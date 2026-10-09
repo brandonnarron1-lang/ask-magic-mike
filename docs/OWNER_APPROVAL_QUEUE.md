@@ -1,5 +1,31 @@
 # Owner Approval Queue
 
+## Current readability continuation — 2026-10-09
+
+Accepted Production is PR #292, merge `d071c17a25453614bcf1c95fc5ddca24e11cefd4`,
+tree `75b24b02dd42bbee984622ed99e7d046f10283bb`, deployment
+`dpl_8vSxG9ByEh3nKRHwqNHXAH5GXAcF`; its release authority is consumed.
+The owner supplied mobile screenshots and requested a less-is-more lead landing
+page, clear email and one review copy to Mike plus the existing private audit
+recipient. This is not a new lead or authority to change recipients or suppression.
+
+Local branch `codex/lead-alert-readability-20261009` prepares email v4, compact
+permission-aware lead detail and an outbox-backed one-copy operation. No live send,
+application deployment, schema/environment change, account mutation, WordPress
+edit or remote QA wake has occurred. Prior email versions and receipts remain.
+
+Next boundary: authorize pushing the frozen readability candidate and opening
+ONE review PR, including the existing GitHub CI/Vercel Preview build effects.
+Preview must remain no-send and use its approved isolated/read-only data boundary;
+the old unsafe Preview is not approved by this request. This is **not** merge,
+Production deployment, remote schema/seed/secret, provider, lead, pilot or spending
+authority. New exact-source Production approval follows protected review. Retain
+the owner's one-email request for after the accepted release; do not ask for that
+same resend permission again or replay the already-sent notification.
+
+See the existing conversion completion register for new versus inherited checks.
+Older continuation boundaries below are chronology, not current pending gates.
+
 ## Current local continuation boundary — 2026-10-08
 
 Authenticated resolver25/25 confirms accepted PR291/main

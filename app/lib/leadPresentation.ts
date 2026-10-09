@@ -1,5 +1,6 @@
 import type { AdminLeadView,AdminLeadDetailResult } from "./persistence/supabase/adminLeadView";
 import { canAccessAssignedLead, hasLeadCenterPermission, type LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
+import { leadQuestionForDisplay, leadSourceLabel, leadTimelineLabel } from "./leadReadability";
 
 export const LEAD_PRESENTATION_VERSION = "reference_cards_v1";
 export const LEAD_MODULES = {
@@ -58,8 +59,8 @@ export function presentLead(input: {
     reference: offer?.reference || `AMM-${lead.id.slice(0, 8).toUpperCase()}`, isTest,
     priority: isTest ? "TEST" : score !== null && score >= 80 ? "HOT" : score !== null && score >= 60 ? "ACTIVE" : "NEW",
     score, reasons: full ? (lead.score_reasons || []).slice(0, 5) : ["Qualification details available after authorized assignment."],
-    location: ["Wilson","Elm City","Lucama","Stantonsburg","Sims","Kenly"].includes(lead.stated_city || "") ? lead.stated_city! : "Area to verify", source: full ? lead.attribution_summary : "Owned intake",
-    timeline: full ? lead.timeline || "Timeline not recorded" : "Review in Lead Center",
+    location: ["Wilson","Elm City","Lucama","Stantonsburg","Sims","Kenly"].includes(lead.stated_city || "") ? lead.stated_city! : "Area to verify", source: full ? leadSourceLabel(lead.source) : "Owned intake",
+    timeline: full ? leadTimelineLabel(lead.timeline || lead.timeline_months) : "Review in Lead Center",
     budget: "Not recorded", financing: full && lead.stated_financing ? `Self-reported: ${lead.stated_financing} — verify evidence` : full && typeof lead.stated_preapproval==="boolean" ? `Preapproval self-reported ${lead.stated_preapproval?"yes":"no"} — not independently verified` : "Unknown — evidence required", propertyEvidence: "Property facts and current availability unverified",
     custodian: lead.assigned_agent_id ? "Assigned custodian" : "Mike / admin review",
     nextAction: isTest ? "INTERNAL QA — DO NOT CONTACT" : "Review facts and communication permission before follow-up.",
@@ -78,7 +79,7 @@ export function presentLead(input: {
       { label: "Reviewed packet", state: ["seller","cash_seller","investor_buyer"].includes(subtype)?"blocked":"not_applicable" },
       { label: "Documented outcome", state: full && input.evidence?.outcomes.length ? "complete" : "pending" }],
   };
-  if (full) result.identity = { name: lead.name || "Name not recorded", email: lead.email, phone: lead.phone, address: lead.address, question: lead.question };
+  if (full) result.identity = { name: lead.name || "Name not recorded", email: lead.email, phone: lead.phone, address: lead.address, question: leadQuestionForDisplay(lead.question) };
   if (offer && intendedOffer && tier !== "audit") result.offer = { ...offer, code: undefined };
   return result;
 }

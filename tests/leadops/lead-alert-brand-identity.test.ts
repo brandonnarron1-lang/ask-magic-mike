@@ -48,7 +48,7 @@ function renderQaAlert() {
 
 describe("lead-alert brand identity", () => {
   it("versions the branded email and composes only approved project assets", () => {
-    expect(LEAD_ALERT_TEMPLATE_VERSION).toBe("lead_alert_email_v3");
+    expect(LEAD_ALERT_TEMPLATE_VERSION).toBe("lead_alert_email_v4");
     const rendered = renderQaAlert();
 
     expect(rendered.html).toContain("/images/ask-magic-mike/our-town-properties-logo.webp");
@@ -59,7 +59,7 @@ describe("lead-alert brand identity", () => {
     expect(rendered.html).toContain('width="80"');
     expect(rendered.html).toContain("table-layout:fixed");
     expect(rendered.html).toContain("overflow-wrap:anywhere");
-    expect(rendered.html).toContain(rendered.visualTemplate.backgroundAssetPath);
+    expect(rendered.html).toContain("Your three-step walkthrough");
     expect(rendered.html).not.toContain("data:image/");
     expect(rendered.html).not.toContain("LEAD_NOTIFICATION_BCC");
   });

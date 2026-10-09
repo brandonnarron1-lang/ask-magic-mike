@@ -46,7 +46,9 @@ export function evaluateLeadCommunicationPermission(
   input: PermissionEvaluationInput,
 ): CommunicationPermissionDecision {
   const explicit = explicitState(permissions, input.channel, input.purpose);
-  const denied = explicit?.state === "denied";
+  // A phone opt-out must not be re-enabled by the older broad consent_call
+  // flag. Email/SMS retain their existing channel_opt_out decision codes.
+  const denied = explicit?.state === "denied" || (input.channel === "phone" && explicit?.state === "opted_out");
   const ambiguous = explicit?.state === "ambiguous" || (!explicit && !["internal_alert", "qa_test"].includes(input.purpose));
   const optedOut = explicit?.state === "opted_out";
   const held = explicit?.state === "held";
@@ -96,4 +98,3 @@ export function permissionDecisionIdempotencyKey(
     .update(JSON.stringify({ leadId, actor, channel: decision.channel, purpose: decision.purpose, code: decision.code, evidence: decision.evidence }))
     .digest("hex");
 }
-

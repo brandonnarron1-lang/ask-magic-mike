@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireLeadCenterApiPermission } from "@/lib/admin/rbac-session";
+import { hasLeadCenterPermission } from "@/lib/admin/rbac-policy";
+import { isPreviewRuntime } from "@/lib/preview-security";
 import { approvedQaRecipientConfigured, messagingFeatureFlags } from "@/lib/messaging/feature-flags";
 import { loadLeadPermissionContext, evaluateAndRecordPermission } from "@/lib/messaging/neon-communication-repository";
 import { MESSAGE_PURPOSES } from "@/lib/messaging/permission-engine";
@@ -39,6 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     { channel: "sms" as const, purpose: "transactional_acknowledgment" as const },
     { channel: "sms" as const, purpose: "requested_service_response" as const },
     { channel: "phone" as const, purpose: "manual_one_to_one" as const },
+    { channel: "email" as const, purpose: "manual_one_to_one" as const },
   ].map((item) => ({
     ...item,
     decision: evaluateAndRecordPermissionPreview(context.lead, context.permissions, item, flags),
@@ -46,6 +49,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   return NextResponse.json({
     ok: true,
     lead: { isTest: context.lead.isTest, suppressed: context.lead.suppressed },
+    manualContact: { ...context.contact, canReview: !isPreviewRuntime() && hasLeadCenterPermission(auth.principal.role, "lead:update_assigned") },
     permissions: context.permissions,
     reviewMatrix,
     release: { consumerEmail: flags.consumerAcknowledgment, consumerSms: flags.consumerSms, autoSend: flags.autoSend },

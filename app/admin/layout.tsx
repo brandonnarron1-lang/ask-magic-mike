@@ -47,7 +47,8 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <div className="border-b border-white/10 bg-[#050505] px-4 py-3 text-[#d9ceb8]">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <Link href="/admin/today" className="text-xs font-bold uppercase tracking-[0.19em] text-[#e2c06f]">
-            Ask Magic Mike · Command Center
+            Ask Magic Mike · Lead Center
+            <span className="mt-1 block text-xs font-normal normal-case tracking-normal text-[#d9ceb8]">Our Town Properties, Inc.</span>
           </Link>
           <nav className="flex flex-wrap gap-1.5" aria-label="Command Center navigation">
             {PRIMARY_NAVIGATION.filter(([, , permission]) => can(permission)).map(([label, href]) => (
@@ -59,9 +60,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                 {label}
               </Link>
             ))}
-            {ADMIN_NAVIGATION.some(([, , permission]) => can(permission)) ? (
-              <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-white/10 sm:block" />
-            ) : null}
+            {ADMIN_NAVIGATION.some(([, , permission]) => can(permission)) ? <details className="min-w-0">
+              <summary className="cursor-pointer rounded-full border border-[#cda24a24] px-3 py-1.5 text-xs text-[#e2c06f] focus-visible:outline-2 focus-visible:outline-cyan-300">More tools</summary>
+              <div className="mt-2 flex max-w-md flex-wrap gap-2">
             {ADMIN_NAVIGATION.filter(([, , permission]) => can(permission)).map(([label, href]) => (
               <Link
                 key={href}
@@ -70,7 +71,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               >
                 {label}
               </Link>
-            ))}
+            ))}</div></details> : null}
           </nav>
         </div>
       </div>

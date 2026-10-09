@@ -167,11 +167,11 @@ describe("public owned-referral handoff", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Share Ask Magic Mike" }));
 
-    await waitFor(() => expect(share).toHaveBeenCalledOnce());
-    expect(trackEventMock).not.toHaveBeenCalled();
-    expect(screen.getByRole("status")).toHaveTextContent(
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(
       "Native sharing is unavailable here. Use Copy referral link instead.",
-    );
+    ));
+    expect(share).toHaveBeenCalledOnce();
+    expect(trackEventMock).not.toHaveBeenCalled();
   });
 
   it("copies the fixed referral URL when native sharing is unavailable", async () => {
