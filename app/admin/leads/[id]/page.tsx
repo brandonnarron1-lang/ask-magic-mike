@@ -372,7 +372,7 @@ function AppointmentCard({ leadId, appointment, canUpdate }: { leadId: string; a
   );
 }
 
-function AppointmentPanel({ leadId, appointments, canUpdate }: { leadId: string; appointments: AdminAppointmentRow[]; canUpdate: boolean }) {
+function AppointmentPanel({ leadId, appointments, canUpdate, canCreate = canUpdate }: { leadId: string; appointments: AdminAppointmentRow[]; canUpdate: boolean; canCreate?: boolean }) {
   return (
     <Panel title="Appointment operations">
       <div className="space-y-3">
@@ -382,7 +382,7 @@ function AppointmentPanel({ leadId, appointments, canUpdate }: { leadId: string;
         )) : (
           <p className="text-sm text-[#8f8778]">No appointment record yet.</p>
         )}
-        {canUpdate && !appointments.some((appointment) => ["requested", "scheduled", "confirmed", "reschedule_requested"].includes(appointment.status)) ? <AppointmentCreateForm leadId={leadId} /> : null}
+        {canCreate && !appointments.some((appointment) => ["requested", "scheduled", "confirmed", "reschedule_requested"].includes(appointment.status)) ? <AppointmentCreateForm leadId={leadId} /> : null}
       </div>
     </Panel>
   );
@@ -624,6 +624,9 @@ export default async function AdminLeadDetailPage({
   if (detail.configured && !detail.lead && detail.error === "lead_not_found") notFound();
   const lead = detail.lead;
   const contactBlocked = Boolean(lead && (lead.is_test || lead.communication_suppressed || isTerminalContactRecord(lead.status, lead.conversion_stage)));
+  // Contact holds are not a new prohibition on maintaining existing internal
+  // records. Preserve canonical task/appointment transitions on closed leads.
+  const canMaintainRecords = Boolean(lead && canUpdateLead && !lead.is_test && !lead.communication_suppressed);
   const canFollowThrough = canUpdateLead && !contactBlocked;
 
   return (
@@ -705,7 +708,7 @@ export default async function AdminLeadDetailPage({
                 </Panel>
               ) : null}
 
-              <div id="follow-up">{canFollowThrough && canManageTasks ? <ManualHumanFollowthroughForm leadId={lead.id} /> : <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} canManage={false}/>}</div>
+              <div id="follow-up">{canFollowThrough && canManageTasks ? <ManualHumanFollowthroughForm leadId={lead.id} /> : <FollowupPanel leadId={lead.id} tasks={detail.followupTasks} canManage={canMaintainRecords && canManageTasks}/>}</div>
 
               <details id="next-action-review" className="min-w-0 rounded-lg border border-white/10 p-4"><summary className="cursor-pointer text-sm font-semibold text-[#e2c06f]">AI draft tools (review required)</summary><div className="mt-4"><Phase6CopilotPanel
                 leadId={lead.id}
@@ -733,7 +736,7 @@ export default async function AdminLeadDetailPage({
                 </p>
               </Panel>
 
-              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} canUpdate={canFollowThrough} /></div>
+              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} canUpdate={canMaintainRecords} canCreate={canFollowThrough} /></div>
 
               <OutcomePanel
                 outcomes={detail.outcomes}

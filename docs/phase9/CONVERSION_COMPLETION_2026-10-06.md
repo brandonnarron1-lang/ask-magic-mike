@@ -32,6 +32,9 @@ Accepted release approval remains consumed. Migration/environment changes: zero.
   completed contact. Tests, suppressed/terminal records, opt-outs, unknown/held
   permission, unassigned-role access and Preview contact tools stay blocked.
   A reproduced phone opt-out/legacy-consent conflict is fixed fail-closed.
+  Closed-record contact holds do not remove authorized maintenance of existing
+  internal appointments/tasks. New appointment/contact controls stay held; QA
+  remains read-only. A real-session regression checks this distinction.
 - Prepared one-copy operation uses the existing outbox/provider, configured primary
   and private BCC, stable copy key and one atomic claim. It preserves the original
   sent row/provider ID; parallel calls send once. Failure/ambiguous state is retained,

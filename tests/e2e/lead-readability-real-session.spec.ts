@@ -75,6 +75,17 @@ test("QA is visibly blocked; changed opt-out and role/assignment fail closed wit
   await page.getByRole("checkbox",{name:/I reviewed the request/}).check(); await page.getByRole("button",{name:"Open dialer"}).click();
   await expect(page.getByRole("status").filter({hasText:"Permission changed"})).toBeVisible();
   expect(page.url()).toContain(`/admin/leads/${fixture.leads.agent}`);
+  // Contact holds must not remove authorized cleanup of existing internal
+  // records. This is synthetic setup only, not an actual appointment/contact.
+  await query("INSERT INTO lead_appointments(lead_id,assigned_agent_id,created_by,status,timezone,location_type) SELECT id,assigned_agent_id,$2,'requested','America/New_York','office' FROM leads WHERE id=$1",[fixture.leads.agent,fixture.ids.agent]);
+  await query("UPDATE leads SET status='converted' WHERE id=$1",[fixture.leads.agent]);
+  await page.goto(`/admin/leads/${fixture.leads.agent}`);
+  await expect(page.getByRole("button",{name:"Review & call"})).toHaveCount(0);
+  await page.locator("summary").filter({hasText:/^Appointment operations$/}).click();
+  await expect(page.getByRole("form",{name:"Mark canceled",exact:true})).toBeVisible();
+  await expect(page.getByRole("form",{name:"Create appointment record",exact:true})).toHaveCount(0);
+  await page.locator("summary").filter({hasText:/^Follow-up tasks$/}).click();
+  await expect(page.getByRole("button",{name:"Cancel task",exact:true})).toBeVisible();
   await page.goto(`/admin/leads/${fixture.leads.other}`);await expect(page).toHaveURL(/error=forbidden/);expect(await page.content()).not.toContain("private-other@example.test");
   expect((await query("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
   expect((await query("SELECT count(*)::int AS n FROM lead_response_milestones"))[0].n).toBe(0);
