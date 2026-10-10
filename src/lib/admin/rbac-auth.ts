@@ -3,6 +3,7 @@ import { admin } from "better-auth/plugins";
 import { createAccessControl } from "better-auth/plugins/access";
 import { Pool } from "pg";
 import { sendLeadCenterPasswordResetEmail } from "./rbac-password-reset-email";
+import { isApprovedAskMagicMikeOrigin } from "../../../app/lib/publicOrigin";
 
 const statements = {
   user: [
@@ -46,6 +47,27 @@ const connectionString = normalizeAuthDatabaseUrl(
   process.env.DATABASE_URL || "postgresql://disabled:disabled@127.0.0.1:5432/disabled",
 );
 
+export function leadCenterTrustedOrigins(env: NodeJS.ProcessEnv = process.env) {
+  const origins = [
+    "https://www.askmagicmike.com",
+    "https://askmagicmike.com",
+    env.BETTER_AUTH_URL || "http://localhost:3000",
+  ];
+  // Trust only this Preview's server-provided deployment identity, never a
+  // wildcard, request Host header, or Preview metadata in Production.
+  if (env.VERCEL_ENV === "preview" && env.VERCEL_URL) {
+    try {
+      const url = new URL(`https://${env.VERCEL_URL}`);
+      if (url.hostname.endsWith(".vercel.app") && !url.username && !url.password
+        && !url.port && url.pathname === "/" && !url.search && !url.hash
+        && isApprovedAskMagicMikeOrigin(url.origin, env)) origins.push(url.origin);
+    } catch {
+      // Malformed metadata adds no trusted origin.
+    }
+  }
+  return [...new Set(origins)];
+}
+
 export const leadCenterAuth = betterAuth({
   appName: "Ask Magic Mike Lead Center",
   baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
@@ -54,11 +76,7 @@ export const leadCenterAuth = betterAuth({
     process.env.BETTER_AUTH_SECRET ||
     "development-only-rbac-disabled-until-a-real-secret-is-configured",
   database: new Pool({ connectionString, max: 4, idleTimeoutMillis: 10_000 }),
-  trustedOrigins: [
-    "https://www.askmagicmike.com",
-    "https://askmagicmike.com",
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  ],
+  trustedOrigins: leadCenterTrustedOrigins(),
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,

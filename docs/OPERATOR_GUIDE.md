@@ -1,6 +1,8 @@
 # Operator Guide — Ask Magic Mike
 **Our Town Properties, Inc. · Wilson, NC**
-**Current walkthrough:** October 9, 2026. Production is accepted PR #292.
+**Current walkthrough:** October 9, 2026. The compact layout is live in accepted
+PR #293. This is a dated observation; the deployment-generated receipt remains
+the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
@@ -9,11 +11,16 @@ This guide covers daily operation of the Ask Magic Mike platform for brokers and
 **Open lead → review permission → make personal contact → log the actual result
 → set the next task.** Do not treat opening an email or dialer as completed contact.
 
-The new compact layout is a **local review candidate, not deployed yet**. It puts
+The accepted compact layout puts
 the request, area, timeframe, source, assignment and permission-aware contact
-options first. History, tasks and appointments are one click away; advanced
+options first. History, tasks and appointments have short navigation links; advanced
 messaging, attribution and technical records are collapsed. Original evidence is
 retained. Explicit permission gaps and opt-outs remain blocked, not hidden.
+
+The live shortcut currently scrolls to a closed panel; expand its named heading
+to read it. A local follow-up fixes one-click reveal/focus and collapses optional
+property evidence. That follow-up is **not deployed** and needs new source-bound
+review authority; PR #293's release approval is consumed.
 
 For today's QA walkthrough, use your own account and read only. Mike's email
 access is not required for Brandon's walkthrough. Mike's mailbox receipt and
@@ -30,21 +37,22 @@ password reset or contact action was performed.
    work queue, not a list of every test submission. Do not click Snooze, Dismiss
    or Complete during this read-only walkthrough.
 2. Open the [saved QA lead](https://www.askmagicmike.com/admin/leads/27cdd1a9-b85f-4092-bbc4-deec15754814).
-   It is clearly **INTERNAL QA — DO NOT CONTACT**, not a prospect. Read the request,
-   Operational profile, Attribution and Lead state. Assigned does not mean the
-   agent accepted or contacted the person. Contact information is not permission.
-3. Find **Follow-up tasks** and **Appointments**. Read only. A task completed is
+   Read the short overview. **TEST — DO NOT CONTACT** means review only. No call,
+   message, task edit or appointment confirmation belongs in this walkthrough.
+3. Expand **Follow-up tasks**, **Appointment operations** and **Unified activity
+   history**. Read what is saved and what is still pending. A task completed is
    not a conversation; an appointment requested is not booked or confirmed.
    These screens do not prove an external calendar event exists.
-4. Find **Unified activity history**. It shows what was recorded and by whom.
-   The older Home Value record and the newer deduplicated rental inquiry retain
+   History shows what was recorded and by whom. The older Home Value record and
+   the newer deduplicated rental inquiry retain
    separate evidence. The main timeline is not proof that every alias event is
    displayed. AI drafts require review; approval is not an email send.
-5. Open [Reports](https://www.askmagicmike.com/admin/reporting) if your role permits.
-   QA/suppressed inquiries stay out of ordinary business totals. A provider delivery
-   event is not proof that Mike saw an email. Closed is not settled commission.
 
-Finish by confirming these five distinctions and identifying any screen you
+Optional: open [Reports](https://www.askmagicmike.com/admin/reporting) if your role
+permits. QA/suppressed inquiries stay out of business totals. A provider delivery
+event is not proof that Mike saw an email. Closed is not settled commission.
+
+Finish by confirming these distinctions and identifying any screen you
 cannot use. Engineering navigation alone does not mark human acceptance complete.
 Do not change this QA lead, record a fictional interaction, send a message or
 enable SMS to complete the walkthrough.
@@ -56,7 +64,7 @@ recipient. This supersedes the older instruction below not to request a resend;
 it does **not** authorize replay of the original delivery, a new lead, a consumer
 acknowledgment, or a new application release. No resend has occurred in this run.
 
-The prepared email v4 is single-column, with a short source/intent subject,
+The released email v4 is single-column, with a short source/intent subject,
 Eastern-time receipt, readable request/source/timeframe/owner facts, one main-record
 button and a three-step walkthrough. Full contact details, tracking JSON and long
 IDs stay in authenticated records. Queued v1/v2/v3 emails keep their original versions.
@@ -64,7 +72,17 @@ The capture transaction already accepts a template version; no schema migration
 or environment change is required for v4. Exact intake replay still resolves the
 original intent rather than seeding a new-version email.
 
-After reviewed release authority is obtained, the intended one-email resend must
+The existing one-copy send request is approved, but **NOT SENT**. Fresh read-only
+Production evidence confirms the source notification is already sent/delivered,
+no v4 review-copy intent exists, and both QA records remain suppressed. The
+existing Resend browser session is signed out. Required Production configuration
+is Vercel Secret/non-exportable; listing it does not prove its values or delivery
+readiness. Do not copy/rotate secrets, change settings, replay the old row or
+create a public send endpoint. A legitimate private execution venue holding the
+existing configuration is needed to run `sendOwnerRequestedQaReviewCopy` once.
+No further send approval is requested for the same already-approved effects.
+
+The intended one-email resend must
 use the existing canonical outbox/provider and retain the previous delivery record.
 Bind it to the latest rental QA notification and its main-record link; do not claim
 it created a new assignment. Keep the existing primary recipient and private BCC,
