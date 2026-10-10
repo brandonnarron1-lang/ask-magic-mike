@@ -3,6 +3,82 @@
 Run against the Vercel Preview URL produced by this branch. Production
 must NOT be promoted in this phase.
 
+## Bounded synthetic read-only venue (current procedure)
+
+The historical mutation examples below are not permission to execute them.
+For read-only review, keep `SAFE_DB_WRITE=false` and `FORCE_DB_WRITE=false`;
+skip intake, task, appointment, webhook, cron-persist, queue and send probes.
+Consult the current release authority and the exact owner's setup scope first.
+
+1. Verify the owned project and distinct QA/Production branch and endpoint
+   identities using current provider metadata. Create one explicitly schema-only
+   or empty target, never a data clone. Configure **provider deletion expiry at
+   creation**, within the authorized lifetime; five-minute auto-suspend is not
+   expiry. Record a conservative compute/storage/transfer/build budget before
+   allocating. Do not upgrade billing or extend expiry to avoid a failed review.
+2. Inspect inherited jobs, foreign connections, function bodies and login roles.
+   Verify every application/auth table is empty before seeding. Reuse copied
+   schema effects without replaying migrations or fabricating a ledger. Seed only
+   approved deterministic synthetic records and fresh actual-role QA accounts;
+   preserve test/suppression flags and non-deliverable contacts. Archive the
+   schema/fixture manifests privately outside the ephemeral database.
+3. Keep the bootstrap/owner credential out of runtime. Give runtime SELECT only
+   on business tables, no business DML, no sequence mutation, no schema creation,
+   and no mutating/security-definer application function execution. Verify
+   effective privileges, including PUBLIC/inherited grants. Allow only the auth
+   bookkeeping required for fresh legitimate QA sessions during setup. Rotate
+   inherited application login credentials **only in the new QA target**.
+4. Snapshot settings and apply QA-specific overrides to the **one approved Git
+   Preview branch**, never generic Preview or Production. Inspect inherited
+   provider keys. Independently disable real email/SMS/Push/model/calendar/
+   analytics/scheduled work and fallback providers. A data-enabled application
+   flag or health boolean is not database isolation or read-only proof.
+5. Create a new protected Git Preview of the reviewed commit/tree. Verify the
+   immutable deployment/project/environment, current DB branch/endpoint/role,
+   effective transport controls and timestamps. Do not test a mutable alias or
+   assume old deployments pick up changed settings. Authentication must accept
+   the current exact immutable origin without wildcard trust or CSRF/RBAC bypass.
+6. Use the existing CLI transport and credential-file inputs through private
+   local orchestration, not secrets in command arguments or public evidence:
+
+   ```bash
+   PREVIEW_URL="https://<new-immutable-preview>" \
+   EXPECTED_RELEASE_SHA="<full-reviewed-commit>" \
+   PREVIEW_TRANSPORT=vercel_cli \
+   VERCEL_CLI_CWD="/absolute/path/to/the/linked-ask-magic-mike-project" \
+   LEAD_CENTER_QA_CREDENTIALS_FILE="/absolute/private/qa-credentials.json" \
+   SAFE_DB_WRITE=false FORCE_DB_WRITE=false pnpm preview:qa
+   ```
+
+   Verify current runner inputs before each reuse. Keep session/setup writes
+   distinct from business probes. Classify redirects, HTTP403 origin failures
+   and HTTP429 rate limits truthfully; do not change Origin in the canonical
+   runner, bypass limits or call a login page an authenticated success. Separate
+   configured-origin diagnostic sessions from immutable-origin acceptance.
+7. Test tasks/appointments/history and deliberately opened property tools with
+   synthetic read-only sessions, four widths, 200% text, keyboard and fresh
+   fragment bookmarks. Await actual layout/focus settlement; select the real
+   panel markup (property evidence is nested inside an ancestor disclosure).
+   Preserve page-error assertions and failed attempts. An authenticated GET-only
+   response relay is transport-scoped render evidence, not native cloud login.
+8. Compare full business-table counts/content hashes before/after review. Run
+   `pnpm release:doctor`, `pnpm release:report`, `pnpm launch:authority`, and
+   `REQUIRE_VERDICT=PREVIEW_READY pnpm release:assert` against current genuine
+   artifacts. Archive stale artifacts before selecting inputs; never rename a
+   navigation screenshot/report into the required widget report. Missing/skipped
+   evidence remains explicit. Do not substitute inherited CI for new venue QA.
+9. Revoke setup credentials and no-longer-needed auth writes, retain only the
+   permitted read capability or disconnect, and verify final effective access.
+   This applies to old immutable deployments sharing the QA credential too.
+   Preserve earlier genuine setup/QA reports separately from closure evidence.
+   Stop local jobs; do not reconnect unsafe bindings after expiry. Record actual
+   available usage and delayed/unverified charges, not a guaranteed invoice cap.
+
+PR #294's 2026-10-10 immutable-origin diagnostic exposed HTTP403 from the prior
+static authentication trusted-origin list. Its failed canonical report remains
+evidence, not acceptance; a local exact-Preview-origin correction requires its
+own source publication and subsequent hosted/immutable Preview review.
+
 ## Automated runner (preferred)
 
 ```bash
