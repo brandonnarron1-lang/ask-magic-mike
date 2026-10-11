@@ -782,12 +782,19 @@ export default async function AdminLeadDetailPage({
               </Panel>
 
               <Panel title="Attribution">
+                <p className="mb-4 text-sm text-[#d9ceb8]">URL attribution is client-reported, not proof of a widget or signed adapter. These facts belong to this saved inquiry; missing history is not reconstructed.</p>
                 <dl className="grid gap-4">
                   <Field label="Summary" value={lead.attribution_summary} />
                   <Field label="Source" value={lead.source || "Unknown"} />
                   <Field label="Detail" value={lead.source_detail || "Unknown"} />
                   <Field label="Campaign" value={lead.attribution.campaign || "Unknown"} />
-                  <Field label="Surface" value={lead.lead_source_surface} />
+                  <Field label="Recorded intake surface" value={detail.sourceEvidence?.captureSurface.value || "Not recorded"} />
+                  <Field label="Selected funnel" value={detail.sourceEvidence?.selectedFunnel.value || "Not recorded"} />
+                  <Field label="Selected tab" value={detail.sourceEvidence?.selectedTab.value || "Not recorded"} />
+                  <Field label="Transport adapter proof" value="Not established by these fields" />
+                  <Field label="First-touch source (client-reported)" value={detail.sourceEvidence?.firstTouch.source.value || "Not recorded"} />
+                  <Field label="Latest-touch source (client-reported)" value={detail.sourceEvidence?.latestTouch.source.value || "Not recorded"} />
+                  <Field label="Notification intent" value={detail.sourceEvidence?.notification.recordedIntentsInLoadedWindow == null ? "Not established" : `${detail.sourceEvidence.notification.recordedIntentsInLoadedWindow} in loaded history window — not proof of delivery`} />
                 </dl>
               </Panel>
 

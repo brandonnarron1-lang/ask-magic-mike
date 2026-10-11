@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { projectLeadSourceEvidence } from "../leadSourceEvidence";
 import {
   buildLeadTimelinePage,
 } from "../adminLeadTimeline";
@@ -41,6 +42,8 @@ const LEAD_SELECT = `
            'referrer', sa.referrer_url,
            'landing_page', sa.landing_page,
            'placement', sa.placement_id,
+           'first_touch', sa.first_touch,
+           'last_touch', sa.last_touch,
            'gclid', sa.click_ids->>'gclid',
            'fbclid', sa.click_ids->>'fbclid'
          ) AS attribution
@@ -338,6 +341,7 @@ export async function loadNeonAdminLeadDetail(
       lead,
       timeline: timelinePage.events,
       timelinePage,
+      sourceEvidence: projectLeadSourceEvidence(leadRows[0], timelineSources.incompleteSources.includes("notifications") ? undefined : timelineSources.rows.notifications),
       appointments,
       followupTasks,
       outcomes,
