@@ -40,7 +40,11 @@ export async function middleware(req: NextRequest) {
     }
     // This is an optimistic cookie-presence gate only. Every active page,
     // action, and route performs a full server-side session/role check.
-    const response = NextResponse.next();
+    // Overwrite, never trust a client-supplied return header. The layout may
+    // reject an expired cookie before the lead page gets to choose its return.
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-amm-lead-center-path", req.nextUrl.pathname + req.nextUrl.search);
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set("Cache-Control", "private, no-store");
     response.headers.set("X-Frame-Options", "SAMEORIGIN");
     return response;

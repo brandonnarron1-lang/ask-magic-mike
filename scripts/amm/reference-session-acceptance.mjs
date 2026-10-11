@@ -44,7 +44,10 @@ try {
   // disposable acceptance venue must expose synthetic identities only.
   psql("UPDATE agents SET name='SYNTHETIC DIRECTORY ' || id::text,email=id::text || '@example.test',phone=NULL,notification_phone=NULL; ");
   const identity = JSON.parse(psql("SELECT json_build_object('database',current_database(),'role',current_user,'dataDirectory',current_setting('data_directory'),'listenAddresses',current_setting('listen_addresses'),'port',current_setting('port'),'startedAt',pg_postmaster_start_time(),'leadsBeforeFixtures',(SELECT count(*) FROM leads),'nonSyntheticDirectory',(SELECT count(*) FROM agents WHERE email NOT LIKE '%@example.test'))"));
-  if (identity.database !== "amm_qa_upgrade" || identity.listenAddresses !== "127.0.0.1" || identity.leadsBeforeFixtures !== 0 || identity.nonSyntheticDirectory !== 0) throw new Error("isolated_synthetic_identity_failed");
+  const expectedListen = process.env.AMM_QA_NATIVE_POSTGRES_TEST === "1" ? "127.0.0.1" : "*";
+  // Docker listens inside its owned container; startDatabase separately verifies
+  // that its sole host binding is loopback. Do not confuse those two boundaries.
+  if (identity.database !== "amm_qa_upgrade" || identity.listenAddresses !== expectedListen || identity.leadsBeforeFixtures !== 0 || identity.nonSyntheticDirectory !== 0) throw new Error("isolated_synthetic_identity_failed");
   writeFileSync(path.join(runDir, "database-identity.json"), JSON.stringify({ ...identity, source: "fresh-initdb-or-owned-test-container; tracked schema only", externalFetch: "blocked by isolated transport", outbound: "disabled", at: new Date().toISOString() }, null, 2), { mode: 0o600 });
   const hash = await hashPassword(password);
   const roles = { admin: "administrator", owner: "primary_lead_owner", agent: "approved_agent", analyst: "read_only_analyst", other: "approved_agent" };

@@ -26,7 +26,7 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
       return;
     }
     const query = new URLSearchParams(window.location.search);
-    window.location.assign(safeLeadCenterReturn(query.get("returnTo")));
+    window.location.assign(safeLeadCenterReturn(query.get("returnTo"), window.location.hash));
   }
 
   return (

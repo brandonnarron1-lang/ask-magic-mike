@@ -79,7 +79,9 @@ for(const width of [320,390,768,1440]) {
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
     // Extra administration stays absent for an assigned-agent session.
     await expect(page.locator("summary").filter({hasText:"More tools"})).toHaveCount(0);
-    await page.getByRole("navigation",{name:"Lead next steps"}).getByRole("link",{name:"History",exact:true}).focus();
+    const historyLink=page.getByRole("navigation",{name:"Lead next steps"}).getByRole("link",{name:"History",exact:true});
+    expect((await historyLink.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await historyLink.focus();
     await page.keyboard.press("Enter");
     const history=page.locator("summary").filter({hasText:"Unified activity history"});
     await expect(history.locator("..")).toHaveAttribute("open","");
@@ -199,12 +201,14 @@ test("fresh ownership, role and expired-session reads remove stale contact detai
   await choose();
   await query('UPDATE lead_center_sessions SET "expiresAt"=now()-interval \'1 minute\' WHERE "userId"=$1',[fixture.ids.agent]);
   await denied(401);
-  await page.goto(`/admin/leads/${fixture.leads.agent}`);
+  await page.goto(`/admin/leads/${fixture.leads.agent}#message-review`);
   const login=new URL(page.url());expect(login.pathname).toBe("/lead-center-login");expect(login.searchParams.get("returnTo")).toBe(`/admin/leads/${fixture.leads.agent}`);
   expect(await page.content()).not.toContain("private-agent@example.test");
   await page.getByLabel("Work email").fill("agent@example.test");await page.getByLabel("Password",{exact:true}).fill(process.env.AMM_E2E_FIXTURE_PASSWORD!);
   await page.getByRole("button",{name:"Open Lead Center"}).click();
-  await expect(page).toHaveURL(`${login.origin}/admin/leads/${fixture.leads.agent}`);
+  await expect(page).toHaveURL(`${login.origin}/admin/leads/${fixture.leads.agent}#message-review`);
+  await expect(page.locator("details#message-review")).toHaveAttribute("open", "");
+  await expect(page.locator("details#message-review > summary")).toBeFocused();
   await expect(page.locator('[aria-label="Saved contact details"]')).toContainText("private-agent@example.test");
   await query('DELETE FROM lead_center_sessions WHERE "userId"=$1',[fixture.ids.agent]);
   const revoke=await page.evaluate(async id=>{const response=await fetch(`/api/admin/leads/${id}/communication-permissions`,{cache:"no-store"});return {status:response.status,body:await response.text()};},fixture.leads.agent);

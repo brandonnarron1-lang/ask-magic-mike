@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { NextResponse, type NextRequest } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { leadCenterAuth } from "./rbac-auth";
+import { safeLeadCenterReturn } from "../../../app/lib/leadCenterReturn";
 import {
   getLeadCenterRbacState,
   hasLeadCenterPermission,
@@ -50,7 +51,10 @@ export async function requireLeadCenterAuthenticated(): Promise<LeadCenterPrinci
   if (!state.enabled) return null;
   if (!state.configured) redirect("/lead-center-login?error=configuration");
   const principal = await getLeadCenterPrincipal();
-  if (!principal) redirect("/lead-center-login?error=session");
+  if (!principal) {
+    const returnTo = safeLeadCenterReturn((await headers()).get("x-amm-lead-center-path"));
+    redirect(`/lead-center-login?error=session&returnTo=${encodeURIComponent(returnTo)}`);
+  }
   return principal;
 }
 
