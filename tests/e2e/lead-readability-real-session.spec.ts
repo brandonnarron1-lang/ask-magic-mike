@@ -200,6 +200,28 @@ test("optional seller evidence stays closed until requested and QA cannot save i
   await query("UPDATE leads SET lead_type='buyer',is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);
   await page.close();
 });
+test("a genuine supervisor session sees saved QA values without gaining contact actions",async({browser})=>{
+  const ctx=await browser.newContext({baseURL:test.info().project.use.baseURL,viewport:{width:390,height:1000}});
+  const page=await ctx.newPage();
+  try {
+    await query("UPDATE leads SET is_test=true,communication_suppressed=true WHERE id=$1",[fixture.leads.agent]);
+    await page.goto(`/lead-center-login?returnTo=/admin/leads/${fixture.leads.agent}`);
+    await page.getByLabel("Work email").fill("admin@example.test");
+    await page.getByLabel("Password",{exact:true}).fill(process.env.AMM_E2E_FIXTURE_PASSWORD!);
+    await page.getByRole("button",{name:"Open Lead Center"}).click();
+    await expect(page.getByRole("heading",{level:1})).toHaveText("Test lead");
+    expect((await query('SELECT count(*)::int AS n FROM lead_center_sessions WHERE "userId"=$1',[fixture.ids.admin]))[0].n).toBeGreaterThan(0);
+    await expect(page.locator('[aria-label="Saved contact details"]')).toContainText("private-agent@example.test");
+    await expect(page.getByRole("button",{name:"Review & call"})).toHaveCount(0);
+    await expect(page.getByRole("button",{name:"Review & email"})).toHaveCount(0);
+    await expect(page.getByRole("form",{name:"Save interaction and next task"})).toHaveCount(0);
+    await page.getByText("More tools",{exact:true}).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("link",{name:"Notifications",exact:true})).toBeVisible();
+    expect((await page.getByRole("link",{name:"Notifications",exact:true}).boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await page.screenshot({path:path.join(output,"readable-supervisor-test-390.png"),fullPage:false});
+  } finally { await query("UPDATE leads SET is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);await ctx.close(); }
+});
 for(const version of ["lead_alert_email_v4", "lead_alert_email_v5"]) for(const width of [320,390,768,1440]) {
   test(`Actual ${version} renderer fits ${width}px with main link early`,async({browser})=>{
     const ctx=await browser.newContext({viewport:{width,height:1000}}); const page=await ctx.newPage();
