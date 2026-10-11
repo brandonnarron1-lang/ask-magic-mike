@@ -1,4 +1,4 @@
-import { readFileSync, mkdirSync } from "node:fs";
+import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Pool } from "pg";
 import { expect, test, type BrowserContext } from "@playwright/test";
@@ -57,7 +57,9 @@ test.beforeAll(async({browser})=>{
 test.afterAll(async()=>{await context?.close();await pool?.end();});
 for(const width of [320,390,768,1440]) {
   test(`Action-first detail ${width}px, keyboard and enlarged text`,async()=>{
-    const page=await context.newPage();const errors:string[]=[];page.on("pageerror",error=>errors.push(error.message));
+    const page=await context.newPage();const errors:string[]=[];const hydrationContext:string[]=[];
+    page.on("pageerror",error=>errors.push(error.message));
+    page.on("console",message=>{if(message.type()==="error" && /hydration|server rendered|didn't match/i.test(message.text())) hydrationContext.push(message.text());});
     await page.setViewportSize({width,height:1000}); await page.goto(`/admin/leads/${fixture.leads.agent}`);
     await expect(page.getByRole("heading",{level:1})).toHaveText("SYNTHETIC AGENT DO NOT CONTACT");
     const overview=page.getByRole("region",{name:"Lead overview"});
@@ -90,6 +92,7 @@ for(const width of [320,390,768,1440]) {
     await page.keyboard.press("Enter");
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.screenshot({path:path.join(output,`readable-lead-200-${width}.png`),fullPage:false});
+    writeFileSync(path.join(output,`contact-diagnostic-${width}.json`),JSON.stringify({errors,hydrationContext,at:new Date().toISOString()},null,2),{mode:0o600});
     expect(errors).toEqual([]); await page.close();
   });
 }
@@ -202,6 +205,8 @@ test("fresh ownership, role and expired-session reads remove stale contact detai
   await query('UPDATE lead_center_sessions SET "expiresAt"=now()-interval \'1 minute\' WHERE "userId"=$1',[fixture.ids.agent]);
   await denied(401);
   await page.goto(`/admin/leads/${fixture.leads.agent}#message-review`);
+  // A same-document fragment change is not a fresh server authorization read.
+  await page.reload();
   const login=new URL(page.url());expect(login.pathname).toBe("/lead-center-login");expect(login.searchParams.get("returnTo")).toBe(`/admin/leads/${fixture.leads.agent}`);
   expect(await page.content()).not.toContain("private-agent@example.test");
   await page.getByLabel("Work email").fill("agent@example.test");await page.getByLabel("Password",{exact:true}).fill(process.env.AMM_E2E_FIXTURE_PASSWORD!);
