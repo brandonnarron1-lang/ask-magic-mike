@@ -18,9 +18,39 @@ messaging, attribution and technical records are collapsed. Original evidence is
 retained. Explicit permission gaps and opt-outs remain blocked, not hidden.
 
 The live shortcut currently scrolls to a closed panel; expand its named heading
-to read it. A local follow-up fixes one-click reveal/focus and collapses optional
-property evidence. That follow-up is **not deployed** and needs new source-bound
-review authority; PR #293's release approval is consumed.
+to read it. Draft PR #294 contains the navigation/property-tool follow-up; it is
+**not deployed**. Its evidence and source binding are separate from the additional
+local contact/template work below. PR #293's release approval is consumed.
+
+### Local mobile-handoff candidate — October 10, 2026; not live
+
+The locally tested candidate puts selectable **Phone** and **Email** at the top
+of an authorized assigned/supervisor lead overview. Missing details say **Not
+provided**. Visibility is not consent: QA, suppression, terminal status and each
+channel's permissions still control the actions. No unconditional call/email link
+was added. A fresh session, role or ownership denial removes stale contact details
+and the pending action. Sign-in preserves a safe lead/panel bookmark.
+
+After a future accepted release: open your permitted lead, read its contact values,
+then use **Review & call** or **Review & email** only when available. Review and
+confirm permission before opening your own dialer/composer. Opening it is not a
+send, conversation or saved outcome. Record the actual result and next task later.
+For QA walkthroughs, read only; do not contact or save fictional interactions.
+
+The new compact email **v5 reader is inactive**; generation and the separately
+approved cleaner-copy operation remain v4. Queued v1–v4 retain their renderers.
+The source panel distinguishes retained intake fields from client-reported
+first/latest/inquiry attribution; a campaign name does not establish widget
+capture or a signed transport. Missing history is not backfilled.
+
+Local proof: 3,858 unit passes/104 explicit skips, successful full local gate,
+36 isolated PostgreSQL passes/two deliberately excluded resend-helper cases,
+and 18 unique built-app Chromium cases with real Better Auth. The 320/390/768/1440
+layouts, enlarged text, keyboard/focus and primary operational target sizes were
+checked. Actual iPhone/Safari/Apple Mail, Mike's own acceptance and real response
+time remain unverified. React #418 recurred in an earlier built run; it was not
+reproduced in the final run, and its cause remains unresolved, not repaired.
+No publication, deployment, live submission, send or remote data change occurred.
 
 For today's QA walkthrough, use your own account and read only. Mike's email
 access is not required for Brandon's walkthrough. Mike's mailbox receipt and

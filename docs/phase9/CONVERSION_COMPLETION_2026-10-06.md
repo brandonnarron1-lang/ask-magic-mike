@@ -774,3 +774,59 @@ message and reports its actual folder, then signs into his own Production accoun
 and completes the guide's read-only canonical-lead/Today/report walkthrough.
 Reply`TAKEOVER DONE` when his session is ready; no credentials in chat. QA closeout
 does not wait on that participation or extend the branch.
+
+### Local mobile lead-handoff candidate — October 10, 2026
+
+LOCAL ONLY, not an accepted release. Authenticated authority resolution passed
+25/25 at 2026-10-11T01:08:40.775Z: accepted PR293 source
+`c12349d16c479fea064ffb7f2095c13cc27ab3ce`, tree
+`d979311ba30d4e26ac7c0c59cbc666fc4fd243ec`, deployment
+`dpl_87EEEL6skmBXenjcpPgKiFzbTCnY`. No release/migration was repeated.
+
+Branch `codex/mobile-contact-handoff-20261010` is based on pending PR294 candidate
+`81c6825eaa8b8b00bef10e62b503236bf80a4078`, not current Production. Its inherited
+navigation/origin/CI changes must be reviewed separately; do not silently describe
+the whole branch as a Production-only contact patch.
+
+Application checkpoint `b40404c0647159e44d8ceb8c949d48460740c6b1`, tree
+`88bac2e4c7bf5ae0159daa9a86c85215df3bfd98`: authorized identity-only plain contact
+values, fresh-session/ownership invalidation, safe sign-in return, 44px targets,
+read-only retained source evidence and a separate compact v5 reader. Generation,
+approved cleaner-copy key, provider/recipients/BCC/Reply-To and immutable v4 remain
+unchanged. No new migration, dependency, workflow, runtime config or provider.
+
+New local evidence: full `release:gate` PASS (3,858 tests/104 explicit skips;
+typecheck/lint/build/isolation/safety; 114 routes/22 acknowledged duplicates),
+36 real PostgreSQL checks PASS with two resend-helper cases deliberately NOT RUN.
+Browser-test-only checkpoint `59784c189ce214e35ff7259541fa69482862b84c`, tree
+`851a8accc01aaee4c92c7f818ed1a8f9d0e106f6`: 18 unique compiled Chromium cases
+PASS, including genuine assigned/supervisor sessions, denials, expiry, enlarged
+text, contact contrast and v4/v5 rendering. Application source is identical to the
+built b40404c checkpoint; the later delta adds only a supervisor browser case.
+These are this-session checks, not inherited hosted CI or Apple Mail evidence.
+
+Synthetic 390px actual-render measurements: v4/v5 CTA top 340.19/175.59px; text
+link lines20/2. Authorized contact access needed one authenticated navigation and
+zero expansion; four single-run loopback observations were134–215ms, not human
+response time or an operational latency distribution. Six explicit-URL widget
+cases retained their claims despite blocked storage; no real-traffic completeness,
+assignment acknowledgement or conversion outcome was inferred.
+
+Earlier locale/bootstrap, expired-login-return, static renderer-assertion and
+React418 failures remain in private evidence. React418 was NOT REPRODUCED in the
+final run; cause remains unresolved. Actual staff/iPhone/Mail acceptance and the
+private October10 inquiry correlation remain NOT RUN. Expired Preview resources
+were not restored. Cleaner email remains approved but NOT SENT / secure execution
+access unavailable. Historical failures and pages226/3952/Twilio holds are intact.
+
+Private receipt, diff, logs, screenshots and <=80-line next-agent handoff are in
+the existing ignored `.amm-run/mobile-handoff/` of that local worktree; do not
+publish its synthetic session/fixture artifacts. Frozen package/lock/v4 hashes
+are unchanged. Contact-only review can stop at its independent local checkpoint
+without taking v5; resolve the pending-base dependency before publication.
+Reader-first v5 deployment must retain v4 generation; later activation is separate.
+After any v5 intent exists, rollback must retain the v5 reader while returning
+generation to v4. Never delete/rewrite/resend outbox history to enable rollback.
+No hosted/publication/Production/send authority is supplied by this local receipt.
+The existing Agent Command Center operational-acceptance boundary remains next;
+unrelated verified product surfaces are not relabeled unfinished.
