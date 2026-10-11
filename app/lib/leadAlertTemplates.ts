@@ -2,6 +2,7 @@ import type { LeadPayload } from "./leadPayload";
 import type { LeadRoutingDecision } from "./leadRouting";
 import type { LeadScore } from "./leadScoring";
 import { renderReadableLeadAlert } from "./leadAlertReadableTemplate";
+import { renderCompactLeadAlert } from "./leadAlertCompactTemplate";
 import {
   selectLeadAlertVisualTemplate,
   shouldRenderLeadAlertVisual,
@@ -9,6 +10,8 @@ import {
 } from "./leadAlertVisualTemplates";
 
 export const LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v4";
+/** Reader capability only; do not change the generation/approved-copy version. */
+export const COMPACT_LEAD_ALERT_TEMPLATE_VERSION = "lead_alert_email_v5";
 export const LEAD_ALERT_SMS_TEMPLATE_VERSION = "lead_alert_sms_v2";
 export const CONSUMER_ACK_TEMPLATE_VERSION = "consumer_ack_email_v1";
 
@@ -177,6 +180,9 @@ export function renderLeadAlertForTemplateVersion(
   input: LeadAlertRenderInput,
   templateVersion: string,
 ) {
+  if (templateVersion === COMPACT_LEAD_ALERT_TEMPLATE_VERSION) {
+    return renderCompactLeadAlert(input);
+  }
   if (templateVersion === LEAD_ALERT_TEMPLATE_VERSION) {
     return renderReadableLeadAlert(input);
   }

@@ -2,7 +2,7 @@ import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Pool } from "pg";
 import { expect, test, type BrowserContext } from "@playwright/test";
-import { renderReadableLeadAlert } from "../../app/lib/leadAlertReadableTemplate";
+import { renderLeadAlertForTemplateVersion } from "../../app/lib/leadAlertTemplates";
 import type { LeadAlertRenderInput } from "../../app/lib/leadAlertTemplates";
 
 // Render current compiled source from explicit synthetic data. A clean hosted
@@ -187,8 +187,8 @@ test("optional seller evidence stays closed until requested and QA cannot save i
   await query("UPDATE leads SET lead_type='buyer',is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);
   await page.close();
 });
-for(const width of [320,390,768,1440]) {
-  test(`Actual compiled email fits ${width}px with main link early`,async({browser})=>{
+for(const version of ["lead_alert_email_v4", "lead_alert_email_v5"]) for(const width of [320,390,768,1440]) {
+  test(`Actual ${version} renderer fits ${width}px with main link early`,async({browser})=>{
     const ctx=await browser.newContext({viewport:{width,height:1000}}); const page=await ctx.newPage();
     await page.route("**/*",route=>{
       // Approved image bytes from the repository, never a Production fetch.
@@ -196,12 +196,24 @@ for(const width of [320,390,768,1440]) {
       const asset=assets[new URL(route.request().url()).pathname];
       return asset?route.fulfill({status:200,contentType:"image/webp",body:readFileSync(asset)}):route.abort();
     }); // No provider, contact or private-data request.
-    await page.setContent(renderReadableLeadAlert(emailFixture).html);
+    const rendered=renderLeadAlertForTemplateVersion(emailFixture,version)!;
+    await page.setContent(rendered.html);
     const link=page.getByRole("link",{name:"Open saved lead",exact:true}); await expect(link).toBeVisible();
     expect((await link.boundingBox())!.y).toBeLessThan(600);
+    expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
     await expect(page.locator("body")).not.toContainText("First touch:");
-    await page.screenshot({path:path.join(output,`readable-email-${width}.png`),fullPage:true});await ctx.close();
+    const ctaTop=(await link.boundingBox())!.y;
+    await page.screenshot({path:path.join(output,`readable-email-${version}-${width}.png`),fullPage:true});
+    if(width===390) {
+      writeFileSync(path.join(output,`${version}.html`),rendered.html,{mode:0o600});
+      writeFileSync(path.join(output,`${version}.txt`),rendered.text,{mode:0o600});
+    }
+    await page.evaluate(()=>{const sizes=Array.from(document.body.querySelectorAll<HTMLElement>("h1,p,a,strong")).map(el=>({el,size:parseFloat(getComputedStyle(el).fontSize)}));for(const {el,size} of sizes)el.style.fontSize=`${size*2}px`;});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
+    await link.focus();await expect(link).toBeFocused();
+    writeFileSync(path.join(output,`email-layout-${version}-${width}.json`),JSON.stringify({ctaTop,textCtaLine:rendered.text.split("\n").findIndex(line=>line.startsWith("Open saved lead:"))+1,scope:"synthetic Chromium renderer, not Apple Mail",at:new Date().toISOString()},null,2),{mode:0o600});
+    await ctx.close();
   });
 }
 
