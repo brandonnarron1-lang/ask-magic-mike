@@ -51,7 +51,7 @@ test.beforeAll(async({browser})=>{
   expect((await query('SELECT count(*)::int AS n FROM lead_center_sessions WHERE "userId"=$1',[fixture.ids.agent]))[0].n).toBeGreaterThan(0);
   await page.close();
   await query("UPDATE leads SET question_raw=$2,source='ourtownproperties',timeline_months=3 WHERE id=$1",[fixture.leads.agent,'Question: SYNTHETIC REQUEST — NOT A CONSUMER\nAttribution: {"source":"ourtownproperties","campaign":"synthetic"}']);
-  await query("INSERT INTO communication_permissions(lead_id,channel,purpose,state,consent_text,source,evidence_at) VALUES($1,'phone','manual_one_to_one','allowed','SYNTHETIC — NO CONTACT','isolated_fixture',now())",[fixture.leads.agent]);
+  await query("INSERT INTO communication_permissions(lead_id,channel,purpose,state,consent_text,source,evidence_at) VALUES($1,'phone','manual_one_to_one','allowed','SYNTHETIC — NO CONTACT','isolated_fixture',now()),($1,'email','manual_one_to_one','allowed','SYNTHETIC — NO CONTACT','isolated_fixture',now())",[fixture.leads.agent]);
   mkdirSync(output,{recursive:true});
 });
 test.afterAll(async()=>{await context?.close();await pool?.end();});
@@ -60,12 +60,14 @@ for(const width of [320,390,768,1440]) {
     const page=await context.newPage();const errors:string[]=[];const hydrationContext:string[]=[];
     page.on("pageerror",error=>errors.push(error.message));
     page.on("console",message=>{if(message.type()==="error" && /hydration|server rendered|didn't match/i.test(message.text())) hydrationContext.push(message.text());});
-    await page.setViewportSize({width,height:1000}); await page.goto(`/admin/leads/${fixture.leads.agent}`);
+    await page.setViewportSize({width,height:1000}); const started=Date.now(); await page.goto(`/admin/leads/${fixture.leads.agent}`);
     await expect(page.getByRole("heading",{level:1})).toHaveText("SYNTHETIC AGENT DO NOT CONTACT");
     const overview=page.getByRole("region",{name:"Lead overview"});
     const contacts=overview.getByRole("definition");
     await expect(overview.locator('[aria-label="Saved contact details"]')).toContainText("private-agent@example.test");
     await expect(overview.locator('[aria-label="Saved contact details"]')).toContainText("+12025550199");
+    const accessMs=Date.now()-started;
+    const savedContactTop=(await overview.locator('[aria-label="Saved contact details"]').boundingBox())!.y;
     expect((await overview.locator('[aria-label="Saved contact details"]').boundingBox())!.y).toBeLessThan((await contacts.filter({hasText:"Our Town Properties website"}).boundingBox())!.y);
     expect(await overview.locator('a[href^="tel:"],a[href^="mailto:"],a[href^="sms:"]').count()).toBe(0);
     await expect(overview).toContainText("Our Town Properties website"); await expect(overview).not.toContainText("Attribution:");
@@ -92,10 +94,32 @@ for(const width of [320,390,768,1440]) {
     await page.keyboard.press("Enter");
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.screenshot({path:path.join(output,`readable-lead-200-${width}.png`),fullPage:false});
-    writeFileSync(path.join(output,`contact-diagnostic-${width}.json`),JSON.stringify({errors,hydrationContext,at:new Date().toISOString()},null,2),{mode:0o600});
+    writeFileSync(path.join(output,`contact-diagnostic-${width}.json`),JSON.stringify({errors,hydrationContext,accessMs,savedContactTop,stepsFromAuthenticatedLink:1,expansionsNeeded:0,scope:"synthetic loopback, not human response or iPhone/Mail latency",at:new Date().toISOString()},null,2),{mode:0o600});
     expect(errors).toEqual([]); await page.close();
   });
 }
+test("missing and long untrusted saved values remain readable without fabricating actions",async()=>{
+  const original=(await query("SELECT phone,email,city FROM leads WHERE id=$1",[fixture.leads.agent]))[0];
+  const page=await context.newPage();
+  try {
+    await query("UPDATE leads SET phone=NULL,email=NULL,city=NULL WHERE id=$1",[fixture.leads.agent]);
+    await page.goto(`/admin/leads/${fixture.leads.agent}`);
+    const details=page.locator('[aria-label="Saved contact details"]');
+    await expect(details.getByText("Not provided",{exact:true})).toHaveCount(2);
+    await expect(page.getByRole("button",{name:"Review & call"})).toBeDisabled();
+    await expect(page.getByRole("button",{name:"Review & email"})).toBeDisabled();
+    const untrusted=`${"long".repeat(100)}<script>synthetic</script>@example.test`;
+    await query("UPDATE leads SET email=$2 WHERE id=$1",[fixture.leads.agent,untrusted]);
+    for(const width of [320,390,768,1440]) {
+      await page.setViewportSize({width,height:1000});await page.reload();
+      await expect(details).toContainText(untrusted);
+      expect(await details.locator("script").count()).toBe(0);
+      await expect(page.getByRole("button",{name:"Review & email"})).toBeDisabled();
+      await page.evaluate(()=>{document.documentElement.style.fontSize="200%";});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
+    }
+  } finally {await query("UPDATE leads SET phone=$2,email=$3,city=$4 WHERE id=$1",[fixture.leads.agent,original.phone,original.email,original.city]);await page.close();}
+});
 test("QA is visibly blocked; changed opt-out and role/assignment fail closed without sending",async()=>{
   const page=await context.newPage();
   await page.setViewportSize({width:390,height:1000});
@@ -110,6 +134,8 @@ test("QA is visibly blocked; changed opt-out and role/assignment fail closed wit
   await query("UPDATE communication_permissions SET state='opted_out' WHERE lead_id=$1 AND channel='phone' AND purpose='manual_one_to_one'",[fixture.leads.agent]);
   await page.getByRole("checkbox",{name:/I reviewed the request/}).check(); await page.getByRole("button",{name:"Open dialer"}).click();
   await expect(page.getByRole("status").filter({hasText:"Permission changed"})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Review & call"})).toBeDisabled();
+  await expect(page.getByRole("button",{name:"Review & email"})).toBeEnabled();
   expect(page.url()).toContain(`/admin/leads/${fixture.leads.agent}`);
   // Contact holds must not remove authorized cleanup of existing internal
   // records. This is synthetic setup only, not an actual appointment/contact.
