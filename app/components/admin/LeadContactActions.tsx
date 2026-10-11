@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { manualContactReviewTarget, type ManualContactReview } from "../../lib/manualContactReview";
+import { useInvalidateContactDisclosure } from "./LeadContactDisclosure";
 
 export function LeadContactActions({ leadId, blocked, canReview }: { leadId: string; blocked: boolean; canReview: boolean }) {
   const [review, setReview] = useState<ManualContactReview>({});
@@ -9,25 +10,31 @@ export function LeadContactActions({ leadId, blocked, canReview }: { leadId: str
   const [selected, setSelected] = useState<"phone" | "email" | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
+  const invalidateDisclosure = useInvalidateContactDisclosure();
+  const requestScope = useRef({ active: false });
   useEffect(() => {
-    if (blocked || !canReview) return;
-    let active = true;
-    readPermission(leadId).then(value => { if (active) { setReview(value); setState("Review the request before contacting this person."); } }).catch(() => { if (active) setState("Contact permission could not be verified. No contact action is available."); });
-    return () => { active = false; };
+    const scope = { active: !blocked && canReview };
+    requestScope.current = scope;
+    if (!scope.active) return;
+    readPermission(leadId).then(value => { if (scope.active) { setReview(value); setState("Review the request before contacting this person."); } }).catch(error => { if (scope.active) { setReview({}); setSelected(null); setConfirmed(false); if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); setState("Contact permission could not be verified. No contact action is available."); } });
+    return () => { scope.active = false; };
     // The endpoint always reads the current role/ownership and stored consent.
-  }, [leadId, blocked, canReview]);
+  }, [leadId, blocked, canReview, invalidateDisclosure]);
 
   async function openNativeContact() {
     if (!selected || !confirmed || busy) return;
+    const expectedTarget = manualContactReviewTarget(review, selected);
+    const scope = requestScope.current;
     setBusy(true);
     try {
       const fresh = await readPermission(leadId);
+      if (!scope.active) return;
       setReview(fresh);
       const target = manualContactReviewTarget(fresh, selected);
-      if (!target) { setSelected(null); setConfirmed(false); setState("Permission changed or is unavailable. No contact action was opened."); return; }
-      setState(selected === "phone" ? "Dialer opened. Record the actual result after your call." : "Email app opened. Nothing is sent or recorded by Lead Center.");
+      if (!target || target !== expectedTarget) { setSelected(null); setConfirmed(false); setState("Permission changed or is unavailable. No contact action was opened."); return; }
+      setState(selected === "phone" ? "Opening your dialer… Record the actual result after your call." : "Opening your email app… Nothing is sent or recorded by Lead Center.");
       window.location.assign(target);
-    } catch { setState("Contact permission could not be verified. Nothing was opened."); }
+    } catch (error) { if (!scope.active) return; setReview({}); setSelected(null); setConfirmed(false); if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); setState("Contact permission could not be verified. Nothing was opened."); }
     finally { setBusy(false); }
   }
   if (blocked) return <p role="status" className="rounded-lg border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">Contact blocked. Test, suppressed and terminal records are for review only.</p>;
@@ -46,8 +53,11 @@ export function LeadContactActions({ leadId, blocked, canReview }: { leadId: str
   </section>;
 }
 
+class ContactAccessDenied extends Error {}
+
 async function readPermission(leadId: string) {
   const response = await fetch(`/api/admin/leads/${encodeURIComponent(leadId)}/communication-permissions`, { cache: "no-store" });
+  if ([401, 403, 404].includes(response.status)) throw new ContactAccessDenied("access_unavailable");
   if (!response.ok) throw new Error("permission_unavailable");
   return await response.json() as ManualContactReview;
 }

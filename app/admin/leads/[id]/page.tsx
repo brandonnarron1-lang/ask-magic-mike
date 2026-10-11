@@ -24,6 +24,7 @@ import { hasLeadCenterPermission } from "../../../../src/lib/admin/rbac-policy";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
 import { LeadQuickOverview } from "../../../components/admin/LeadQuickOverview";
+import { LeadContactDisclosure } from "../../../components/admin/LeadContactDisclosure";
 import { isTerminalContactRecord } from "../../../lib/manualContactReview";
 import { isPreviewRuntime } from "../../../../src/lib/preview-security";
 import { ConversionMutationForm } from "../../../components/admin/ConversionMutationForm";
@@ -630,7 +631,7 @@ export default async function AdminLeadDetailPage({
   const canFollowThrough = canUpdateLead && !contactBlocked;
 
   return (
-    <main className="min-h-screen bg-[#050505] px-4 py-5 text-[#f4ead4] [overflow-wrap:anywhere]">
+    <LeadContactDisclosure key={id} leadId={id}><main className="min-h-screen bg-[#050505] px-4 py-5 text-[#f4ead4] [overflow-wrap:anywhere]">
       <div className="mx-auto max-w-6xl">
         <header className="mb-4 border-b border-[#cda24a33] pb-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -814,6 +815,6 @@ export default async function AdminLeadDetailPage({
           </div>
         )}
       </div>
-    </main>
+    </main></LeadContactDisclosure>
   );
 }

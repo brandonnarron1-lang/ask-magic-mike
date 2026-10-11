@@ -61,8 +61,14 @@ for(const width of [320,390,768,1440]) {
     await page.setViewportSize({width,height:1000}); await page.goto(`/admin/leads/${fixture.leads.agent}`);
     await expect(page.getByRole("heading",{level:1})).toHaveText("SYNTHETIC AGENT DO NOT CONTACT");
     const overview=page.getByRole("region",{name:"Lead overview"});
+    const contacts=overview.getByRole("definition");
+    await expect(overview.locator('[aria-label="Saved contact details"]')).toContainText("private-agent@example.test");
+    await expect(overview.locator('[aria-label="Saved contact details"]')).toContainText("+12025550199");
+    expect((await overview.locator('[aria-label="Saved contact details"]').boundingBox())!.y).toBeLessThan((await contacts.filter({hasText:"Our Town Properties website"}).boundingBox())!.y);
+    expect(await overview.locator('a[href^="tel:"],a[href^="mailto:"],a[href^="sms:"]').count()).toBe(0);
     await expect(overview).toContainText("Our Town Properties website"); await expect(overview).not.toContainText("Attribution:");
     const call=overview.getByRole("button",{name:"Review & call"}); await expect(call).toBeEnabled();
+    expect((await call.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect((await call.boundingBox())!.y).toBeLessThan(width===320?1000:844);
     expect(await page.locator("main details[open]").count()).toBe(0);
     await call.focus();await expect(call).toBeFocused();await page.keyboard.press("Enter");
@@ -91,6 +97,7 @@ test("QA is visibly blocked; changed opt-out and role/assignment fail closed wit
   await query("UPDATE leads SET is_test=true,communication_suppressed=true WHERE id=$1",[fixture.leads.agent]);
   await page.goto(`/admin/leads/${fixture.leads.agent}`); await expect(page.getByRole("heading",{level:1})).toHaveText("Test lead");
   await expect(page.getByText("Contact blocked.",{exact:false})).toBeVisible(); await expect(page.getByRole("button",{name:"Review & call"})).toHaveCount(0);
+  await expect(page.locator('[aria-label="Saved contact details"]')).toContainText("private-agent@example.test");
   await expect(page.getByRole("form",{name:"Save interaction and next task"})).toHaveCount(0);
   await page.screenshot({path:path.join(output,"readable-qa-lead-390.png"),fullPage:false});
   await query("UPDATE leads SET is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);
@@ -166,3 +173,43 @@ for(const width of [320,390,768,1440]) {
     await page.screenshot({path:path.join(output,`readable-email-${width}.png`),fullPage:true});await ctx.close();
   });
 }
+
+test("fresh ownership, role and expired-session reads remove stale contact details; server denies disclosure", async()=>{
+  await query("UPDATE leads SET lead_type='buyer',status='assigned',is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);
+  await query("UPDATE communication_permissions SET state='allowed' WHERE lead_id=$1 AND channel='phone' AND purpose='manual_one_to_one'",[fixture.leads.agent]);
+  const page=await context.newPage();
+  const choose=async()=>{await page.goto(`/admin/leads/${fixture.leads.agent}`);await page.getByRole("button",{name:"Review & call"}).click();await page.getByRole("checkbox",{name:/I reviewed the request/}).check();};
+  const denied=async(status:number)=>{
+    const response=page.waitForResponse(r=>r.url().endsWith("/communication-permissions") && r.status()===status);
+    await page.getByRole("button",{name:"Open dialer"}).click();
+    expect((await response).headers()["cache-control"]).toContain("private");
+    await expect(page.getByRole("status",{name:"Lead access unavailable"})).toBeVisible();
+    await expect(page.locator('[aria-label="Saved contact details"]')).toHaveCount(0);
+    await expect(page.getByRole("button",{name:"Open dialer"})).toHaveCount(0);
+  };
+  const owner=(await query("SELECT assigned_agent_id FROM leads WHERE id=$1",[fixture.leads.agent]))[0].assigned_agent_id;
+  await choose();
+  try {await query("UPDATE leads SET assigned_agent_id=NULL WHERE id=$1",[fixture.leads.agent]);await denied(404);
+    await page.goto(`/admin/leads/${fixture.leads.agent}`);await expect(page).toHaveURL(/error=forbidden/);expect(await page.content()).not.toContain("private-agent@example.test");
+  } finally {await query("UPDATE leads SET assigned_agent_id=$2 WHERE id=$1",[fixture.leads.agent,owner]);}
+  await choose();
+  try {await query("UPDATE lead_center_users SET role='read_only_analyst' WHERE id=$1",[fixture.ids.agent]);await denied(403);
+    await page.goto(`/admin/leads/${fixture.leads.agent}`);await expect(page).toHaveURL(/error=forbidden/);expect(await page.content()).not.toContain("private-agent@example.test");
+  } finally {await query("UPDATE lead_center_users SET role='approved_agent' WHERE id=$1",[fixture.ids.agent]);}
+  await choose();
+  await query('UPDATE lead_center_sessions SET "expiresAt"=now()-interval \'1 minute\' WHERE "userId"=$1',[fixture.ids.agent]);
+  await denied(401);
+  await page.goto(`/admin/leads/${fixture.leads.agent}`);
+  const login=new URL(page.url());expect(login.pathname).toBe("/lead-center-login");expect(login.searchParams.get("returnTo")).toBe(`/admin/leads/${fixture.leads.agent}`);
+  expect(await page.content()).not.toContain("private-agent@example.test");
+  await page.getByLabel("Work email").fill("agent@example.test");await page.getByLabel("Password",{exact:true}).fill(process.env.AMM_E2E_FIXTURE_PASSWORD!);
+  await page.getByRole("button",{name:"Open Lead Center"}).click();
+  await expect(page).toHaveURL(`${login.origin}/admin/leads/${fixture.leads.agent}`);
+  await expect(page.locator('[aria-label="Saved contact details"]')).toContainText("private-agent@example.test");
+  await query('DELETE FROM lead_center_sessions WHERE "userId"=$1',[fixture.ids.agent]);
+  const revoke=await page.evaluate(async id=>{const response=await fetch(`/api/admin/leads/${id}/communication-permissions`,{cache:"no-store"});return {status:response.status,body:await response.text()};},fixture.leads.agent);
+  expect(revoke.status).toBe(401);expect(revoke.body).not.toContain("private-agent@example.test");
+  expect((await query("SELECT count(*)::int AS n FROM lead_response_milestones"))[0].n).toBe(0);
+  expect((await query("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
+  await page.close();
+});
