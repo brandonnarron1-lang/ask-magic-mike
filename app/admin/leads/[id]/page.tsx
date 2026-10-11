@@ -789,7 +789,7 @@ export default async function AdminLeadDetailPage({
                   <Field label="Detail" value={lead.source_detail || "Unknown"} />
                   <Field label="Campaign" value={lead.attribution.campaign || "Unknown"} />
                   <Field label="Recorded intake surface" value={detail.sourceEvidence?.captureSurface.value || "Not recorded"} />
-                  <Field label="Selected funnel" value={detail.sourceEvidence?.selectedFunnel.value || "Not recorded"} />
+                  <Field label="Recorded funnel / lead type" value={detail.sourceEvidence?.selectedFunnel.value || "Not recorded"} />
                   <Field label="Selected tab" value={detail.sourceEvidence?.selectedTab.value || "Not recorded"} />
                   <Field label="Transport adapter proof" value="Not established by these fields" />
                   <Field label="First-touch source (client-reported)" value={detail.sourceEvidence?.firstTouch.source.value || "Not recorded"} />

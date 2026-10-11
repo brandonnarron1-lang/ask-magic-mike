@@ -1,3 +1,5 @@
+import { isLeadSourceSurface } from "./leadPayload";
+
 /** Read-only evidence for ONE retained inquiry. Never infer capture from a
  * campaign name, copy canonical attribution onto repeats, or backfill history. */
 export type SourceFact = Readonly<{
@@ -39,8 +41,6 @@ function touch(value: unknown): TouchEvidence {
     placement: fact(row.placement || row.placement_id, "client_reported"),
   };
 }
-const surfaces = new Set(["home_value_page", "buyer_page", "renter_page", "seller_page", "ask_page", "widget", "open_house"]);
-
 export function projectLeadSourceEvidence(
   row: Record<string, unknown>,
   notificationRows?: readonly Record<string, unknown>[],
@@ -50,7 +50,7 @@ export function projectLeadSourceEvidence(
   // Do not use generic row.source (an acquisition channel) as a surface.
   const detailSurface = typeof row.source_detail === "string" ? row.source_detail.split(" / ")[0] : null;
   const candidate = row.lead_source_surface || detailSurface;
-  const captureSurface = typeof candidate === "string" && surfaces.has(candidate) ? candidate : null;
+  const captureSurface = isLeadSourceSurface(candidate) ? candidate : null;
   return {
     inquiry: touch(attribution),
     firstTouch: touch(attribution.first_touch),

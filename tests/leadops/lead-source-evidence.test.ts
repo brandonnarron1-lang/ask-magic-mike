@@ -41,5 +41,7 @@ describe("read-only per-inquiry source evidence", () => {
     expect(projectLeadSourceEvidence({ attribution: [] }).notification.recordedIntentsInLoadedWindow).toBeNull();
     expect(projectLeadSourceEvidence({}, []).notification.recordedIntentsInLoadedWindow).toBe(0);
     expect(projectLeadSourceEvidence({ lead_source_surface: "home_value_page" }).captureSurface.value).toBe("home_value_page");
+    expect(projectLeadSourceEvidence({ lead_source_surface: "homepage" }).captureSurface.value).toBe("homepage");
+    expect(projectLeadSourceEvidence({ lead_source_surface: "ourtownproperties" }).captureSurface.value).toBe("ourtownproperties");
   });
 });

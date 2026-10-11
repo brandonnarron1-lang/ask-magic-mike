@@ -32,6 +32,14 @@ let pool:Pool;
 let context:BrowserContext;
 const query=async(statement:string,values:unknown[]=[]) => (await pool.query(statement,values)).rows;
 const output = process.env.AMM_E2E_OUTPUT_DIR || "output/playwright";
+function contrast(foreground: string, background: string) {
+  const luminance = (color: string) => {
+    const channels = color.match(/[\d.]+/g)!.slice(0, 3).map(value => { const c = Number(value) / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+    return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+  };
+  const a = luminance(foreground), b = luminance(background);
+  return (Math.max(a,b) + 0.05) / (Math.min(a,b) + 0.05);
+}
 test.beforeAll(async({browser})=>{
   const url=new URL(process.env.DATABASE_URL||"");
   if(process.env.VERCEL_ENV!=="development" || process.env.PREVIEW_URL || !["localhost","127.0.0.1"].includes(url.hostname) || url.pathname!=="/amm_qa_upgrade") throw new Error("disposable_local_database_required");
@@ -68,6 +76,9 @@ for(const width of [320,390,768,1440]) {
     await expect(overview.locator('[aria-label="Saved contact details"]')).toContainText("+12025550199");
     const accessMs=Date.now()-started;
     const savedContactTop=(await overview.locator('[aria-label="Saved contact details"]').boundingBox())!.y;
+    const contactColors = await overview.evaluate(el => [getComputedStyle(el.querySelector('[aria-label="Saved contact details"] dd')!).color, getComputedStyle(el).backgroundColor]);
+    const contactContrast = contrast(contactColors[0],contactColors[1]);
+    expect(contactContrast).toBeGreaterThanOrEqual(4.5);
     expect((await overview.locator('[aria-label="Saved contact details"]').boundingBox())!.y).toBeLessThan((await contacts.filter({hasText:"Our Town Properties website"}).boundingBox())!.y);
     expect(await overview.locator('a[href^="tel:"],a[href^="mailto:"],a[href^="sms:"]').count()).toBe(0);
     await expect(overview).toContainText("Our Town Properties website"); await expect(overview).not.toContainText("Attribution:");
@@ -77,6 +88,7 @@ for(const width of [320,390,768,1440]) {
     expect((await call.boundingBox())!.y).toBeLessThan(width===320?1000:844);
     expect(await page.locator("main details[open]").count()).toBe(0);
     await call.focus();await expect(call).toBeFocused();await page.keyboard.press("Enter");
+    expect((await page.getByRole("checkbox",{name:/I reviewed the request/}).locator("..").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await expect(page.getByRole("button",{name:"Open dialer"})).toBeDisabled(); // Never open or call the fictional number.
     await page.getByRole("button",{name:"Cancel",exact:true}).click();
     await page.screenshot({path:path.join(output,`readable-lead-${width}.png`),fullPage:false});
@@ -95,7 +107,7 @@ for(const width of [320,390,768,1440]) {
     await page.keyboard.press("Enter");
     await page.evaluate(()=>window.scrollTo(0,0));
     await page.screenshot({path:path.join(output,`readable-lead-200-${width}.png`),fullPage:false});
-    writeFileSync(path.join(output,`contact-diagnostic-${width}.json`),JSON.stringify({errors,hydrationContext,accessMs,savedContactTop,stepsFromAuthenticatedLink:1,expansionsNeeded:0,scope:"synthetic loopback, not human response or iPhone/Mail latency",at:new Date().toISOString()},null,2),{mode:0o600});
+    writeFileSync(path.join(output,`contact-diagnostic-${width}.json`),JSON.stringify({errors,hydrationContext,accessMs,savedContactTop,contactContrast,stepsFromAuthenticatedLink:1,expansionsNeeded:0,scope:"synthetic loopback, not human response or iPhone/Mail latency",at:new Date().toISOString()},null,2),{mode:0o600});
     expect(errors).toEqual([]); await page.close();
   });
 }
@@ -205,6 +217,8 @@ for(const version of ["lead_alert_email_v4", "lead_alert_email_v5"]) for(const w
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
     await expect(page.locator("body")).not.toContainText("First touch:");
     const ctaTop=(await link.boundingBox())!.y;
+    const ctaColors=await link.evaluate(el=>[getComputedStyle(el).color,getComputedStyle(el).backgroundColor]);
+    const ctaContrast=contrast(ctaColors[0],ctaColors[1]);expect(ctaContrast).toBeGreaterThanOrEqual(4.5);
     await page.screenshot({path:path.join(output,`readable-email-${version}-${width}.png`),fullPage:true});
     if(width===390) {
       writeFileSync(path.join(output,`${version}.html`),rendered.html,{mode:0o600});
@@ -213,7 +227,7 @@ for(const version of ["lead_alert_email_v4", "lead_alert_email_v5"]) for(const w
     await page.evaluate(()=>{const sizes=Array.from(document.body.querySelectorAll<HTMLElement>("h1,p,a,strong")).map(el=>({el,size:parseFloat(getComputedStyle(el).fontSize)}));for(const {el,size} of sizes)el.style.fontSize=`${size*2}px`;});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
     await link.focus();await expect(link).toBeFocused();
-    writeFileSync(path.join(output,`email-layout-${version}-${width}.json`),JSON.stringify({ctaTop,textCtaLine:rendered.text.split("\n").findIndex(line=>line.startsWith("Open saved lead:"))+1,scope:"synthetic Chromium renderer, not Apple Mail",at:new Date().toISOString()},null,2),{mode:0o600});
+    writeFileSync(path.join(output,`email-layout-${version}-${width}.json`),JSON.stringify({ctaTop,ctaContrast,textCtaLine:rendered.text.split("\n").findIndex(line=>line.startsWith("Open saved lead:"))+1,scope:"synthetic Chromium renderer, not Apple Mail",at:new Date().toISOString()},null,2),{mode:0o600});
     await ctx.close();
   });
 }
