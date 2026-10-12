@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { NextResponse, type NextRequest } from "next/server";
 import { neon } from "@neondatabase/serverless";
 import { leadCenterAuth } from "./rbac-auth";
+import { safeLeadCenterReturn } from "../../../app/lib/leadCenterReturn";
 import {
   getLeadCenterRbacState,
   hasLeadCenterPermission,
@@ -26,18 +27,19 @@ function principalFromSession(session: typeof leadCenterAuth.$Infer.Session): Le
 export async function getLeadCenterPrincipal(): Promise<LeadCenterPrincipal | null> {
   const state = getLeadCenterRbacState();
   if (!state.ready) return null;
-  const session = await leadCenterAuth.api.getSession({ headers: await headers() });
+  const session = await leadCenterAuth.api.getSession({ headers: await headers(), query: { disableCookieCache: true } });
   return session ? principalFromSession(session) : null;
 }
 
 export async function requireLeadCenterPermission(
   permission: LeadCenterPermission,
+  returnTo?: string,
 ): Promise<LeadCenterPrincipal | null> {
   const state = getLeadCenterRbacState();
   if (!state.enabled) return null;
   if (!state.configured) redirect("/lead-center-login?error=configuration");
   const principal = await getLeadCenterPrincipal();
-  if (!principal) redirect("/lead-center-login?error=session");
+  if (!principal) redirect(`/lead-center-login?error=session${returnTo ? `&returnTo=${encodeURIComponent(returnTo)}` : ""}`);
   if (!hasLeadCenterPermission(principal.role, permission)) {
     redirect("/lead-center-login?error=forbidden");
   }
@@ -49,7 +51,10 @@ export async function requireLeadCenterAuthenticated(): Promise<LeadCenterPrinci
   if (!state.enabled) return null;
   if (!state.configured) redirect("/lead-center-login?error=configuration");
   const principal = await getLeadCenterPrincipal();
-  if (!principal) redirect("/lead-center-login?error=session");
+  if (!principal) {
+    const returnTo = safeLeadCenterReturn((await headers()).get("x-amm-lead-center-path"));
+    redirect(`/lead-center-login?error=session&returnTo=${encodeURIComponent(returnTo)}`);
+  }
   return principal;
 }
 
@@ -57,7 +62,7 @@ export async function requireLeadCenterLeadPermission(
   leadId: string,
   permission: "lead:view_assigned" | "lead:update_assigned" | "task:manage_assigned" | "lead:record_revenue",
 ): Promise<LeadCenterPrincipal | null> {
-  const principal = await requireLeadCenterPermission(permission);
+  const principal = await requireLeadCenterPermission(permission, /^[0-9a-f-]{36}$/i.test(leadId) ? `/admin/leads/${leadId}` : undefined);
   if (!principal || hasLeadCenterPermission(principal.role, "lead:view_all")) return principal;
   if (!principal.agentId || !/^[0-9a-f-]{36}$/i.test(leadId)) {
     redirect("/lead-center-login?error=forbidden");
@@ -87,7 +92,7 @@ export async function requireLeadCenterApiPermission(
   if (!state.configured) {
     return { ok: false, response: NextResponse.json({ ok: false, error: "rbac_not_configured" }, { status: 503 }) };
   }
-  const session = await leadCenterAuth.api.getSession({ headers: request.headers });
+  const session = await leadCenterAuth.api.getSession({ headers: request.headers, query: { disableCookieCache: true } });
   const principal = session ? principalFromSession(session) : null;
   if (!principal) {
     return { ok: false, response: NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 }) };

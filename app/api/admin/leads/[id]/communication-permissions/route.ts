@@ -8,7 +8,7 @@ import { loadLeadPermissionContext, evaluateAndRecordPermission } from "@/lib/me
 import { MESSAGE_PURPOSES } from "@/lib/messaging/permission-engine";
 import { evaluateLeadCommunicationPermission, type LeadPermissionFacts, type StoredPermission } from "@/lib/messaging/permission-service";
 
-const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
+const NO_STORE = { "Cache-Control": "private, no-store, max-age=0" };
 const schema = z.object({
   channel: z.enum(["email", "sms", "push", "phone"]),
   purpose: z.enum(MESSAGE_PURPOSES),
@@ -22,7 +22,7 @@ function sameOrigin(request: NextRequest) {
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireLeadCenterApiPermission(request, "lead:view_assigned");
-  if (!auth.ok) return auth.response;
+  if (!auth.ok) { auth.response.headers.set("Cache-Control", NO_STORE["Cache-Control"]); return auth.response; }
   const { id } = await params;
   if (!z.string().uuid().safeParse(id).success) {
     return NextResponse.json({ ok: false, error: "invalid_lead_id" }, { status: 400, headers: NO_STORE });

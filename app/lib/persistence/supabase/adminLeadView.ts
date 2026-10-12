@@ -5,6 +5,7 @@ import {
   type AdminLeadTimelineEvent,
 } from "../../adminLeadTimeline";
 import type { StalledLeadSignal } from "../../adminLeadLifecycle";
+import type { LeadSourceEvidence } from "../../leadSourceEvidence";
 import {
   normalizeAppointment,
   normalizeTask,
@@ -121,6 +122,7 @@ export type AdminLeadDetailResult = {
   firstResponse: AdminLeadFirstResponseRow | null;
   aiDrafts?: AdminAiDraftReviewRow[];
   timelinePage?: AdminLeadTimelinePage;
+  sourceEvidence?: LeadSourceEvidence;
   error?: string;
 };
 

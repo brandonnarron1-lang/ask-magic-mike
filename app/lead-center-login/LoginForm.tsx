@@ -3,10 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { leadCenterAuthClient } from "../../src/lib/admin/rbac-client";
-
-function safeReturnTo(value: string | null) {
-  return value?.startsWith("/admin") ? value : "/admin";
-}
+import { safeLeadCenterReturn } from "../lib/leadCenterReturn";
 
 export function LoginForm({ enabled }: { enabled: boolean }) {
   const [error, setError] = useState("");
@@ -29,7 +26,7 @@ export function LoginForm({ enabled }: { enabled: boolean }) {
       return;
     }
     const query = new URLSearchParams(window.location.search);
-    window.location.assign(safeReturnTo(query.get("returnTo")));
+    window.location.assign(safeLeadCenterReturn(query.get("returnTo"), window.location.hash));
   }
 
   return (

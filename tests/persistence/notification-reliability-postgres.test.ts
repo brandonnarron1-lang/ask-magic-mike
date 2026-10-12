@@ -149,6 +149,27 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("PR279 successor: real 
     expect((await new NeonLeadNotificationRepository(localQuery as never).listRetryable()).some((row) => row.lead_id === id)).toBe(false);
   });
 
+  it.each([1, 2, 3, 4, 5])("recorded email v%i retries through its own reader once with unchanged transport (mock provider)", async (version) => {
+    const input = cloneInput(false);
+    input.internalNotification.template_version = `lead_alert_email_v${version}`;
+    const captured = JSON.parse(psql(`${captureSql(input)};`));
+    const before = tableCounts();
+    provider.send.mockReset();
+    provider.send.mockImplementation(async request => {
+      expect(request.recipient).toBe("operator@example.test");
+      expect(request.bcc).toEqual(["audit@example.test"]);
+      expect(request.replyTo).toBe(input.lead.email);
+      if (version === 5) expect(request.text.split("\n")[1]).toContain(`/admin/leads/${captured.lead_id}`);
+      return { ok: true, provider: "isolated", providerMessageId: "synthetic_reader_receipt" };
+    });
+    const { retryLeadAlertNotification } = await import("../../app/lib/leadAlertService");
+    expect((await retryLeadAlertNotification(captured.notification_id))?.status).toBe("sent");
+    expect((await retryLeadAlertNotification(captured.notification_id))?.status).toBe("sent");
+    expect(provider.send).toHaveBeenCalledTimes(1);
+    expect(tableCounts()).toBe(before);
+    expect(psql(`SELECT template_version FROM lead_notifications WHERE id=${literal(captured.notification_id)};`)).toBe(`lead_alert_email_v${version}`);
+  });
+
   it("one requested readable QA copy preserves the original sent receipt and concurrent repeats cannot send twice", async () => {
     const { result } = await submit();
     // The public handler returns the lead identity; recover its one original intent.
@@ -316,6 +337,9 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("PR279 successor: real 
       }
       const today = await loadNeonAdminTodayQueue(scoped); expect(today.error).toBeUndefined(); expect(today.items.some((row) => row.leadId === qaId)).toBe(false);
       const detail = await loadNeonAdminLeadDetail(ordinaryId, scoped, { offset: 0, limit: 1 }); expect(detail.error).toBeUndefined(); expect(detail.lead?.id).toBe(ordinaryId);
+      expect(detail.sourceEvidence?.captureSurface).toEqual({ value: "home_value_page", provenance: "retained_intake_field" });
+      expect(detail.sourceEvidence?.firstTouch.source).toEqual({ value: "ourtownproperties", provenance: "client_reported" });
+      expect(detail.sourceEvidence?.transportAdapter.provenance).toBe("not_established");
       const report = await loadNeonAdminReportingSummary(30, scoped);
       if (role === "approved_agent") {
         expect(report.error).toBe("lead_center_report_permission_required"); expect(report.rows).toEqual([]);

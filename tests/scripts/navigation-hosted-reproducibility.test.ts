@@ -10,7 +10,9 @@ describe("hosted navigation acceptance reproducibility", () => {
   });
   it("renders synthetic email from source rather than an ignored local HTML artifact", () => {
     const suite = readFileSync("tests/e2e/lead-readability-real-session.spec.ts", "utf8");
-    expect(suite).toContain("renderReadableLeadAlert(emailFixture).html");
+    expect(suite).toContain("renderLeadAlertForTemplateVersion(emailFixture,version)");
+    expect(suite).toContain('["lead_alert_email_v4", "lead_alert_email_v5"]');
+    expect(suite).toContain("await page.setContent(rendered.html)");
     expect(suite).toContain("Synthetic review only. No consumer exists.");
     expect(suite).not.toContain("email-preview.html");
     expect(suite).toContain('expect(errors).toEqual([])');

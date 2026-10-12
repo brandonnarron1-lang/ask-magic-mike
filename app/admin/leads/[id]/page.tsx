@@ -24,6 +24,7 @@ import { hasLeadCenterPermission } from "../../../../src/lib/admin/rbac-policy";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
 import { LeadQuickOverview } from "../../../components/admin/LeadQuickOverview";
+import { LeadContactDisclosure } from "../../../components/admin/LeadContactDisclosure";
 import { isTerminalContactRecord } from "../../../lib/manualContactReview";
 import { isPreviewRuntime } from "../../../../src/lib/preview-security";
 import { ConversionMutationForm } from "../../../components/admin/ConversionMutationForm";
@@ -630,7 +631,7 @@ export default async function AdminLeadDetailPage({
   const canFollowThrough = canUpdateLead && !contactBlocked;
 
   return (
-    <main className="min-h-screen bg-[#050505] px-4 py-5 text-[#f4ead4] [overflow-wrap:anywhere]">
+    <LeadContactDisclosure key={id} leadId={id}><main className="min-h-screen bg-[#050505] px-4 py-5 text-[#f4ead4] [overflow-wrap:anywhere]">
       <div className="mx-auto max-w-6xl">
         <header className="mb-4 border-b border-[#cda24a33] pb-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -781,12 +782,19 @@ export default async function AdminLeadDetailPage({
               </Panel>
 
               <Panel title="Attribution">
+                <p className="mb-4 text-sm text-[#d9ceb8]">URL attribution is client-reported, not proof of a widget or signed adapter. These facts belong to this saved inquiry; missing history is not reconstructed.</p>
                 <dl className="grid gap-4">
                   <Field label="Summary" value={lead.attribution_summary} />
                   <Field label="Source" value={lead.source || "Unknown"} />
                   <Field label="Detail" value={lead.source_detail || "Unknown"} />
                   <Field label="Campaign" value={lead.attribution.campaign || "Unknown"} />
-                  <Field label="Surface" value={lead.lead_source_surface} />
+                  <Field label="Recorded intake surface" value={detail.sourceEvidence?.captureSurface.value || "Not recorded"} />
+                  <Field label="Recorded funnel / lead type" value={detail.sourceEvidence?.selectedFunnel.value || "Not recorded"} />
+                  <Field label="Selected tab" value={detail.sourceEvidence?.selectedTab.value || "Not recorded"} />
+                  <Field label="Transport adapter proof" value="Not established by these fields" />
+                  <Field label="First-touch source (client-reported)" value={detail.sourceEvidence?.firstTouch.source.value || "Not recorded"} />
+                  <Field label="Latest-touch source (client-reported)" value={detail.sourceEvidence?.latestTouch.source.value || "Not recorded"} />
+                  <Field label="Notification intent" value={detail.sourceEvidence?.notification.recordedIntentsInLoadedWindow == null ? "Not established" : `${detail.sourceEvidence.notification.recordedIntentsInLoadedWindow} in loaded history window — not proof of delivery`} />
                 </dl>
               </Panel>
 
@@ -814,6 +822,6 @@ export default async function AdminLeadDetailPage({
           </div>
         )}
       </div>
-    </main>
+    </main></LeadContactDisclosure>
   );
 }

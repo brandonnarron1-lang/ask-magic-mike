@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { manualContactReviewTarget, type ManualContactReview } from "../../lib/manualContactReview";
+import { useInvalidateContactDisclosure } from "./LeadContactDisclosure";
 
 export function LeadContactActions({ leadId, blocked, canReview }: { leadId: string; blocked: boolean; canReview: boolean }) {
   const [review, setReview] = useState<ManualContactReview>({});
@@ -9,25 +10,31 @@ export function LeadContactActions({ leadId, blocked, canReview }: { leadId: str
   const [selected, setSelected] = useState<"phone" | "email" | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState(false);
+  const invalidateDisclosure = useInvalidateContactDisclosure();
+  const requestScope = useRef({ active: false });
   useEffect(() => {
-    if (blocked || !canReview) return;
-    let active = true;
-    readPermission(leadId).then(value => { if (active) { setReview(value); setState("Review the request before contacting this person."); } }).catch(() => { if (active) setState("Contact permission could not be verified. No contact action is available."); });
-    return () => { active = false; };
+    const scope = { active: !blocked && canReview };
+    requestScope.current = scope;
+    if (!scope.active) return;
+    readPermission(leadId).then(value => { if (scope.active) { setReview(value); setState("Review the request before contacting this person."); } }).catch(error => { if (scope.active) { setReview({}); setSelected(null); setConfirmed(false); if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); setState("Contact permission could not be verified. No contact action is available."); } });
+    return () => { scope.active = false; };
     // The endpoint always reads the current role/ownership and stored consent.
-  }, [leadId, blocked, canReview]);
+  }, [leadId, blocked, canReview, invalidateDisclosure]);
 
   async function openNativeContact() {
     if (!selected || !confirmed || busy) return;
+    const expectedTarget = manualContactReviewTarget(review, selected);
+    const scope = requestScope.current;
     setBusy(true);
     try {
       const fresh = await readPermission(leadId);
+      if (!scope.active) return;
       setReview(fresh);
       const target = manualContactReviewTarget(fresh, selected);
-      if (!target) { setSelected(null); setConfirmed(false); setState("Permission changed or is unavailable. No contact action was opened."); return; }
-      setState(selected === "phone" ? "Dialer opened. Record the actual result after your call." : "Email app opened. Nothing is sent or recorded by Lead Center.");
+      if (!target || target !== expectedTarget) { setSelected(null); setConfirmed(false); setState("Permission changed or is unavailable. No contact action was opened."); return; }
+      setState(selected === "phone" ? "Opening your dialer… Record the actual result after your call." : "Opening your email app… Nothing is sent or recorded by Lead Center.");
       window.location.assign(target);
-    } catch { setState("Contact permission could not be verified. Nothing was opened."); }
+    } catch (error) { if (!scope.active) return; setReview({}); setSelected(null); setConfirmed(false); if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); setState("Contact permission could not be verified. Nothing was opened."); }
     finally { setBusy(false); }
   }
   if (blocked) return <p role="status" className="rounded-lg border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">Contact blocked. Test, suppressed and terminal records are for review only.</p>;
@@ -37,17 +44,20 @@ export function LeadContactActions({ leadId, blocked, canReview }: { leadId: str
       {(["phone", "email"] as const).map(channel => <button key={channel} type="button" disabled={!manualContactReviewTarget(review, channel)} onClick={() => { setSelected(channel); setConfirmed(false); }} className="min-h-11 rounded-lg border border-[#d9af52]/45 bg-[#d9af52] px-3 py-3 text-sm font-bold text-[#090909] disabled:bg-transparent disabled:text-[#b9ae9d] focus-visible:outline-2 focus-visible:outline-cyan-300">{channel === "phone" ? "Review & call" : "Review & email"}</button>)}
     </div>
     <p role="status" className="text-sm leading-5 text-[#d9ceb8]">{state}</p>
-    {review.ok && !manualContactReviewTarget(review, "phone") && !manualContactReviewTarget(review, "email") ? <p className="text-sm leading-5 text-[#d9ceb8]">No approved contact option. Review <a href="#message-review" className="text-[#e2c06f] underline">communication permissions</a>; this screen cannot grant consent.</p> : null}
+    {review.ok && !manualContactReviewTarget(review, "phone") && !manualContactReviewTarget(review, "email") ? <p className="text-sm leading-5 text-[#d9ceb8]">No approved contact option. Review <a href="#message-review" className="inline-flex min-h-11 items-center text-[#e2c06f] underline">communication permissions</a>; this screen cannot grant consent.</p> : null}
     {selected ? <div className="rounded-lg border border-[#d9af52]/45 p-3">
       <p className="break-words text-sm font-semibold">{selected === "phone" ? review.manualContact?.phone : review.manualContact?.email}</p>
-      <label className="my-3 flex items-start gap-3 text-sm leading-5"><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} className="mt-1 h-4 w-4 shrink-0"/>I reviewed the request and contact permission. Open my {selected === "phone" ? "dialer" : "email app"}; do not record completed contact.</label>
+      <label className="my-3 flex min-h-11 items-start gap-3 text-sm leading-5"><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} className="mt-1 h-4 w-4 shrink-0"/>I reviewed the request and contact permission. Open my {selected === "phone" ? "dialer" : "email app"}; do not record completed contact.</label>
       <div className="flex flex-wrap gap-2"><button type="button" disabled={!confirmed || busy} onClick={openNativeContact} className="min-h-11 rounded-lg bg-[#d9af52] px-4 py-2 text-sm font-bold text-[#090909] disabled:opacity-50">{busy ? "Checking…" : selected === "phone" ? "Open dialer" : "Open email app"}</button><button type="button" onClick={() => { setSelected(null); setConfirmed(false); }} className="min-h-11 px-4 text-sm">Cancel</button></div>
     </div> : null}
   </section>;
 }
 
+class ContactAccessDenied extends Error {}
+
 async function readPermission(leadId: string) {
   const response = await fetch(`/api/admin/leads/${encodeURIComponent(leadId)}/communication-permissions`, { cache: "no-store" });
+  if ([401, 403, 404].includes(response.status)) throw new ContactAccessDenied("access_unavailable");
   if (!response.ok) throw new Error("permission_unavailable");
   return await response.json() as ManualContactReview;
 }
