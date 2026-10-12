@@ -463,6 +463,59 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await screenshot(page, "keyboard-synthetic-receipt");
 });
 
+test("Eventless DOM address/contact values survive health recheck, consent and timeline changes", async ({ page }) => {
+  await openHomeValue(page);
+  const address = page.getByLabel("Property address", { exact: true });
+  await address.evaluate((element, value) => { (element as HTMLInputElement).value = value; }, ADDRESS);
+  // Simulated pageshow triggers the real hook's asynchronous health recheck.
+  // Offline failure must stay read_only; never mock an enabling capability.
+  // This is not evidence of a trusted bfcache return or real OS autofill.
+  await page.context().setOffline(true);
+  try {
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
+    await expect(page.locator('[data-intake-mode="read_only"]')).toHaveCount(2);
+    await expect(address).toHaveValue(ADDRESS);
+  } finally {
+    await page.context().setOffline(false);
+  }
+  await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
+  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(2);
+  await expect(address).toHaveValue(ADDRESS);
+  await funnel(page).getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.getByLabel("Your name", { exact: true })).toBeFocused();
+  await page.getByLabel("Your name", { exact: true }).fill(NAME);
+  await page.getByLabel("Email for your valuation follow-up", { exact: true }).fill(EMAIL);
+  const values = {
+    name: "EVENTLESS SYNTHETIC | INTERNAL QA | DO NOT CONTACT",
+    email: "eventless@example.test",
+    phone: "+12025550188",
+  };
+  // Eventless DOM assignment models the autofill integration hazard only;
+  // it does not exercise real OS/browser autofill or production persistence.
+  await funnel(page).locator('[data-amm-step="contact"]').evaluate((form, nativeValues) => {
+    for (const key of ["name", "email", "phone"] as const) {
+      form.querySelector<HTMLInputElement>(`input[name="${key}"]`)!.value = nativeValues[key];
+    }
+  }, values);
+  const expectNativeValues = async () => {
+    await expect(page.getByLabel("Your name", { exact: true })).toHaveValue(values.name);
+    await expect(page.getByLabel("Email for your valuation follow-up", { exact: true })).toHaveValue(values.email);
+    await expect(page.getByLabel("Phone (optional)", { exact: true })).toHaveValue(values.phone);
+  };
+  await funnel(page).getByRole("checkbox").check();
+  await expectNativeValues();
+  await page.getByLabel("Timeline", { exact: true }).selectOption("Just planning");
+  await expectNativeValues();
+  await expect(funnel(page).getByRole("checkbox")).toBeChecked();
+  await expect(page.getByLabel("Timeline", { exact: true })).toHaveValue("Just planning");
+  await submit(page).click(); await assertSaved(page);
+  const capture = captures.get(page)!;
+  expect(capture.attempts).toHaveLength(1);
+  expect(capture.attempts[0].payload).toMatchObject({
+    ...values, address: ADDRESS, timeline: "Just planning", consent: true, consent_email: true, consent_call: true,
+  });
+});
+
 test("Native values without change events survive Edit address and are submitted from actual controls", async ({ page }) => {
   await openHomeValue(page); await contact(page);
   // Native setter without input/change events models the integration hazard,

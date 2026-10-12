@@ -877,3 +877,23 @@ Private evidence is in `.amm-run/live-intake-repair-20261012/` of
 Brandon acceptance/no-v5 census remain closed historical findings. Cleaner email
 remains approved but NOT SENT / secure execution access unavailable; WordPress,
 carrier/pilot holds, historical failures, NellySelly and PropertyLens are untouched.
+
+The first PR297 hosted run (`38314096582`) passed unit, actual intake SQL,
+typecheck/lint/build and reference-session gates, then failed before the conversion
+test's expected POST: its unmarked fixture was correctly refused by synthetic-QA
+UI. Later browser/report gates were skipped, not passes. The correction keeps that
+refusal and marked-QA UI-to-SQL proof, and separately exercises ordinary synthetic
+Home Value HTTP-to-SQL/manual follow-through plus the existing seller/shared
+appointment UI. This is not ordinary Home Value consumer browser-to-appointment
+proof. The first seller-selector failure is retained; no application rule was
+weakened to make these tests pass.
+
+Local tests also reproduced eventless native address/contact values being erased
+by unrelated React rerenders, including a phone becoming empty after consent.
+The Home Value-only correction lets mounted native fields retain their values;
+existing FormData snapshots seed defaults on step remount. Consent, classification,
+frozen payload/key, handler, routing and delivery rules remain unchanged. Failing
+and passing unit evidence is retained privately. DOM-assignment tests model an
+autofill integration hazard, not physical iPhone/system-autofill acceptance.
+These corrective changes require new final-source local/hosted/Preview evidence;
+the predecessor's green results do not accept the revised source.

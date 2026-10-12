@@ -25,15 +25,39 @@ function transport(handler: (call: Call, index: number) => Promise<Response> | R
   }));
 }
 async function contact(phone = "") {
-  render(<HomeValueFunnel />);
+  const view = render(<HomeValueFunnel />);
   fireEvent.change(screen.getByLabelText("Property address"), { target: { value: "101 Synthetic Fixture Road, Wilson NC" } });
   fireEvent.click(screen.getByRole("button", { name: "Continue" }));
   await screen.findByLabelText("Your name");
   fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "SYNTHETIC OWNER | INTERNAL QA | DO NOT CONTACT" } });
   fireEvent.change(screen.getByLabelText("Email for your valuation follow-up"), { target: { value: "fixture@example.test" } });
   fireEvent.change(screen.getByLabelText("Phone (optional)"), { target: { value: phone } });
+  return view;
 }
 function submit() { fireEvent.click(screen.getByRole("button", { name: "Request Valuation" })); }
+function eventlessContact() {
+  const values = {
+    name: "EVENTLESS SYNTHETIC | INTERNAL QA | DO NOT CONTACT",
+    email: "eventless@example.test",
+    phone: "+12025550188",
+    timeline: "Just planning",
+    consent: false,
+  };
+  // Direct DOM assignment emits no input/change events. This reproduces the
+  // integration hazard, not a real OS/browser autofill acceptance test.
+  (screen.getByLabelText("Your name") as HTMLInputElement).value = values.name;
+  (screen.getByLabelText("Email for your valuation follow-up") as HTMLInputElement).value = values.email;
+  (screen.getByLabelText("Phone (optional)") as HTMLInputElement).value = values.phone;
+  (screen.getByLabelText("Timeline") as HTMLSelectElement).value = values.timeline;
+  return values;
+}
+function expectContactValues(values: ReturnType<typeof eventlessContact>) {
+  expect(screen.getByLabelText("Your name")).toHaveValue(values.name);
+  expect(screen.getByLabelText("Email for your valuation follow-up")).toHaveValue(values.email);
+  expect(screen.getByLabelText("Phone (optional)")).toHaveValue(values.phone);
+  expect(screen.getByLabelText("Timeline")).toHaveValue(values.timeline);
+  expect(screen.getByRole("checkbox").matches(":checked")).toBe(values.consent);
+}
 beforeEach(() => {
   const pending = readPendingHomeValueRequest();
   if (pending) clearPendingHomeValueRequest(pending.key);
@@ -50,6 +74,34 @@ afterEach(() => {
 });
 
 describe("Home Value logical-request integrity", () => {
+  it("retains an eventless address across asynchronous capability rerenders before Continue", async () => {
+    transport(call => response(call));
+    const view = render(<HomeValueFunnel />);
+    const actualAddress = "101 Synthetic Fixture Road, Wilson NC";
+    // DOM assignment emits no input/change event; React address state is empty.
+    (screen.getByLabelText("Property address") as HTMLInputElement).value = actualAddress;
+    for (const mode of ["checking", "live"] as const) {
+      await act(async () => {
+        await Promise.resolve(); fixture.mode = mode;
+        view.rerender(<HomeValueFunnel />);
+      });
+      expect(screen.getByLabelText("Property address")).toHaveValue(actualAddress);
+      if (mode === "checking") expect(screen.getByRole("button", {name:"Continue"})).toBeDisabled();
+      else expect(screen.getByRole("button", {name:"Continue"})).toBeEnabled();
+    }
+    fireEvent.click(screen.getByRole("button", {name:"Continue"}));
+    expect(screen.getByLabelText("Your name")).toHaveFocus();
+    expect(screen.getByText(actualAddress)).toBeVisible();
+    fireEvent.click(screen.getByRole("button", {name:"Edit address"}));
+    expect(screen.getByLabelText("Property address")).toHaveValue(actualAddress);
+    fireEvent.click(screen.getByRole("button", {name:"Continue"}));
+    fireEvent.change(screen.getByLabelText("Your name"), {target:{value:"SYNTHETIC OWNER | INTERNAL QA | DO NOT CONTACT"}});
+    fireEvent.change(screen.getByLabelText("Email for your valuation follow-up"), {target:{value:"fixture@example.test"}});
+    submit(); await screen.findByText("Your request is in.");
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(calls[0].body).address).toBe(actualAddress);
+  });
+
   it("requires real identifiers and focuses an accurate saved receipt without promising a valuation or booking", async () => {
     transport(call => response(call));
     await contact("+12025550199"); submit();
@@ -104,6 +156,76 @@ describe("Home Value logical-request integrity", () => {
     (screen.getByLabelText("Phone (optional)") as HTMLInputElement).value="+12025550188";
     submit(); await screen.findByText("Your request is in.");
     expect(JSON.parse(calls[0].body)).toMatchObject({email:"autofilled@example.test",phone:"+12025550188"});
+  });
+
+  it("does not silently omit an eventless phone after a consent click", async () => {
+    transport(call => response(call)); await contact();
+    (screen.getByLabelText("Phone (optional)") as HTMLInputElement).value = "+12025550188";
+    fireEvent.click(screen.getByRole("checkbox"));
+    submit(); await screen.findByText("Your request is in.");
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(calls[0].body)).toMatchObject({phone:"+12025550188",consent:true,consent_call:true});
+  });
+
+  it.each(["consent", "timeline", "typing name", "typing email", "typing phone"] as const)(
+    "retains eventless contact values across %s before reading FormData", async interaction => {
+      transport(call => response(call)); await contact();
+      const values = eventlessContact();
+      if (interaction === "consent") {
+        fireEvent.click(screen.getByRole("checkbox")); values.consent = true;
+      } else if (interaction === "timeline") {
+        values.timeline = "ASAP";
+        fireEvent.change(screen.getByLabelText("Timeline"), {target:{value:values.timeline}});
+      } else if (interaction === "typing name") {
+        values.name = "TYPED SYNTHETIC | INTERNAL QA | DO NOT CONTACT";
+        fireEvent.change(screen.getByLabelText("Your name"), {target:{value:values.name}});
+      } else if (interaction === "typing email") {
+        values.email = "typed@example.test";
+        fireEvent.change(screen.getByLabelText("Email for your valuation follow-up"), {target:{value:values.email}});
+      } else {
+        values.phone = "+12025550199";
+        fireEvent.change(screen.getByLabelText("Phone (optional)"), {target:{value:values.phone}});
+      }
+      expectContactValues(values);
+      submit(); await screen.findByText("Your request is in.");
+      expect(calls).toHaveLength(1);
+      expect(JSON.parse(calls[0].body)).toMatchObject({...values,consent_email:values.consent,consent_call:values.consent});
+    },
+  );
+
+  it("retains eventless contact values across asynchronous capability-mode rerenders", async () => {
+    transport(call => response(call)); const view = await contact();
+    const values = eventlessContact();
+    // Simulate async hook results without health/network traffic. This checks
+    // rerender preservation, not the capability endpoint or real browser restore.
+    for (const mode of ["checking", "read_only", "live"] as const) {
+      await act(async () => {
+        await Promise.resolve(); fixture.mode = mode;
+        view.rerender(<HomeValueFunnel />);
+      });
+      expectContactValues(values);
+      const button = screen.getByRole("button", {name:mode === "read_only" ? "Review demo (not saved)" : "Request Valuation"});
+      if (mode === "checking") expect(button).toBeDisabled();
+      else expect(button).toBeEnabled();
+    }
+    submit(); await screen.findByText("Your request is in.");
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(calls[0].body)).toMatchObject(values);
+  });
+
+  it("snapshots eventless contact values for a remount after editing the address", async () => {
+    transport(call => response(call)); await contact();
+    const values = eventlessContact();
+    fireEvent.click(screen.getByRole("button", {name:"Edit address"}));
+    fireEvent.change(screen.getByLabelText("Property address"), {target:{value:"102 Synthetic Fixture Road, Wilson NC"}});
+    fireEvent.click(screen.getByRole("button", {name:"Continue"}));
+    expect(screen.getByLabelText("Your name")).toHaveFocus();
+    expectContactValues(values);
+    fireEvent.click(screen.getByRole("checkbox")); values.consent = true;
+    expectContactValues(values);
+    submit(); await screen.findByText("Your request is in.");
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(calls[0].body)).toMatchObject({...values,address:"102 Synthetic Fixture Road, Wilson NC"});
   });
 
   it("distinguishes omitted phone from invalid phone without discarding a supplied value", async () => {

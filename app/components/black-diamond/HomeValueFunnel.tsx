@@ -139,8 +139,8 @@ export function HomeValueFunnel({
     const data = new FormData(form);
     const field = (key: string) => String(data.get(key) ?? "");
     const values = { name: field("name"), email: field("email"), phone: field("phone"), timeline: field("timeline"), consent: data.get("consent") === "yes" };
-    // Read the actual visible native controls as well as React state. Browser
-    // autofill can update a value without a React change event.
+    // Mounted contact controls own their values so eventless autofill survives
+    // unrelated rerenders. Snapshot them to seed defaults when this step remounts.
     setName(values.name); setEmail(values.email); setPhone(values.phone);
     setTimeline(values.timeline); setConsent(values.consent);
     return values;
@@ -342,7 +342,7 @@ export function HomeValueFunnel({
             label="Property address"
             name="address"
             inputRef={addressRef}
-            value={address}
+            defaultValue={address}
             onChange={(event) => {
               setAddress(event.target.value);
               clearKnownRefusal();
@@ -374,7 +374,7 @@ export function HomeValueFunnel({
             label="Your name"
             name="name"
             inputRef={nameRef}
-            value={name}
+            defaultValue={name}
             onChange={(event) => {
               setName(event.target.value);
               clearKnownRefusal();
@@ -391,7 +391,7 @@ export function HomeValueFunnel({
             label="Email for your valuation follow-up"
             name="email"
             inputRef={emailRef}
-            value={email}
+            defaultValue={email}
             onChange={(event) => {
               setEmail(event.target.value);
               clearKnownRefusal();
@@ -410,7 +410,7 @@ export function HomeValueFunnel({
             label="Phone (optional)"
             name="phone"
             inputRef={phoneRef}
-            value={phone}
+            defaultValue={phone}
             onChange={(event) => {
               setPhone(event.target.value);
               clearKnownRefusal();
@@ -424,7 +424,7 @@ export function HomeValueFunnel({
             aria-describedby={formError?.field === "phone" ? errorId : undefined}
             aria-invalid={formError?.field === "phone"}
           />
-          <SelectField label="Timeline" name="timeline" disabled={locked} value={timeline} onChange={(event) => setTimeline(event.target.value)}>
+          <SelectField label="Timeline" name="timeline" disabled={locked} defaultValue={timeline} onChange={(event) => setTimeline(event.target.value)}>
             {timelineOptions.map((option) => (
               <option key={option}>{option}</option>
             ))}
