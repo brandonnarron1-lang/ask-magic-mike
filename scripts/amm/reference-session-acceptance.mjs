@@ -11,7 +11,11 @@ import { startDatabase, stopDatabase, install, psql, literal } from "../../tests
 
 if (process.env.AMM_QA_POSTGRES_TEST !== "1" || process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview" || process.env.DATABASE_URL || process.env.PREVIEW_URL) throw new Error("explicit_clean_isolated_venue_required");
 const readability = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1";
-const runDir = path.resolve(readability ? ".amm-run/lead-alert-readability-20261009/real-session" : ".amm-run/reference-session-acceptance");
+// An explicit private output directory keeps later verification from replacing
+// an earlier frozen release's fixtures, screenshots or receipt.
+const artifactOverride = process.env.AMM_SESSION_ARTIFACT_DIR;
+const runDir = path.resolve(artifactOverride || (readability ? ".amm-run/lead-alert-readability-20261009/real-session" : ".amm-run/reference-session-acceptance"));
+if (artifactOverride && !runDir.startsWith(`${path.resolve(".amm-run")}${path.sep}`)) throw new Error("private_session_artifact_directory_required");
 mkdirSync(runDir, { recursive: true });
 const reserve = createServer();
 await new Promise(resolve => reserve.listen(0, "127.0.0.1", resolve));
@@ -73,7 +77,10 @@ try {
     AMM_QA_POSTGRES_TEST: "1", AMM_ISOLATED_SESSION_ACCEPTANCE: "1", AMM_E2E_FIXTURE_PATH: fixturePath,
     ...(process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? { AMM_CONVERSION_SESSION_ACCEPTANCE: "1" } : {}),
     ...(readability ? { AMM_LEAD_READABILITY_ACCEPTANCE: "1" } : {}),
-    AMM_E2E_FIXTURE_PASSWORD: password, AMM_E2E_BUILT: "1", AMM_E2E_PORT: String(port),
+    ...(artifactOverride ? { AMM_E2E_OUTPUT_DIR: path.join(runDir, "screenshots"), AMM_SESSION_ARTIFACT_DIR: runDir } : {}),
+    // The existing Playwright switch permits an explicit local development
+    // diagnostic. It is never evidence for the default built-app gate.
+    AMM_E2E_FIXTURE_PASSWORD: password, AMM_E2E_BUILT: process.env.AMM_E2E_BUILT === "0" ? "0" : "1", AMM_E2E_PORT: String(port),
     VERCEL_ENV: "development", DATABASE_URL: connection, BETTER_AUTH_URL: origin,
     BETTER_AUTH_SECRET: randomBytes(32).toString("hex"), LEAD_CENTER_RBAC_ENABLED: "true",
     NEXT_PUBLIC_SITE_URL: origin, LEAD_ALLOCATION_ENABLED: "true", LEAD_ALLOCATION_SENDS_ENABLED: "false", LEAD_ALLOCATION_DUE_ENABLED: "false",
@@ -91,6 +98,6 @@ try {
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });
   const counts = JSON.parse(psql(`SELECT json_build_object('leads',count(*),'notifications',(SELECT count(*) FROM lead_notifications),'provider_ids',(SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL),'reservations',(SELECT count(*) FROM lead_allocation_send_reservations)) FROM leads;`));
   const receiptName = process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? "conversion-receipt.json" : "receipt.json";
-  writeFileSync(path.join(runDir, receiptName), JSON.stringify({ at: new Date().toISOString(), exit, suite, scope: "built-app-real-auth-isolated-postgresql", productionWrites: 0, providerCalls: 0, counts }, null, 2), { mode: 0o600 });
+  writeFileSync(path.join(runDir, receiptName), JSON.stringify({ at: new Date().toISOString(), exit, suite, scope: env.AMM_E2E_BUILT === "1" ? "built-app-real-auth-isolated-postgresql" : "development-diagnostic-real-auth-isolated-postgresql", productionWrites: 0, providerCalls: 0, counts }, null, 2), { mode: 0o600 });
   process.exitCode = Number(exit || 0);
 } finally { if (child && child.exitCode === null) child.kill("SIGTERM"); stopDatabase(); }

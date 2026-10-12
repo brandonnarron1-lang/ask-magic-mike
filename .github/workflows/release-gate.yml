@@ -97,6 +97,9 @@ jobs:
       - name: Built application conversion journey and responsive acceptance
         run: AMM_CONVERSION_SESSION_ACCEPTANCE=1 pnpm run test:reference:sessions
 
+      - name: Built lead navigation and optional-tool acceptance (isolated, no sends)
+        run: AMM_LEAD_READABILITY_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/lead-navigation-ci pnpm run test:reference:sessions
+
       - name: Assert canonical route manifest and cron targets
         run: pnpm run routes:assert
 
@@ -117,6 +120,8 @@ jobs:
             .amm-run/reference-session-acceptance/receipt.json
             .amm-run/reference-session-acceptance/conversion-receipt.json
             .amm-run/reference-session-acceptance/performance.json
+            .amm-run/lead-navigation-ci/receipt.json
+            .amm-run/lead-navigation-ci/screenshots/*.png
           if-no-files-found: ignore
 
       - name: Summarize failed release gate

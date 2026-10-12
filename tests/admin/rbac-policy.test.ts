@@ -6,7 +6,8 @@ import {
   hasLeadCenterSessionCookie,
   type LeadCenterPrincipal,
 } from "../../src/lib/admin/rbac-policy";
-import { leadCenterAuth, normalizeAuthDatabaseUrl } from "../../src/lib/admin/rbac-auth";
+import { leadCenterAuth, normalizeAuthDatabaseUrl, leadCenterTrustedOrigins } from "../../src/lib/admin/rbac-auth";
+import { betterAuth } from "better-auth";
 
 function principal(overrides: Partial<LeadCenterPrincipal> = {}): LeadCenterPrincipal {
   return {
@@ -20,6 +21,50 @@ function principal(overrides: Partial<LeadCenterPrincipal> = {}): LeadCenterPrin
 }
 
 describe("Lead Center RBAC policy", () => {
+  const previewHost = "ask-magic-mike-exact-eyes-up-industries.vercel.app";
+  const configuredOrigin = "https://ask-magic-mike-git-codex-review-eyes-up-industries.vercel.app";
+  const previewEnv: NodeJS.ProcessEnv = { ...process.env, VERCEL_ENV: "preview", VERCEL_URL: previewHost, BETTER_AUTH_URL: configuredOrigin };
+
+  it("trusts only the exact immutable Preview and configured login origin, without wildcard trust", () => {
+    expect(leadCenterTrustedOrigins(previewEnv)).toEqual([
+      "https://www.askmagicmike.com", "https://askmagicmike.com", configuredOrigin, `https://${previewHost}`,
+    ]);
+    expect(leadCenterTrustedOrigins(previewEnv)).not.toContain("https://unrelated.vercel.app");
+    expect(leadCenterTrustedOrigins(previewEnv).some(origin => origin.includes("*"))).toBe(false);
+  });
+
+  it("preserves Production origins and ignores stale Preview metadata outside Preview", () => {
+    for (const VERCEL_ENV of ["production", "development", undefined]) {
+      expect(leadCenterTrustedOrigins({ ...previewEnv, VERCEL_ENV })).toEqual([
+        "https://www.askmagicmike.com", "https://askmagicmike.com", configuredOrigin,
+      ]);
+    }
+  });
+
+  it.each(["not a host", "attacker.test", "user:password@ask-magic-mike.vercel.app", "ask-magic-mike.vercel.app/path", "ask-magic-mike.vercel.app?query=1", "ask-magic-mike.vercel.app#fragment", "ask-magic-mike.vercel.app:8443"])("rejects malformed or non-deployment metadata: %s", VERCEL_URL => {
+    expect(leadCenterTrustedOrigins({ ...previewEnv, VERCEL_URL })).toHaveLength(3);
+  });
+
+  it("reproduces immutable-origin 403 through real Better Auth, and allows credential validation only after the exact-origin correction", async () => {
+    const request = () => new Request(`https://${previewHost}/api/lead-center-auth/sign-in/email`, {
+      method: "POST", headers: { "Content-Type": "application/json", Origin: `https://${previewHost}` },
+      body: JSON.stringify({ email: "nonexistent-synthetic@example.test", password: "SYNTHETIC-not-a-real-account" }),
+    });
+    const make = (trustedOrigins: string[]) => betterAuth({
+      secret: "synthetic-unit-fixture-only-never-a-runtime-secret",
+      baseURL: configuredOrigin, basePath: "/api/lead-center-auth", trustedOrigins,
+      emailAndPassword: { enabled: true, disableSignUp: true }, telemetry: { enabled: false },
+      advanced: { disableCSRFCheck: false, disableOriginCheck: false }, // Match real non-test enforcement.
+    });
+    const denied = await make([configuredOrigin]).handler(request());
+    expect(denied.status).toBe(403);
+    expect((await denied.json()).code).toBe("INVALID_ORIGIN");
+    const acceptedOrigin = await make(leadCenterTrustedOrigins(previewEnv)).handler(request());
+    expect(acceptedOrigin.status).toBe(401); // Real credential validation; no invented successful login.
+    expect((await acceptedOrigin.json()).code).toBe("INVALID_EMAIL_OR_PASSWORD");
+    const unrelated = new Request(request(), { headers: { "Content-Type": "application/json", Origin: "https://unrelated.vercel.app" } });
+    expect((await make(leadCenterTrustedOrigins(previewEnv)).handler(unrelated)).status).toBe(403);
+  });
   it("pins Neon/PostgreSQL auth connections to full TLS verification", () => {
     expect(normalizeAuthDatabaseUrl("postgresql://role:secret@example.test/db?sslmode=require"))
       .toBe("postgresql://role:secret@example.test/db?sslmode=verify-full");

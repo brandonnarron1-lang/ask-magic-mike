@@ -673,7 +673,7 @@ export default async function AdminLeadDetailPage({
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <section className="min-w-0 space-y-5">
               {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && !isPreviewRuntime()} status={lead.status}/> : null}
-              {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/> : null}
+              {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <Panel title="Property evidence (optional)"><LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/></Panel> : null}
               <Panel title="Lead state">
                 <div className="flex flex-wrap gap-2">
                   <Badge>{lead.status}</Badge>

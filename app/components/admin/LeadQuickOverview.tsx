@@ -1,6 +1,7 @@
 import type { LeadPresentation } from "../../lib/leadPresentation";
 import { leadReceivedLabel } from "../../lib/leadReadability";
 import { LeadContactActions } from "./LeadContactActions";
+import { LeadSectionNavigation } from "./LeadSectionNavigation";
 
 export function LeadQuickOverview({ view, leadId, receivedAt, request, blocked, canReview, status }: {
   view: LeadPresentation; leadId: string; receivedAt: string | null; request: string;
@@ -14,6 +15,6 @@ export function LeadQuickOverview({ view, leadId, receivedAt, request, blocked, 
     {!view.isTest && view.identity?.question ? <div className="text-sm leading-6"><p className="whitespace-pre-line break-words">{view.identity.question.slice(0, 280)}{view.identity.question.length > 280 ? "…" : ""}</p>{view.identity.question.length > 280 ? <details className="mt-2"><summary className="cursor-pointer py-2 text-[#e2c06f]">Read full request</summary><p className="whitespace-pre-line break-words">{view.identity.question}</p></details> : null}</div> : null}
     <LeadContactActions key={leadId} leadId={leadId} blocked={blocked} canReview={canReview}/>
     <p className="text-xs leading-5 text-[#b9ae9d]">Received {leadReceivedLabel(receivedAt)}. {view.isTest ? "Read-only walkthrough; no contact or task changes." : "After contact, record what actually happened and set the next task."}</p>
-    <nav aria-label="Lead next steps" className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[#e2c06f]"><a className="py-2 underline" href="#follow-up">{view.isTest ? "Review tasks" : "Log result / next task"}</a><a className="py-2 underline" href="#appointment-review">Appointments</a><a className="py-2 underline" href="#activity">History</a></nav>
+    <LeadSectionNavigation leadId={leadId} isTest={view.isTest}/>
   </section>;
 }

@@ -1,6 +1,34 @@
 # Owner Approval Queue
 
-## Current readability continuation — 2026-10-09
+## Post-293 operational continuation — 2026-10-09
+
+Resolve current acceptance with `pnpm release:authority:resolve` under
+`config/release-authority-policy.json`; the observations below are dated evidence.
+
+Fresh resolver25/25 and an authenticated Production refresh confirm accepted
+PR #293; its exact release approval is consumed. The compact overview is live.
+The requested ONE internal QA review copy remains approved but NOT SENT: bounded
+Production reads found the original delivered v3 intent and no v4 review copy.
+Both QA references retain all suppression. Resend browser access is signed out;
+Vercel lists the required values as non-exportable Secrets. Metadata presence is
+not a readiness/recipient assertion. Do not rotate/copy credentials, replay the
+original row, ask the same send approval again or add a public send endpoint.
+A legitimate private execution venue with the existing configuration is missing.
+
+Local `codex/lead-center-navigation-20261009` corrects the observed shortcut
+failure (History scrolled to a closed panel), keyboard/bookmark reveal, and the
+always-expanded optional property form. It preserves all authorization and
+contact guards. Local preparation is not publication/deployment authority.
+The first built browser attempt reported React418 during initial hydration;
+development and rebuilt runs passed with the unchanged page-error assertion.
+Its cause is not established. Retain that failure and require protected hosted
+review, rather than claiming a hydration repair from a later pass.
+After its exact-source verification, the next application boundary is permission
+to push that frozen candidate and open ONE review PR with existing CI/Preview
+build effects only. New merge/Production authority follows protected review;
+no remote data/secret/send/WordPress/pilot/spending authority is included.
+
+## Historical readability preparation — 2026-10-09
 
 Accepted Production is PR #292, merge `d071c17a25453614bcf1c95fc5ddca24e11cefd4`,
 tree `75b24b02dd42bbee984622ed99e7d046f10283bb`, deployment

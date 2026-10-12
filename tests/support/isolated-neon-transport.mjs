@@ -3,7 +3,10 @@
 // Loaded only by the opt-in loopback acceptance runner, never by application code.
 import { Pool } from "pg";
 import { appendFileSync } from "node:fs";
-const diagnosticPath = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1"
+import path from "node:path";
+const artifactDirectory = process.env.AMM_SESSION_ARTIFACT_DIR && path.resolve(process.env.AMM_SESSION_ARTIFACT_DIR);
+if (artifactDirectory && !artifactDirectory.startsWith(`${path.resolve(".amm-run")}${path.sep}`)) throw new Error("private_session_artifact_directory_required");
+const diagnosticPath = artifactDirectory ? path.join(artifactDirectory, "transport.log") : process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1"
   ? ".amm-run/lead-alert-readability-20261009/real-session/transport.log"
   : ".amm-run/reference-session-acceptance/transport.log";
 const diagnostic = value => appendFileSync(diagnosticPath, `${JSON.stringify(value)}\n`, { mode: 0o600 });
