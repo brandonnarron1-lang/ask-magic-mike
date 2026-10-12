@@ -5,8 +5,9 @@ import {
   loadAdminLeadNotificationSummary,
 } from "../../lib/adminLeadNotificationView";
 import type { LeadNotificationRecord } from "../../lib/leadNotificationTypes";
-import { retryLeadNotificationAction } from "./actions";
+import { retryLeadNotificationAction, sendOwnerQaReviewCopyAction } from "./actions";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { OWNER_QA_REVIEW_COPY_BINDING } from "../../lib/ownerQaReviewCopy";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -149,7 +150,7 @@ export default async function AdminNotificationsPage({
 }: {
   searchParams?: Promise<{ notification_action?: string }>;
 }) {
-  await requireLeadCenterPermission("notification:manage");
+  const principal = await requireLeadCenterPermission("notification:manage");
   const params = searchParams ? await searchParams : {};
   const summary = await loadAdminLeadNotificationSummary();
   const operations = summary.operations;
@@ -198,6 +199,33 @@ export default async function AdminNotificationsPage({
             </p>
           ) : null}
         </header>
+
+        {principal?.role === "administrator" ? <details className="mb-6 rounded-lg border border-[#cda24a33] p-4">
+          <summary className="min-h-11 cursor-pointer font-semibold">Approved internal review copy</summary>
+          <p className="mt-3 text-sm text-[#d9ceb8]">
+            One already-approved v4 copy only. No consumer contact, source replay or queue processing.
+          </p>
+          {OWNER_QA_REVIEW_COPY_BINDING.enabled && OWNER_QA_REVIEW_COPY_BINDING.recipientSenderScopeSha256 ? (
+            <form action={sendOwnerQaReviewCopyAction} className="mt-3 grid gap-3">
+              <label className="grid gap-1 text-sm">
+                Approved source notification reference
+                <input name="source_notification_id" required maxLength={36} autoComplete="off"
+                  className="min-h-11 rounded border border-[#cda24a33] bg-[#0b0b0b] px-3" />
+              </label>
+              <label className="flex min-h-11 items-center gap-2 text-sm">
+                <input type="checkbox" name="confirm_owner_review_copy" value="yes" required />
+                <span>Execute the original approved copy once, using the reviewed configuration.</span>
+              </label>
+              <button type="submit" className="min-h-11 rounded bg-[#cda24a] px-4 font-semibold text-black">
+                Send approved review copy
+              </button>
+            </form>
+          ) : (
+            <p className="mt-3 text-sm text-[#d9ceb8]">
+              Unavailable: this private invoker still needs exact-source review and a verified recipient/sender binding. Nothing can be sent here.
+            </p>
+          )}
+        </details> : null}
 
         {!summary.configured || summary.error ? (
           <section className="mb-6 rounded-lg border border-[#cda24a33] bg-[#0d0d0d] p-6">
