@@ -7,6 +7,8 @@ import {
 } from "../../lib/growth/experiment-registry";
 import { recordExperimentEvent } from "../../lib/growth/public-experiment-client";
 import { HomeValueFunnel } from "./HomeValueFunnel";
+import { usePublicIntakeCapability } from "../../lib/publicIntakeCapability";
+import { IntakeModeNotice } from "./IntakeModeNotice";
 
 const SUBJECT_STORAGE_KEY = "amm_public_experiment_subject_v1";
 
@@ -30,6 +32,7 @@ async function hashSubject(value: string) {
 
 export function HomeValueExperimentExperience() {
   const [context, setContext] = useState<PublicExperimentContext | null>(null);
+  const intakeMode = usePublicIntakeCapability();
 
   useEffect(() => {
     let cancelled = false;
@@ -60,17 +63,22 @@ export function HomeValueExperimentExperience() {
   );
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[.86fr_1.14fr] lg:items-start">
-      <div data-experiment={context?.experimentKey} data-variant={context?.variantKey}>
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Home Value</p>
-        <h1 className="mt-4 font-serif text-5xl leading-tight text-[#f4ead4] sm:text-6xl">
-          {variant.headline}
-        </h1>
-        <p className="mt-5 max-w-xl text-lg leading-8 text-[#d9ceb8]">
-          {variant.description}
-        </p>
+    <div className="mx-auto max-w-7xl">
+      {intakeMode !== "live" ? <IntakeModeNotice mode={intakeMode} className="mb-6 lg:mb-8" /> : null}
+      <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,.86fr)_minmax(0,1.14fr)] lg:items-start lg:gap-10">
+        <div className="min-w-0 [overflow-wrap:anywhere]" data-experiment={context?.experimentKey} data-variant={context?.variantKey}>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Home Value</p>
+          <h1 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4] sm:text-4xl lg:mt-4 lg:text-6xl">
+            <span className="lg:hidden">Request a local home value review.</span>
+            <span className="hidden lg:inline">{variant.headline}</span>
+          </h1>
+          <p className="mt-3 max-w-xl text-base leading-6 text-[#d9ceb8] lg:mt-5 lg:text-lg lg:leading-8">
+            <span className="lg:hidden">Share the address and your best contact method. Mike or the Our Town Properties team can review the property and follow up with practical next steps.</span>
+            <span className="hidden lg:inline">{variant.description}</span>
+          </p>
+        </div>
+        <HomeValueFunnel surface="home_value_page" experimentContext={context} />
       </div>
-      <HomeValueFunnel surface="home_value_page" experimentContext={context} />
     </div>
   );
 }

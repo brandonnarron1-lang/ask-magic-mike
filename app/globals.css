@@ -192,3 +192,28 @@ textarea:focus-visible {
 .amm-form-field:focus {
   border-color: var(--bd-cyan-restrained);
 }
+
+/* Scoped native-control visibility: never disable autofill, paste or zoom. */
+.amm-home-value {
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+.amm-home-value .amm-form-field {
+  min-height: 44px;
+  color-scheme: dark;
+  scroll-margin-block: 6rem;
+}
+.amm-home-value .amm-form-field:focus-visible {
+  outline: 2px solid var(--bd-cyan-restrained);
+  outline-offset: 2px;
+}
+.amm-home-value input.amm-form-field:-webkit-autofill {
+  -webkit-text-fill-color: #f4ead4;
+  caret-color: #f4ead4;
+  box-shadow: 0 0 0 1000px #28251b inset;
+}
+@media (forced-colors: active) {
+  .amm-home-value input.amm-form-field:-webkit-autofill {
+    -webkit-text-fill-color: CanvasText;
+    box-shadow: none;
+  }
+}

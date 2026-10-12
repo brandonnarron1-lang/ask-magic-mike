@@ -64,6 +64,9 @@ jobs:
       - name: Isolated PostgreSQL notification reliability and recovery
         run: pnpm run test:postgres:notification-reliability
 
+      - name: Isolated PostgreSQL actual Home Value root POST and intake fidelity
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/home-value-intake-fidelity-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+
       - name: Isolated PostgreSQL reference allocation and no-send claims
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/reference-allocation-postgres.test.ts
 
@@ -100,6 +103,9 @@ jobs:
       - name: Built lead navigation and optional-tool acceptance (isolated, no sends)
         run: AMM_LEAD_READABILITY_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/lead-navigation-ci pnpm run test:reference:sessions
 
+      - name: Built Home Value UI failure and replay acceptance (intercepted synthetic receipts, no intake writes)
+        run: AMM_SESSION_ARTIFACT_DIR=.amm-run/home-value-intake-ci pnpm run test:home-value:sessions
+
       - name: Assert canonical route manifest and cron targets
         run: pnpm run routes:assert
 
@@ -122,6 +128,9 @@ jobs:
             .amm-run/reference-session-acceptance/performance.json
             .amm-run/lead-navigation-ci/receipt.json
             .amm-run/lead-navigation-ci/screenshots/*.png
+            .amm-run/home-value-intake-ci/home-value-ui-receipt.json
+            .amm-run/home-value-intake-ci/screenshots/*.png
+            .amm-run/home-value-intake-ci/screenshots/*-diagnostics.json
           if-no-files-found: ignore
 
       - name: Summarize failed release gate
