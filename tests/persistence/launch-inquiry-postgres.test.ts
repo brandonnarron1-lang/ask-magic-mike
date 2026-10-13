@@ -214,4 +214,24 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolat
     expect(updated.status).toBe("permanently_failed"); expect(updated.metadata).toMatchObject({provider_delivery_confirmed:true,provider_last_event:"bounced"});
     expect(lead(records[0].lead_id).email_suppressed).toBe(false);
   });
+  it.each([false,true])("persists provider %s outcome without lead loss or a second envelope attempt", async accepted => {
+    const records = await pending(); const id = records.find(record=>record.recipient_reference==='operator:mike')!.id;
+    const before = counts();
+    vi.stubEnv("EMAIL_ENABLED","true"); vi.stubEnv("LEAD_NOTIFICATION_PRODUCTION_ENABLED","true");
+    vi.stubEnv("EMAIL_PROVIDER","resend"); vi.stubEnv("RESEND_API_KEY","synthetic-no-network-key");
+    provider.send.mockResolvedValue(accepted
+      ? {ok:true,provider:"resend",providerMessageId:`synthetic_api_${id}`}
+      : {ok:false,provider:"resend",retryable:false,ambiguous:true,errorCode:"resend_network_error"});
+    const { dispatchLaunchAlertEnvelope } = await import("../../app/lib/leadAlertService");
+    const first = await dispatchLaunchAlertEnvelope(String(id),{initial:true});
+    expect(first?.status).toBe(accepted?"sent":"processing");
+    expect(provider.send).toHaveBeenCalledOnce(); expect(counts()).toBe(before);
+    const after = notifications(records[0].lead_id).find(record=>record.id===id)!;
+    expect(after.first_provider_attempt_at).not.toBeNull();
+    expect(after.provider_message_id).toBe(accepted?`synthetic_api_${id}`:null);
+    expect(after.private_intake_snapshot).toEqual(records.find(record=>record.id===id)!.private_intake_snapshot);
+    await dispatchLaunchAlertEnvelope(String(id),{initial:true});
+    expect(provider.send).toHaveBeenCalledOnce(); expect(counts()).toBe(before);
+    expect(notifications(records[0].lead_id).find(record=>record.recipient_reference==='operator:brandon')!.status).toBe("pending");
+  });
 });
