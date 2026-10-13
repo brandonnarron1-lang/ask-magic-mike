@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
@@ -71,7 +71,6 @@ export function HomeValueFunnel({
   const [timeline, setTimeline] = useState(timelineOptions[1]);
   const [consent, setConsent] = useState(false);
   const displayedReview = useRef("");
-  displayedReview.current = contactReviewFingerprint({ address, name, email, phone, timeline, consent });
   const [formError, setFormError] = useState<{ message: string; field?: HomeValueField } | null>(null);
   const [leadMessage, setLeadMessage] = useState<string | null>(null);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
@@ -93,6 +92,11 @@ export function HomeValueFunnel({
     : {};
   const experimentLeadContext = publicExperimentLeadFields(experimentContext);
   const eventOptions = { sessionId: submissionId };
+
+  useLayoutEffect(() => {
+    // Bind only a committed review, never a speculative React render.
+    displayedReview.current = contactReviewFingerprint({ address, name, email, phone, timeline, consent });
+  }, [address, name, email, phone, timeline, consent]);
 
   useEffect(() => {
     const pending = readPendingHomeValueRequest();
