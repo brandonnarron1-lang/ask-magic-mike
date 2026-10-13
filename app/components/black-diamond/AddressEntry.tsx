@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { formatAddress, normalizeAddressValue, type AddressComponents, type AddressResolvedSuggestion, type AddressSuggestion, type AddressValue } from "../../lib/address/addressValue";
 import { TextField } from "./FormField";
 
@@ -38,6 +38,17 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
   const request = useRef<AbortController | null>(null);
   const session = useRef<string | null>(null);
   const proposalRef = useRef<HTMLDivElement>(null);
+  const manualFocusRequested = useRef(false);
+
+  // Focus only after React commits the destination. A frame callback can run
+  // before a concurrent commit and miss the panel or focus still-hidden fields.
+  useLayoutEffect(() => {
+    if (proposal) proposalRef.current?.focus();
+    else if (manual && manualFocusRequested.current) {
+      manualFocusRequested.current = false;
+      refs.current.line1?.focus();
+    }
+  }, [proposal, manual]);
 
   useEffect(() => {
     const sequence = selectionSequence;
@@ -102,7 +113,6 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
       const components = { ...result.components, line2: unit || result.components.line2 };
       normalizeAddressValue({ version: 1, enteredText: original, acceptedText: formatAddress(components), components, confirmation: "manual", validation: "not_performed" });
       setProposal({ original, result, components }); setState("idle");
-      window.requestAnimationFrame(() => proposalRef.current?.focus());
     } catch { if (sequence === selectionSequence.current) { setState("unavailable"); setStatus("Suggestion could not be resolved. Your entry is unchanged; use manual entry."); } }
     finally { window.clearTimeout(timeout); if (session.current === lookupSession) session.current = null; }
   }
@@ -169,7 +179,7 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
       <div className="flex flex-wrap gap-2">
         <button type="button" disabled={disabled} onClick={applyProposal} className="amm-primary-button min-h-11 px-3 py-3">Use suggested address</button>
         <button type="button" disabled={disabled} onClick={() => { setProposal(null); setStatus("Your original entry is kept."); inputRef.current?.focus(); }} className="amm-secondary-button min-h-11 px-3 py-3">Keep my entry</button>
-        <button type="button" disabled={disabled} onClick={() => { setProposal(null); setManual(true); window.requestAnimationFrame(() => refs.current.line1?.focus()); }} className="amm-secondary-button min-h-11 px-3 py-3">Edit address</button>
+        <button type="button" disabled={disabled} onClick={() => { manualFocusRequested.current = true; setProposal(null); setManual(true); }} className="amm-secondary-button min-h-11 px-3 py-3">Edit address</button>
       </div>
     </div> : null}
     <button type="button" aria-expanded={manual} aria-controls={`${id}-manual`} disabled={disabled}

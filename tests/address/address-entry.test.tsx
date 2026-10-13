@@ -38,6 +38,16 @@ describe("manual-selection address entry", () => {
     expect(screen.getByLabelText("Unit / apartment (if applicable)")).toHaveValue("Apt 4");
     expect(calls.every(call => Object.keys(call).every(key => ["operation", "query", "sessionToken", "candidateToken"].includes(key)))).toBe(true);
   });
+  it("focuses correction only after its DOM exists, even if a frame callback runs before React commits", async () => {
+    vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => { callback(0); return 1; });
+    transport(); await type(); await select();
+    expect(screen.getByLabelText("Review suggested correction")).toHaveFocus();
+    expect(submit).not.toHaveBeenCalled(); expect(accept).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Edit address" }));
+    expect(screen.getByLabelText("Street address")).toBeVisible();
+    expect(screen.getByLabelText("Street address")).toHaveFocus();
+    expect(submit).not.toHaveBeenCalled(); expect(accept).not.toHaveBeenCalled();
+  });
   it("keeps original, dismisses Escape/Tab and never chooses first option on blur", async () => {
     transport(); await type(); fireEvent.keyDown(screen.getByRole("combobox"), { key: "Escape" }); expect(screen.queryByRole("listbox")).toBeNull();
     fireEvent.keyDown(screen.getByRole("combobox"), { key: "ArrowDown" }); fireEvent.keyDown(screen.getByRole("combobox"), { key: "Tab" });
