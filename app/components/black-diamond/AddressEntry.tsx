@@ -51,7 +51,12 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
   }, []);
 
   useEffect(() => {
-    if (!enabled || disabled || query.trim().length < 5) { setSuggestions([]); setOpen(false); return; }
+    if (!enabled || disabled || query.trim().length < 5) {
+      // A fresh empty array on every keystroke caused a second commit even
+      // when lookup was off. Rapid native typing reproduced React #185 in the
+      // built app. Clear actual results only; an already empty list is a no-op.
+      setSuggestions(current => current.length ? [] : current); setOpen(false); return;
+    }
     const abort = new AbortController();
     const sequence = ++selectionSequence.current;
     const timer = window.setTimeout(async () => {
