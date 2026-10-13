@@ -4,6 +4,8 @@ import {
   type FunnelType,
   type LeadPayload,
 } from "./leadPayload";
+import { normalizeAddressValue } from "./address/addressValue";
+import { normalizeBuyerInterest } from "./buyerInterest";
 
 export const MAX_PUBLIC_LEAD_BODY_BYTES = 65_536;
 
@@ -185,6 +187,22 @@ export async function readBoundedPublicLeadBody(req: Request) {
 export function validateRawPublicLeadInput(
   input: Record<string, unknown>,
 ): PublicLeadInputFailure | null {
+  if (input.buyer_interest !== undefined && input.buyer_interest !== null) {
+    try {
+      normalizeBuyerInterest(input.buyer_interest);
+    } catch {
+      return { code: "invalid_buyer_interest", message: "Invalid property interest. Review your entry." };
+    }
+  }
+  if (input.address_entry !== undefined) {
+    try {
+      const entry = normalizeAddressValue(input.address_entry);
+      if (clean(input.address || input.property_address) !== entry.acceptedText ||
+        (input.address && input.property_address && clean(input.address) !== clean(input.property_address))) {
+        return { code: "invalid_address_entry", message: "Address fields do not match. Review your entry." };
+      }
+    } catch { return { code: "invalid_address_entry", message: "Invalid address details. Review your entry." }; }
+  }
   for (const field of RAW_STRING_FIELDS) {
     const value = input[field];
     if (value !== undefined && value !== null && typeof value !== "string") {

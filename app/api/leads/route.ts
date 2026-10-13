@@ -15,6 +15,7 @@ import { scoreLead } from "../../lib/leadScoring";
 import { routeLead } from "../../lib/leadRouting";
 import { enqueueLeadNotifications } from "../../lib/leadAlertService";
 import { LEAD_ALERT_TEMPLATE_VERSION } from "../../lib/leadAlertTemplates";
+import { LAUNCH_LEAD_ALERT_TEMPLATE_VERSION, inquiryRequestContext, launchAlertGenerationEnabled, launchAlertCutoff, prepareLaunchAlertDraft, isLaunchIntake } from "../../lib/leadAlertLaunch";
 import { notificationMode } from "../../lib/leadNotificationProvider";
 import { recordServerAnalyticsEvent } from "../../lib/serverAnalytics";
 import {
@@ -354,7 +355,13 @@ function buildLeadRow(
     spam_reasons: [],
     is_duplicate: false,
     duplicate_of_lead_id: null,
-    state: "NC",
+    state: payload.address_entry ? payload.address_entry.components.region : "NC",
+    ...(payload.address_entry ? {
+      address_entry: payload.address_entry,
+      address_line1: payload.address_entry.components.line1 || null,
+      address_line2: payload.address_entry.components.line2 || null,
+      zip: payload.address_entry.components.postalCode || null,
+    } : {}),
     address_raw: address || null,
     primary_intent: primaryIntentFor(leadType, payload),
     question_raw: notes || payload.question || payload.condition || null,
@@ -372,7 +379,7 @@ function buildLeadRow(
     source_detail: sourceDetailFor(payload),
     page_url: pageUrlFor(payload, req),
     widget_session_id: payload.widget_session_id || sessionId,
-    city: payload.city || null,
+    city: payload.address_entry?.components.locality || payload.city || null,
     score: score.score,
     score_factors: score.factors,
     score_version: score.version,
@@ -386,6 +393,7 @@ function buildLeadRow(
     sms_suppressed: payload.is_test === true,
     routing_reason: routing.routingReason,
     target_geography: payload.target_geography || null,
+    buyer_interest: payload.buyer_interest || null,
     financing: payload.financing || null,
     preapproval: payload.preapproval ?? null,
     request_idempotency_key: payload.idempotency_key || null,
@@ -428,6 +436,7 @@ async function insertLead(
   score: ReturnType<typeof scoreLead>,
   routing: ReturnType<typeof routeLead>,
   correlationId: string,
+  receivedAt: string,
 ) {
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) throw new Error(mutation.error);
@@ -445,21 +454,26 @@ async function insertLead(
   }
 
   const sessionId = sessionIdFor(payload);
+  const cutoff = launchAlertCutoff();
+  const launchPath = isLaunchIntake(payload);
+  const launch = launchPath && launchAlertGenerationEnabled() && (!cutoff || Date.parse(receivedAt) >= Date.parse(cutoff));
   const result = await persistence.captureLeadLifecycle({
     session: buildSessionRow(payload, req, sessionId),
     lead: buildLeadRow(payload, req, sessionId, score, routing),
     attribution: buildSourceAttributionRow(payload, req),
-    // v2 disables legacy assignment delivery and atomically seeds the canonical
-    // internal intent. Dispatch below occurs only after this transaction commits.
+    // Capture wrappers retain legacy assignment policy and commit required
+    // internal intents before any provider I/O.
     notificationMode: process.env.NODE_ENV === "test" ? "disabled" : notificationMode(),
     internalNotification: {
-      templateVersion: LEAD_ALERT_TEMPLATE_VERSION,
+      templateVersion: launch ? LAUNCH_LEAD_ALERT_TEMPLATE_VERSION : LEAD_ALERT_TEMPLATE_VERSION,
+      ...(launch || payload.buyer_interest ? { requestContext: inquiryRequestContext(payload) } : {}),
+      ...(launch ? { launchDraft: prepareLaunchAlertDraft({ payload, sessionId, receivedAt, sourceLabel: routing.sourceLabel }) } : {}),
       metadata: { source_label: routing.sourceLabel, intent_label: routing.intentLabel,
         score: score.score, score_grade: score.grade, is_test: payload.is_test === true,
         correlation_id: correlationId },
     },
   });
-  // v2 commits required enrichment, consent and internal intent with capture.
+  // The selected wrapper commits inquiry, consent and intent atomically.
   return result;
 }
 
@@ -470,6 +484,11 @@ function isLeadConflict(
 }
 
 function validateLead(payload: LeadPayload) {
+  // New structured requests collect a name. Retain the older unstructured
+  // caller contract; no historic record or queued intent is rewritten.
+  if ((payload.buyer_interest || payload.address_entry) && (payload.name || "").trim().length < 2) {
+    return "Enter your name so Our Town Properties can review this request.";
+  }
   if ((payload.funnel_type === "home_value" || payload.funnel_type === "widget") && !payload.address) {
     return "Address is required.";
   }
@@ -752,7 +771,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    persistedLead = await insertLead(payload, req, score, routing, correlationId);
+    persistedLead = await insertLead(payload, req, score, routing, correlationId, receivedAt);
   } catch (error) {
     if (error instanceof Error && error.message === "preview_data_disabled") {
       return leadResponse(
@@ -815,6 +834,7 @@ export async function POST(req: Request) {
           routing,
           submittedAt: receivedAt,
           duplicateOfLeadId: persistedLead.duplicate_of_lead_id,
+          notificationTemplateVersion: persistedLead.alert_template_version,
         });
         if (notificationResult.warning) {
           console.error("[leads] post-commit notification dispatch reported a warning", {
@@ -872,7 +892,7 @@ export async function POST(req: Request) {
       if (internalStatus) {
         try {
           await recordServerAnalyticsEvent({
-            eventName: internalStatus === "sent" ? "notification_delivered" : internalStatus === "retry_scheduled" || internalStatus === "permanently_failed" ? "notification_failed" : "notification_queued",
+            eventName: internalStatus === "sent" ? persistedLead.alert_template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION ? "notification_api_accepted" : "notification_delivered" : internalStatus === "retry_scheduled" || internalStatus === "permanently_failed" ? "notification_failed" : "notification_queued",
             category: "system",
             sessionId: persistedLead.session_id,
             leadId: persistedLead.lead_id,

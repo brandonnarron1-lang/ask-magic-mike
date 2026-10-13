@@ -33,6 +33,7 @@ function queryFromEnv(): Query | null {
 
 const LEAD_SELECT = `
   SELECT l.*,
+         COALESCE(l.assigned_agent_id,(SELECT original.assigned_agent_id FROM public.leads original WHERE original.id=l.duplicate_of_lead_id)) AS inquiry_owner_agent_id,
          jsonb_build_object(
            'source', COALESCE(sa.utm_source, l.source),
            'medium', sa.utm_medium,
@@ -204,7 +205,10 @@ export async function loadNeonAdminLeadInbox(
       params.push(value);
       return `$${params.length}`;
     };
-    if (scoped) clauses.push(`l.assigned_agent_id = ${bind(principal?.agentId)}::uuid`);
+    if (scoped) {
+      const owner = bind(principal?.agentId);
+      clauses.push(`(l.assigned_agent_id=${owner}::uuid OR (l.assigned_agent_id IS NULL AND EXISTS(SELECT 1 FROM public.leads original WHERE original.id=l.duplicate_of_lead_id AND original.assigned_agent_id=${owner}::uuid)))`);
+    }
     if (filter === "active") {
       clauses.push("l.is_test = false", "l.communication_suppressed = false", "l.status = ANY(ARRAY['new','scored','assigned','escalated']::text[])");
     } else if (filter === "working") {
@@ -219,12 +223,13 @@ export async function loadNeonAdminLeadInbox(
       const token = bind(`%${search.replaceAll("%", "\\%").replaceAll("_", "\\_")}%`);
       clauses.push(`(
         l.id::text ILIKE ${token} ESCAPE '\\'
-        OR COALESCE(l.name, '') ILIKE ${token} ESCAPE '\\'
         OR COALESCE(l.first_name, '') ILIKE ${token} ESCAPE '\\'
         OR COALESCE(l.last_name, '') ILIKE ${token} ESCAPE '\\'
         OR COALESCE(l.email, '') ILIKE ${token} ESCAPE '\\'
         OR COALESCE(l.phone, '') ILIKE ${token} ESCAPE '\\'
         OR COALESCE(l.address_raw, '') ILIKE ${token} ESCAPE '\\'
+        OR COALESCE(l.buyer_interest->>'desired_area', '') ILIKE ${token} ESCAPE '\\'
+        OR COALESCE(l.buyer_interest->'properties', '[]'::jsonb)::text ILIKE ${token} ESCAPE '\\'
       )`);
     }
     const where = clauses.length ? ` WHERE ${clauses.join(" AND ")}` : "";
@@ -283,7 +288,7 @@ export async function loadNeonAdminLeadDetail(
       return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "lead_not_found" };
     }
     const leadRows = await sql.query(
-      `${LEAD_SELECT} WHERE l.id = $1::uuid${scoped ? " AND l.assigned_agent_id = $2::uuid" : ""} LIMIT 1`,
+      `${LEAD_SELECT} WHERE l.id = $1::uuid${scoped ? " AND (l.assigned_agent_id=$2::uuid OR (l.assigned_agent_id IS NULL AND EXISTS(SELECT 1 FROM public.leads original WHERE original.id=l.duplicate_of_lead_id AND original.assigned_agent_id=$2::uuid)))" : ""} LIMIT 1`,
       scoped ? [leadId, principal?.agentId] : [leadId],
     ) as Array<Record<string, unknown>>;
     if (!leadRows[0]) {

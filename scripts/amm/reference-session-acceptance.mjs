@@ -12,11 +12,13 @@ import { startDatabase, stopDatabase, install, psql, literal } from "../../tests
 if (process.env.AMM_QA_POSTGRES_TEST !== "1" || process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview" || process.env.DATABASE_URL || process.env.PREVIEW_URL) throw new Error("explicit_clean_isolated_venue_required");
 const readability = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1";
 const homeValue = process.env.AMM_HOME_VALUE_ACCEPTANCE === "1";
+const launchIntake = process.env.AMM_LAUNCH_INTAKE_UI_ACCEPTANCE === "1";
+if (launchIntake && (homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_launch_intake_acceptance_selection_required");
 if (homeValue && (readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_home_value_acceptance_selection_required");
 // An explicit private output directory keeps later verification from replacing
 // an earlier frozen release's fixtures, screenshots or receipt.
 const artifactOverride = process.env.AMM_SESSION_ARTIFACT_DIR;
-const runDir = path.resolve(artifactOverride || (homeValue ? ".amm-run/home-value-intake-acceptance" : readability ? ".amm-run/lead-alert-readability-20261009/real-session" : ".amm-run/reference-session-acceptance"));
+const runDir = path.resolve(artifactOverride || (launchIntake ? ".amm-run/launch-intake-ui-acceptance" : homeValue ? ".amm-run/home-value-intake-acceptance" : readability ? ".amm-run/lead-alert-readability-20261009/real-session" : ".amm-run/reference-session-acceptance"));
 if (artifactOverride && !runDir.startsWith(`${path.resolve(".amm-run")}${path.sep}`)) throw new Error("private_session_artifact_directory_required");
 mkdirSync(runDir, { recursive: true });
 const reserve = createServer();
@@ -89,7 +91,8 @@ try {
     ...(process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? { AMM_CONVERSION_SESSION_ACCEPTANCE: "1" } : {}),
     ...(readability ? { AMM_LEAD_READABILITY_ACCEPTANCE: "1" } : {}),
     ...(homeValue ? { AMM_HOME_VALUE_ACCEPTANCE: "1" } : {}),
-    ...(artifactOverride || homeValue ? { AMM_E2E_OUTPUT_DIR: path.join(runDir, "screenshots"), AMM_SESSION_ARTIFACT_DIR: runDir } : {}),
+    ...(launchIntake ? { AMM_LAUNCH_INTAKE_UI_ACCEPTANCE: "1" } : {}),
+    ...(artifactOverride || homeValue || launchIntake ? { AMM_E2E_OUTPUT_DIR: path.join(runDir, "screenshots"), AMM_SESSION_ARTIFACT_DIR: runDir } : {}),
     // The existing Playwright switch permits an explicit local development
     // diagnostic. It is never evidence for the default built-app gate.
     AMM_E2E_FIXTURE_PASSWORD: password, AMM_E2E_BUILT: process.env.AMM_E2E_BUILT === "0" ? "0" : "1", AMM_E2E_PORT: String(port),
@@ -104,13 +107,13 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
   child = spawn("pnpm", ["exec", "playwright", "test", suite], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });
   const counts = JSON.parse(psql(`SELECT json_build_object('leads',count(*),'notifications',(SELECT count(*) FROM lead_notifications),'provider_ids',(SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL),'reservations',(SELECT count(*) FROM lead_allocation_send_reservations)) FROM leads;`));
-  const receiptName = homeValue ? "home-value-ui-receipt.json" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? "conversion-receipt.json" : "receipt.json";
-  const scope = homeValue
+  const receiptName = launchIntake ? "launch-intake-ui-receipt.json" : homeValue ? "home-value-ui-receipt.json" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? "conversion-receipt.json" : "receipt.json";
+  const scope = homeValue || launchIntake
     ? `${env.AMM_E2E_BUILT === "1" ? "built-app" : "development-diagnostic"}-ui-intercepted-synthetic-lead-receipts-isolated-harness-not-intake-sql-proof`
     : env.AMM_E2E_BUILT === "1" ? "built-app-real-auth-isolated-postgresql" : "development-diagnostic-real-auth-isolated-postgresql";
   writeFileSync(path.join(runDir, receiptName), JSON.stringify({ at: new Date().toISOString(), exit, suite, scope, productionWrites: 0, providerCalls: 0, counts }, null, 2), { mode: 0o600 });

@@ -12,6 +12,9 @@ test.use({ contextOptions: { reducedMotion: "reduce" }, hasTouch: true, serviceW
 
 const ADDRESS = "101 Synthetic Fixture Road, Wilson NC | INTERNAL QA | DO NOT CONTACT";
 const EDITED_ADDRESS = "102 Synthetic Fixture Road, Wilson NC | INTERNAL QA | DO NOT CONTACT";
+const LOOKUP_QUERY = "101 Synthetic Fixture Rd Apt 4";
+const SUGGESTED_ADDRESS = "101 Synthetic Fixture Road, Apt 4, Wilson, NC 27893";
+const MANUAL_EDITED_ADDRESS = "101 Synthetic Fixture Road, Apt 5, Wilson, NC 27893";
 const NAME = "SYNTHETIC FIXTURE | INTERNAL QA | DO NOT CONTACT";
 const EMAIL = "home-value-fixture@example.test";
 const PHONE = "+12025550199"; // reserved fictional range; never sent anywhere
@@ -29,6 +32,7 @@ type Capture = {
   capabilityReads: number;
   capabilityModes: Set<string>;
   pageErrors: string[];
+  addressLookupFixture?: boolean;
   checks: Promise<void>[];
   syntheticLeadIds: Map<string, string>;
   reply: (route: Route, attempt: Attempt, index: number) => Promise<void>;
@@ -84,7 +88,7 @@ async function installBoundary(page: Page): Promise<Capture> {
     externalBlocked: 0, capabilityReads: 0, capabilityModes: new Set(), pageErrors: [], checks: [], syntheticLeadIds: new Map(),
     reply: (route, attempt) => savedReply(route, capture, attempt),
   };
-  page.on("pageerror", error => capture.pageErrors.push(error.message));
+  page.on("pageerror", error => capture.pageErrors.push(error.stack || error.message));
   await page.addInitScript(() => {
     const state: BrowserEvidence = { documentId: crypto.randomUUID(), events: [], pageShows: [] };
     (window as Window & { __ammIntakeEvidence?: BrowserEvidence }).__ammIntakeEvidence = state;
@@ -119,6 +123,20 @@ async function installBoundary(page: Page): Promise<Capture> {
       return;
     }
     const method = request.method();
+    if (target.pathname === "/api/address-suggestions" && capture.addressLookupFixture) {
+      // Offline fixture only. No real billable provider or application limiter
+      // request is forwarded; the ordinary unconfigured GET remains genuine.
+      if (method === "GET") { await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ enabled: true }) }); return; }
+      const input = request.postDataJSON();
+      if (method !== "POST" || input.query !== LOOKUP_QUERY || !UUID.test(input.sessionToken) ||
+        Object.keys(input).some(key => !["operation", "query", "sessionToken", "candidateToken"].includes(key))) {
+        capture.violations.push("non_synthetic_address_lookup_blocked"); await route.abort("blockedbyclient"); return;
+      }
+      if (input.operation === "suggest") await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ state: "results", suggestions: [{ id: "synthetic_place", label: "101 Synthetic Fixture Road", secondary: "Wilson, NC 27893", token: "offline_fixture_token" }] }) });
+      else if (input.operation === "resolve" && input.candidateToken === "offline_fixture_token") await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ state: "resolved", result: { id: "synthetic_place", label: "101 Synthetic Fixture Road, Wilson NC 27893", components: { line1: "101 Synthetic Fixture Road", line2: "", locality: "Wilson", region: "NC", postalCode: "27893", country: "US" } } }) });
+      else { capture.violations.push("invalid_lookup_operation_blocked"); await route.abort("blockedbyclient"); }
+      return;
+    }
     if (target.pathname === "/api/leads" && method === "POST" && !target.search) {
       const raw = request.postData() ?? "";
       let payload: Record<string, unknown> = {};
@@ -131,7 +149,7 @@ async function installBoundary(page: Page): Promise<Capture> {
       if (!UUID.test(key) || payload.idempotency_key !== key || payload.widget_session_id !== key ||
         !fixtureName.includes("INTERNAL QA") || !fixtureName.includes("DO NOT CONTACT") ||
         typeof payload.email !== "string" || !payload.email.endsWith("@example.test") ||
-        ![ADDRESS, EDITED_ADDRESS].includes(String(payload.address)) ||
+        ![ADDRESS, EDITED_ADDRESS, SUGGESTED_ADDRESS, MANUAL_EDITED_ADDRESS].includes(String(payload.address)) ||
         !["", PHONE, "+12025550188"].includes(String(payload.phone))) {
         capture.violations.push("non_synthetic_or_invalid_lead_request_blocked");
         await route.abort("blockedbyclient");
@@ -443,6 +461,8 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await openHomeValue(page);
   const address = page.getByLabel("Property address", { exact: true });
   await address.focus(); await page.keyboard.type(ADDRESS); await page.keyboard.press("Tab");
+  await expect(funnel(page).getByRole("button", { name: "Enter / edit address manually", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(funnel(page).getByRole("button", { name: "Continue", exact: true })).toBeFocused();
   await page.keyboard.press("Enter");
   const name = page.getByLabel("Your name", { exact: true });
@@ -508,12 +528,33 @@ test("Eventless DOM address/contact values survive health recheck, consent and t
   await expectNativeValues();
   await expect(funnel(page).getByRole("checkbox")).toBeChecked();
   await expect(page.getByLabel("Timeline", { exact: true })).toHaveValue("Just planning");
+  await submit(page).click();
+  await expect(error(page)).toContainText("Review the updated address and email");
+  expect(captures.get(page)!.attempts).toHaveLength(0);
+  await expect(funnel(page).getByLabel("Review before requesting valuation")).toContainText(values.email);
   await submit(page).click(); await assertSaved(page);
   const capture = captures.get(page)!;
   expect(capture.attempts).toHaveLength(1);
   expect(capture.attempts[0].payload).toMatchObject({
     ...values, address: ADDRESS, timeline: "Just planning", consent: true, consent_email: true, consent_call: true,
   });
+});
+
+test("Typed address and focused manual control remain stable through deferred capability deadlines", async ({ page }) => {
+  await openHomeValue(page);
+  const address = page.getByLabel("Property address", { exact: true });
+  await address.focus(); await page.keyboard.type(ADDRESS); await page.keyboard.press("Tab");
+  const manual = funnel(page).getByRole("button", { name: "Enter / edit address manually", exact: true });
+  await expect(manual).toBeFocused();
+  // Reproduce the first failure's ten-second observation window, rather than
+  // moving to the next step before pending capability deadlines can execute.
+  const until = Date.now() + 10_000;
+  while (Date.now() < until) {
+    await expect(manual).toBeFocused(); await expect(address).toHaveValue(ADDRESS);
+    expect(captures.get(page)!.pageErrors).toEqual([]);
+    await page.waitForTimeout(250);
+  }
+  expect(captures.get(page)!.attempts).toHaveLength(0);
 });
 
 test("Native values without change events survive Edit address and are submitted from actual controls", async ({ page }) => {
@@ -539,11 +580,47 @@ test("Native values without change events survive Edit address and are submitted
   await expect(funnel(page).getByRole("checkbox")).toBeChecked();
   // A second eventless native value tests the submit path itself as well.
   await page.getByLabel("Email for your valuation follow-up", { exact: true }).evaluate(element => { (element as HTMLInputElement).value = "submitted-native@example.test"; });
+  await submit(page).click(); await expect(error(page)).toContainText("Review the updated address and email");
+  expect(captures.get(page)!.attempts).toHaveLength(0);
   await submit(page).click(); await assertSaved(page);
   const payload = captures.get(page)!.attempts[0].payload;
   expect(payload.address === EDITED_ADDRESS && payload.email === "submitted-native@example.test" && payload.phone === "+12025550188").toBe(true);
   expect(payload.timeline).toBe("Just planning"); expect(payload.consent).toBe(true);
 });
+
+for (const width of [320, 390, 430, 768, 1440]) {
+  test(`Offline suggestion correction and structured manual edit at ${width}px`, async ({ page }) => {
+    captures.get(page)!.addressLookupFixture = true;
+    await openHomeValue(page, width);
+    const input = page.getByRole("combobox", { name: "Property address" });
+    await input.fill(LOOKUP_QUERY);
+    await expect(page.getByRole("listbox", { name: "Address suggestions" })).toBeVisible();
+    await input.press("ArrowDown"); await expect(input).toHaveAttribute("aria-activedescendant", /option-0$/);
+    if (width === 390) await page.getByRole("option").first().tap();
+    else await input.press("Enter");
+    const correction = page.getByLabel("Review suggested correction");
+    await expect(correction).toBeVisible(); await expect(correction).toBeFocused();
+    await expect(correction).toContainText(LOOKUP_QUERY); await expect(correction).toContainText(SUGGESTED_ADDRESS);
+    expect(captures.get(page)!.attempts).toHaveLength(0);
+    await noOverflow(page); await targets(page); await screenshot(page, `address-correction-${width}`);
+    await page.getByRole("button", { name: "Use suggested address" }).click();
+    await expect(page.getByLabel("Unit / apartment (if applicable)")).toHaveValue("Apt 4");
+    await page.getByLabel("Unit / apartment (if applicable)").fill("Apt 5");
+    if (width === 320) {
+      const diagnostic = await rootFontDiagnostic(page);
+      expect(parseFloat(diagnostic.restoredAfterFrames.readable.address["font-size"]) / parseFloat(diagnostic.original.readable.address["font-size"])).toBe(2);
+    }
+    await noOverflow(page); await targets(page); await screenshot(page, `address-manual-${width}`);
+    await funnel(page).getByRole("button", { name: "Continue", exact: true }).click();
+    await page.getByLabel("Your name", { exact: true }).fill(NAME);
+    await page.getByLabel("Email for your valuation follow-up", { exact: true }).fill(EMAIL);
+    await expect(funnel(page).getByLabel("Review before requesting valuation")).toContainText(MANUAL_EDITED_ADDRESS);
+    await noOverflow(page); await targets(page);
+    await submit(page).click(); await assertSaved(page);
+    expect(captures.get(page)!.attempts[0].payload.address_entry).toMatchObject({ version: 1, enteredText: LOOKUP_QUERY,
+      acceptedText: MANUAL_EDITED_ADDRESS, components: { line2: "Apt 5", postalCode: "27893" }, confirmation: "user_edited", validation: "not_performed" });
+  });
+}
 
 test("Synthetic QA rejects unlabeled fictional contact and invalid optional phone before any POST", async ({ page }) => {
   await openHomeValue(page); await contact(page);

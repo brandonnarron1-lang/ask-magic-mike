@@ -1,7 +1,8 @@
 import { assertProviderDeliveryAllowed } from "../../src/lib/preview-security";
 import { neon } from "@neondatabase/serverless";
 import { agentPushNotificationsEnabled, agentSmsNotificationsEnabled, emailNotificationsEnabled, productionNotificationDeliveryEnabled, normalizeUsSmsRecipient, notificationMode, safeRecipientReference, selectNotificationProvider } from "./leadNotificationProvider";
-import { emailProviderConfigurationReady } from "./emailProviderConfiguration";
+import { emailProviderConfigurationReady, configuredEmailProvider } from "./emailProviderConfiguration";
+import { LAUNCH_LEAD_ALERT_TEMPLATE_VERSION, LAUNCH_ALERT_BATCH_LIMIT, LAUNCH_ALERT_RUNTIME_MS, LAUNCH_ALERT_PROVIDER_TIMEOUT_MS, launchAlertCutoff, launchAlertGenerationEnabled, launchAlertWorkerEnabled, launchEnvelopeKey, launchAttemptOutcome } from "./leadAlertLaunch";
 import { SupabaseLeadNotificationRepository } from "./persistence/supabase/leadNotificationRepository";
 import { NeonLeadNotificationRepository } from "./persistence/neonLeadNotificationRepository";
 import type { LeadNotificationRecord, LeadNotificationRepository, NotificationProvider } from "./leadNotificationTypes";
@@ -30,6 +31,7 @@ export type LeadAlertInput = {
   duplicateOfLeadId?: string | null;
   communicationSuppressed?: boolean;
   emailSuppressed?: boolean;
+  notificationTemplateVersion?: string | null;
 };
 
 export function consumerAcknowledgmentPermitted(
@@ -101,6 +103,7 @@ async function deliver(
   options: { allowInitialInternalQa?: boolean } = {},
 ) {
   const current = await repo.findById(notification.id) || notification;
+  if (current.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) return current;
   if (current.status === "sent") return current;
   if (!["pending", "failed", "retry_scheduled"].includes(current.status) ||
     current.provider_message_id || (current.status === "pending" && current.attempt_count !== 0)) return current;
@@ -292,6 +295,7 @@ export async function retryLeadAlertNotification(
   const repo = notificationRepository();
   const current = await repo.findById(notificationId);
   if (!current || !["lead_alert", "consumer_ack"].includes(current.notification_type)) return null;
+  if (current.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) return current;
   if (!["pending", "failed", "retry_scheduled"].includes(current.status) ||
     current.provider_message_id || (current.status === "pending" && current.attempt_count !== 0)) return current;
   const input = await loadLeadAlertInput(current.lead_id, current.metadata);
@@ -402,6 +406,9 @@ export async function retryNotificationByType(
   if (!current) {
     return { ok: false, statusCode: 404, error: "notification_not_found" };
   }
+  if (current.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) {
+    return { ok: false, statusCode: 409, error: "launch_processor_required" };
+  }
   if (!["failed", "retry_scheduled"].includes(current.status)) {
     return { ok: false, statusCode: 409, error: "notification_not_retryable" };
   }
@@ -437,6 +444,7 @@ export async function retryDueNotifications(
   const results: Array<LeadNotificationRecord | null> = [];
   for (const row of rows) {
     try {
+      if (row.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) continue;
       if (row.lead_is_test === true) {
         results.push(await repo.update(row.id, {
           status: "skipped",
@@ -479,6 +487,81 @@ type EnqueueLeadNotificationDependencies = {
   repository?: LeadNotificationRepository;
   provider?: NotificationProvider;
 };
+
+type LaunchDeliveryRepository = Pick<NeonLeadNotificationRepository,
+  "findLaunchEnvelope" | "claimLaunchEnvelope" | "finishLaunchAttempt" | "listLaunchDue" | "holdExpiredLaunchEnvelopes" | "findById" | "acquireLaunchBatch" | "releaseLaunchBatch">;
+type LaunchDeliveryDependencies = { repository?: LaunchDeliveryRepository; provider?: NotificationProvider };
+function launchDeliveryReady() {
+  return notificationMode() === "production" && configuredEmailProvider() === "resend" && notificationRetryDeliveryReady()
+    && productionNotificationDeliveryEnabled() && emailNotificationsEnabled();
+}
+
+/** Only the immutable canonical v6 envelope is delivered; no live lead/body,
+ * current recipient, BCC, customer Reply-To, or generic retry fallback. */
+export async function dispatchLaunchAlertEnvelope(
+  id: string, options: { initial?: boolean; timeoutMs?: number; batchLease?: string } = {}, dependencies: LaunchDeliveryDependencies = {},
+): Promise<LeadNotificationRecord | null> {
+  if (!assertProviderDeliveryAllowed().ok || !launchDeliveryReady()) return null;
+  if (options.initial ? !launchAlertGenerationEnabled() : !launchAlertWorkerEnabled()) return null;
+  const cutoff = launchAlertCutoff();
+  const repo = dependencies.repository || NeonLeadNotificationRepository.fromEnv();
+  if (!repo || !cutoff) return null;
+  const current = await repo.findLaunchEnvelope(id);
+  if (!current) return null;
+  const { notification, snapshot } = current;
+  if (snapshot.launch_cutoff !== cutoff || notification.idempotency_key !== launchEnvelopeKey(notification.lead_id, snapshot.operator) ||
+    notification.notification_type !== "lead_alert" || notification.channel !== "email" || notification.recipient_type !== "internal" ||
+    !snapshot.recipient || !snapshot.from || (snapshot.is_test && (!options.initial || !snapshot.qa_initial_authorized)) ||
+    !["pending", "retry_scheduled", "failed"].includes(notification.status) || notification.provider_message_id) return notification;
+  const claimed = await repo.claimLaunchEnvelope(id, cutoff, options.initial === true, options.batchLease || null);
+  if (!claimed || !claimed.firstProviderAttemptAt) return repo.findById(id);
+  const frozen = claimed.snapshot;
+  if (!frozen.recipient || !frozen.from) return claimed.notification;
+  const provider = dependencies.provider || selectNotificationProvider();
+  let result: import("./leadNotificationTypes").NotificationResult;
+  try {
+    result = await provider.send({ notificationId: id, channel: "email", recipient: frozen.recipient,
+      frozenFrom: frozen.from, subject: frozen.subject, text: frozen.text, html: frozen.html,
+      idempotencyKey: claimed.notification.idempotency_key, intakeV6: true,
+      deliveryTimeoutMs: Math.min(options.timeoutMs || LAUNCH_ALERT_PROVIDER_TIMEOUT_MS, LAUNCH_ALERT_PROVIDER_TIMEOUT_MS) });
+  } catch {
+    result = { ok: false, provider: "resend", retryable: false, ambiguous: true,
+      errorCode: "provider_acceptance_ambiguous", errorSummary: "Provider outcome requires reconciliation." };
+  }
+  return repo.finishLaunchAttempt(id, launchAttemptOutcome({ result, attempt: claimed.notification.attempt_count,
+    maxAttempts: claimed.notification.max_attempts, firstAttemptAt: claimed.firstProviderAttemptAt, now: Date.now() }));
+}
+
+/** Bounded new-intake-only processor. Main owns actual scheduler activation.
+ * Atomic per-envelope claims exclude concurrent sends and all unknown in-flight
+ * states. QA never enters this recovery path, even when its first send was authorized. */
+export async function processNewLaunchAlerts(limit = LAUNCH_ALERT_BATCH_LIMIT, dependencies: LaunchDeliveryDependencies = {}) {
+  if (!launchAlertWorkerEnabled() || !assertProviderDeliveryAllowed().ok || !launchDeliveryReady()) return [];
+  const cutoff = launchAlertCutoff();
+  const repository = dependencies.repository || NeonLeadNotificationRepository.fromEnv();
+  if (!repository || !cutoff) return [];
+  const deadline = Date.now() + LAUNCH_ALERT_RUNTIME_MS;
+  const lease = await repository.acquireLaunchBatch(cutoff);
+  if (!lease) return [];
+  const results: Array<LeadNotificationRecord | null> = [];
+  try {
+    await repository.holdExpiredLaunchEnvelopes(cutoff);
+    const due = await repository.listLaunchDue(cutoff, Math.max(1, Math.min(limit, LAUNCH_ALERT_BATCH_LIMIT)));
+    for (const notification of due) {
+      if (Date.now() >= deadline) break;
+      try {
+        results.push(await dispatchLaunchAlertEnvelope(notification.id, { batchLease: lease, timeoutMs: Math.min(LAUNCH_ALERT_PROVIDER_TIMEOUT_MS, deadline - Date.now()) }, { ...dependencies, repository }));
+      } catch { results.push(null); }
+    }
+  } finally { await repository.releaseLaunchBatch(lease); }
+  return results;
+}
+
+export async function readNewLaunchAlertHealth() {
+  const cutoff = launchAlertCutoff();
+  const repository = NeonLeadNotificationRepository.fromEnv();
+  return cutoff && repository ? repository.readLaunchHealth(cutoff) : null;
+}
 
 /** One owner-requested review copy of an already-sent internal QA email.
  * No public route or automatic worker calls this operation. The caller needs
@@ -531,6 +614,16 @@ export async function enqueueLeadNotifications(
   if (!delivery.ok) return { internal: null, sms: [], push: [], consumer: null, warning: delivery.error };
   const repo = dependencies.repository || notificationRepository();
   const provider = dependencies.provider || selectNotificationProvider();
+  if (input.notificationTemplateVersion === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) {
+    if (!(repo instanceof NeonLeadNotificationRepository)) return { internal: null, sms: [], push: [], consumer: null, warning: "canonical_v6_store_required" };
+    try {
+      const intents = (await repo.listByLead(input.leadId, 10)).filter(record => record.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION);
+      const delivered: Array<LeadNotificationRecord | null> = [];
+      for (const intent of intents.slice(0, 2)) delivered.push(await dispatchLaunchAlertEnvelope(intent.id, { initial: true }, { repository: repo, provider }));
+      return { internal: delivered[0] || null, internals: delivered, sms: [], push: [], consumer: null,
+        warning: delivered.length !== 2 || delivered.some(record => !record || record.status !== "sent") ? "launch_delivery_pending_or_held" : null };
+    } catch { return { internal: null, sms: [], push: [], consumer: null, warning: "launch_dispatch_requires_review" }; }
+  }
   const rendered = renderLeadAlert(input);
   try {
     const internal = await enqueueOne({

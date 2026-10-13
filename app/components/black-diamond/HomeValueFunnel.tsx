@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
@@ -22,6 +22,8 @@ import { LuxuryCard } from "./LuxuryCard";
 import { ProgressBar } from "./ProgressBar";
 import { SelectField, TextField } from "./FormField";
 import { LeadConsentField } from "./LeadConsentField";
+import { AddressEntry } from "./AddressEntry";
+import { addressFromForm, contactReviewFingerprint, MissingAddressStreetError, type AddressValue } from "../../lib/address/addressValue";
 
 type HomeValueFunnelProps = {
   surface?: LeadSourceSurface;
@@ -60,6 +62,7 @@ export function HomeValueFunnel({
   const controller = useRef<AbortController | null>(null);
   const mounted = useRef(true);
   const [address, setAddress] = useState("");
+  const [addressValue, setAddressValue] = useState<AddressValue | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -67,6 +70,7 @@ export function HomeValueFunnel({
   const hasQaMarkers = qaMarkerText.includes("INTERNAL QA") && qaMarkerText.includes("DO NOT CONTACT");
   const [timeline, setTimeline] = useState(timelineOptions[1]);
   const [consent, setConsent] = useState(false);
+  const displayedReview = useRef("");
   const [formError, setFormError] = useState<{ message: string; field?: HomeValueField } | null>(null);
   const [leadMessage, setLeadMessage] = useState<string | null>(null);
   const [leadReference, setLeadReference] = useState<{ leadId: string | null; sessionId: string | null }>({
@@ -88,6 +92,11 @@ export function HomeValueFunnel({
     : {};
   const experimentLeadContext = publicExperimentLeadFields(experimentContext);
   const eventOptions = { sessionId: submissionId };
+
+  useLayoutEffect(() => {
+    // Bind only a committed review, never a speculative React render.
+    displayedReview.current = contactReviewFingerprint({ address, name, email, phone, timeline, consent });
+  }, [address, name, email, phone, timeline, consent]);
 
   useEffect(() => {
     const pending = readPendingHomeValueRequest();
@@ -124,7 +133,9 @@ export function HomeValueFunnel({
     };
   }, []);
 
-  useEffect(() => {
+  // Step destinations must be focused in the commit that reveals them, not a
+  // later passive task after a screen reader/test can already observe the DOM.
+  useLayoutEffect(() => {
     if (step === 2) nameRef.current?.focus();
     if (step === 3) successRef.current?.focus();
   }, [step]);
@@ -160,16 +171,19 @@ export function HomeValueFunnel({
     event.preventDefault();
     if (locked) return;
     setFormError(null);
-    const actualAddress = String(new FormData(event.currentTarget).get("address") ?? address);
-    setAddress(actualAddress);
-    if (clean(actualAddress).length < 5) {
+    let actualAddress: AddressValue;
+    try { actualAddress = addressFromForm(event.currentTarget, addressValue); }
+    catch (error) {
       setFormError({
-        message: "Enter the full property address so Mike can review the right home.",
+        message: error instanceof MissingAddressStreetError
+          ? "Add the street before other separate address fields. Keep any unit and leave unknown details blank for broker review."
+          : "Enter the full property address so Mike can review the right home.",
         field: "address",
       });
       addressRef.current?.focus();
       return;
     }
+    setAddress(actualAddress.acceptedText); setAddressValue(actualAddress);
     // Passive effects normally create this identifier before a person can
     // interact. Recover synchronously as well so an unusually fast first tap
     // cannot create unlinked address-stage telemetry.
@@ -218,9 +232,11 @@ export function HomeValueFunnel({
       nameRef.current?.focus();
       return;
     }
-    if (!isValidLeadEmail(clean(actual.email))) {
+    if ((!clean(actual.email) && !clean(actual.phone)) || (clean(actual.email) && !isValidLeadEmail(clean(actual.email)))) {
       setFormError({
-        message: "Enter a valid email for your valuation follow-up.",
+        message: !clean(actual.email) && !clean(actual.phone)
+          ? "Enter at least one valid contact method: email or phone."
+          : "Enter a valid email for your valuation follow-up.",
         field: "email",
       });
       emailRef.current?.focus();
@@ -236,14 +252,23 @@ export function HomeValueFunnel({
       return;
     }
 
+    // The review and POST share one native snapshot. Eventless autofill or an
+    // edit just before activation requires a fresh explicit review, not a send
+    // using stale React state. No PII is stored outside this mounted form.
+    if (contactReviewFingerprint({ address, ...actual }) !== displayedReview.current) {
+      setFormError({ message: "Your details changed. Review the updated address and email below, then choose Request Valuation again." });
+      return;
+    }
+
     frozenRequest.current = { key: submissionId, body: JSON.stringify({
       funnel_type: surface === "widget" ? "widget" : "home_value",
       lead_source_surface: surface,
       address: clean(address), name: clean(actual.name), email: clean(actual.email), phone: clean(actual.phone),
+      ...(addressValue ? { address_entry: addressValue } : {}),
       timeline: actual.timeline, status: "new", assigned_agent_id: null,
       widget_session_id: submissionId, idempotency_key: submissionId,
       ...(experimentLeadContext || {}),
-      consent: actual.consent, consent_email: actual.consent,
+      consent: actual.consent, consent_email: actual.consent && Boolean(clean(actual.email)),
       consent_call: actual.consent && Boolean(clean(actual.phone)),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
@@ -338,23 +363,9 @@ export function HomeValueFunnel({
 
       {step === 1 ? (
         <form noValidate onSubmit={submitAddress} className="space-y-5" data-amm-step="address">
-          <TextField
-            label="Property address"
-            name="address"
-            inputRef={addressRef}
-            defaultValue={address}
-            onChange={(event) => {
-              setAddress(event.target.value);
-              clearKnownRefusal();
-            }}
-            autoComplete="street-address"
-            maxLength={500}
-            disabled={intakeMode === "checking" || locked}
-            placeholder="123 Lake Wilson Road, Wilson, NC"
-            aria-describedby={formError?.field === "address" ? errorId : undefined}
-            aria-invalid={formError?.field === "address"}
-            required
-          />
+          <AddressEntry inputRef={addressRef} value={addressValue} initialText={address}
+            onChange={text => { setAddress(text); clearKnownRefusal(); }} onAccept={setAddressValue}
+            disabled={intakeMode === "checking" || locked} invalid={formError?.field === "address"} errorId={errorId} />
           <button disabled={intakeMode === "checking" || locked} className="amm-primary-button w-full px-5 py-4 disabled:opacity-60">
             Continue
           </button>
@@ -404,8 +415,8 @@ export function HomeValueFunnel({
             placeholder="you@example.com"
             aria-describedby={formError?.field === "email" ? errorId : undefined}
             aria-invalid={formError?.field === "email"}
-            required
           />
+          <p className="text-xs leading-5 text-[#b7aa94]">Provide a valid email or phone number for follow-up. Either one is enough.</p>
           <TextField
             label="Phone (optional)"
             name="phone"
@@ -430,6 +441,13 @@ export function HomeValueFunnel({
             ))}
           </SelectField>
           <fieldset disabled={locked} className="min-w-0"><legend className="sr-only">Contact permission</legend><LeadConsentField checked={consent} onChange={setConsent} /></fieldset>
+          <div aria-label="Review before requesting valuation" className="space-y-2 rounded-md border border-[#cda24a55] bg-black/30 p-3 text-sm leading-6">
+            <p className="font-semibold text-[#f4ead4]">Review your request</p>
+            <p className="select-text break-words">Address: {address}</p>
+            <p className="select-text break-words">Email: {clean(email) || "Not provided"}</p>
+            <p className="select-text break-words">Phone: {clean(phone) || "Not provided"}</p>
+            <p className="text-[#d9ceb8]">{addressValue?.confirmation === "user_confirmed_suggestion" ? "Suggestion confirmed by you." : "Address entered or edited by you."} Address validation has not been performed.</p>
+          </div>
           <div className="flex gap-3">
             <button
               type="button"

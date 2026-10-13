@@ -1,0 +1,16 @@
+{
+  "seller": {
+    "canonical": "https://www.askmagicmike.com/home-value",
+    "facebook": "https://www.askmagicmike.com/home-value?utm_source=facebook&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_facebook",
+    "instagram": "https://www.askmagicmike.com/home-value?utm_source=instagram&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_instagram",
+    "owned_site": "https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_owned_site",
+    "qr": "https://www.askmagicmike.com/home-value?utm_source=qr&utm_medium=print&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_qr"
+  },
+  "buyer": {
+    "canonical": "https://www.askmagicmike.com/buy",
+    "facebook": "https://www.askmagicmike.com/buy?utm_source=facebook&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_facebook",
+    "instagram": "https://www.askmagicmike.com/buy?utm_source=instagram&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_instagram",
+    "owned_site": "https://www.askmagicmike.com/buy?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_owned_site",
+    "qr": "https://www.askmagicmike.com/buy?utm_source=qr&utm_medium=print&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_qr"
+  }
+}

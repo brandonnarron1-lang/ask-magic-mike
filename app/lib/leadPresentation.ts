@@ -1,6 +1,7 @@
 import type { AdminLeadView,AdminLeadDetailResult } from "./persistence/supabase/adminLeadView";
 import { canAccessAssignedLead, hasLeadCenterPermission, type LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 import { leadQuestionForDisplay, leadSourceLabel, leadTimelineLabel } from "./leadReadability";
+import type { BuyerInterestV1 } from "./buyerInterest";
 
 export const LEAD_PRESENTATION_VERSION = "reference_cards_v1";
 export const LEAD_MODULES = {
@@ -21,7 +22,7 @@ export type LeadPresentation = {
   reference: string; isTest: boolean; priority: "HOT" | "ACTIVE" | "NEW" | "TEST";
   score: number | null; reasons: string[]; location: string; source: string; timeline: string;
   budget: string; financing: string; propertyEvidence: string; custodian: string;
-  identity?: { name: string; email: string | null; phone: string | null; address: string | null; question: string | null };
+  identity?: { name: string; email: string | null; phone: string | null; address: string | null; question: string | null; buyerInterest?: BuyerInterestV1 };
   offer?: LeadOfferSnapshot; nextAction: string; draftStatus: string; insight: string;
   actions: LeadCardAction[]; steps: Array<{ label: string; state: "complete" | "pending" | "blocked" | "not_applicable" }>;
 };
@@ -43,7 +44,7 @@ export function presentLead(input: {
   evidence?: Pick<AdminLeadDetailResult,"appointments"|"followupTasks"|"outcomes">;
 }): LeadPresentation {
   const { lead, principal, tier, offer } = input;
-  const full = (tier === "assigned" || tier === "supervisor") && canAccessAssignedLead(principal, lead.assigned_agent_id);
+  const full = (tier === "assigned" || tier === "supervisor") && canAccessAssignedLead(principal, lead.assigned_agent_id || lead.inquiry_owner_agent_id || null);
   const intendedOffer = hasLeadCenterPermission(principal.role,"lead:view_assigned") && (offer?.agentId === principal.agentId || hasLeadCenterPermission(principal.role, "routing:manage"));
   if (!full && tier !== "audit" && !intendedOffer) throw new Error("lead_presentation_forbidden");
   if (tier === "audit" && !hasLeadCenterPermission(principal.role, "audit:view")) throw new Error("audit_presentation_forbidden");
@@ -51,7 +52,7 @@ export function presentLead(input: {
   const score = lead.score ?? null;
   const isTest = lead.is_test;
   const base = `/admin/leads/${encodeURIComponent(lead.id)}`;
-  const update = full && hasLeadCenterPermission(principal.role, "lead:update_assigned");
+  const update = full && canAccessAssignedLead(principal, lead.assigned_agent_id) && hasLeadCenterPermission(principal.role, "lead:update_assigned");
   // Intent/location evidence is explicitly sourced; never derive a town from
   // address/free text, or assume a pictured property is the lead's property.
   const result: LeadPresentation = {
@@ -79,7 +80,7 @@ export function presentLead(input: {
       { label: "Reviewed packet", state: ["seller","cash_seller","investor_buyer"].includes(subtype)?"blocked":"not_applicable" },
       { label: "Documented outcome", state: full && input.evidence?.outcomes.length ? "complete" : "pending" }],
   };
-  if (full) result.identity = { name: lead.name || "Name not recorded", email: lead.email, phone: lead.phone, address: lead.address, question: leadQuestionForDisplay(lead.question) };
+  if (full) result.identity = { name: lead.name || "Name not recorded", email: lead.email, phone: lead.phone, address: lead.address, question: leadQuestionForDisplay(lead.question), ...(lead.buyer_interest ? { buyerInterest: lead.buyer_interest } : {}) };
   if (offer && intendedOffer && tier !== "audit") result.offer = { ...offer, code: undefined };
   return result;
 }

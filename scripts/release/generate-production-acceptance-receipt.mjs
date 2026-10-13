@@ -9,11 +9,15 @@ import {
   receiptTag,
   serializeReceiptDocument,
   validateReleaseAuthorityPolicy,
+  validateReceiptFileChecksum,
+  validateProductionAcceptanceReceipt,
+  rollbackDeploymentFromAcceptedReceipt,
 } from "../lib/release-authority-receipt.mjs";
 import {
   extractVercelDeploymentId,
   findSuccessfulVercelStatus,
   ghApi,
+  runTextCommand,
 } from "../lib/release-authority-platform.mjs";
 
 const ROOT = resolve(".");
@@ -84,22 +88,27 @@ function latestDeploymentStatus(repository, deploymentId) {
   return status;
 }
 
-function findRollbackDeployment(repository, currentDeploymentId, currentCreatedAt, policy) {
-  const deployments = ghApi(`repos/${repository}/deployments?environment=Production&per_page=100`);
-  for (const deployment of deployments) {
-    if (deployment.id === currentDeploymentId) continue;
-    if (new Date(deployment.created_at).getTime() >= new Date(currentCreatedAt).getTime()) continue;
+function findRollbackDeployment(repository, currentDeploymentId, currentCreatedAt, policy, currentVercelId) {
+  const releases = ghApi(`repos/${repository}/releases?per_page=100`)
+    .filter(r => !r.draft && r.tag_name.startsWith(policy.receiptStore.tagPrefix))
+    .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
+  for (const release of releases) {
+    if (release.tag_name === `${policy.receiptStore.tagPrefix}${currentVercelId}`) continue;
+    if (Date.parse(release.published_at) > Date.parse(currentCreatedAt)) continue;
+    const asset = release.assets?.find(a => a.name === policy.receiptStore.assetName);
+    const checksumAsset = release.assets?.find(a => a.name === policy.receiptStore.checksumAssetName);
+    if (!asset || !checksumAsset) throw new Error("receipt_prior_assets_missing");
+    const document = runTextCommand("gh", ["api", asset.url, "-H", "Accept: application/octet-stream"]);
+    const checksum = runTextCommand("gh", ["api", checksumAsset.url, "-H", "Accept: application/octet-stream"]);
+    validateReceiptFileChecksum(document, checksum, policy.receiptStore.assetName);
+    const receipt = validateProductionAcceptanceReceipt(JSON.parse(document), policy);
+    if (receipt.deployment.githubDeploymentId === currentDeploymentId) continue;
+    const deployment = ghApi(`repos/${repository}/deployments/${receipt.deployment.githubDeploymentId}`);
     const statuses = ghApi(`repos/${repository}/deployments/${deployment.id}/statuses`);
     if (statuses[0]?.state !== "success") continue;
-    const combined = ghApi(`repos/${repository}/commits/${deployment.sha}/status`);
-    try {
-      return findSuccessfulVercelStatus(combined, {
-        team: policy.productionTarget.vercelTeam,
-        project: policy.productionTarget.vercelProject,
-      }).deploymentId;
-    } catch {
-      // Continue to the next previously successful Production deployment.
-    }
+    return rollbackDeploymentFromAcceptedReceipt(receipt, deployment, statuses[0], {
+      githubId: currentDeploymentId, vercelId: currentVercelId, createdAt: currentCreatedAt,
+    }, policy);
   }
   throw new Error("receipt_rollback_deployment_missing");
 }
@@ -181,6 +190,7 @@ async function main() {
     githubDeploymentId,
     deployment.created_at,
     policy,
+    eventDeploymentId,
   );
   const monitorEvidence = normalizeMonitor(await readJson(MONITOR_PATH, "receipt_monitor_report_missing"), sha);
   const smoke = normalizeSmoke(await readJson(SMOKE_PATH, "receipt_smoke_report_missing"));

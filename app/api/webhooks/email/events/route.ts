@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { normalizeEmailEvent, type EmailEventType } from "@/lib/adapters/email-webhook-normalizer";
 import { isPreviewRuntime } from "@/lib/preview-security";
+import { readLaunchCallbackCorrelation } from "../../../../lib/launchCallbackCorrelation";
 
 export const runtime = "nodejs";
 
@@ -49,6 +50,7 @@ type AtomicWebhookResult = {
   recorded_payload_hash: string | null;
   notification_updated: number | string;
   communication_recorded: number | string;
+  delivery_evidence_recorded?: boolean;
   lead_suppressed: number | string;
   state_transition_applied: boolean;
   state_transition_ignored_reason: "out_of_order_event" | "concurrent_newer_event" | null;
@@ -128,6 +130,8 @@ async function recordResendEventAtomically(input: {
   eventType: EmailEventType;
   payloadHash: string;
   occurredAt: string;
+  notificationId: string | null;
+  recipient: string | null;
 }) {
   if (!process.env.DATABASE_URL) throw new Error("database_not_configured");
   const sql = neon(process.env.DATABASE_URL);
@@ -149,6 +153,8 @@ async function recordResendEventAtomically(input: {
     `WITH notification_candidate AS MATERIALIZED (
        SELECT notification.id,
               notification.lead_id,
+              notification.template_version,
+              notification.recipient_type,
               CASE
                 WHEN COALESCE(notification.metadata->>'provider_last_event_at', '') ~
                      '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$'
@@ -157,7 +163,11 @@ async function recordResendEventAtomically(input: {
               END AS previous_event_at
          FROM public.lead_notifications AS notification
         WHERE notification.provider = 'resend'
-          AND notification.provider_message_id = $2
+          AND (notification.provider_message_id = $2 OR (
+            notification.template_version='lead_alert_email_v6' AND notification.recipient_type='internal'
+            AND notification.status='processing' AND notification.provider_message_id IS NULL
+            AND notification.first_provider_attempt_at IS NOT NULL AND notification.id=$11::uuid
+            AND lower(notification.private_intake_snapshot->>'recipient')=lower($12::text)))
         ORDER BY notification.created_at DESC, notification.id
         LIMIT 1
         FOR UPDATE OF notification
@@ -169,7 +179,8 @@ async function recordResendEventAtomically(input: {
           occurred_at, received_at, processed_at, metadata)
        VALUES (
          'resend', $1, $2, $3, true,
-         CASE WHEN EXISTS (SELECT 1 FROM notification_candidate) THEN 'processed' ELSE 'ignored' END,
+         CASE WHEN EXISTS (SELECT 1 FROM notification_candidate) THEN 'processed'
+           WHEN $11::uuid IS NOT NULL THEN 'failed' ELSE 'ignored' END,
          $4, NULL, $5::timestamptz, now(), now(),
          jsonb_build_object(
            'matched_notification', EXISTS (SELECT 1 FROM notification_candidate),
@@ -191,7 +202,7 @@ async function recordResendEventAtomically(input: {
        RETURNING receipt.id, receipt.processing_status, receipt.payload_hash
      ),
      matched_notification AS (
-       SELECT candidate.id, candidate.lead_id, candidate.previous_event_at
+       SELECT candidate.id, candidate.lead_id, candidate.previous_event_at,candidate.template_version,candidate.recipient_type
          FROM notification_candidate AS candidate
         WHERE EXISTS (SELECT 1 FROM claimed_webhook)
      ),
@@ -199,6 +210,7 @@ async function recordResendEventAtomically(input: {
        UPDATE public.lead_notifications AS notification
           SET status = CASE
                 WHEN $6::boolean THEN 'permanently_failed'
+                WHEN $8::boolean AND notification.template_version='lead_alert_email_v6' AND notification.status='processing' THEN 'sent'
                 WHEN $8::boolean AND notification.error_code = 'resend_failed' THEN 'sent'
                 ELSE notification.status END,
               error_code = CASE
@@ -221,6 +233,8 @@ async function recordResendEventAtomically(input: {
                 ELSE notification.sent_at
               END,
               next_attempt_at = CASE WHEN $6::boolean OR $8::boolean THEN NULL ELSE notification.next_attempt_at END,
+              provider_message_id=CASE WHEN notification.template_version='lead_alert_email_v6' THEN coalesce(notification.provider_message_id,$2) ELSE notification.provider_message_id END,
+              provider_accepted_at=CASE WHEN notification.template_version='lead_alert_email_v6' THEN coalesce(notification.provider_accepted_at,$5::timestamptz) ELSE notification.provider_accepted_at END,
               updated_at = now(),
               metadata = COALESCE(notification.metadata, '{}'::jsonb) || $9::jsonb
                 || CASE WHEN $8::boolean AND notification.error_code = 'resend_failed'
@@ -228,6 +242,22 @@ async function recordResendEventAtomically(input: {
          FROM matched_notification AS matched
         WHERE notification.id = matched.id
           AND (matched.previous_event_at IS NULL OR matched.previous_event_at <= $5::timestamptz)
+       RETURNING notification.id
+     ),
+     delivery_confirmation_update AS (
+       -- Cumulative signed evidence is distinct from the latest lifecycle
+       -- event. This predicate is disjoint from notification_update: an older
+       -- delivery cannot regress newer opened/clicked or terminal state.
+       UPDATE public.lead_notifications AS notification
+          SET metadata = COALESCE(notification.metadata, '{}'::jsonb)
+                || jsonb_build_object('provider_delivery_confirmed', true),
+              updated_at = now()
+         FROM matched_notification AS matched
+        WHERE notification.id = matched.id
+          AND matched.template_version = 'lead_alert_email_v6'
+          AND $3::text = 'delivered'
+          AND matched.previous_event_at > $5::timestamptz
+          AND COALESCE(notification.metadata->>'provider_delivery_confirmed', 'false') <> 'true'
        RETURNING notification.id
      ),
      communication_insert AS (
@@ -240,6 +270,7 @@ async function recordResendEventAtomically(input: {
                 'signature_verified', true,
                 'processing_contract', 'atomic_ordered_v2',
                 'state_transition_applied', EXISTS (SELECT 1 FROM notification_update),
+                'delivery_evidence_recorded', EXISTS (SELECT 1 FROM delivery_confirmation_update),
                 'state_transition_ignored_reason', CASE
                   WHEN EXISTS (SELECT 1 FROM notification_update) THEN NULL
                   WHEN matched.previous_event_at IS NOT NULL AND matched.previous_event_at > $5::timestamptz
@@ -256,6 +287,7 @@ async function recordResendEventAtomically(input: {
           SET email_suppressed = true, updated_at = now()
          FROM matched_notification AS matched
         WHERE $10::boolean
+          AND NOT (matched.template_version='lead_alert_email_v6' AND matched.recipient_type='internal')
           AND lead.id = matched.lead_id
           AND lead.email_suppressed = false
        RETURNING lead.id
@@ -279,6 +311,7 @@ async function recordResendEventAtomically(input: {
        ) AS recorded_payload_hash,
        (SELECT count(*)::int FROM notification_update) AS notification_updated,
        (SELECT count(*)::int FROM communication_insert) AS communication_recorded,
+       EXISTS (SELECT 1 FROM delivery_confirmation_update) AS delivery_evidence_recorded,
        (SELECT count(*)::int FROM lead_suppression) AS lead_suppressed,
        EXISTS (SELECT 1 FROM notification_update) AS state_transition_applied,
        CASE
@@ -301,6 +334,8 @@ async function recordResendEventAtomically(input: {
       acceptedDelivery,
       notificationMetadata,
       suppressEmail,
+      input.notificationId,
+      input.recipient,
     ],
   ) as AtomicWebhookResult[];
 }
@@ -384,6 +419,7 @@ export async function POST(request: NextRequest) {
       eventType: normalized.eventType,
       payloadHash,
       occurredAt,
+      ...readLaunchCallbackCorrelation(payload),
     });
   } catch {
     console.error("[resend-webhook] atomic persistence failed", {
@@ -404,6 +440,9 @@ export async function POST(request: NextRequest) {
   if (!result.claimed && result.recorded_payload_hash !== payloadHash) {
     return webhookResponse(correlationId, { ok: false, error: "event_id_conflict" }, 409);
   }
+  if (result.processing_status === "failed" && !result.matched_notification) {
+    return webhookResponse(correlationId, { ok: false, error: "launch_callback_reconciliation_pending" }, 503);
+  }
   if (!result.claimed) {
     return webhookResponse(correlationId, {
       ok: true,
@@ -418,6 +457,7 @@ export async function POST(request: NextRequest) {
     event_type: normalized.eventType,
     matched_notification: Boolean(result.matched_notification),
     state_transition_applied: Boolean(result.state_transition_applied),
+    delivery_evidence_recorded: Boolean(result.delivery_evidence_recorded),
     ...(result.state_transition_ignored_reason
       ? { state_transition_ignored_reason: result.state_transition_ignored_reason }
       : {}),

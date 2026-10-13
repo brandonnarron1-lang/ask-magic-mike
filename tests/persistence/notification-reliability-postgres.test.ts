@@ -362,5 +362,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("PR279 successor: real 
     const compatible = JSON.parse(psql(`${captureSql(cloneInput(), "v1")};`)); expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(compatible.lead_id)} AND action='lead.qa_suppressed';`)).toBe("1");
     const retained = tableCounts(); psql(source); expect(tableCounts()).toBe(retained);
     console.info("Isolated reliability receipt", { migration: reliabilityMigration, migrationSourceSha256: createHash("sha256").update(source).digest("hex"), externalProviderCalls: 0, productionWrites: 0 });
-  });
+  // Complete tracked-schema installation plus role/rollback psql processes,
+  // not an application-response SLA. Hosted Docker measured 5,112ms against
+  // the implicit 5,000ms limit. Retain every assertion and a finite budget.
+  }, 30_000);
 });

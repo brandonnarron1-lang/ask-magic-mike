@@ -29,13 +29,17 @@ describe("public lead error hygiene", () => {
   it("routes active public lead forms through the sanitizer", () => {
     const homeValue = readFileSync("app/components/black-diamond/HomeValueFunnel.tsx", "utf8");
     const sellerIntent = readFileSync("app/components/black-diamond/SellerIntentSection.tsx", "utf8");
+    const recovery = readFileSync("app/lib/client/publicIntakeRecovery.ts", "utf8");
 
     expect(homeValue).toContain("publicLeadOutcomeFromResponse(res)");
     expect(homeValue).toContain("publicLeadTransportOutcome(abort.signal.aborted");
     expect(homeValue).not.toContain("setFormError({ message: data.error");
     expect(homeValue).not.toContain("error.message");
-    expect(sellerIntent).toContain("publicLeadErrorMessage(data.error)");
-    expect(sellerIntent).toContain("publicLeadErrorMessage(error instanceof Error");
+    expect(sellerIntent).toContain("recordOutcome(await recovery.start(JSON.stringify(payload)))");
+    expect(recovery).toContain("publicLeadOutcomeFromResponse(response)");
+    expect(recovery).toContain("publicLeadTransportOutcome(timeout");
+    expect(sellerIntent).not.toContain("data.error");
+    expect(sellerIntent).not.toContain("error.message");
   });
 
   it("sanitizes unknown persistence exceptions through the typed Home Value outcome", async () => {

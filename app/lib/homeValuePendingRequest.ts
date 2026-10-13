@@ -2,6 +2,11 @@ export type PendingHomeValueStorage = Pick<Storage, "getItem" | "setItem" | "rem
 export type PendingHomeValueRequest = { key: string; at: string };
 
 const STORAGE_KEY = "amm_home_value_pending_request_v1";
+export const PUBLIC_INTAKE_PENDING_EVENT = "askmagicmike:intake-reference-changed";
+function notifyBrowser(storage?: PendingHomeValueStorage | null) {
+  // A reference-state signal only: no payload, contact, consent or authority.
+  if (storage === undefined && typeof window !== "undefined") window.dispatchEvent(new Event(PUBLIC_INTAKE_PENDING_EVENT));
+}
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
@@ -88,6 +93,7 @@ export function rememberPendingHomeValueRequest(key: string, storage?: PendingHo
   }
   context.memory.pending = pending;
   context.memory.volatile = true;
+  notifyBrowser(storage);
   if (!context.storage) return false;
   try {
     context.storage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, key: pending.key, at: pending.at }));
@@ -115,6 +121,7 @@ export function clearPendingHomeValueRequest(key: string, storage?: PendingHomeV
       // A matching volatile guard can be cleared explicitly, but do not delete
       // an unreadable stored value that might belong to a newer request.
       if (context.memory.pending?.key === normalized) context.memory.pending = null;
+      notifyBrowser(storage);
       return;
     }
     if (stored && stored.key !== normalized) {
@@ -135,4 +142,5 @@ export function clearPendingHomeValueRequest(key: string, storage?: PendingHomeV
   }
   if (context.memory.pending?.key === normalized) context.memory.pending = null;
   context.memory.volatile = false;
+  notifyBrowser(storage);
 }

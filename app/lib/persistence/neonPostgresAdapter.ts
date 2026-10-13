@@ -65,11 +65,22 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
 
   async captureLeadLifecycle(input: LeadLifecycleCapture): Promise<LeadLifecycleCaptureResult> {
     try {
-      if (input.internalNotification) {
+      // A non-null address entry must use the additive atomic wrapper. Invalid
+      // entries fail in SQL; never fall back to v2 and silently drop evidence.
+      const structuredAddress = input.lead.address_entry !== undefined && input.lead.address_entry !== null;
+      const structuredInterest = input.lead.buyer_interest !== undefined && input.lead.buyer_interest !== null;
+      const inquiryContext = input.internalNotification?.requestContext;
+      if (input.internalNotification || structuredAddress || structuredInterest) {
+        const capture = inquiryContext || structuredInterest ? "capture_public_lead_v4"
+          : structuredAddress ? "capture_public_lead_v3" : "capture_public_lead_v2";
         const rows = await this.sql.query(
-          "SELECT public.capture_public_lead_v2($1::jsonb, $2::jsonb, $3::jsonb, $4::text, $5::jsonb) AS result",
+          `SELECT public.${capture}($1::jsonb, $2::jsonb, $3::jsonb, $4::text, $5::jsonb) AS result`,
           [JSON.stringify(input.session), JSON.stringify(input.lead), JSON.stringify(input.attribution),
-            input.notificationMode, JSON.stringify({ template_version: input.internalNotification.templateVersion, metadata: input.internalNotification.metadata })],
+            input.notificationMode, JSON.stringify(input.internalNotification
+              ? { template_version: input.internalNotification.templateVersion, metadata: input.internalNotification.metadata,
+                  ...(inquiryContext ? { request_context: inquiryContext } : {}),
+                  ...(input.internalNotification.launchDraft ? { launch_draft: input.internalNotification.launchDraft } : {}) }
+              : {})],
         ) as Array<Record<string, unknown>>;
         const result = rows[0]?.result;
         if (!result || typeof result !== "object" || Array.isArray(result)) throw new Error("capture_result_invalid");

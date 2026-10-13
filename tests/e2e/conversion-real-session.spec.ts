@@ -8,9 +8,10 @@ import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../..
 // Main's opt-in runner creates this disposable database, synthetic identities,
 // and built-app transport. Never attach this mutation suite to another venue.
 // Intake proof is intentionally split: marked Home Value UI -> real SQL,
-// ordinary Home Value HTTP -> real SQL/manual UI, and seller saved-receipt UI
-// -> the shared public appointment handler. The latter is not ordinary Home
-// Value browser-to-appointment acceptance. Health/capability are never mocked.
+// ordinary Home Value/seller HTTP -> real SQL/appointment/manual UI. Marked
+// seller UI now also follows the synthetic-only capability and has no consumer
+// appointment CTA. Ordinary consumer UI is separately covered by intercepted
+// compiled UI cases, not falsely unlocked here. Health/capability are never mocked.
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE !== "1", "Run the isolated conversion acceptance command");
 test.describe.configure({ mode: "serial" });
 type Fixture = { ids: Record<string, string>; agents: Record<string, string>; leads: Record<string, string> };
@@ -224,21 +225,19 @@ test("Ordinary synthetic Home Value root HTTP capture reaches Mike-first owner, 
   await owner.close();await analyst.close();
 });
 
-test("Distinct ordinary seller saved-receipt UI drives the shared AppointmentRequestCTA and genuine public appointment HTTP-to-SQL", async () => {
+test("Marked seller UI persists without consumer CTA; distinct ordinary seller HTTP reaches genuine appointment SQL", async () => {
   test.setTimeout(120_000);
   const owner = await contexts.owner.newPage();
   await isolatedPublicOrigin(owner);
   const source = "synthetic_conversion_seller_ui";
-  const email = `${randomUUID()}@example.test`;
-  // A separate fictional identity/address/phone prevents deduplication with
-  // the marked QA capture, ordinary Home Value fixture or seeded role leads.
-  // The existing seller form mounts the same AppointmentRequestCTA only after
-  // its own genuine public intake receipt; no component/receipt injection.
+  const qaEmail = `${randomUUID()}@example.test`;
+  // Preserve the real synthetic-QA capability. Do not force LIVE, remove the
+  // guard, clear a test flag, inject a component/receipt or fabricate delivery.
   await owner.goto(`/sell?utm_source=${source}&utm_medium=owned_media&utm_campaign=synthetic_conversion_only&utm_content=synthetic_seller_appointment_ui`);
   await owner.getByLabel("Property address", { exact: true }).fill("3 Synthetic Test Street, Wilson, NC");
-  await owner.getByLabel("Name optional", { exact: true }).fill("SYNTHETIC SELLER FIXTURE — NOT A CONSUMER");
+  await owner.getByLabel("Name optional", { exact: true }).fill("INTERNAL QA — DO NOT CONTACT — SYNTHETIC SELLER UI");
   await owner.getByLabel("Phone required", { exact: true }).fill("+12025550198");
-  await owner.getByLabel("Email optional", { exact: true }).fill(email);
+  await owner.getByLabel("Email optional", { exact: true }).fill(qaEmail);
   await owner.getByRole("combobox", { name: /Timeline \(optional\)/ }).selectOption(timelineOptions[1]);
   await owner.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
   await expect(owner.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
@@ -246,30 +245,42 @@ test("Distinct ordinary seller saved-receipt UI drives the shared AppointmentReq
     owner.waitForResponse(response => new URL(response.url()).pathname === "/api/leads" && response.request().method() === "POST"),
     owner.getByRole("button", { name: "Send Seller Details", exact: true }).click(),
   ]);
-  const body = await intake.json();
-  expect(intake.status(), JSON.stringify(body)).toBe(200);
-  expect(intake.request().postDataJSON()).toMatchObject({ funnel_type: "seller", lead_source_surface: "seller_page", email });
-  expect(body.session_id).toBe(intake.request().postDataJSON().idempotency_key);
-  const leadId = body.lead_id; expect(leadId).toBeTruthy();
+  const qaBody = await intake.json();
+  expect(intake.status(), JSON.stringify(qaBody)).toBe(200);
+  expect(intake.request().postDataJSON()).toMatchObject({ funnel_type: "seller", lead_source_surface: "seller_page", email:qaEmail });
+  expect(qaBody.session_id).toBe(intake.request().postDataJSON().idempotency_key);
+  expect((await sql("SELECT email,is_test,communication_suppressed FROM leads WHERE id=$1",[qaBody.lead_id]))[0])
+    .toMatchObject({email:qaEmail,is_test:true,communication_suppressed:true});
+  await expect(owner.locator("#seller-form-status")).toContainText("stored for review");
+  await expect(owner.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
+  expect((await sql("SELECT count(*)::int AS n FROM lead_appointments WHERE lead_id=$1",[qaBody.lead_id]))[0].n).toBe(0);
+  // A separate ordinary synthetic record tests the real public appointment
+  // HTTP-to-SQL contract. This is explicitly NOT ordinary seller browser UI.
+  const email=`${randomUUID()}@example.test`,key=randomUUID();
+  const ordinary=await owner.request.post("/api/leads",{headers:{Origin:"https://www.askmagicmike.com","Idempotency-Key":key},data:{
+    funnel_type:"seller",lead_source_surface:"seller_page",name:"SYNTHETIC SELLER HTTP FIXTURE — NOT A CONSUMER",email,phone:"+12025550197",
+    address:"4 Synthetic Test Street, Wilson, NC",timeline:timelineOptions[1],widget_session_id:key,idempotency_key:key,
+    consent:true,consent_email:true,consent_call:true,consent_sms:false,
+    consent_language_version:LEAD_CONSENT_LANGUAGE_VERSION,consent_language_text:LEAD_CONSENT_LANGUAGE_TEXT,consent_source:"seller_page:seller-intake",
+    attribution:{source,medium:"owned_media",campaign:"synthetic_conversion_only",content:"synthetic_seller_appointment_http"},
+  }});
+  const body=await ordinary.json();expect(ordinary.status(),JSON.stringify(body)).toBe(200);expect(body.session_id).toBe(key);
+  const leadId=body.lead_id;expect(leadId).toBeTruthy();
   expect((await sql("SELECT email,is_test,communication_suppressed,assigned_agent_id FROM leads WHERE id=$1", [leadId]))[0])
     .toMatchObject({ email, is_test: false, communication_suppressed: false, assigned_agent_id: fixture.agents.owner });
   expect((await sql("SELECT utm_source,utm_medium FROM source_attribution WHERE lead_id=$1", [leadId]))[0])
     .toMatchObject({ utm_source: source, utm_medium: "owned_media" });
   expect((await sql("SELECT count(*)::int AS n FROM consents WHERE lead_id=$1", [leadId]))[0].n).toBe(3);
-  await expect(owner.getByRole("button", { name: "Request a conversation", exact: true })).toBeVisible();
-  const [requested] = await Promise.all([
-    owner.waitForResponse(response => new URL(response.url()).pathname === "/api/appointments/request" && response.request().method() === "POST"),
-    owner.getByRole("button", { name: "Request a conversation", exact: true }).click(),
-  ]);
+  const appointmentPayload={lead_id:leadId,session_id:body.session_id,request_surface:"seller_page"};
+  const requested=await owner.request.post("/api/appointments/request",{headers:{Origin:"https://www.askmagicmike.com"},data:appointmentPayload});
   expect(requested.status()).toBe(200);
   expect(await requested.json()).toMatchObject({ status: "requested" });
-  expect(requested.request().postDataJSON()).toEqual({ lead_id: leadId, session_id: body.session_id, request_surface: "seller_page" });
-  await expect(owner.getByRole("heading", { name: "Your appointment request has been received.", exact: true })).toBeVisible();
-  await expect(owner.getByRole("button", { name: "Request received", exact: true })).toBeDisabled();
+  expect((await sql("SELECT is_test,communication_suppressed FROM leads WHERE id=$1",[qaBody.lead_id]))[0])
+    .toMatchObject({is_test:true,communication_suppressed:true});
   expect((await sql("SELECT count(*)::int AS n FROM tasks WHERE lead_id=$1 AND category='followup:appointment_confirmation'", [leadId]))[0].n).toBe(1);
   expect((await sql("SELECT count(*)::int AS n FROM lead_appointments WHERE lead_id=$1 AND status='requested'", [leadId]))[0].n).toBe(1);
   expect((await sql("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
-  await owner.screenshot({ path: "output/playwright/conversion-seller-shared-appointment-ui-390.png", fullPage: true });
+  await owner.screenshot({ path: "output/playwright/conversion-marked-seller-ui-no-consumer-appointment-390.png", fullPage: true });
   await owner.close();
 });
 

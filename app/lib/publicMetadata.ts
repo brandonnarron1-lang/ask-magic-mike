@@ -8,6 +8,7 @@ type PublicMetadataInput = {
   description: string;
   path: `/${string}` | "/";
   canonicalPath?: `/${string}` | "/";
+  socialImage?: { src: string; alt: string };
 };
 
 export function publicPageMetadata({
@@ -15,6 +16,7 @@ export function publicPageMetadata({
   description,
   path,
   canonicalPath = path,
+  socialImage,
 }: PublicMetadataInput): Metadata {
   const socialTitle = title.includes("Ask Magic Mike") ? title : `${title} | Ask Magic Mike`;
   return {
@@ -29,17 +31,17 @@ export function publicPageMetadata({
       url: canonicalPath,
       siteName: "Ask Magic Mike",
       images: [{
-        url: SOCIAL_IMAGE.src,
+        url: socialImage?.src ?? SOCIAL_IMAGE.src,
         width: SOCIAL_IMAGE.width,
         height: SOCIAL_IMAGE.height,
-        alt: SOCIAL_IMAGE.alt,
+        alt: socialImage?.alt ?? SOCIAL_IMAGE.alt,
       }],
     },
     twitter: {
       card: "summary_large_image",
       title: socialTitle,
       description,
-      images: [SOCIAL_IMAGE.src],
+      images: [socialImage?.src ?? SOCIAL_IMAGE.src],
     },
   };
 }

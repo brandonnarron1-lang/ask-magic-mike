@@ -69,7 +69,7 @@ describe("home-value inline validation", () => {
     await user.type(name, "INTERNAL QA DO NOT CONTACT");
     await user.click(screen.getByRole("button", { name: "Request Valuation" }));
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "Enter a valid email for your valuation follow-up.",
+      "Enter at least one valid contact method: email or phone.",
     );
     expect(email).toHaveAttribute("aria-invalid", "true");
     expect(email).toHaveAttribute("aria-describedby", "home-value-form-error");

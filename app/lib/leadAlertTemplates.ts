@@ -3,6 +3,7 @@ import type { LeadRoutingDecision } from "./leadRouting";
 import type { LeadScore } from "./leadScoring";
 import { renderReadableLeadAlert } from "./leadAlertReadableTemplate";
 import { renderCompactLeadAlert } from "./leadAlertCompactTemplate";
+import { LAUNCH_LEAD_ALERT_TEMPLATE_VERSION, readFrozenLaunchAlert } from "./leadAlertLaunch";
 import {
   selectLeadAlertVisualTemplate,
   shouldRenderLeadAlertVisual,
@@ -179,7 +180,14 @@ export function renderLeadAlertDesignPreview(input: LeadAlertRenderInput) {
 export function renderLeadAlertForTemplateVersion(
   input: LeadAlertRenderInput,
   templateVersion: string,
+  frozenSnapshot?: unknown,
 ) {
+  if (templateVersion === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) {
+    const snapshot = readFrozenLaunchAlert(frozenSnapshot);
+    if (!snapshot || snapshot.inquiry_id !== input.leadId) return null;
+    return { subject: snapshot.subject, text: snapshot.text, html: snapshot.html,
+      safeEmail: null, safePhone: null };
+  }
   if (templateVersion === COMPACT_LEAD_ALERT_TEMPLATE_VERSION) {
     return renderCompactLeadAlert(input);
   }

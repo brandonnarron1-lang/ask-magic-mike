@@ -1,0 +1,53 @@
+{
+  "source": {
+    "photo": "4b07af9225c67cd75430eb57fd59495d9ef69534fcd05aec900cfa8c3fe62633",
+    "logo": "d6f9cf50829416c348985307e68b111f8e46665a1c603810b46b55b377c32d49"
+  },
+  "identityPreserved": true,
+  "aiGeneratedIdentityUsed": false,
+  "networkUsed": false,
+  "files": [
+    {
+      "file": "seller-feed.jpg",
+      "dimensions": "1080x1350",
+      "sha256": "2a6d82eabe404c60eb0b2cf75a254043443af95be5e1bae5e9325016359b3e20"
+    },
+    {
+      "file": "seller-story.jpg",
+      "dimensions": "1080x1920",
+      "sha256": "4277fe0ac11f8ddbcde96337bc85e536f41d8b00157b12b31ab9706071ca5cb1"
+    },
+    {
+      "file": "seller-og.jpg",
+      "dimensions": "1200x630",
+      "sha256": "da259b3ec0bee6209b18f2b873d2fde5a2fdf0724adacfce4852f21a23747a36"
+    },
+    {
+      "file": "buyer-feed.jpg",
+      "dimensions": "1080x1350",
+      "sha256": "99cf3e99663e58de632d9c5e0d2d6f7483afb38fe4f17c4003f94fc02ec30e80"
+    },
+    {
+      "file": "buyer-story.jpg",
+      "dimensions": "1080x1920",
+      "sha256": "62154d0385264da3c2174e1028621ade19fc2604841a7f9dbbd75a2c6b5ca674"
+    },
+    {
+      "file": "buyer-og.jpg",
+      "dimensions": "1200x630",
+      "sha256": "fb577cb03440a12df4e1c323aead9804c5c4dc5a4d667c97f286d3578a4f2fbd"
+    }
+  ],
+  "qr": [
+    {
+      "decoded": "https://www.askmagicmike.com/home-value?utm_source=qr&utm_medium=print&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_qr",
+      "file": "seller-qr.png",
+      "result": "PASS"
+    },
+    {
+      "decoded": "https://www.askmagicmike.com/buy?utm_source=qr&utm_medium=print&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_qr",
+      "file": "buyer-qr.png",
+      "result": "PASS"
+    }
+  ]
+}

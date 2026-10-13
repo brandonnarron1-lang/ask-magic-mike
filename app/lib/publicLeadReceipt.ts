@@ -124,6 +124,7 @@ const ERROR_CONTRACTS = {
   invalid_lead_type: [400, "Invalid lead request type."],
   invalid_lead_source_surface: [400, "Invalid lead source."],
   invalid_attribution: [400, "Invalid attribution context."],
+  invalid_address_entry: [400, "Address details do not match. Review your entry."],
   idempotency_key_conflict: [400, "Submission references do not match. Please refresh and try again."],
   idempotency_key_required: [400, "A secure submission reference is required. Please refresh and try again."],
   idempotency_key_invalid: [400, "The submission reference is invalid. Please refresh and try again."],

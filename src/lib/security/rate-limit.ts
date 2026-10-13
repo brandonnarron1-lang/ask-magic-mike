@@ -293,6 +293,8 @@ export const LIMITS = {
   phoneSetup:     { limit: 10, windowMs: 10 * 60 * 1000 },
   /** Public appointment follow-up request — 10 per 10 minutes */
   appointmentRequest: { limit: 10, windowMs: 10 * 60 * 1000 },
+  /** Optional address lookup (suggest + resolve) — 30 per minute; route requires durable Production limiting. */
+  addressLookup: { limit: 30, windowMs: 60 * 1000 },
 } as const;
 
 export type LimitKey = keyof typeof LIMITS;

@@ -90,14 +90,14 @@ describe("public owned-referral handoff", () => {
     await waitFor(() => expect(share).toHaveBeenCalledWith(
       buildPublicReferralPacket("homepage"),
     ));
+    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent(
+      "Share options opened. You choose the person and app.",
+    ));
     expect(canShare).toHaveBeenCalledWith(buildPublicReferralPacket("homepage"));
     expect(trackEventMock).toHaveBeenCalledWith(
       "referral_share_handoff",
       expect.objectContaining({ source: "direct" }),
       { surface: "homepage", share_method: "native" },
-    );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Share options opened. You choose the person and app.",
     );
   });
 

@@ -1,4 +1,5 @@
 export type EmailProviderKind = "resend" | "smtp" | "invalid";
+import { configuredLaunchFrom } from "./leadAlertLaunch";
 
 export type SmtpConfiguration = {
   host: string;
@@ -62,7 +63,7 @@ function boundedTimeout(value: string | undefined, fallback: number) {
   return parsed;
 }
 
-export function configuredEmailProvider(env: NodeJS.ProcessEnv = process.env): EmailProviderKind {
+export function configuredEmailProvider(env: Readonly<Record<string, string | undefined>> = process.env): EmailProviderKind {
   const explicit = normalized(env.EMAIL_PROVIDER).toLowerCase();
   if (explicit === "resend" || explicit === "smtp") return explicit;
   // Preserve the already-deployed Resend configuration when the historical
@@ -72,7 +73,7 @@ export function configuredEmailProvider(env: NodeJS.ProcessEnv = process.env): E
 }
 
 export function resolveSmtpConfiguration(
-  env: NodeJS.ProcessEnv = process.env,
+  env: Readonly<Record<string, string | undefined>> = process.env,
 ): SmtpConfigurationResult {
   const host = normalized(env.SMTP_HOST).toLowerCase();
   const portText = normalized(env.SMTP_PORT);
@@ -148,17 +149,17 @@ export function resolveSmtpConfiguration(
   };
 }
 
-export function smtpConfigurationReady(env: NodeJS.ProcessEnv = process.env) {
+export function smtpConfigurationReady(env: Readonly<Record<string, string | undefined>> = process.env) {
   return resolveSmtpConfiguration(env).ok;
 }
 
 /** Read-only PR #279 readiness boundary: incomplete configuration must not
  * consume recoverable intents. No credential value leaves this function. */
-export function emailProviderConfigurationReady(env: NodeJS.ProcessEnv = process.env) {
+export function emailProviderConfigurationReady(env: Readonly<Record<string, string | undefined>> = process.env) {
   const provider = configuredEmailProvider(env);
   if (provider === "smtp") return smtpConfigurationReady(env);
   if (provider !== "resend") return false;
   const apiKey = normalized(env.RESEND_API_KEY);
-  const fromEmail = normalized(env.AGENT_NOTIFICATION_FROM_EMAIL || env.RESEND_FROM || env.FROM_EMAIL).toLowerCase();
-  return Boolean(apiKey && validEmail(fromEmail));
+  const from = env.AGENT_NOTIFICATION_FROM_EMAIL || env.RESEND_FROM || env.FROM_EMAIL;
+  return Boolean(apiKey && configuredLaunchFrom(from));
 }

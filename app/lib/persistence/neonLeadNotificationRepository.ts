@@ -7,6 +7,7 @@ import type {
   LeadNotificationRepository,
 } from "../leadNotificationTypes";
 import { NOTIFICATION_PENDING_STALE_MINUTES } from "../leadNotificationRetryPolicy";
+import { LAUNCH_LEAD_ALERT_TEMPLATE_VERSION, readFrozenLaunchAlert, type FrozenLaunchAlert } from "../leadAlertLaunch";
 import {
   normalizeAssignmentAgentRow,
   normalizeAssignmentLeadRow,
@@ -14,6 +15,24 @@ import {
 } from "./supabase/leadNotificationRepository";
 
 type Query = ReturnType<typeof neon>;
+export type PrivateLaunchEnvelope = {
+  notification: LeadNotificationRecord;
+  snapshot: FrozenLaunchAlert;
+  firstProviderAttemptAt: string | null;
+};
+export type LaunchAlertHealth = {
+  unresolved_over_5m: number; ambiguous_over_5m: number;
+  failed_over_5m: number; accepted_not_delivered_over_5m: number;
+};
+function launchRow(value: unknown): PrivateLaunchEnvelope | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  const snapshot = readFrozenLaunchAlert(raw.private_intake_snapshot);
+  const notification = row(raw);
+  if (!snapshot || !notification || snapshot.inquiry_id !== notification.lead_id || notification.template_version !== LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) return null;
+  const attempted = raw.first_provider_attempt_at;
+  return { notification, snapshot, firstProviderAttemptAt: attempted instanceof Date ? attempted.toISOString() : typeof attempted === "string" ? attempted : null };
+}
 
 function queryFromEnv(env: Record<string, string | undefined> = process.env): Query | null {
   return env.DATABASE_URL ? neon(env.DATABASE_URL) : null;
@@ -105,6 +124,7 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
          AND status IN ('pending', 'failed', 'retry_scheduled')
          AND attempt_count < max_attempts
          AND provider_message_id IS NULL
+         AND template_version <> 'lead_alert_email_v6'
          AND (status <> 'pending' OR attempt_count = 0)
          AND (status = 'pending' OR next_attempt_at <= now())
          AND NOT EXISTS (
@@ -165,6 +185,7 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
         )
           AND n.attempt_count < n.max_attempts
           AND n.provider_message_id IS NULL
+          AND n.template_version <> 'lead_alert_email_v6'
           AND left(n.notification_type,11) <> 'allocation_'
           AND l.is_test = false AND l.communication_suppressed = false
           AND l.email_suppressed = false AND l.sms_suppressed = false
@@ -179,6 +200,84 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
       ],
     );
     return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));
+  }
+
+  /** Dedicated server-only reader. Normal notification DTOs omit the snapshot. */
+  async findLaunchEnvelope(id: string): Promise<PrivateLaunchEnvelope | null> {
+    const rows = await this.sql.query("SELECT * FROM public.lead_notifications WHERE id=$1::uuid AND template_version='lead_alert_email_v6'", [id]);
+    return launchRow((rows as unknown[])[0]);
+  }
+
+  async listLaunchDue(cutoff: string, limit = 4): Promise<LeadNotificationRecord[]> {
+    const rows = await this.sql.query(
+      `SELECT n.*,l.is_test AS lead_is_test FROM public.lead_notifications n JOIN public.leads l ON l.id=n.lead_id
+       WHERE n.template_version='lead_alert_email_v6' AND n.notification_type='lead_alert' AND n.channel='email' AND n.recipient_type='internal'
+         AND n.created_at >= $1::timestamptz AND l.created_at >= $1::timestamptz
+         AND n.private_intake_snapshot->>'launch_cutoff'=to_char($1::timestamptz AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+         AND n.provider_message_id IS NULL AND n.provider_accepted_at IS NULL AND n.attempt_count<least(n.max_attempts,3)
+         AND (n.first_provider_attempt_at IS NULL OR now()<n.first_provider_attempt_at+interval '23 hours 59 minutes')
+         AND NOT l.is_test AND NOT l.communication_suppressed AND n.private_intake_snapshot->>'is_test'='false'
+         AND ((n.status='pending' AND n.attempt_count=0) OR (n.status IN ('failed','retry_scheduled')
+           AND n.error_code IN ('resend_http_429','resend_http_425') AND n.next_attempt_at<=now()))
+       ORDER BY coalesce(n.next_attempt_at,n.created_at),n.id LIMIT $2`, [cutoff, Math.max(1, Math.min(limit, 4))]);
+    return (rows as unknown[]).map(row).filter((value): value is LeadNotificationRecord => Boolean(value));
+  }
+
+  async claimLaunchEnvelope(id: string, cutoff: string, initialSend = false, lease: string | null = null): Promise<PrivateLaunchEnvelope | null> {
+    const rows = await this.sql.query("SELECT * FROM public.claim_launch_lead_alert_v1($1::uuid,$2::timestamptz,$3::boolean,$4::uuid)", [id, cutoff, initialSend, lease]);
+    return launchRow((rows as unknown[])[0]);
+  }
+
+  async finishLaunchAttempt(id: string, patch: {
+    status: string; providerMessageId?: string; acceptedAt?: string; errorCode?: string;
+    nextAttemptAt?: string;
+  }): Promise<LeadNotificationRecord | null> {
+    // A signed callback may win the race. Never overwrite its accepted message,
+    // delivered/bounced state or evidence with the later HTTP result.
+    const rows = await this.sql.query(
+      `UPDATE public.lead_notifications SET status=$2,provider_message_id=$3,
+       provider_accepted_at=$4::timestamptz,sent_at=CASE WHEN $4::timestamptz IS NOT NULL THEN $4::timestamptz ELSE sent_at END,
+       error_code=$5,error_summary=CASE WHEN $5::text IS NULL THEN NULL ELSE 'Launch delivery requires review; see per-envelope evidence.' END,
+       failed_at=CASE WHEN $5::text IS NOT NULL THEN now() ELSE NULL END,next_attempt_at=$6::timestamptz
+       WHERE id=$1::uuid AND template_version='lead_alert_email_v6' AND status='processing'
+         AND provider_message_id IS NULL AND provider_accepted_at IS NULL RETURNING *`,
+      [id, patch.status, patch.providerMessageId || null, patch.acceptedAt || null, patch.errorCode || null, patch.nextAttemptAt || null]);
+    return row((rows as unknown[])[0]) || this.findById(id);
+  }
+
+  async holdExpiredLaunchEnvelopes(cutoff: string) {
+    await this.sql.query(
+      `WITH expired AS (SELECT id FROM public.lead_notifications WHERE template_version='lead_alert_email_v6'
+       AND created_at >= $1::timestamptz AND private_intake_snapshot->>'launch_cutoff'=to_char($1::timestamptz AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+       AND status IN ('failed','retry_scheduled') AND provider_message_id IS NULL AND provider_accepted_at IS NULL
+       AND first_provider_attempt_at<=now()-interval '23 hours 59 minutes' ORDER BY created_at LIMIT 4 FOR UPDATE SKIP LOCKED)
+       UPDATE public.lead_notifications n SET status='permanently_failed',error_code='provider_retry_window_expired',
+       error_summary='Provider-key retention window ended; no automatic resubmission.',next_attempt_at=NULL,failed_at=now()
+       FROM expired WHERE n.id=expired.id`, [cutoff]);
+  }
+
+  async acquireLaunchBatch(cutoff: string): Promise<string | null> {
+    const rows = await this.sql.query("SELECT public.acquire_launch_alert_batch_v1($1::timestamptz) AS lease", [cutoff]);
+    const lease = (rows as Array<Record<string, unknown>>)[0]?.lease;
+    return typeof lease === "string" ? lease : null;
+  }
+  async releaseLaunchBatch(lease: string) {
+    await this.sql.query("UPDATE public.lead_notifications SET launch_batch_lease_token=NULL,launch_batch_lease_until=NULL WHERE template_version='lead_alert_email_v6' AND launch_batch_lease_token=$1::uuid", [lease]);
+  }
+  async readLaunchHealth(cutoff: string): Promise<LaunchAlertHealth> {
+    const rows = await this.sql.query(
+      `SELECT count(*)::integer AS unresolved_over_5m,
+       count(*) FILTER(WHERE n.status='processing')::integer AS ambiguous_over_5m,
+       count(*) FILTER(WHERE n.status IN ('failed','retry_scheduled','permanently_failed','skipped'))::integer AS failed_over_5m,
+       count(*) FILTER(WHERE n.provider_accepted_at IS NOT NULL AND coalesce(n.metadata->>'provider_delivery_confirmed','false')<>'true')::integer AS accepted_not_delivered_over_5m
+       FROM public.lead_notifications n JOIN public.leads l ON l.id=n.lead_id
+       WHERE n.template_version='lead_alert_email_v6' AND n.notification_type='lead_alert' AND n.channel='email' AND n.recipient_type='internal'
+       AND n.created_at>=$1::timestamptz AND l.created_at>=$1::timestamptz AND n.private_intake_snapshot->>'launch_cutoff'=to_char($1::timestamptz AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+       AND n.created_at<=now()-interval '5 minutes' AND NOT l.is_test AND NOT l.communication_suppressed
+       AND (n.status<>'sent' OR coalesce(n.metadata->>'provider_delivery_confirmed','false')<>'true')`, [cutoff]);
+    const raw = (rows as Array<Record<string, unknown>>)[0] || {};
+    return Object.fromEntries(["unresolved_over_5m", "ambiguous_over_5m", "failed_over_5m", "accepted_not_delivered_over_5m"]
+      .map(key => [key, Math.max(0, Number(raw[key]) || 0)])) as LaunchAlertHealth;
   }
 }
 

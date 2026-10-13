@@ -431,6 +431,39 @@ export function receiptTag(receipt, policy) {
   return `${policy.receiptStore.tagPrefix}${receipt.deployment.id}`;
 }
 
+/** A commit status is mutable across same-source redeployments. Bind rollback
+ * to a checksum-verified prior acceptance and that deployment's own recorded
+ * immutable URL. The authenticated resolver independently checks availability. */
+export function rollbackDeploymentFromAcceptedReceipt(receipt, githubDeployment, status, current, policy) {
+  validateProductionAcceptanceReceipt(receipt, policy);
+  if (receipt.deployment.id === current.vercelId || githubDeployment.id === current.githubId) {
+    fail("receipt_rollback_matches_current");
+  }
+  if (githubDeployment.id !== receipt.deployment.githubDeploymentId
+    || githubDeployment.sha !== receipt.source.mergeCommit
+    || githubDeployment.environment !== policy.productionTarget.githubEnvironment
+    || githubDeployment.creator?.login !== "vercel[bot]"
+    || status.creator?.login !== "vercel[bot]" || status.state !== "success") {
+    fail("receipt_prior_deployment_mismatch");
+  }
+  const before = Date.parse(current.createdAt);
+  const created = Date.parse(githubDeployment.created_at);
+  const accepted = Date.parse(receipt.acceptedAt);
+  if (![before, created, accepted].every(Number.isFinite) || created >= before || accepted > before) {
+    fail("receipt_prior_deployment_not_earlier");
+  }
+  const recorded = String(status.environment_url || status.target_url || "").replace(/\/$/, "");
+  let url;
+  try { url = new URL(recorded); } catch { fail("receipt_prior_generated_url_invalid"); }
+  if (url.protocol !== "https:" || !url.hostname.startsWith(`${policy.productionTarget.vercelProject}-`)
+    || !url.hostname.endsWith(".vercel.app") || url.username || url.password || url.port
+    || url.pathname !== "/" || url.search || url.hash
+    || recorded !== receipt.deployment.generatedUrl.replace(/\/$/, "")) {
+    fail("receipt_prior_generated_url_mismatch");
+  }
+  return receipt.deployment.id;
+}
+
 export function assertIdempotentReceiptReplay(existing, candidate) {
   const existingCanonical = canonicalJson(existing);
   const candidateCanonical = canonicalJson(candidate);

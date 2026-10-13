@@ -6,6 +6,8 @@ import {
 } from "../../adminLeadTimeline";
 import type { StalledLeadSignal } from "../../adminLeadLifecycle";
 import type { LeadSourceEvidence } from "../../leadSourceEvidence";
+import { normalizeAddressValue, type AddressValue } from "../../address/addressValue";
+import { normalizeBuyerInterest, type BuyerInterestV1 } from "../../buyerInterest";
 import {
   normalizeAppointment,
   normalizeTask,
@@ -61,6 +63,11 @@ export type AdminLeadView = {
   email: string | null;
   phone: string | null;
   address: string | null;
+  address_entry?: AddressValue | null;
+  buyer_interest?: BuyerInterestV1 | null;
+  duplicate_of_lead_id?: string | null;
+  /** Read ownership only; never an invented assignment on this inquiry. */
+  inquiry_owner_agent_id?: string | null;
   timeline: string | null;
   condition: string | null;
   question: string | null;
@@ -289,13 +296,32 @@ function summarizeContact(email: string | null, phone: string | null): string {
 
 function primaryDetail(row: {
   address: string | null;
+  buyer_interest?: BuyerInterestV1 | null;
   question: string | null;
   notes: string | null;
 }): string {
+  if (row.buyer_interest?.kind === "search") {
+    return ["Home search: " + row.buyer_interest.desired_area,
+      row.buyer_interest.budget_range ? "Budget: " + row.buyer_interest.budget_range : null]
+      .filter(Boolean).join(" · ");
+  }
+  if (row.buyer_interest?.kind === "specific") {
+    return "Property interest: " + row.buyer_interest.properties.map(property =>
+      [property.address_text, property.unit ? "Unit " + property.unit : null,
+        property.listing_url, property.reference ? "Reference " + property.reference : null]
+        .filter(Boolean).join(" · "))
+      .join(" | ");
+  }
   return row.address || row.question || row.notes || "No property detail";
 }
 
 export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadView {
+  let addressEntry: AddressValue | null = null;
+  if (row.address_entry) { try { addressEntry = normalizeAddressValue(row.address_entry); } catch { /* Historical/unsupported metadata is not fabricated. */ } }
+  let buyerInterest: BuyerInterestV1 | null = null;
+  if (row.buyer_interest !== undefined && row.buyer_interest !== null) {
+    try { buyerInterest = normalizeBuyerInterest(row.buyer_interest); } catch { /* Unsupported data is not relabeled as a valid interest. */ }
+  }
   const attribution = buildAttribution(row);
   const name = buildName(row);
   const email = text(row.email);
@@ -347,6 +373,10 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
     email,
     phone,
     address,
+    address_entry: addressEntry,
+    buyer_interest: buyerInterest,
+    duplicate_of_lead_id: text(row.duplicate_of_lead_id),
+    inquiry_owner_agent_id: firstText(row.assigned_agent_id, row.inquiry_owner_agent_id),
     timeline: text(row.timeline),
     condition: firstText(row.condition, row.property_condition),
     question,
