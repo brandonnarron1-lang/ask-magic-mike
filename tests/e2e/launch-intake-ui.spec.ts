@@ -190,6 +190,41 @@ test("ordinary saved-receipt UI passes its exact IDs to the shared appointment C
   expect(capture.appointmentBodies).toEqual([{ lead_id: capture.lead, session_id: capture.attempts[0].key, request_surface: "buyer_page" }]);
 });
 
+test("legacy Selling Options does not treat a bare 202 as a saved inquiry", async ({ page }) => {
+  const capture = captures.get(page)!;
+  capture.reply = route => route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ message: "Got it." }) });
+  await page.goto("/widget/v1"); await page.getByRole("tab", { name: "Selling Options", exact: true }).click();
+  await page.getByLabel("Property address", { exact: true }).fill(ADDRESS);
+  await page.getByLabel("Name optional", { exact: true }).fill(NAME);
+  await page.getByLabel("Phone required", { exact: true }).fill(PHONE);
+  await page.getByLabel("Email optional", { exact: true }).fill(EMAIL);
+  await page.getByRole("button", { name: "Send Seller Details", exact: true }).click();
+  await expect(page.locator("#seller-form-status")).toContainText("not saved");
+  await expect(page.getByLabel("Property address", { exact: true })).toHaveValue(ADDRESS);
+  await expect(page.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
+  expect(capture.attempts).toHaveLength(1); expect(capture.appointmentBodies).toHaveLength(0);
+});
+
+test("unknown Selling Options result holds other widget paths and retries identical bytes/key", async ({ page }) => {
+  const capture = captures.get(page)!;
+  capture.reply = async (route, attempt, index) => index===1
+    ? route.fulfill({ status: 500, contentType: "application/json", body: "{}" })
+    : saved(route, attempt, capture.lead, true);
+  await page.goto("/widget/v1"); await page.getByRole("tab", { name: "Selling Options", exact: true }).click();
+  await page.getByLabel("Property address", { exact: true }).fill(ADDRESS);
+  await page.getByLabel("Name optional", { exact: true }).fill(NAME);
+  await page.getByLabel("Phone required", { exact: true }).fill(PHONE);
+  await page.getByLabel("Email optional", { exact: true }).fill(EMAIL);
+  await page.getByRole("button", { name: "Send Seller Details", exact: true }).click();
+  await expect(page.locator("#seller-form-status")).toContainText("couldn't confirm");
+  for (const name of ["Get My Home Value", "Find a Home", "Ask a Question"]) await expect(page.getByRole("tab", { name, exact: true })).toBeDisabled();
+  await expect(page.getByRole("link", { name: "Open full form", exact: true })).toHaveCount(0);
+  await page.getByRole("button", { name: "Retry identical request", exact: true }).click();
+  await expect(page.locator("#seller-form-status")).toContainText("stored for review");
+  expect(capture.attempts).toHaveLength(2); expect(capture.attempts[1]).toEqual(capture.attempts[0]);
+  expect(capture.appointmentBodies).toHaveLength(0);
+});
+
 for (const width of [320, 390, 768, 1440]) {
   test(`seller and buyer review reflow at ${width}px and 200% text without submitting`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
@@ -201,7 +236,7 @@ for (const width of [320, 390, 768, 1440]) {
         await page.getByLabel("Property address", { exact: true }).fill(ADDRESS);
         await page.getByRole("button", { name: "Continue", exact: true }).click();
         await page.getByLabel("Your name").fill(NAME);
-        await page.getByLabel("Email", { exact: true }).fill(EMAIL);
+        await page.getByLabel("Email for your valuation follow-up", { exact: true }).fill(EMAIL);
       } else {
         await buyer(page);
         await page.getByLabel("Property address (or provide a listing URL)").fill(ADDRESS.repeat(2));
