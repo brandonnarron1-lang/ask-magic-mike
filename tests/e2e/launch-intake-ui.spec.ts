@@ -199,7 +199,7 @@ test("legacy Selling Options does not treat a bare 202 as a saved inquiry", asyn
   await page.getByLabel("Phone required", { exact: true }).fill(PHONE);
   await page.getByLabel("Email optional", { exact: true }).fill(EMAIL);
   await page.getByRole("button", { name: "Send Seller Details", exact: true }).click();
-  await expect(page.locator("#seller-form-status")).toContainText("not saved");
+  await expect(page.locator("#seller-form-status")).toContainText("couldn't confirm");
   await expect(page.getByLabel("Property address", { exact: true })).toHaveValue(ADDRESS);
   await expect(page.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
   expect(capture.attempts).toHaveLength(1); expect(capture.appointmentBodies).toHaveLength(0);

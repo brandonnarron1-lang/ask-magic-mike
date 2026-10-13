@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HomeValueFunnel } from "../../app/components/black-diamond/HomeValueFunnel";
 import { SellerIntentSection } from "../../app/components/black-diamond/SellerIntentSection";
+import { PUBLIC_LEAD_SAVED_MESSAGE } from "../../app/lib/publicLeadReceipt";
 vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
 
 Object.defineProperty(window, "matchMedia", {
@@ -107,11 +108,12 @@ describe("client replay analytics suppression", () => {
     const analytics = recordAnalytics();
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () =>
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) =>
         replayResponse({
           message: "Got it. Mike will review it.",
-          lead_id: "replay-seller-lead",
-          session_id: "replay-seller-session",
+          lead_id: "00000000-0000-4000-8000-000000000203",
+          session_id: JSON.parse(String(init?.body)).idempotency_key,
+          correlation_id: "00000000-0000-4000-8000-000000000202",
         }),
       ),
     );
@@ -122,7 +124,8 @@ describe("client replay analytics suppression", () => {
     await user.type(screen.getByLabelText("Phone required"), "2525550199");
     await user.click(screen.getByRole("button", { name: "Send Seller Details" }));
 
-    expect(await screen.findByText("Got it. Mike will review it.")).toBeVisible();
+    expect(await screen.findByText(PUBLIC_LEAD_SAVED_MESSAGE)).toBeVisible();
+    expect(screen.queryByText("Got it. Mike will review it.")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Request a conversation" })).toBeVisible();
     expect(analytics.events).not.toContain("lead_created");
 
