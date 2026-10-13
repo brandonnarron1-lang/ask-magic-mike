@@ -50,6 +50,7 @@ type AtomicWebhookResult = {
   recorded_payload_hash: string | null;
   notification_updated: number | string;
   communication_recorded: number | string;
+  delivery_evidence_recorded?: boolean;
   lead_suppressed: number | string;
   state_transition_applied: boolean;
   state_transition_ignored_reason: "out_of_order_event" | "concurrent_newer_event" | null;
@@ -243,6 +244,22 @@ async function recordResendEventAtomically(input: {
           AND (matched.previous_event_at IS NULL OR matched.previous_event_at <= $5::timestamptz)
        RETURNING notification.id
      ),
+     delivery_confirmation_update AS (
+       -- Cumulative signed evidence is distinct from the latest lifecycle
+       -- event. This predicate is disjoint from notification_update: an older
+       -- delivery cannot regress newer opened/clicked or terminal state.
+       UPDATE public.lead_notifications AS notification
+          SET metadata = COALESCE(notification.metadata, '{}'::jsonb)
+                || jsonb_build_object('provider_delivery_confirmed', true),
+              updated_at = now()
+         FROM matched_notification AS matched
+        WHERE notification.id = matched.id
+          AND matched.template_version = 'lead_alert_email_v6'
+          AND $3::text = 'delivered'
+          AND matched.previous_event_at > $5::timestamptz
+          AND COALESCE(notification.metadata->>'provider_delivery_confirmed', 'false') <> 'true'
+       RETURNING notification.id
+     ),
      communication_insert AS (
        INSERT INTO public.communication_events
          (lead_id, lead_notification_id, provider_event_id, event_type,
@@ -253,6 +270,7 @@ async function recordResendEventAtomically(input: {
                 'signature_verified', true,
                 'processing_contract', 'atomic_ordered_v2',
                 'state_transition_applied', EXISTS (SELECT 1 FROM notification_update),
+                'delivery_evidence_recorded', EXISTS (SELECT 1 FROM delivery_confirmation_update),
                 'state_transition_ignored_reason', CASE
                   WHEN EXISTS (SELECT 1 FROM notification_update) THEN NULL
                   WHEN matched.previous_event_at IS NOT NULL AND matched.previous_event_at > $5::timestamptz
@@ -293,6 +311,7 @@ async function recordResendEventAtomically(input: {
        ) AS recorded_payload_hash,
        (SELECT count(*)::int FROM notification_update) AS notification_updated,
        (SELECT count(*)::int FROM communication_insert) AS communication_recorded,
+       EXISTS (SELECT 1 FROM delivery_confirmation_update) AS delivery_evidence_recorded,
        (SELECT count(*)::int FROM lead_suppression) AS lead_suppressed,
        EXISTS (SELECT 1 FROM notification_update) AS state_transition_applied,
        CASE
@@ -438,6 +457,7 @@ export async function POST(request: NextRequest) {
     event_type: normalized.eventType,
     matched_notification: Boolean(result.matched_notification),
     state_transition_applied: Boolean(result.state_transition_applied),
+    delivery_evidence_recorded: Boolean(result.delivery_evidence_recorded),
     ...(result.state_transition_ignored_reason
       ? { state_transition_ignored_reason: result.state_transition_ignored_reason }
       : {}),

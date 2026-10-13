@@ -52,8 +52,8 @@ function originalEvidence() {
   return psql(`SELECT jsonb_build_object('lead',(SELECT to_jsonb(l)-ARRAY['buyer_interest','inquiry_request_fingerprint'] FROM leads l WHERE id=${literal(legacy.lead_id)}::uuid),
     'notifications',(SELECT jsonb_agg(to_jsonb(n)-ARRAY['private_intake_snapshot','first_provider_attempt_at','provider_accepted_at','launch_batch_lease_token','launch_batch_lease_until'] ORDER BY id) FROM lead_notifications n WHERE lead_id=${literal(legacy.lead_id)}::uuid));`);
 }
-function callback(id: unknown, recipient: string, type = "delivered", eventId = `synthetic_${randomUUID()}`, valid = true) {
-  const when = new Date(); const raw = JSON.stringify({ type: `email.${type}`, created_at: when.toISOString(), data: {
+function callback(id: unknown, recipient: string, type = "delivered", eventId = `synthetic_${randomUUID()}`, valid = true, occurredAt = new Date().toISOString()) {
+  const when = new Date(); const raw = JSON.stringify({ type: `email.${type}`, created_at: occurredAt, data: {
     email_id: `synthetic_message_${id}`, to: [recipient], tags: { amm_notification_id: id } } });
   return new NextRequest("https://www.askmagicmike.com/api/webhooks/email/events", { method: "POST", headers: {
     "content-type": "application/json", "svix-id": eventId, "svix-timestamp": String(Math.floor(when.getTime()/1000)),
@@ -194,5 +194,24 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolat
     expect(lead(records[0].lead_id).email_suppressed).toBe(false);
     expect(notifications(records[0].lead_id).find(record => record.recipient_reference==='operator:brandon')!.status).toBe("pending");
     expect((await POST(callback(records[0].id,"brandon@example.test","delivered",undefined,false))).status).toBe(400);
+  });
+  it("records stale signed delivery cumulatively without regressing opened or terminal state", async () => {
+    const records = await pending(); const id = records.find(record => record.recipient_reference==='operator:mike')!.id;
+    expect(claim(id,true)).toHaveLength(1); const { POST } = await import("../../app/api/webhooks/email/events/route");
+    const time = Date.now(), newer = new Date(time).toISOString(), older = new Date(time-1000).toISOString();
+    expect((await POST(callback(id,"mike@example.test","opened",undefined,true,newer))).status).toBe(200);
+    const delivery = callback(id,"mike@example.test","delivered",undefined,true,older), duplicate = delivery.clone() as NextRequest;
+    const receipt = await (await POST(delivery)).json();
+    expect(receipt).toMatchObject({ state_transition_applied:false, state_transition_ignored_reason:"out_of_order_event", delivery_evidence_recorded:true });
+    let updated = notifications(records[0].lead_id).find(record=>record.id===id)!;
+    expect(updated.status).toBe("sent"); expect(updated.metadata).toMatchObject({provider_delivery_confirmed:true,provider_last_event:"opened",provider_last_event_at:newer});
+    expect(rows(`SELECT * FROM communication_events WHERE lead_notification_id=${literal(id)}::uuid`)).toHaveLength(2);
+    expect((await POST(duplicate)).status).toBe(200);
+    expect(rows(`SELECT * FROM communication_events WHERE lead_notification_id=${literal(id)}::uuid`)).toHaveLength(2);
+    expect((await POST(callback(id,"mike@example.test","bounced",undefined,true,new Date(time+1000).toISOString()))).status).toBe(200);
+    expect((await POST(callback(id,"mike@example.test","delivered",undefined,true,older))).status).toBe(200);
+    updated = notifications(records[0].lead_id).find(record=>record.id===id)!;
+    expect(updated.status).toBe("permanently_failed"); expect(updated.metadata).toMatchObject({provider_delivery_confirmed:true,provider_last_event:"bounced"});
+    expect(lead(records[0].lead_id).email_suppressed).toBe(false);
   });
 });
