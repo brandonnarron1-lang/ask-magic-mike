@@ -88,7 +88,7 @@ async function installBoundary(page: Page): Promise<Capture> {
     externalBlocked: 0, capabilityReads: 0, capabilityModes: new Set(), pageErrors: [], checks: [], syntheticLeadIds: new Map(),
     reply: (route, attempt) => savedReply(route, capture, attempt),
   };
-  page.on("pageerror", error => capture.pageErrors.push(error.message));
+  page.on("pageerror", error => capture.pageErrors.push(error.stack || error.message));
   await page.addInitScript(() => {
     const state: BrowserEvidence = { documentId: crypto.randomUUID(), events: [], pageShows: [] };
     (window as Window & { __ammIntakeEvidence?: BrowserEvidence }).__ammIntakeEvidence = state;
@@ -461,6 +461,8 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await openHomeValue(page);
   const address = page.getByLabel("Property address", { exact: true });
   await address.focus(); await page.keyboard.type(ADDRESS); await page.keyboard.press("Tab");
+  await expect(funnel(page).getByRole("button", { name: "Enter / edit address manually", exact: true })).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(funnel(page).getByRole("button", { name: "Continue", exact: true })).toBeFocused();
   await page.keyboard.press("Enter");
   const name = page.getByLabel("Your name", { exact: true });
@@ -538,6 +540,23 @@ test("Eventless DOM address/contact values survive health recheck, consent and t
   });
 });
 
+test("Typed address and focused manual control remain stable through deferred capability deadlines", async ({ page }) => {
+  await openHomeValue(page);
+  const address = page.getByLabel("Property address", { exact: true });
+  await address.focus(); await page.keyboard.type(ADDRESS); await page.keyboard.press("Tab");
+  const manual = funnel(page).getByRole("button", { name: "Enter / edit address manually", exact: true });
+  await expect(manual).toBeFocused();
+  // Reproduce the first failure's ten-second observation window, rather than
+  // moving to the next step before pending capability deadlines can execute.
+  const until = Date.now() + 10_000;
+  while (Date.now() < until) {
+    await expect(manual).toBeFocused(); await expect(address).toHaveValue(ADDRESS);
+    expect(captures.get(page)!.pageErrors).toEqual([]);
+    await page.waitForTimeout(250);
+  }
+  expect(captures.get(page)!.attempts).toHaveLength(0);
+});
+
 test("Native values without change events survive Edit address and are submitted from actual controls", async ({ page }) => {
   await openHomeValue(page); await contact(page);
   // Native setter without input/change events models the integration hazard,
@@ -577,7 +596,8 @@ for (const width of [320, 390, 430, 768, 1440]) {
     await input.fill(LOOKUP_QUERY);
     await expect(page.getByRole("listbox", { name: "Address suggestions" })).toBeVisible();
     await input.press("ArrowDown"); await expect(input).toHaveAttribute("aria-activedescendant", /option-0$/);
-    await input.press("Enter");
+    if (width === 390) await page.getByRole("option").first().tap();
+    else await input.press("Enter");
     const correction = page.getByLabel("Review suggested correction");
     await expect(correction).toBeVisible(); await expect(correction).toBeFocused();
     await expect(correction).toContainText(LOOKUP_QUERY); await expect(correction).toContainText(SUGGESTED_ADDRESS);
