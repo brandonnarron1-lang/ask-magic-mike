@@ -87,7 +87,7 @@ for (const viewport of viewports) {
     await page.getByLabel("Property address").fill("123 INTERNAL QA Avenue, Wilson, NC");
     await page.getByRole("button", { name: "Continue" }).click();
     await page.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");
-    await page.getByLabel("Email for your valuation follow-up").fill("funnel-qa@example.com");
+    await page.getByLabel("Email for your valuation follow-up").fill("funnel-qa@example.test");
     await page.getByLabel("Phone (optional)").fill("2525550100");
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: "Request Valuation" }).click();
@@ -100,7 +100,7 @@ for (const viewport of viewports) {
       eventStart,
       homeSessionId,
       ["funnel_started", "address_submitted", "contact_submitted", "consent_accepted", "thank_you_viewed"],
-      ["INTERNAL QA DO NOT CONTACT", "funnel-qa@example.com", "2525550100", "123 INTERNAL QA Avenue"],
+      ["INTERNAL QA DO NOT CONTACT", "funnel-qa@example.test", "2525550100", "123 INTERNAL QA Avenue"],
     );
     await expectBrowserConversion(page);
     await expectNoHorizontalOverflow(page);
@@ -229,7 +229,7 @@ test("intercepted durable failure is recoverable, linked, private, and non-conve
   await page.getByLabel("Property address").fill("789 INTERNAL QA Road, Wilson, NC");
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");
-  await page.getByLabel("Email for your valuation follow-up").fill("failure-funnel-qa@example.com");
+  await page.getByLabel("Email for your valuation follow-up").fill("failure-funnel-qa@example.test");
   await page.getByRole("button", { name: "Request Valuation" }).click();
 
   await expect(page.locator("#home-value-form-error")).toBeVisible();
@@ -241,7 +241,7 @@ test("intercepted durable failure is recoverable, linked, private, and non-conve
     0,
     sessionId,
     ["funnel_started", "address_submitted", "contact_submitted", "lead_submit_failed"],
-    ["INTERNAL QA DO NOT CONTACT", "failure-funnel-qa@example.com", "789 INTERNAL QA Road"],
+    ["INTERNAL QA DO NOT CONTACT", "failure-funnel-qa@example.test", "789 INTERNAL QA Road"],
   );
   const emitted = await browserEvents(page);
   expect(emitted.some((entry) => entry.event === "lead_created")).toBe(false);

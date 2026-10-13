@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WidgetApp } from "../../app/components/black-diamond/WidgetApp";
 vi.mock("../../app/lib/analytics", () => ({ trackEvent: vi.fn() }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
 
 beforeEach(() => {
   Object.defineProperty(window, "matchMedia", { configurable: true, value: () => ({ matches: false, addListener() {}, removeListener() {} }) });
@@ -24,7 +25,7 @@ describe("actual widget components retain explicit URL claims without third-part
           if (String(url) === "/api/chat/message") return new Response(JSON.stringify({ message: "SYNTHETIC ANSWER — NO CONSUMER" }), { headers: { "Content-Type": "application/json" } });
           if (String(url) !== "/api/leads") throw new Error("unexpected_local_request");
           captures.push(JSON.parse(String(init?.body)));
-          return new Response(JSON.stringify({ message: "SYNTHETIC SAVE ONLY", lead_id: "synthetic-lead", session_id: "synthetic-session" }), { headers: { "Content-Type": "application/json" } });
+          return new Response(JSON.stringify({ message: "SYNTHETIC SAVE ONLY", lead_id: "00000000-0000-4000-8000-000000000301", session_id: captures.at(-1)!.idempotency_key, correlation_id: "00000000-0000-4000-8000-000000000302" }), { headers: { "Content-Type": "application/json", "X-AMM-Correlation-Id": "00000000-0000-4000-8000-000000000302" } });
         }));
         const user = userEvent.setup();
         render(<WidgetApp />);

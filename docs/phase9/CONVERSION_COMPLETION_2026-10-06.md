@@ -830,3 +830,70 @@ generation to v4. Never delete/rewrite/resend outbox history to enable rollback.
 No hosted/publication/Production/send authority is supplied by this local receipt.
 The existing Agent Command Center operational-acceptance boundary remains next;
 unrelated verified product surfaces are not relabeled unfinished.
+
+### Live Home Value intake repair — October 12, 2026; local candidate
+
+Fresh authenticated release resolution accepted PR295: main
+`d764f0e8b52f60f57392a212e3190d03c5f32134`, tree
+`f14d2e4e8928a18045b0d46a04e815a3b1455fe0`, Production
+`dpl_GKUubWxaFzJXoLKQtkzQqd38JQHa`. This is the compatible app-only
+rollback, retaining v5 reading and v4 generation. PR296 remains separate/disabled.
+
+The local repair adds early live/demo/synthetic capability disclosure; validates
+the actual public response identifiers; preserves one frozen payload/key across
+uncertainty; retains native autofill and deliberate consent when editing the
+address; and fixes the reproduced 320px enlarged-text grid overflow. A tab-scoped
+recovery marker contains only version/key/time, never personal form data. A full
+reload of an unresolved request blocks a fresh capture, not an automatic retry.
+Blocked storage cannot promise full-reload recovery; the user is told to keep the
+page and its reference. The existing POST, database, routing, permissions,
+outbox/template versions, consumer suppression and delivery transport are retained.
+
+New local evidence: six actual PostgreSQL intake/fidelity/replay/rollback cases,
+24 retained notification-recovery cases, and 23 unique compiled Chromium UI
+cases. Browser receipt fixtures are intercepted and are NOT database/provider
+proof. The actual browser history return created a new document with the pending
+reference guard; a trusted bfcache hit was not observed. Initial failures and the
+accepted-source incomplete-200 reproduction remain in private evidence. The
+200% check waits for actual doubled root/control/glyph size, retaining no-overflow
+and target-size assertions; it does not shrink type or suppress page errors.
+
+Anonymous accepted Production reads showed HTTP200, canonical Home Value and a
+visible first address field at 390/430x844. These are desktop Chromium viewports,
+not physical iPhone/Safari/Mail evidence or a live capture. The exact reported
+iPhone Preview hostname/link and the owner's actual address/contact/consent inputs
+were unavailable. One owner-input question was issued; no live submission/send
+has been made. No private inputs may be guessed or replaced with fixtures.
+
+Scope authorization covers the focused repair/release and at most one fresh,
+six-hour synthetic venue within a new $5 total allowance. Allocation still
+requires final-source gates and verified cost/headroom/provenance. No old retired
+venue is restored. Preview setup is separate from the zero-migration, unchanged
+Production-configuration application release. Final source-bound checks and
+deployment acceptance must supersede this local checkpoint before calling it live.
+
+Private evidence is in `.amm-run/live-intake-repair-20261012/` of
+`live-intake-repair-20261012`; do not publish protected URLs, credentials or inputs.
+Brandon acceptance/no-v5 census remain closed historical findings. Cleaner email
+remains approved but NOT SENT / secure execution access unavailable; WordPress,
+carrier/pilot holds, historical failures, NellySelly and PropertyLens are untouched.
+
+The first PR297 hosted run (`38314096582`) passed unit, actual intake SQL,
+typecheck/lint/build and reference-session gates, then failed before the conversion
+test's expected POST: its unmarked fixture was correctly refused by synthetic-QA
+UI. Later browser/report gates were skipped, not passes. The correction keeps that
+refusal and marked-QA UI-to-SQL proof, and separately exercises ordinary synthetic
+Home Value HTTP-to-SQL/manual follow-through plus the existing seller/shared
+appointment UI. This is not ordinary Home Value consumer browser-to-appointment
+proof. The first seller-selector failure is retained; no application rule was
+weakened to make these tests pass.
+
+Local tests also reproduced eventless native address/contact values being erased
+by unrelated React rerenders, including a phone becoming empty after consent.
+The Home Value-only correction lets mounted native fields retain their values;
+existing FormData snapshots seed defaults on step remount. Consent, classification,
+frozen payload/key, handler, routing and delivery rules remain unchanged. Failing
+and passing unit evidence is retained privately. DOM-assignment tests model an
+autofill integration hazard, not physical iPhone/system-autofill acceptance.
+These corrective changes require new final-source local/hosted/Preview evidence;
+the predecessor's green results do not accept the revised source.

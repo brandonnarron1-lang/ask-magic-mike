@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { HomeValueFunnel } from "../../app/components/black-diamond/HomeValueFunnel";
 import { assignExperimentVariant } from "../../app/lib/growth/experiment-engine";
 import { HOME_VALUE_TRUST_EXPERIMENT } from "../../app/lib/growth/experiment-registry";
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
 
 const EXPERIMENT_SUBJECT_KEY = "d".repeat(64);
 const EXPERIMENT_VARIANT_KEY = assignExperimentVariant(
@@ -109,9 +110,10 @@ describe("home-value inline validation", () => {
       if (String(input) === "/api/leads") {
         return new Response(JSON.stringify({
           message: "Stored for broker review.",
-          lead_id: "qa-email-only-lead",
-          session_id: "qa-email-only-session",
-        }), { status: 200, headers: { "Content-Type": "application/json" } });
+          lead_id: "00000000-0000-4000-8000-000000000101",
+          session_id: JSON.parse(String(_init?.body)).idempotency_key,
+          correlation_id: "00000000-0000-4000-8000-000000000102",
+        }), { status: 200, headers: { "Content-Type": "application/json", "X-AMM-Correlation-Id": "00000000-0000-4000-8000-000000000102" } });
       }
       return new Response(JSON.stringify({ accepted: true }), {
         status: 202,
@@ -186,7 +188,8 @@ describe("home-value inline validation", () => {
     await user.type(screen.getByLabelText("Email for your valuation follow-up"), "failure@example.test");
     await user.click(screen.getByRole("button", { name: "Request Valuation" }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("intercepted_failure");
+    expect(await screen.findByRole("alert")).toHaveTextContent("We couldn't confirm whether your request was saved.");
+    expect(screen.getByRole("alert")).not.toHaveTextContent("intercepted_failure");
     expect(screen.getByText("Step 2 of 3")).toBeVisible();
     expect(events).toContain("lead_submit_failed");
     expect(events).not.toContain("lead_created");

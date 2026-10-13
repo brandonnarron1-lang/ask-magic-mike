@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HomeValueFunnel } from "../../app/components/black-diamond/HomeValueFunnel";
 import { SellerIntentSection } from "../../app/components/black-diamond/SellerIntentSection";
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,
@@ -24,6 +25,7 @@ function replayResponse(body: Record<string, unknown>) {
     headers: {
       "Content-Type": "application/json",
       "X-AMM-Idempotent-Replay": "1",
+      "X-AMM-Correlation-Id": "00000000-0000-4000-8000-000000000202",
     },
   });
 }
@@ -58,11 +60,12 @@ describe("client replay analytics suppression", () => {
     const postMessage = vi.spyOn(window.parent, "postMessage").mockImplementation(() => {});
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () =>
+      vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) =>
         replayResponse({
           message: "Got it. Mike will follow up shortly.",
-          lead_id: "replay-home-lead",
-          session_id: "replay-home-session",
+          lead_id: "00000000-0000-4000-8000-000000000201",
+          session_id: JSON.parse(String(init?.body)).idempotency_key,
+          correlation_id: "00000000-0000-4000-8000-000000000202",
         }),
       ),
     );
@@ -77,7 +80,8 @@ describe("client replay analytics suppression", () => {
     await user.click(screen.getByRole("button", { name: "Request Valuation" }));
 
     expect(await screen.findByText("Your request is in.")).toBeVisible();
-    expect(screen.getByText("Got it. Mike will follow up shortly.")).toBeVisible();
+    expect(screen.getByText("Your labeled troubleshooting request is stored for internal review. This confirmation does not create consumer contact or an appointment.")).toBeVisible();
+    expect(screen.queryByText("Got it. Mike will follow up shortly.")).not.toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith(
       "/api/leads",
       expect.objectContaining({

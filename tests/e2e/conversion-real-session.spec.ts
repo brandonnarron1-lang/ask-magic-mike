@@ -2,9 +2,15 @@ import { readFileSync } from "node:fs";
 import { Pool } from "pg";
 import { randomUUID } from "node:crypto";
 import { expect, test, type BrowserContext, type Locator, type Page } from "@playwright/test";
+import { timelineOptions } from "../../app/lib/constants";
+import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../app/lib/leadConsent";
 
 // Main's opt-in runner creates this disposable database, synthetic identities,
 // and built-app transport. Never attach this mutation suite to another venue.
+// Intake proof is intentionally split: marked Home Value UI -> real SQL,
+// ordinary Home Value HTTP -> real SQL/manual UI, and seller saved-receipt UI
+// -> the shared public appointment handler. The latter is not ordinary Home
+// Value browser-to-appointment acceptance. Health/capability are never mocked.
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE !== "1", "Run the isolated conversion acceptance command");
 test.describe.configure({ mode: "serial" });
 type Fixture = { ids: Record<string, string>; agents: Record<string, string>; leads: Record<string, string> };
@@ -40,6 +46,16 @@ async function countResponse() {
 }
 async function noOverflow(page: Page) {
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1)).toBe(true);
+}
+async function isolatedPublicOrigin(page: Page) {
+  // next start uses Production Origin policy in this isolated venue. Map ONLY
+  // the Origin; actual UI bytes, public handlers, responses and SQL are real.
+  // This proves neither deployed DNS/TLS nor cross-domain browser behavior.
+  await page.route(/\/api\/(?:leads|appointments\/request)$/, async route => {
+    expect(new URL(route.request().url()).origin).toBe(new URL(test.info().project.use.baseURL!).origin);
+    const response = await route.fetch({ headers: { ...route.request().headers(), origin: "https://www.askmagicmike.com" } });
+    await route.fulfill({ response });
+  });
 }
 
 test.beforeAll(async ({ browser }) => {
@@ -88,41 +104,99 @@ test("Authentication-dependent command aliases render dynamically when auth was 
   await page.close();
 });
 
-test("Actual source-tagged inquiry reaches Mike-first owner, human follow-through, appointment and scoped reporting",async()=>{
+test("Real Home Value synthetic-QA UI rejects unmarked contact without POST, then captures a distinct marked request with no appointment CTA",async()=>{
   test.setTimeout(120_000);
   const owner=await contexts.owner.newPage();
-  const source="synthetic_conversion_capture";
-  await owner.goto(`/home-value?utm_source=${source}&utm_medium=owned_media&utm_campaign=synthetic_conversion_only&utm_content=wordpress_home_value_page`);
-  const email=`${randomUUID()}@example.test`;
-  // next start intentionally uses production Origin policy even in this
-  // isolated venue. Map ONLY the local intake request's Origin to the owned
-  // hostname: actual UI payload, public handler, auth and SQL stay unchanged.
-  // This does not prove deployed DNS/TLS or cross-domain browser behavior.
-  await owner.route(/\/api\/(?:leads|appointments\/request)$/,async(route)=>{
-    expect(new URL(route.request().url()).origin).toBe(new URL(owner.url()).origin);
-    const response=await route.fetch({headers:{...route.request().headers(),origin:"https://www.askmagicmike.com"}});
-    await route.fulfill({response});
+  const health = await owner.request.get("/api/health/live");
+  expect(health.status()).toBe(200);
+  expect(await health.json()).toMatchObject({ ok: true, service: "ask-magic-mike", public_intake: "synthetic_qa" });
+  let leadPosts = 0;
+  owner.on("request", request => {
+    if (new URL(request.url()).pathname === "/api/leads" && request.method() === "POST") leadPosts += 1;
   });
-  await owner.getByLabel("Property address").fill("1 Synthetic Test Street, Wilson, NC");
+  await isolatedPublicOrigin(owner);
+  const source="synthetic_conversion_qa_ui";
+  await owner.goto(`/home-value?utm_source=${source}&utm_medium=owned_media&utm_campaign=synthetic_conversion_only&utm_content=wordpress_home_value_page`);
+  await expect(owner.locator('.amm-home-value [data-intake-mode="synthetic_qa"]')).toBeVisible();
+  const email=`${randomUUID()}@example.test`;
+  await owner.getByLabel("Property address").fill("2 Synthetic Test Street, Wilson, NC");
   await owner.getByRole("button",{name:"Continue",exact:true}).click();
   await owner.getByLabel("Your name",{exact:true}).fill("SYNTHETIC FIXTURE — NOT A CONSUMER");
   await owner.getByLabel("Email for your valuation follow-up").fill(email);
   await owner.locator('[data-amm-step="contact"]').getByRole("checkbox").check();
-  const response=owner.waitForResponse(r=>new URL(r.url()).pathname==="/api/leads"&&r.request().method()==="POST");
   await owner.getByRole("button",{name:"Request Valuation",exact:true}).click();
-  const intake=await response; const body=await intake.json();
+  await expect(owner.locator(".amm-home-value").getByRole("alert")).toContainText("Synthetic QA only: use an INTERNAL QA / DO NOT CONTACT name and an example.test email.");
+  await expect(owner.getByLabel("Your name",{exact:true})).toHaveValue("SYNTHETIC FIXTURE — NOT A CONSUMER");
+  await expect(owner.getByLabel("Email for your valuation follow-up")).toHaveValue(email);
+  await expect(owner.getByRole("heading",{name:"Your request is in.",exact:true})).toHaveCount(0);
+  expect(leadPosts).toBe(0);
+  expect((await sql("SELECT count(*)::int AS n FROM leads WHERE email=$1",[email]))[0].n).toBe(0);
+
+  const qaEmail=`${randomUUID()}@example.test`;
+  await owner.getByLabel("Your name",{exact:true}).fill("SYNTHETIC UI FIXTURE | INTERNAL QA | DO NOT CONTACT");
+  await owner.getByLabel("Email for your valuation follow-up").fill(qaEmail);
+  const [intake] = await Promise.all([
+    owner.waitForResponse(r=>new URL(r.url()).pathname==="/api/leads"&&r.request().method()==="POST"),
+    owner.getByRole("button",{name:"Request Valuation",exact:true}).click(),
+  ]);
+  const body=await intake.json();
   expect(intake.status(),JSON.stringify(body)).toBe(200);
+  const submitted = intake.request().postDataJSON();
+  expect(submitted).toMatchObject({funnel_type:"home_value",lead_source_surface:"home_value_page",
+    name:"SYNTHETIC UI FIXTURE | INTERNAL QA | DO NOT CONTACT",email:qaEmail});
+  expect(body.session_id).toBe(submitted.idempotency_key);
   await expect(owner.getByRole("heading",{name:"Your request is in.",exact:true})).toBeVisible();
+  expect(leadPosts).toBe(1);
   const leadId=body.lead_id; expect(leadId).toBeTruthy();
+  expect((await sql("SELECT email,is_test,communication_suppressed,assigned_agent_id FROM leads WHERE id=$1",[leadId]))[0])
+    .toMatchObject({email:qaEmail,is_test:true,communication_suppressed:true,assigned_agent_id:fixture.agents.owner});
+  expect((await sql("SELECT count(*)::int AS n FROM consents WHERE lead_id=$1",[leadId]))[0].n).toBe(3);
+  expect((await sql("SELECT count(*)::int AS n FROM audit_logs WHERE resource_id=$1 AND action='lead.qa_suppressed'",[leadId]))[0].n).toBe(1);
+  await expect(owner.getByRole("button",{name:"Request a conversation",exact:true})).toHaveCount(0);
+  await expect(owner.locator(".amm-home-value")).toContainText("This test request does not create an appointment or consumer outreach.");
+  expect((await sql("SELECT count(*)::int AS n FROM lead_appointments WHERE lead_id=$1",[leadId]))[0].n).toBe(0);
+  expect((await sql("SELECT count(*)::int AS n FROM tasks WHERE lead_id=$1 AND category='followup:appointment_confirmation'",[leadId]))[0].n).toBe(0);
+  expect((await sql("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
+  await owner.close();
+});
+
+test("Ordinary synthetic Home Value root HTTP capture reaches Mike-first owner, genuine appointment HTTP, manual UI and scoped reporting (not consumer intake UI proof)",async()=>{
+  test.setTimeout(120_000);
+  const owner=await contexts.owner.newPage();
+  const source="synthetic_conversion_capture";
+  const email=`${randomUUID()}@example.test`;
+  const key=randomUUID();
+  // Preserve ordinary lifecycle semantics without clearing a QA record or
+  // claiming the synthetic-QA Home Value UI accepts an unmarked consumer.
+  // This is the real local root HTTP handler -> isolated SQL, not direct SQL,
+  // a handler import, a mocked receipt, or a replacement browser response.
+  const intake=await owner.request.post("/api/leads",{
+    headers:{Origin:"https://www.askmagicmike.com","Idempotency-Key":key},
+    data:{
+      funnel_type:"home_value",lead_source_surface:"home_value_page",
+      address:"1 Synthetic Test Street, Wilson, NC",name:"SYNTHETIC FIXTURE — NOT A CONSUMER",email,phone:"",
+      timeline:timelineOptions[1],status:"new",assigned_agent_id:null,
+      widget_session_id:key,idempotency_key:key,
+      consent:true,consent_email:true,consent_call:false,
+      consent_language_version:LEAD_CONSENT_LANGUAGE_VERSION,consent_language_text:LEAD_CONSENT_LANGUAGE_TEXT,
+      consent_source:"home_value_page:home-value",
+      attribution:{source,medium:"owned_media",campaign:"synthetic_conversion_only",content:"wordpress_home_value_page"},
+    },
+  });
+  const body=await intake.json();
+  expect(intake.status(),JSON.stringify(body)).toBe(200);
+  expect(body.session_id).toBe(key);
+  const leadId=body.lead_id; expect(leadId).toBeTruthy();
+  expect((await sql("SELECT email,is_test,communication_suppressed FROM leads WHERE id=$1",[leadId]))[0])
+    .toMatchObject({email,is_test:false,communication_suppressed:false});
   expect((await sql("SELECT assigned_agent_id FROM leads WHERE id=$1",[leadId]))[0].assigned_agent_id).toBe(fixture.agents.owner);
   expect((await sql("SELECT utm_source,utm_medium FROM source_attribution WHERE lead_id=$1",[leadId]))[0]).toMatchObject({utm_source:source,utm_medium:"owned_media"});
   expect((await sql("SELECT count(*)::int AS n FROM consents WHERE lead_id=$1",[leadId]))[0].n).toBe(3);
-  const appointmentResponse=owner.waitForResponse(r=>new URL(r.url()).pathname==="/api/appointments/request"&&r.request().method()==="POST");
-  await owner.getByRole("button",{name:"Request a conversation",exact:true}).click();
-  const requested=await appointmentResponse; expect(requested.status()).toBe(200);
-  await expect(owner.getByRole("heading",{name:"Your appointment request has been received.",exact:true})).toBeVisible();
-  expect((await sql("SELECT count(*)::int AS n FROM tasks WHERE lead_id=$1 AND category='followup:appointment_confirmation'",[leadId]))[0].n).toBe(1);
   const appointmentBody={lead_id:leadId,session_id:body.session_id,request_surface:"home_value_page"};
+  const requested=await owner.request.post("/api/appointments/request",{headers:{Origin:"https://www.askmagicmike.com"},data:appointmentBody});
+  expect(requested.status()).toBe(200);
+  expect(await requested.json()).toMatchObject({status:"requested"});
+  expect((await sql("SELECT count(*)::int AS n FROM tasks WHERE lead_id=$1 AND category='followup:appointment_confirmation'",[leadId]))[0].n).toBe(1);
   const replay=await owner.request.post("/api/appointments/request",{headers:{Origin:"https://www.askmagicmike.com"},data:appointmentBody});
   expect(replay.status()).toBe(200); expect(await replay.json()).toMatchObject({status:"already_requested"});
   const wrongSession=await owner.request.post("/api/appointments/request",{headers:{Origin:"https://www.askmagicmike.com"},data:{...appointmentBody,session_id:randomUUID()}});
@@ -148,6 +222,55 @@ test("Actual source-tagged inquiry reaches Mike-first owner, human follow-throug
   await panel(analyst,"Source to outcome").screenshot({path:"output/playwright/conversion-source-outcome-panel-390.png"});
   expect((await sql("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
   await owner.close();await analyst.close();
+});
+
+test("Distinct ordinary seller saved-receipt UI drives the shared AppointmentRequestCTA and genuine public appointment HTTP-to-SQL", async () => {
+  test.setTimeout(120_000);
+  const owner = await contexts.owner.newPage();
+  await isolatedPublicOrigin(owner);
+  const source = "synthetic_conversion_seller_ui";
+  const email = `${randomUUID()}@example.test`;
+  // A separate fictional identity/address/phone prevents deduplication with
+  // the marked QA capture, ordinary Home Value fixture or seeded role leads.
+  // The existing seller form mounts the same AppointmentRequestCTA only after
+  // its own genuine public intake receipt; no component/receipt injection.
+  await owner.goto(`/sell?utm_source=${source}&utm_medium=owned_media&utm_campaign=synthetic_conversion_only&utm_content=synthetic_seller_appointment_ui`);
+  await owner.getByLabel("Property address", { exact: true }).fill("3 Synthetic Test Street, Wilson, NC");
+  await owner.getByLabel("Name optional", { exact: true }).fill("SYNTHETIC SELLER FIXTURE — NOT A CONSUMER");
+  await owner.getByLabel("Phone required", { exact: true }).fill("+12025550198");
+  await owner.getByLabel("Email optional", { exact: true }).fill(email);
+  await owner.getByRole("combobox", { name: /Timeline \(optional\)/ }).selectOption(timelineOptions[1]);
+  await owner.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
+  await expect(owner.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
+  const [intake] = await Promise.all([
+    owner.waitForResponse(response => new URL(response.url()).pathname === "/api/leads" && response.request().method() === "POST"),
+    owner.getByRole("button", { name: "Send Seller Details", exact: true }).click(),
+  ]);
+  const body = await intake.json();
+  expect(intake.status(), JSON.stringify(body)).toBe(200);
+  expect(intake.request().postDataJSON()).toMatchObject({ funnel_type: "seller", lead_source_surface: "seller_page", email });
+  expect(body.session_id).toBe(intake.request().postDataJSON().idempotency_key);
+  const leadId = body.lead_id; expect(leadId).toBeTruthy();
+  expect((await sql("SELECT email,is_test,communication_suppressed,assigned_agent_id FROM leads WHERE id=$1", [leadId]))[0])
+    .toMatchObject({ email, is_test: false, communication_suppressed: false, assigned_agent_id: fixture.agents.owner });
+  expect((await sql("SELECT utm_source,utm_medium FROM source_attribution WHERE lead_id=$1", [leadId]))[0])
+    .toMatchObject({ utm_source: source, utm_medium: "owned_media" });
+  expect((await sql("SELECT count(*)::int AS n FROM consents WHERE lead_id=$1", [leadId]))[0].n).toBe(3);
+  await expect(owner.getByRole("button", { name: "Request a conversation", exact: true })).toBeVisible();
+  const [requested] = await Promise.all([
+    owner.waitForResponse(response => new URL(response.url()).pathname === "/api/appointments/request" && response.request().method() === "POST"),
+    owner.getByRole("button", { name: "Request a conversation", exact: true }).click(),
+  ]);
+  expect(requested.status()).toBe(200);
+  expect(await requested.json()).toMatchObject({ status: "requested" });
+  expect(requested.request().postDataJSON()).toEqual({ lead_id: leadId, session_id: body.session_id, request_surface: "seller_page" });
+  await expect(owner.getByRole("heading", { name: "Your appointment request has been received.", exact: true })).toBeVisible();
+  await expect(owner.getByRole("button", { name: "Request received", exact: true })).toBeDisabled();
+  expect((await sql("SELECT count(*)::int AS n FROM tasks WHERE lead_id=$1 AND category='followup:appointment_confirmation'", [leadId]))[0].n).toBe(1);
+  expect((await sql("SELECT count(*)::int AS n FROM lead_appointments WHERE lead_id=$1 AND status='requested'", [leadId]))[0].n).toBe(1);
+  expect((await sql("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
+  await owner.screenshot({ path: "output/playwright/conversion-seller-shared-appointment-ui-390.png", fullPage: true });
+  await owner.close();
 });
 
 test("Genuine task action preserves invalid draft, replays a lost response once, and never infers contact", async () => {

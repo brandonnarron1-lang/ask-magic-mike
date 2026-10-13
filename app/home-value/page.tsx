@@ -16,12 +16,12 @@ export default function HomeValuePage() {
   return (
     <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
       <PageTracker funnelName="home_value" />
-      <section className="bg-[#050505] px-5 py-6 sm:px-8 lg:px-10">
+      <section className="bg-[#050505] px-5 py-3 sm:px-8 lg:px-10 lg:py-6">
         <div className="mx-auto max-w-7xl">
           <BlackDiamondHeader />
         </div>
       </section>
-      <section id="page-content" tabIndex={-1} className="px-5 py-14 sm:px-8 lg:px-10">
+      <section id="page-content" tabIndex={-1} className="px-5 py-6 sm:px-8 lg:px-10 lg:py-14">
         <HomeValueExperimentExperience />
       </section>
       <TrustProofStrip />

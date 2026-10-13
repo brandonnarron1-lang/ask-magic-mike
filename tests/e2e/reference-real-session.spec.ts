@@ -1,4 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import twilio from "twilio";
@@ -312,5 +313,5 @@ test("Bounded real-session reporting/queue load records predeclared latency and 
     metrics.push(metric);expect(errors).toBe(0);expect(metric.p95Ms).toBeLessThan(budgetP95Ms);
   }
   const plans=await sql("EXPLAIN (ANALYZE,BUFFERS,FORMAT JSON) SELECT id FROM leads WHERE assigned_agent_id=$1::uuid ORDER BY created_at DESC LIMIT 50",[f.agents.agent]);
-  writeFileSync(".amm-run/reference-session-acceptance/performance.json",JSON.stringify({at:new Date().toISOString(),dataset:{additionalLeads:dataset,auditRows:dataset*5},budgetP95Ms,metrics,plans,scope:"isolated PG17/loopback; not hosted latency or carrier SLA"},null,2),{mode:0o600});
+  writeFileSync(join(process.env.AMM_SESSION_ARTIFACT_DIR || ".amm-run/reference-session-acceptance", "performance.json"),JSON.stringify({at:new Date().toISOString(),dataset:{additionalLeads:dataset,auditRows:dataset*5},budgetP95Ms,metrics,plans,scope:"isolated PG17/loopback; not hosted latency or carrier SLA"},null,2),{mode:0o600});
 });
