@@ -16,6 +16,7 @@ import {
   validateProductionAcceptanceReceipt,
   validateReleaseAuthorityPolicy,
   withReceiptIntegrity,
+  rollbackDeploymentFromAcceptedReceipt,
 } from "../../scripts/lib/release-authority-receipt.mjs";
 
 const policy = validateReleaseAuthorityPolicy(policyJson);
@@ -75,6 +76,47 @@ function receiptEvidence() {
 function validReceipt() {
   return buildProductionAcceptanceReceipt(receiptEvidence(), policy);
 }
+
+describe("same-source immutable rollback identity", () => {
+  function prior() {
+    const receipt = validReceipt();
+    const deployment = { id: receipt.deployment.githubDeploymentId, sha: receipt.source.mergeCommit,
+      environment: "Production", created_at: "2026-10-02T11:59:00Z", creator: { login: "vercel[bot]" } };
+    const status = { state: "success", environment_url: receipt.deployment.generatedUrl, creator: { login: "vercel[bot]" } };
+    const current = { githubId: 123457, vercelId: "dpl_ActiveSameSource456", createdAt: "2026-10-02T12:01:00Z" };
+    return { receipt, deployment, status, current };
+  }
+  it("keeps accepted reader deployment when a mutable same-SHA status now points at the active deployment", () => {
+    const p = prior();
+    expect(rollbackDeploymentFromAcceptedReceipt(p.receipt,p.deployment,p.status,p.current,policy)).toBe("dpl_Current123");
+    // No mutable commit-status argument or new Vercel credential is required.
+    expect(p.deployment.sha).toBe(p.receipt.source.mergeCommit);
+  });
+  it("refuses current identity even with a previous GitHub deployment ID", () => {
+    const p = prior(); p.current.vercelId = p.receipt.deployment.id;
+    expect(() => rollbackDeploymentFromAcceptedReceipt(p.receipt,p.deployment,p.status,p.current,policy)).toThrow("receipt_rollback_matches_current");
+  });
+  it.each(["sha","id","environment"]) ("refuses conflicting prior GitHub %s", field => {
+    const p = prior(); const wrong = { ...p.deployment, [field]: field === "id" ? 999 : "conflicting" };
+    expect(() => rollbackDeploymentFromAcceptedReceipt(p.receipt,wrong,p.status,p.current,policy)).toThrow("receipt_prior_deployment_mismatch");
+  });
+  it("refuses a mutable alias, unrelated URL or unauthorized success actor", () => {
+    const p = prior();
+    for (const url of ["https://www.askmagicmike.com", "https://other.example.test", "https://ask-magic-mike-other.vercel.app"]) {
+      expect(() => rollbackDeploymentFromAcceptedReceipt(p.receipt,p.deployment,{...p.status,environment_url:url},p.current,policy)).toThrow("receipt_prior_generated_url_mismatch");
+    }
+    expect(() => rollbackDeploymentFromAcceptedReceipt(p.receipt,p.deployment,{...p.status,creator:{login:"not-vercel"}},p.current,policy)).toThrow("receipt_prior_deployment_mismatch");
+  });
+  it("requires both deployment creation and accepted evidence to predate the current deployment", () => {
+    const p = prior();
+    expect(() => rollbackDeploymentFromAcceptedReceipt(p.receipt,{...p.deployment,created_at:p.current.createdAt},p.status,p.current,policy)).toThrow("receipt_prior_deployment_not_earlier");
+    expect(() => rollbackDeploymentFromAcceptedReceipt(p.receipt,p.deployment,p.status,{...p.current,createdAt:"2026-10-02T11:59:30Z"},policy)).toThrow("receipt_prior_deployment_not_earlier");
+  });
+  it("does not accept altered receipt bytes or integrity", () => {
+    const p = prior();
+    expect(() => rollbackDeploymentFromAcceptedReceipt({...p.receipt,acceptedAt:"2026-10-02T12:00:01Z"},p.deployment,p.status,p.current,policy)).toThrow();
+  });
+});
 
 function resolverEvidence() {
   return {
