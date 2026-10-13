@@ -133,7 +133,9 @@ export function HomeValueFunnel({
     };
   }, []);
 
-  useEffect(() => {
+  // Step destinations must be focused in the commit that reveals them, not a
+  // later passive task after a screen reader/test can already observe the DOM.
+  useLayoutEffect(() => {
     if (step === 2) nameRef.current?.focus();
     if (step === 3) successRef.current?.focus();
   }, [step]);
