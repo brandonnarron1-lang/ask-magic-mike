@@ -127,21 +127,21 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
 
   const describedBy = error ? "buyer-contact-requirement buyer-form-status" : "buyer-contact-requirement";
   return (
-    <LuxuryCard className={compact ? "p-4" : "p-5 sm:p-7"}>
+    <LuxuryCard className={`min-w-0 [overflow-wrap:anywhere] ${compact ? "p-4" : "p-5 sm:p-7"}`}>
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">{openHouse ? "Open-house registration" : renter ? "Renter path" : "Buyer path"}</p>
       <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">
         {openHouse ? "Register interest in " + (propertyLabel || "this open house") + "." : renter ? "See what a path from renting to owning could look like." : "Turn your next move into a clear local buying plan."}
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#d9ceb8]">Share the basics. Mike or the approved team can review the request and follow up with practical next steps.</p>
       {!saved ? <form noValidate onSubmit={submit} onInput={invalidateReview} onChange={invalidateReview} className="mt-6" aria-describedby={error ? "buyer-form-status" : undefined}>
-        <fieldset disabled={recovery.locked} className="grid min-w-0 gap-4 sm:grid-cols-2">
+        <fieldset disabled={recovery.locked} className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
           <legend className="sr-only">Your request</legend>
           <p id="buyer-contact-requirement" className="text-xs leading-5 text-[#b7aa94] sm:col-span-2">
             Email or phone is required for follow-up. {buyer ? "Your name and buying interest are required; planning details are optional." : "Name, area, and planning details are optional but help Mike prepare."}
           </p>
           {buyer ? <>
-            <fieldset className="grid gap-3 rounded-md border border-white/15 p-4 sm:col-span-2">
-              <legend className="px-1 text-sm font-semibold text-[#f4ead4]">What are you interested in?</legend>
+            <fieldset className="grid min-w-0 grid-cols-1 gap-3 rounded-md border border-white/15 p-4 sm:col-span-2">
+              <legend className="max-w-full px-1 text-sm font-semibold text-[#f4ead4]">What are you interested in?</legend>
               {(["specific", "search"] as const).map(option => <label key={option} className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-[#d9ceb8]">
                 <input type="radio" name="buyer-interest-kind" value={option} checked={kind === option} onChange={() => { invalidateReview(); setKind(option); }} className="h-5 w-5 accent-[#cda24a]" />
                 {option === "specific" ? "A specific property" : "A general home search"}

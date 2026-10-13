@@ -131,7 +131,8 @@ test("eventless native contact and consent require an updated visible review bef
   await page.getByLabel("Email", { exact: true }).evaluate((element: HTMLInputElement) => { element.value = "eventless@example.test"; });
   await page.getByRole("checkbox", { name: /Our Town Properties may contact me/i }).evaluate((element: HTMLInputElement) => { element.checked = true; });
   await page.getByRole("button", { name: "Request Buyer Plan", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Your details changed"); expect(capture.attempts).toHaveLength(0);
+  await expect(page.locator("#buyer-form-status")).toHaveAttribute("role", "alert");
+  await expect(page.locator("#buyer-form-status")).toContainText("Your details changed"); expect(capture.attempts).toHaveLength(0);
   await expect(page.getByText("Email: eventless@example.test")).toBeVisible(); await submit(page);
   expect(capture.attempts[0].payload).toMatchObject({ email: "eventless@example.test", consent: true, consent_email: true, consent_call: false });
 });
@@ -163,7 +164,7 @@ test("unknown failure retains exact bytes/key for manual replay, never a fresh l
   };
   await page.goto("/buy"); await buyer(page); await page.getByLabel("Property address (or provide a listing URL)").fill(ADDRESS); await review(page);
   await page.getByRole("button", { name: "Request Buyer Plan", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("couldn't confirm"); await expect(page.getByLabel("Email", { exact: true })).toBeDisabled();
+  await expect(page.locator("#buyer-form-status")).toContainText("couldn't confirm"); await expect(page.getByLabel("Email", { exact: true })).toBeDisabled();
   await page.getByRole("button", { name: "Retry identical request", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Your request is in.", exact: true })).toBeVisible();
   expect(capture.attempts).toHaveLength(2); expect(capture.attempts[1]).toEqual(capture.attempts[0]);
@@ -173,9 +174,9 @@ test("reload restores reference only and cannot turn uncertainty into a new requ
   const capture = captures.get(page)!;
   capture.reply = route => route.fulfill({ status: 500, contentType: "application/json", body: "{}" });
   await page.goto("/buy"); await buyer(page); await page.getByLabel("Property address (or provide a listing URL)").fill(ADDRESS); await review(page);
-  await page.getByRole("button", { name: "Request Buyer Plan", exact: true }).click(); await expect(page.getByRole("alert")).toContainText("couldn't confirm");
+  await page.getByRole("button", { name: "Request Buyer Plan", exact: true }).click(); await expect(page.locator("#buyer-form-status")).toContainText("couldn't confirm");
   const key = capture.attempts[0].key; await page.reload();
-  await expect(page.getByRole("alert")).toContainText("private form details were not stored"); await expect(page.getByText(key, { exact: true })).toBeVisible();
+  await expect(page.locator("#buyer-form-status")).toContainText("private form details were not stored"); await expect(page.getByText(key, { exact: true })).toBeVisible();
   await expect(page.getByLabel("Email", { exact: true })).toHaveValue(""); await expect(page.getByLabel("Email", { exact: true })).toBeDisabled();
   await expect(page.getByRole("button", { name: "Retry identical request", exact: true })).toHaveCount(0); expect(capture.attempts).toHaveLength(1);
 });
@@ -242,8 +243,15 @@ for (const width of [320, 390, 768, 1440]) {
         await page.getByLabel("Property address (or provide a listing URL)").fill(ADDRESS.repeat(2));
         await review(page);
       }
+      await page.evaluate(() => document.fonts.ready);
+      const contact = page.getByLabel(route === "/buy" ? "Email" : "Email for your valuation follow-up", { exact: true });
+      const originalControlFont = await contact.evaluate(element => parseFloat(getComputedStyle(element).fontSize));
       for (const enlarged of [false, true]) {
         await page.evaluate(value => { document.documentElement.style.fontSize = value ? "200%" : "100%"; }, enlarged);
+        // The retained reduced-motion CSS uses an ultra-short transition.
+        // Wait for its committed computed size, never override CSS or shrink it.
+        await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe(enlarged ? "32px" : "16px");
+        await expect.poll(() => contact.evaluate(element => parseFloat(getComputedStyle(element).fontSize))).toBe(originalControlFont * (enlarged ? 2 : 1));
         const dimensions = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth, font: getComputedStyle(document.documentElement).fontSize }));
         expect(dimensions.font).toBe(enlarged ? "32px" : "16px");
         expect(dimensions.scroll, "Never conceal horizontal overflow to pass").toBeLessThanOrEqual(dimensions.width + 1);

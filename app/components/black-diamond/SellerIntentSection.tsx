@@ -138,7 +138,7 @@ export function SellerIntentSection({ surface = "seller_page", compact = false }
       </div>
 
       <form onSubmit={submitSeller} onInput={clearEditableError} onChange={clearEditableError} className="mt-6" aria-describedby={message ? "seller-form-status" : undefined}>
-        <fieldset disabled={recovery.locked} className="grid min-w-0 gap-4 sm:grid-cols-2">
+        <fieldset disabled={recovery.locked} className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
         <legend className="sr-only">Seller request</legend>
         <TextField name="seller-address" required label="Property address" placeholder="Property address" className="sm:col-span-2" />
         <TextField name="seller-name" label="Name optional" placeholder="Name" />
