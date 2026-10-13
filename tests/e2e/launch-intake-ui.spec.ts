@@ -226,7 +226,7 @@ test("unknown Selling Options result holds other widget paths and retries identi
   expect(capture.appointmentBodies).toHaveLength(0);
 });
 
-for (const width of [320, 390, 768, 1440]) {
+for (const width of [320, 390, 430, 768, 1440]) {
   test(`seller and buyer review reflow at ${width}px and 200% text without submitting`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     const output = process.env.AMM_E2E_OUTPUT_DIR;

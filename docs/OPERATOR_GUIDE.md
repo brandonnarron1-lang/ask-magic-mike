@@ -6,6 +6,42 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Seller/buyer launch candidate — October 13, 2026
+
+PR #299 combines the unchanged PR #298 address-entry work with structured
+buyer intake and a new internal-alert v6 reader. This section describes the
+candidate, **not proof of Production activation**. Resolve the deployment receipt
+before using it as an operating instruction. Earlier dated observations below
+remain historical evidence, not current release identity.
+
+The seller entry is `/home-value`; buyers use `/buy` for a specific property
+or a general home search. The existing website widget adds **Find a Home**,
+using the same intake. Review native contact/property values before confirming.
+Manual address entry remains available; suggestions do not verify a property.
+Listing links are submitted references, not verified availability or MLS facts.
+
+After activation, eligible new inquiries freeze two separate internal envelopes
+for the approved Mike and Brandon recipients. The short email contains the
+submitted contact/property facts and one authenticated saved-inquiry link.
+Contact deduplication preserves each new inquiry; same-key retries are not new
+inquiries. API accepted, recipient-server delivered and mailbox observed remain
+different evidence. QA is conspicuously DO NOT CONTACT and excluded from business
+totals. Nothing enables consumer acknowledgment, nurture, SMS, push or calendars.
+
+Release order: apply the two reviewed additive migrations in order; accept a
+v6-reader build with generation/worker OFF; record that actual deployment as the
+compatible rollback; activate the same tree with a fixed UTC cutoff and exactly
+three authorized initial QA references. The minute worker considers eligible new
+v6 intents only, never history, the old cleaner copy or ambiguous processing.
+Rollback holds the worker and returns new generation to v4 **while retaining the
+v6 reader, rows and immutable envelopes**. Do not promote a v4-only build after v6
+intents exist. No historical records are rewritten or resent.
+
+The local share kit is `public/launch-20261013/`. Treat its URLs and cards as
+prepared until the accepted Production serves them and the bounded dual-delivery
+proof passes. Brandon's remaining routine distribution task is sharing the
+verified seller/buyer links, not submitting another test or operating a database.
+
 ## The simple daily flow
 
 **Open lead → review permission → make personal contact → log the actual result
