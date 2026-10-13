@@ -45,10 +45,14 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
     const timer = window.setTimeout(() => abort.abort(), 4000);
     fetch("/api/address-suggestions", { signal: abort.signal, cache: "no-store", redirect: "error", referrerPolicy: "no-referrer" })
       .then(response => response.ok ? response.json() : null)
-      .then(data => { if (!abort.signal.aborted) setEnabled(data?.enabled === true); })
+      .then(data => { if (!abort.signal.aborted && data?.enabled === true) {
+        // A person may have typed before the capability returned. The native
+        // field, not an older React snapshot, seeds the optional lookup.
+        setQuery(inputRef.current?.value ?? ""); setEnabled(true);
+      } })
       .catch(() => { /* Missing capability never blocks manual input. */ });
     return () => { window.clearTimeout(timer); abort.abort(); request.current?.abort(); sequence.current++; };
-  }, []);
+  }, [inputRef]);
 
   useEffect(() => {
     if (!enabled || disabled || query.trim().length < 5) {
@@ -135,7 +139,15 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
       aria-describedby={[`${id}-help`, invalid ? errorId : ""].filter(Boolean).join(" ")} aria-invalid={invalid}
       onKeyDown={keyDown} onBlur={() => { setOpen(false); }}
       onChange={event => {
-        selectionSequence.current++; request.current?.abort(); setProposal(null); setStatus(""); setQuery(event.target.value); onChange(event.target.value);
+        selectionSequence.current++; request.current?.abort();
+        // Do not enqueue redundant nil/empty updates on every native key. With
+        // lookup disabled the input itself owns the query; no lookup render is
+        // needed. Real selection/error states are still cleared immediately.
+        if (proposal) setProposal(null); if (status) setStatus("");
+        if (open) setOpen(false); if (active !== -1) setActive(-1);
+        if (suggestions.length) setSuggestions([]);
+        if (enabled) setQuery(event.target.value);
+        onChange(event.target.value);
         // A new search is not an edit of the previously resolved property.
         // Clear stale components except the separately entered unit.
         for (const [key] of fields) if (key !== "line2" && refs.current[key]) refs.current[key]!.value = "";

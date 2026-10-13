@@ -44,7 +44,7 @@ Server-only optional names: `ADDRESS_LOOKUP_ENABLED`,
 No browser key, SDK, model call, new dependency or provider account is needed.
 Official references: [Autocomplete](https://developers.google.com/maps/documentation/places/web-service/place-autocomplete),
 [Details](https://developers.google.com/maps/documentation/places/web-service/place-details),
-[sessions](https://developers.google.com/maps/documentation/places/web-service/session-tokens),
+[sessions](https://developers.google.com/maps/documentation/places/web-service/place-session-tokens),
 [policy](https://developers.google.com/maps/documentation/places/web-service/policies).
 
 ## Schema and release/rollback
