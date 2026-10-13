@@ -62,7 +62,10 @@ export async function requireLeadCenterLeadPermission(
   leadId: string,
   permission: "lead:view_assigned" | "lead:update_assigned" | "task:manage_assigned" | "lead:record_revenue",
 ): Promise<LeadCenterPrincipal | null> {
-  const principal = await requireLeadCenterPermission(permission, /^[0-9a-f-]{36}$/i.test(leadId) ? `/admin/leads/${leadId}` : undefined);
+  const path = /^[0-9a-f-]{36}$/i.test(leadId) ? `/admin/leads/${leadId}` : undefined;
+  const bookmark = path && getLeadCenterRbacState().enabled ? safeLeadCenterReturn((await headers()).get("x-amm-lead-center-path")) : undefined;
+  const returnTo = bookmark?.split(/[?#]/,1)[0] === path ? bookmark : path;
+  const principal = await requireLeadCenterPermission(permission, returnTo);
   if (!principal || hasLeadCenterPermission(principal.role, "lead:view_all")) return principal;
   if (!principal.agentId || !/^[0-9a-f-]{36}$/i.test(leadId)) {
     redirect("/lead-center-login?error=forbidden");
@@ -71,7 +74,9 @@ export async function requireLeadCenterLeadPermission(
   if (!databaseUrl) redirect("/lead-center-login?error=configuration");
   const sql = neon(databaseUrl);
   const rows = (await sql.query(
-    "SELECT assigned_agent_id FROM public.leads WHERE id = $1::uuid LIMIT 1",
+    permission === "lead:view_assigned"
+      ? "SELECT COALESCE(l.assigned_agent_id,(SELECT original.assigned_agent_id FROM public.leads original WHERE original.id=l.duplicate_of_lead_id)) AS assigned_agent_id FROM public.leads l WHERE l.id=$1::uuid LIMIT 1"
+      : "SELECT assigned_agent_id FROM public.leads WHERE id = $1::uuid LIMIT 1",
     [leadId],
   )) as Array<{ assigned_agent_id: string | null }>;
   const assigned = rows[0]?.assigned_agent_id || null;

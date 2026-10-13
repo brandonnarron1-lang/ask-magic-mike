@@ -69,6 +69,10 @@ export type NotificationRequest = {
   bcc?: string[];
   replyTo?: string;
   idempotencyKey: string;
+  /** Server-only v6 transport contract; never populate from browser data. */
+  frozenFrom?: string;
+  deliveryTimeoutMs?: number;
+  intakeV6?: boolean;
 };
 
 export type NotificationResult =
@@ -83,6 +87,8 @@ export type NotificationResult =
       retryable: boolean;
       errorCode: string;
       errorSummary: string;
+      ambiguous?: boolean;
+      retryAfterMs?: number;
     };
 
 export type NotificationProvider = {

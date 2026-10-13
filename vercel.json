@@ -1,6 +1,10 @@
 {
   "crons": [
     {
+      "path": "/api/admin/notifications/retry",
+      "schedule": "* * * * *"
+    },
+    {
       "path": "/api/admin/sla/sweep",
       "schedule": "0 * * * *"
     },

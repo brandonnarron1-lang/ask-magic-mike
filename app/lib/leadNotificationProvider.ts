@@ -421,7 +421,7 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
     }
 
     const apiKey = process.env.RESEND_API_KEY;
-    const from = process.env.AGENT_NOTIFICATION_FROM_EMAIL || process.env.RESEND_FROM || process.env.FROM_EMAIL;
+    const from = request.frozenFrom || process.env.AGENT_NOTIFICATION_FROM_EMAIL || process.env.RESEND_FROM || process.env.FROM_EMAIL;
     const requestedBcc = request.bcc || [];
     if (requestedBcc.some((recipient) => !emailDomain(recipient) || hasHeaderInjection(recipient))) {
       return {
@@ -472,7 +472,9 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
           subject: safeSubject(request.subject),
           text: request.text,
           html: request.html,
+          ...(request.intakeV6 ? { tags: [{ name: "amm_notification_id", value: request.notificationId }] } : {}),
         }),
+        ...(request.intakeV6 ? { signal: AbortSignal.timeout(Math.max(1, Math.min(request.deliveryTimeoutMs || 5_000, 5_000))) } : {}),
       });
     } catch {
       return {
@@ -481,6 +483,7 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
         retryable: true,
         errorCode: "resend_network_error",
         errorSummary: "Resend email request failed before completion.",
+        ...(request.intakeV6 ? { ambiguous: true } : {}),
       };
     }
 
@@ -494,6 +497,14 @@ export class ResendEmailNotificationProvider implements NotificationProvider {
         retryable: retryableResendStatus(response.status),
         errorCode: `resend_http_${response.status}`,
         errorSummary: safeProviderErrorSummary(providerError.message),
+        ...(request.intakeV6 && ![425, 429].includes(response.status) && retryableResendStatus(response.status) ? { ambiguous: true } : {}),
+        ...(request.intakeV6 && response.status === 429 ? { retryAfterMs: (() => {
+          const value = response.headers.get("retry-after");
+          if (!value) return 60_000;
+          const seconds = Number(value);
+          return Number.isFinite(seconds) && seconds >= 0 ? Math.max(1_000, seconds * 1_000)
+            : Math.max(1_000, Date.parse(value) - Date.now()) || 60_000;
+        })() } : {}),
       };
     }
 

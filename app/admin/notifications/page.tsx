@@ -7,6 +7,8 @@ import {
 import type { LeadNotificationRecord } from "../../lib/leadNotificationTypes";
 import { retryLeadNotificationAction } from "./actions";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { readNewLaunchAlertHealth } from "../../lib/leadAlertService";
+import { launchNotificationStatus } from "../../lib/launchNotificationPresentation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -50,6 +52,7 @@ function providerLifecycle(notification: LeadNotificationRecord) {
 }
 
 function RetryControl({ notification }: { notification: LeadNotificationRecord }) {
+  if (notification.template_version === "lead_alert_email_v6") return null;
   if (!isNotificationRetryEligible(notification)) return null;
 
   return (
@@ -85,7 +88,7 @@ function NotificationCard({ notification }: { notification: LeadNotificationReco
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#e2c06f]">
             {notification.notification_type} / {notification.channel}
           </p>
-          <h2 className="mt-2 font-serif text-2xl text-[#f4ead4]">{notification.status}</h2>
+          <h2 className="mt-2 font-serif text-2xl text-[#f4ead4]">{launchNotificationStatus(notification)}</h2>
           <p className="mt-2 break-all text-xs text-[#8f8778]">Lead {notification.lead_id}</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -100,14 +103,14 @@ function NotificationCard({ notification }: { notification: LeadNotificationReco
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Recipient</dt>
-          <dd className="mt-1 text-[#f4ead4]">{notification.recipient_type}</dd>
+          <dd className="mt-1 text-[#f4ead4]">{notification.template_version === "lead_alert_email_v6" && ["mike", "brandon"].includes(String(notification.metadata.operator)) ? notification.metadata.operator === "mike" ? "Mike" : "Brandon" : notification.recipient_type}</dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Template</dt>
           <dd className="mt-1 text-[#f4ead4]">{notification.template_version}</dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Sent</dt>
+          <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">{notification.template_version === "lead_alert_email_v6" ? "Provider accepted" : "Sent"}</dt>
           <dd className="mt-1 text-[#f4ead4]">{shortDate(notification.sent_at)}</dd>
         </div>
         <div>
@@ -152,6 +155,8 @@ export default async function AdminNotificationsPage({
   await requireLeadCenterPermission("notification:manage");
   const params = searchParams ? await searchParams : {};
   const summary = await loadAdminLeadNotificationSummary();
+  const launchHealthResult = await readNewLaunchAlertHealth().then(health => ({ health, failed: false }), () => ({ health: null, failed: true }));
+  const launchHealth = launchHealthResult.health;
   const operations = summary.operations;
   const stuckWork = operations
     ? operations.stalePending + operations.staleProcessing
@@ -269,6 +274,19 @@ export default async function AdminNotificationsPage({
           </>
         )}
 
+        {launchHealth || launchHealthResult.failed ? <section aria-label="New inquiry delivery health" className={`mt-6 rounded-lg border p-5 ${launchHealthResult.failed || (launchHealth?.unresolved_over_5m || 0) > 0 ? "border-[#b4233a80] bg-[#3b09141f]" : "border-[#cda24a33] bg-[#0b0b0b]"}`}>
+          <h2 className="text-lg font-semibold">New inquiry delivery</h2>
+          {launchHealth ? <>
+            <p className="mt-2 text-sm leading-6">{launchHealth.unresolved_over_5m ? "Delivery needs review." : "No unresolved new-inquiry envelopes older than five minutes."} QA records and historical failures are excluded from these counts.</p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <MetricCard label="Unresolved over 5 minutes" value={launchHealth.unresolved_over_5m} />
+              <MetricCard label="Acceptance needs reconciliation" value={launchHealth.ambiguous_over_5m} />
+              <MetricCard label="Dispatch / policy problems" value={launchHealth.failed_over_5m} />
+              <MetricCard label="Accepted; delivery unconfirmed" value={launchHealth.accepted_not_delivered_over_5m} />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-[#d9ceb8]">Provider acceptance is not delivery. Recipient-server delivery is not inbox receipt. Do not resend an accepted or ambiguous envelope.</p>
+          </> : <p className="mt-2 text-sm leading-6 text-[#ffcabd]">New-inquiry health is unavailable. Check the protected canonical store; this is not a clear-queue result.</p>}
+        </section> : null}
         <section className="mt-8 grid gap-4" aria-label="Recent notification records">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#e2c06f]">Recent records</p>

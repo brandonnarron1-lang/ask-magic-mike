@@ -232,9 +232,11 @@ export function HomeValueFunnel({
       nameRef.current?.focus();
       return;
     }
-    if (!isValidLeadEmail(clean(actual.email))) {
+    if ((!clean(actual.email) && !clean(actual.phone)) || (clean(actual.email) && !isValidLeadEmail(clean(actual.email)))) {
       setFormError({
-        message: "Enter a valid email for your valuation follow-up.",
+        message: !clean(actual.email) && !clean(actual.phone)
+          ? "Enter at least one valid contact method: email or phone."
+          : "Enter a valid email for your valuation follow-up.",
         field: "email",
       });
       emailRef.current?.focus();
@@ -266,7 +268,7 @@ export function HomeValueFunnel({
       timeline: actual.timeline, status: "new", assigned_agent_id: null,
       widget_session_id: submissionId, idempotency_key: submissionId,
       ...(experimentLeadContext || {}),
-      consent: actual.consent, consent_email: actual.consent,
+      consent: actual.consent, consent_email: actual.consent && Boolean(clean(actual.email)),
       consent_call: actual.consent && Boolean(clean(actual.phone)),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
@@ -413,8 +415,8 @@ export function HomeValueFunnel({
             placeholder="you@example.com"
             aria-describedby={formError?.field === "email" ? errorId : undefined}
             aria-invalid={formError?.field === "email"}
-            required
           />
+          <p className="text-xs leading-5 text-[#b7aa94]">Provide a valid email or phone number for follow-up. Either one is enough.</p>
           <TextField
             label="Phone (optional)"
             name="phone"
@@ -443,6 +445,7 @@ export function HomeValueFunnel({
             <p className="font-semibold text-[#f4ead4]">Review your request</p>
             <p className="select-text break-words">Address: {address}</p>
             <p className="select-text break-words">Email: {clean(email) || "Not provided"}</p>
+            <p className="select-text break-words">Phone: {clean(phone) || "Not provided"}</p>
             <p className="text-[#d9ceb8]">{addressValue?.confirmation === "user_confirmed_suggestion" ? "Suggestion confirmed by you." : "Address entered or edited by you."} Address validation has not been performed.</p>
           </div>
           <div className="flex gap-3">

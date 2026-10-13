@@ -1,4 +1,5 @@
 import { normalizeAddressValue, type AddressValue } from "./address/addressValue";
+import { normalizeBuyerInterest, type BuyerInterestV1 } from "./buyerInterest";
 
 export type FunnelType =
   | "home_value"
@@ -72,6 +73,7 @@ export type LeadPayload = {
   lead_type?: string;
   address?: string;
   address_entry?: AddressValue;
+  buyer_interest?: BuyerInterestV1;
   property_address?: string;
   name?: string;
   first_name?: string;
@@ -148,6 +150,9 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     lead_type: cleanOptional(input.lead_type),
     address: cleanOptional(input.address || input.property_address),
     ...(input.address_entry !== undefined ? { address_entry: normalizeAddressValue(input.address_entry) } : {}),
+    ...(input.buyer_interest !== undefined && input.buyer_interest !== null
+      ? { buyer_interest: normalizeBuyerInterest(input.buyer_interest) }
+      : {}),
     property_address: cleanOptional(input.property_address || input.address),
     name: cleanOptional(input.name),
     first_name: cleanOptional(input.first_name),

@@ -9,7 +9,11 @@ export type LeadLifecycleCapture = {
   attribution: Record<string, unknown>;
   notificationMode: "disabled" | "console" | "sandbox" | "production";
   /** Present only for canonical public v2; omitted compatibility callers keep v1. */
-  internalNotification?: { templateVersion: string; metadata: Record<string, unknown> };
+  internalNotification?: {
+    templateVersion: string; metadata: Record<string, unknown>;
+    requestContext?: Record<string, unknown>;
+    launchDraft?: import("../leadAlertLaunch").LaunchAlertDraft;
+  };
 };
 
 export type LeadLifecycleEnrichment = {
@@ -32,6 +36,8 @@ export type LeadLifecycleCaptureSuccess = {
   assignment_audit_id?: string | null;
   notification_id?: string | null;
   notification_status?: string | null;
+  alert_template_version?: string | null;
+  notification_ids?: string[];
   idempotent_replay: boolean;
 };
 

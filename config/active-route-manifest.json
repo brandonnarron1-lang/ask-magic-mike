@@ -181,6 +181,7 @@
     "/api/admin/leads/search": "active-lead-center-rbac-protected-same-origin-body-search",
     "/api/admin/copilot/drafts/[draftKey]": "active-lead-center-rbac-protected-versioned-human-review-no-send",
     "/api/admin/copilot/jobs/process": "active-feature-flagged-vercel-cron",
+    "/api/admin/notifications/retry": "active-authenticated-feature-flagged-new-intake-only-cron",
     "/api/admin/sequences/process": "active-feature-flagged-mock-only-cron",
     "/api/admin/operations/first-live": "active-required-by-vercel-cron",
     "/api/admin/sla/sweep": "active-required-by-vercel-cron",

@@ -81,6 +81,23 @@ afterEach(() => {
 });
 
 describe("Home Value logical-request integrity", () => {
+  it("accepts phone-only contact in intercepted LIVE mode and scopes consent to that channel", async () => {
+    transport(call => response(call)); await contact("+12025550199");
+    fireEvent.change(screen.getByLabelText("Email for your valuation follow-up"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: /Our Town Properties may contact me/i }));
+    expect(screen.getByLabelText("Email for your valuation follow-up")).not.toBeRequired();
+    expect(screen.getByText("Phone: +12025550199")).toBeVisible();
+    submit(); await screen.findByText("Your request is in.");
+    expect(calls).toHaveLength(1);
+    expect(JSON.parse(calls[0].body)).toMatchObject({ email: "", phone: "+12025550199", consent: true, consent_email: false, consent_call: true });
+  });
+
+  it("does not permit phone-only contact to bypass the unchanged synthetic-QA email guard", async () => {
+    fixture.mode = "synthetic_qa"; transport(call => response(call)); await contact("+12025550199");
+    fireEvent.change(screen.getByLabelText("Email for your valuation follow-up"), { target: { value: "" } });
+    submit(); expect(screen.getByRole("alert")).toHaveTextContent("Synthetic QA only"); expect(calls).toHaveLength(0);
+  });
+
   it("retains an eventless address across asynchronous capability rerenders before Continue", async () => {
     transport(call => response(call));
     const view = render(<HomeValueFunnel />);

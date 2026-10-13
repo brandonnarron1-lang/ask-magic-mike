@@ -10,6 +10,7 @@ export const metadata: Metadata = publicPageMetadata({
   title: "Home Value Review in Wilson, NC",
   description: "Request a broker-reviewed home value and sale-readiness conversation from Mike Eatmon and Our Town Properties. No instant automated estimate or guaranteed value.",
   path: "/home-value",
+  socialImage: { src: "https://www.askmagicmike.com/launch-20261013/seller-og.jpg", alt: "Ask Magic Mike: request a local home value review from Our Town Properties. No instant valuation promised." },
 });
 
 export default function HomeValuePage() {

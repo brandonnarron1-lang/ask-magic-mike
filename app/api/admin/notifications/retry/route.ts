@@ -1,13 +1,25 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { checkAdminAuth, checkBearerSecret } from "../../../../../src/lib/admin/auth";
 import { assertProviderDeliveryAllowed } from "../../../../../src/lib/preview-security";
-import { notificationRetryDeliveryReady, retryDueLeadAlertNotifications } from "../../../../lib/leadAlertService";
+import { notificationRetryDeliveryReady, retryDueLeadAlertNotifications, processNewLaunchAlerts, readNewLaunchAlertHealth } from "../../../../lib/leadAlertService";
+import { launchAlertWorkerEnabled } from "../../../../lib/leadAlertLaunch";
+
+async function batchResponse(results: Awaited<ReturnType<typeof processNewLaunchAlerts>>) {
+  return NextResponse.json({ ok: true, scope: "launch_v6", processed: results.length,
+    health: await readNewLaunchAlertHealth(),
+    statuses: results.map(result => result ? { id: result.id, status: result.status,
+      provider_message_id: result.provider_message_id, error_code: result.error_code } : null) }, { headers: { "Cache-Control": "private, no-store" } });
+}
 
 export async function GET(req: NextRequest) {
-  // Scheduled auth is distinct from administrator readiness. No retry cron is
-  // installed or enabled by this release candidate.
+  // Scheduled auth is distinct from administrator readiness. Main owns the
+  // cron schedule; this handler remains off until launch flag + cutoff exist.
   if (checkBearerSecret(req, process.env.CRON_SECRET)) {
-    return NextResponse.json({ ok: false, error: "scheduled_notification_retry_not_activated" }, { status: 409 });
+    if (!launchAlertWorkerEnabled()) return NextResponse.json({ ok: false, error: "scheduled_notification_retry_not_activated" }, { status: 409 });
+    const delivery = assertProviderDeliveryAllowed();
+    if (!delivery.ok) return NextResponse.json({ ok: false, error: delivery.error }, { status: delivery.statusCode });
+    if (!notificationRetryDeliveryReady()) return NextResponse.json({ ok: false, error: "notification_retry_delivery_not_ready", processed: 0 }, { status: 503 });
+    return batchResponse(await processNewLaunchAlerts());
   }
   const auth = checkAdminAuth(req);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });

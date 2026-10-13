@@ -112,7 +112,7 @@
     close.style.letterSpacing = ".12em";
     close.style.textTransform = "uppercase";
     close.style.cursor = "pointer";
-    close.style.minHeight = "40px";
+    close.style.minHeight = "44px";
 
     var frame = document.createElement("iframe");
     frame.title = "Ask Magic Mike widget";
@@ -143,6 +143,12 @@
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && !panel.hidden) closeWidget();
     });
+    window.addEventListener("message", function (event) {
+      // Only our exact mounted frame may request closure. No wildcard origin,
+      // resizing, form mutation or contact action is accepted here.
+      if (event.source !== frame.contentWindow || event.origin !== originFromScript()) return;
+      if (event.data && event.data.type === "askmagicmike:close" && !panel.hidden) closeWidget();
+    });
 
     panel.appendChild(close);
     panel.appendChild(frame);
@@ -156,6 +162,7 @@
       root.style.bottom = "10px";
       panel.style.width = "100%";
       panel.style.height = "calc(100vh - 20px)";
+      if (window.CSS && window.CSS.supports("height", "100dvh")) panel.style.height = "calc(100dvh - 20px)";
       panel.style.borderRadius = "12px";
       launcher.style.width = "100%";
     }

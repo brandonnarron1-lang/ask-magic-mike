@@ -549,6 +549,7 @@ const CANONICAL_LEDGER_PROTECTED_EVENTS = new Set([
   "appointment_requested",
   "notification_queued",
   "notification_delivered",
+  "notification_api_accepted",
   "notification_failed",
 ]);
 
