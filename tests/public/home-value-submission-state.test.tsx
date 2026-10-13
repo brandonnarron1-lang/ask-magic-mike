@@ -18,6 +18,7 @@ function response(call: Call, status = 200, extra: Record<string, unknown> = {},
 }
 function transport(handler: (call: Call, index: number) => Promise<Response> | Response) {
   vi.stubGlobal("fetch", vi.fn((url: string, init: RequestInit) => {
+    if (url === "/api/address-suggestions") return Promise.resolve(new Response(JSON.stringify({ enabled: false }), {headers:{"Content-Type":"application/json"}}));
     expect(url).toBe("/api/leads");
     const call = { body: String(init.body), key: new Headers(init.headers).get("Idempotency-Key")! };
     calls.push(call);
@@ -35,6 +36,12 @@ async function contact(phone = "") {
   return view;
 }
 function submit() { fireEvent.click(screen.getByRole("button", { name: "Request Valuation" })); }
+function reviewNativeChanges() {
+  submit();
+  expect(calls).toHaveLength(0);
+  expect(screen.getByRole("alert")).toHaveTextContent("Review the updated address and email");
+  submit();
+}
 function eventlessContact() {
   const values = {
     name: "EVENTLESS SYNTHETIC | INTERNAL QA | DO NOT CONTACT",
@@ -154,7 +161,7 @@ describe("Home Value logical-request integrity", () => {
     transport(call=>response(call)); await contact();
     (screen.getByLabelText("Email for your valuation follow-up") as HTMLInputElement).value="  autofilled@example.test  ";
     (screen.getByLabelText("Phone (optional)") as HTMLInputElement).value="+12025550188";
-    submit(); await screen.findByText("Your request is in.");
+    reviewNativeChanges(); await screen.findByText("Your request is in.");
     expect(JSON.parse(calls[0].body)).toMatchObject({email:"autofilled@example.test",phone:"+12025550188"});
   });
 
@@ -162,7 +169,7 @@ describe("Home Value logical-request integrity", () => {
     transport(call => response(call)); await contact();
     (screen.getByLabelText("Phone (optional)") as HTMLInputElement).value = "+12025550188";
     fireEvent.click(screen.getByRole("checkbox"));
-    submit(); await screen.findByText("Your request is in.");
+    reviewNativeChanges(); await screen.findByText("Your request is in.");
     expect(calls).toHaveLength(1);
     expect(JSON.parse(calls[0].body)).toMatchObject({phone:"+12025550188",consent:true,consent_call:true});
   });
@@ -187,7 +194,7 @@ describe("Home Value logical-request integrity", () => {
         fireEvent.change(screen.getByLabelText("Phone (optional)"), {target:{value:values.phone}});
       }
       expectContactValues(values);
-      submit(); await screen.findByText("Your request is in.");
+      reviewNativeChanges(); await screen.findByText("Your request is in.");
       expect(calls).toHaveLength(1);
       expect(JSON.parse(calls[0].body)).toMatchObject({...values,consent_email:values.consent,consent_call:values.consent});
     },
@@ -208,7 +215,7 @@ describe("Home Value logical-request integrity", () => {
       if (mode === "checking") expect(button).toBeDisabled();
       else expect(button).toBeEnabled();
     }
-    submit(); await screen.findByText("Your request is in.");
+    reviewNativeChanges(); await screen.findByText("Your request is in.");
     expect(calls).toHaveLength(1);
     expect(JSON.parse(calls[0].body)).toMatchObject(values);
   });

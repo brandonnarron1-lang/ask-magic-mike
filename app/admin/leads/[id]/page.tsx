@@ -804,6 +804,12 @@ export default async function AdminLeadDetailPage({
                   <Field label="Contact" value={lead.contact_summary} />
                   <Field label="Funnel" value={leadSourceLabel(lead.funnel_type)} />
                   <Field label="Timeline" value={leadTimelineLabel(lead.timeline || lead.timeline_months)} />
+                  {lead.address_entry ? <>
+                    <Field label="Address originally entered" value={lead.address_entry.enteredText} />
+                    <Field label="Address accepted for this inquiry" value={lead.address_entry.acceptedText} />
+                    <Field label="Address evidence" value={`${lead.address_entry.confirmation === "user_confirmed_suggestion" ? "Suggestion confirmed by submitter" : "Entered or edited by submitter"} — not independently validated`} />
+                    <Field label="Unit / apartment" value={lead.address_entry.components.line2 || "Not recorded"} />
+                  </> : null}
                   <Field label="Grade" value={lead.lead_grade || "Unknown"} />
                   <Field label="Qualification score" value={lead.score == null ? "Not recorded" : `${lead.score}/100`} />
                   <Field label="Assignment" value={lead.assigned_agent_id ? "Assigned — review activity history" : "Unassigned"} />

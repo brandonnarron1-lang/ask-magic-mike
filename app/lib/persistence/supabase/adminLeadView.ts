@@ -6,6 +6,7 @@ import {
 } from "../../adminLeadTimeline";
 import type { StalledLeadSignal } from "../../adminLeadLifecycle";
 import type { LeadSourceEvidence } from "../../leadSourceEvidence";
+import { normalizeAddressValue, type AddressValue } from "../../address/addressValue";
 import {
   normalizeAppointment,
   normalizeTask,
@@ -61,6 +62,7 @@ export type AdminLeadView = {
   email: string | null;
   phone: string | null;
   address: string | null;
+  address_entry?: AddressValue | null;
   timeline: string | null;
   condition: string | null;
   question: string | null;
@@ -296,6 +298,8 @@ function primaryDetail(row: {
 }
 
 export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadView {
+  let addressEntry: AddressValue | null = null;
+  if (row.address_entry) { try { addressEntry = normalizeAddressValue(row.address_entry); } catch { /* Historical/unsupported metadata is not fabricated. */ } }
   const attribution = buildAttribution(row);
   const name = buildName(row);
   const email = text(row.email);
@@ -347,6 +351,7 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
     email,
     phone,
     address,
+    address_entry: addressEntry,
     timeline: text(row.timeline),
     condition: firstText(row.condition, row.property_condition),
     question,

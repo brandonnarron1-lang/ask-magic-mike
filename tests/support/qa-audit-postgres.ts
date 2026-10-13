@@ -9,6 +9,7 @@ import { randomUUID } from "node:crypto";
 export const container = `amm-qa-audit-${randomUUID()}`;
 export const migration = "20261003203000_atomic_qa_capture_evidence.sql";
 export const reliabilityMigration = "20261004020000_public_lead_notification_reliability.sql";
+export const addressCaptureMigration = "20261013140000_structured_address_capture.sql";
 export const acceptedMigration = "20260716043829_infra_02_atomic_lifecycle.sql";
 export const database = "amm_qa_upgrade";
 export const statements: Array<{ sql: string; params: unknown[] }> = [];
@@ -156,6 +157,8 @@ export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: bo
     if (excluded.has(file)) continue;
     if (!includeRepair && file === migration) continue;
     if (!includeRepair && file === reliabilityMigration) continue;
+    // The pre-v2 rehearsal intentionally has no predecessor for this wrapper.
+    if (!includeRepair && file === addressCaptureMigration) continue;
     psql(readFileSync(`supabase/migrations/${file}`, "utf8"), db);
   }
   // Emulate server-role table access; browser roles receive no table grants.
