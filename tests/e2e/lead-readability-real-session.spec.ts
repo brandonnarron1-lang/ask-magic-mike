@@ -79,7 +79,11 @@ test("repeat inquiry shows canonical read owner without inventing assignment or 
       await page.setViewportSize({width,height:1000}); await page.goto(`/admin/leads/${id}`);
       await expect(page.getByRole("region",{name:"Lead overview"})).toContainText("SYNTHETIC AGENT · inherited from canonical lead");
       await expect(page.getByRole("region",{name:"Lead overview"})).toContainText("Elm City");
-      await expect(page.getByRole("button",{name:"Review & call"})).toBeDisabled();
+      // An inherited reader has no mutation/contact-review grant. The existing
+      // component omits these controls, rather than rendering disabled buttons.
+      await expect(page.getByRole("button",{name:"Review & call"})).toHaveCount(0);
+      await expect(page.getByRole("region",{name:"Lead overview"})).toContainText("Contact blocked");
+      expect(await page.locator('a[href^="tel:"],a[href^="mailto:"],a[href^="sms:"]').count()).toBe(0);
       await page.locator("summary").filter({hasText:"Lead state"}).click();
       await expect(page.locator("summary").filter({hasText:"Lead state"}).locator("..")).toContainText("Inherited ownership");
       await expect(page.locator("summary").filter({hasText:"Lead state"}).locator("..")).not.toContainText("Unassigned");
