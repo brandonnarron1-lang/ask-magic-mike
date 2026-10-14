@@ -88,7 +88,7 @@ export class FirstLiveLeadMonitor {
                     ELSE COALESCE(original.assignment_status,'unassigned')='assigned' END AS assignment_present,
          (COALESCE(l.is_duplicate, false) OR l.duplicate_of_lead_id IS NOT NULL) AND NOT COALESCE(
            original.id IS NOT NULL AND original.id<>l.id AND original.contact_id=l.contact_id
-           AND original.session_id<>l.session_id AND NULLIF(l.inquiry_request_fingerprint,'') IS NOT NULL, false) AS duplicate_suspected,
+           AND original.session_id<>l.session_id AND NULLIF(to_jsonb(l)->>'inquiry_request_fingerprint','') IS NOT NULL, false) AS duplicate_suspected,
          latest_email.status AS email_status,
          launch.total>0 AND (launch.mike<>1 OR launch.brandon<>1 OR launch.total<>2) AS missing_launch_recipient,
          launch.failed>0 AS launch_delivery_failed
