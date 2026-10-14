@@ -34,6 +34,8 @@ function queryFromEnv(): Query | null {
 const LEAD_SELECT = `
   SELECT l.*,
          COALESCE(l.assigned_agent_id,(SELECT original.assigned_agent_id FROM public.leads original WHERE original.id=l.duplicate_of_lead_id)) AS inquiry_owner_agent_id,
+         (SELECT a.name FROM public.agents a WHERE a.id=COALESCE(l.assigned_agent_id,
+           (SELECT original.assigned_agent_id FROM public.leads original WHERE original.id=l.duplicate_of_lead_id))) AS inquiry_owner_agent_name,
          jsonb_build_object(
            'source', COALESCE(sa.utm_source, l.source),
            'medium', sa.utm_medium,

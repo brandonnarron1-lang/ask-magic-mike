@@ -174,6 +174,10 @@ export function normalizeAuditTimelineEvent(row: Record<string, unknown>): Admin
   if (action === "lead.first_human_response_recorded") {
     return event({ ...base, type: "response", summary: "First human response recorded", detail: "Immutable speed-to-lead evidence recorded" });
   }
+  if (action === "lead.first_live_detected" || action === "lead.first_live_escalation") {
+    return event({ ...base, type: "note", summary: action === "lead.first_live_escalation" ? "Capture incident recorded — operator review required" : "Capture monitor evidence recorded",
+      detail: "Immutable monitor evidence. This is not proof an alert was received or a consumer was contacted." });
+  }
   if (action === "lead.human_interaction_recorded") {
     return event({ ...base, type: "response", summary: `Human ${text(meta.result)?.replaceAll("_", " ") || "interaction"} recorded`,
       detail: sanitizeTimelineText(`Channel: ${text(meta.channel) || "unknown"}. Manual operator evidence; next task recorded. Not provider-verified contact.`) });

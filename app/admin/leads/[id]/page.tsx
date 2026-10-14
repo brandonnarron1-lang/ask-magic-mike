@@ -29,6 +29,7 @@ import { isTerminalContactRecord } from "../../../lib/manualContactReview";
 import { isPreviewRuntime } from "../../../../src/lib/preview-security";
 import { ConversionMutationForm } from "../../../components/admin/ConversionMutationForm";
 import { presentLead, leadSubtype } from "../../../lib/leadPresentation";
+import { leadOwnership } from "../../../lib/leadOwnership";
 import { leadPageHeading, leadRequestLabel, leadSourceLabel, leadTimelineLabel } from "../../../lib/leadReadability";
 import { LeadEvidenceWorkspace } from "../../../components/admin/LeadEvidenceWorkspace";
 import {
@@ -678,12 +679,13 @@ export default async function AdminLeadDetailPage({
               <Panel title="Lead state">
                 <div className="flex flex-wrap gap-2">
                   <Badge>{lead.status}</Badge>
-                  {lead.assigned_agent_id ? <Badge>Assigned</Badge> : <Badge tone="ruby">Unassigned</Badge>}
+                  <Badge tone={leadOwnership(lead).id ? "gold" : "ruby"}>{leadOwnership(lead).state}</Badge>
                   {lead.stalled_signals.length ? <Badge tone="ruby">Stalled</Badge> : <Badge tone="cyan">On track</Badge>}
                 </div>
                 <dl className="mt-5 grid gap-4 sm:grid-cols-2">
                   <Field label="Created" value={shortDate(lead.created_at)} />
                   <Field label="Assigned" value={shortDate(lead.assigned_at)} />
+                  <Field label="Current owner" value={leadOwnership(lead).label} />
                   <Field label="Last contacted" value={shortDate(lead.last_contacted_at)} />
                   <Field
                     label="First human response"
@@ -812,14 +814,14 @@ export default async function AdminLeadDetailPage({
                   </> : null}
                   <Field label="Grade" value={lead.lead_grade || "Unknown"} />
                   <Field label="Qualification score" value={lead.score == null ? "Not recorded" : `${lead.score}/100`} />
-                  <Field label="Assignment" value={lead.assigned_agent_id ? "Assigned — review activity history" : "Unassigned"} />
+                  <Field label="Current owner" value={leadOwnership(lead).label} />
                 </dl>
                 {lead.score_reasons?.length ? <details className="mt-4 min-w-0"><summary className="cursor-pointer py-2 text-sm text-[#e2c06f]">Recorded score factors</summary><ul className="mt-2 space-y-2 text-sm text-[#d9ceb8]">{lead.score_reasons.map((reason,index)=><li key={index}>{reason}</li>)}</ul></details> : null}
                 <details className="mt-5 min-w-0 rounded-md border border-[#cda24a33] p-3">
                   <summary className="cursor-pointer text-sm text-[#e2c06f]">Technical record details (optional)</summary>
                   <dl className="mt-4 grid min-w-0 gap-4">
                     <Field label="Lead identifier" value={lead.id} />
-                    <Field label="Agent identifier" value={lead.assigned_agent_id || "Unassigned"} />
+                    <Field label="Owner identifier (read ownership)" value={leadOwnership(lead).id || "Unassigned"} />
                     <Field label="Original intake text (unaltered)" value={lead.question || "Not recorded"} />
                   </dl>
                 </details>

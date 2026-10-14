@@ -1,5 +1,6 @@
 import { readFileSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import { expect, test, type BrowserContext } from "@playwright/test";
 import { renderLeadAlertForTemplateVersion } from "../../app/lib/leadAlertTemplates";
@@ -63,6 +64,36 @@ test.beforeAll(async({browser})=>{
   mkdirSync(output,{recursive:true});
 });
 test.afterAll(async()=>{await context?.close();await pool?.end();});
+test("repeat inquiry shows canonical read owner without inventing assignment or changing buyer interest", async()=>{
+  const id=randomUUID(), session=randomUUID();
+  await query("INSERT INTO sessions(id) VALUES($1)",[session]);
+  await query(`INSERT INTO leads(id,session_id,first_name,last_name,lead_type,primary_intent,is_test,communication_suppressed,
+    duplicate_of_lead_id,buyer_interest) VALUES($1,$3,'SYNTHETIC','REPEAT DO NOT CONTACT',
+    'buyer','buy',true,true,$2,'{"version":1,"kind":"search","desired_area":"Elm City"}')`,[id,fixture.leads.agent,session]);
+  const snapshot=async()=>JSON.stringify((await query(`SELECT (SELECT coalesce(jsonb_agg(a ORDER BY id),'[]') FROM agent_assignments a) assignments,
+    (SELECT coalesce(jsonb_agg(n ORDER BY id),'[]') FROM lead_notifications n) notifications,
+    (SELECT jsonb_agg(jsonb_build_object('id',id,'assigned',assigned_agent_id,'buyer',buyer_interest) ORDER BY id) FROM leads) leads`))[0]);
+  const before=await snapshot(); const page=await context.newPage();
+  try {
+    for(const width of [320,390,768,1440]) {
+      await page.setViewportSize({width,height:1000}); await page.goto(`/admin/leads/${id}`);
+      await expect(page.getByRole("region",{name:"Lead overview"})).toContainText("SYNTHETIC AGENT · inherited from canonical lead");
+      await expect(page.getByRole("region",{name:"Lead overview"})).toContainText("Elm City");
+      // An inherited reader has no mutation/contact-review grant. The existing
+      // component omits these controls, rather than rendering disabled buttons.
+      await expect(page.getByRole("button",{name:"Review & call"})).toHaveCount(0);
+      await expect(page.getByRole("region",{name:"Lead overview"})).toContainText("Contact blocked");
+      expect(await page.locator('a[href^="tel:"],a[href^="mailto:"],a[href^="sms:"]').count()).toBe(0);
+      await page.locator("summary").filter({hasText:"Lead state"}).click();
+      await expect(page.locator("summary").filter({hasText:"Lead state"}).locator("..")).toContainText("Inherited ownership");
+      await expect(page.locator("summary").filter({hasText:"Lead state"}).locator("..")).not.toContainText("Unassigned");
+      await page.evaluate(()=>{document.documentElement.style.fontSize="200%";});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
+      await page.screenshot({path:path.join(output,`inherited-owner-${width}.png`),fullPage:false});
+    }
+    expect(await snapshot()).toBe(before);
+  }finally{await page.close();}
+});
 for(const width of [320,390,768,1440]) {
   test(`Action-first detail ${width}px, keyboard and enlarged text`,async()=>{
     const page=await context.newPage();const errors:string[]=[];const hydrationContext:string[]=[];

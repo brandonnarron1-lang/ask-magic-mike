@@ -68,6 +68,7 @@ export type AdminLeadView = {
   duplicate_of_lead_id?: string | null;
   /** Read ownership only; never an invented assignment on this inquiry. */
   inquiry_owner_agent_id?: string | null;
+  inquiry_owner_agent_name?: string | null;
   timeline: string | null;
   condition: string | null;
   question: string | null;
@@ -377,6 +378,7 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
     buyer_interest: buyerInterest,
     duplicate_of_lead_id: text(row.duplicate_of_lead_id),
     inquiry_owner_agent_id: firstText(row.assigned_agent_id, row.inquiry_owner_agent_id),
+    inquiry_owner_agent_name: text(row.inquiry_owner_agent_name),
     timeline: text(row.timeline),
     condition: firstText(row.condition, row.property_condition),
     question,

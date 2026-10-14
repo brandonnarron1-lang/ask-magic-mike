@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
@@ -23,7 +23,7 @@ import {
   type VerifiedPublicExperimentLeadContext,
 } from "../../lib/growth/experiment-registry";
 import { recordLeadExperimentConversion } from "../../lib/growth/lead-experiment-conversion";
-import { createFirstLiveLeadMonitor } from "@/lib/operations/first-live-lead-monitor";
+import { createFirstLiveLeadMonitor, observeFirstLiveMonitor } from "@/lib/operations/first-live-lead-monitor";
 import { isApprovedPublicOrigin } from "../../lib/publicOrigin";
 import {
   checkRateLimit,
@@ -909,7 +909,9 @@ export async function POST(req: Request) {
       if (!payload.is_test) {
         const liveMonitor = createFirstLiveLeadMonitor();
         if (liveMonitor) {
-          await liveMonitor.run({ leadId: persistedLead.lead_id, lookbackHours: 1 });
+          // Supported lifetime tracking, not fire-and-forget. A lost callback
+          // is recovered by the existing cron's durable unaudited-lead scan.
+          after(() => observeFirstLiveMonitor(liveMonitor, { leadId: persistedLead.lead_id, lookbackHours: 1 }, correlationId).then(() => undefined));
         }
       }
     } catch {

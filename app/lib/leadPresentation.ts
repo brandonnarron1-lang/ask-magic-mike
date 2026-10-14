@@ -2,6 +2,7 @@ import type { AdminLeadView,AdminLeadDetailResult } from "./persistence/supabase
 import { canAccessAssignedLead, hasLeadCenterPermission, type LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 import { leadQuestionForDisplay, leadSourceLabel, leadTimelineLabel } from "./leadReadability";
 import type { BuyerInterestV1 } from "./buyerInterest";
+import { leadOwnership } from "./leadOwnership";
 
 export const LEAD_PRESENTATION_VERSION = "reference_cards_v1";
 export const LEAD_MODULES = {
@@ -63,7 +64,7 @@ export function presentLead(input: {
     location: ["Wilson","Elm City","Lucama","Stantonsburg","Sims","Kenly"].includes(lead.stated_city || "") ? lead.stated_city! : "Area to verify", source: full ? leadSourceLabel(lead.source) : "Owned intake",
     timeline: full ? leadTimelineLabel(lead.timeline || lead.timeline_months) : "Review in Lead Center",
     budget: "Not recorded", financing: full && lead.stated_financing ? `Self-reported: ${lead.stated_financing} — verify evidence` : full && typeof lead.stated_preapproval==="boolean" ? `Preapproval self-reported ${lead.stated_preapproval?"yes":"no"} — not independently verified` : "Unknown — evidence required", propertyEvidence: "Property facts and current availability unverified",
-    custodian: lead.assigned_agent_id ? "Assigned custodian" : "Mike / admin review",
+    custodian: full ? leadOwnership(lead).label : "Private in Lead Center",
     nextAction: isTest ? "INTERNAL QA — DO NOT CONTACT" : "Review facts and communication permission before follow-up.",
     draftStatus: "Human review required; approval does not send",
     insight: subtype === "copilot" ? "Verify current availability before proposing a showing. No availability or appointment is confirmed." : "Broker review required. No automated valuation, binding offer, or financing claim.",
@@ -91,6 +92,7 @@ export function lockScreenPresentation(view: LeadPresentation): LeadPresentation
   const { identity: _identity, offer, ...safe } = view;
   void _identity;
   return { ...safe, disclosure: "pre_claim", source: "Owned intake", timeline: "Review in Lead Center", budget: "Private in Lead Center",
+    custodian: "Private in Lead Center",
     financing: "Private in Lead Center", reasons: [], actions: [],
     insight: "Review the current authenticated record before acting.",
     offer: offer ? { ...offer, code: undefined } : undefined };
