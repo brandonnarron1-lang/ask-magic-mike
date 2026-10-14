@@ -108,6 +108,24 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("ordinary capture with 
       expect(JSON.stringify(log.mock.calls)).toContain("42501"); expect(JSON.stringify(log.mock.calls)).not.toContain("synthetic private error");
     } finally {log.mockRestore();}
   });
+  it("legacy v2 repeat uses its retained server fingerprint, without backfilling v4 evidence", async () => {
+    vi.stubEnv("LEAD_ALERT_V6_ENABLED","false");
+    try {
+      const first=await submit(body({buyer_interest:undefined}));
+      const repeat=await submit(body({buyer_interest:undefined,email:first.value.email,question:"A separate synthetic follow-up inquiry"}));
+      expect(repeat.response.status).toBe(200);expect(repeat.result.duplicate_of_lead_id).toBe(first.result.lead_id);
+      expect(psql(`SELECT inquiry_request_fingerprint IS NULL AND request_fingerprint IS NOT NULL AND request_idempotency_key IS NOT NULL FROM leads WHERE id=${literal(repeat.result.lead_id)}`)).toBe("t");
+      const {FirstLiveLeadMonitor}=await import("../../src/lib/operations/first-live-lead-monitor");
+      const before=noBusinessEdits();const report=await new FirstLiveLeadMonitor(localQuery).run({leadId:repeat.result.lead_id});
+      expect(report.states.duplicateSuspicion).toBe(0);expect(report.states.missingAssignment).toBe(0);
+      expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(repeat.result.lead_id)} AND action='lead.first_live_escalation'`)).toBe("0");
+      expect(noBusinessEdits()).toBe(before);
+      // Missing canonical contact linkage remains a genuine anomaly even with
+      // a retained fingerprint; compatibility must not disable this detector.
+      psql(`UPDATE leads SET contact_id=NULL WHERE id=${literal(repeat.result.lead_id)}`);
+      expect((await new FirstLiveLeadMonitor(localQuery).run({leadId:repeat.result.lead_id})).states.duplicateSuspicion).toBe(1);
+    }finally{vi.stubEnv("LEAD_ALERT_V6_ENABLED","true");}
+  });
   it("stalled monitor is abortable and outside the response; no work survives its finite deadline", async () => {
     callbacks.mode="stalled"; const result=await submit(); expect(result.response.status).toBe(200); expect(callbacks.active).toBe(0);
     const before=count("leads"); const started=performance.now(); const pending=callbacks.pending[0](); await pending;
