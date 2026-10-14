@@ -65,10 +65,11 @@ test.beforeAll(async({browser})=>{
 });
 test.afterAll(async()=>{await context?.close();await pool?.end();});
 test("repeat inquiry shows canonical read owner without inventing assignment or changing buyer interest", async()=>{
-  const id=randomUUID();
+  const id=randomUUID(), session=randomUUID();
+  await query("INSERT INTO sessions(id) VALUES($1)",[session]);
   await query(`INSERT INTO leads(id,session_id,first_name,last_name,lead_type,primary_intent,is_test,communication_suppressed,
-    duplicate_of_lead_id,buyer_interest) VALUES($1,(SELECT session_id FROM leads WHERE id=$2),'SYNTHETIC','REPEAT DO NOT CONTACT',
-    'buyer','buy',true,true,$2,'{"version":1,"kind":"search","desired_area":"Elm City"}')`,[id,fixture.leads.agent]);
+    duplicate_of_lead_id,buyer_interest) VALUES($1,$3,'SYNTHETIC','REPEAT DO NOT CONTACT',
+    'buyer','buy',true,true,$2,'{"version":1,"kind":"search","desired_area":"Elm City"}')`,[id,fixture.leads.agent,session]);
   const snapshot=async()=>JSON.stringify((await query(`SELECT (SELECT coalesce(jsonb_agg(a ORDER BY id),'[]') FROM agent_assignments a) assignments,
     (SELECT coalesce(jsonb_agg(n ORDER BY id),'[]') FROM lead_notifications n) notifications,
     (SELECT jsonb_agg(jsonb_build_object('id',id,'assigned',assigned_agent_id,'buyer',buyer_interest) ORDER BY id) FROM leads) leads`))[0]);
