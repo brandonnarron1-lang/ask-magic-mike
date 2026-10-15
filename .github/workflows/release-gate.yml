@@ -53,7 +53,9 @@ jobs:
         run: pnpm run release:safety
 
       - name: WordPress Connector PHP syntax lint
-        run: php -l wordpress/ask-magic-mike-connector/ask-magic-mike-connector.php
+        run: |
+          php -l wordpress/ask-magic-mike-connector/ask-magic-mike-connector.php
+          php tests/wordpress/connector-url-runtime.php
 
       - name: Unit tests
         run: pnpm run test

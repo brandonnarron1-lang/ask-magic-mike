@@ -11,6 +11,7 @@ import { bind, concurrent, install, launchIntakeMigration, literal, psql, startD
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../app/lib/leadConsent";
 import { normalizeLeadNotificationRow } from "../../app/lib/persistence/supabase/leadNotificationRepository";
 import { LAUNCH_LEAD_ALERT_TEMPLATE_VERSION } from "../../app/lib/leadAlertLaunch";
+import { queryGrowthPlacementDelivery } from "../../app/lib/persistence/neonGrowthIntelligenceView";
 vi.mock("@neondatabase/serverless", async () => { const local = await import("../support/qa-audit-postgres"); return { neon: () => local.localQuery }; });
 vi.mock("../../src/lib/security/rate-limit", async original => ({ ...await original<object>(), checkRateLimit: vi.fn(async () => ({ allowed: true, durable: true, remaining: 50, resetAt: Date.now() + 60000 })) }));
 vi.mock("../../app/lib/serverAnalytics", () => ({ recordServerAnalyticsEvent: vi.fn(async () => undefined) }));
@@ -123,6 +124,61 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolat
     const before = counts();
     expect((await submit(fixture({ name: "" }))).response.status).toBe(400);
     expect(counts()).toBe(before);
+  });
+  it.each([
+    "Consider an as-is/direct-purchase option.",
+    "Compare listing with an as-is option.",
+    "Get general selling guidance.",
+  ])("stores structured seller purpose and both immutable v6 envelopes without sending: %s", async purpose => {
+    const components = { line1: "103 Synthetic Seller Fixture Road", line2: "Unit C", locality: "Wilson", region: "NC", postalCode: "27893", country: "US" };
+    const address = "103 Synthetic Seller Fixture Road, Unit C, Wilson, NC 27893";
+    const question = `Seller option requested: ${purpose}\nReported condition: Needs repairs\nSynthetic property review context.`;
+    const body = fixture({ funnel_type: "seller", lead_source_surface: "seller_page", buyer_interest: undefined,
+      address, address_entry: { version: 1, enteredText: address, acceptedText: address, components, confirmation: "manual", validation: "not_performed" },
+      question, consent: false, consent_email: false, consent_call: false, consent_sms: false,
+      attribution: { source: "ourtownproperties", medium: "owned_media", campaign: "amm_owned_demand_2026", content: "wordpress_we_buy_homes" },
+      page_url: "https://www.askmagicmike.com/sell?seller_option=compare" });
+    const saved = await submit(body); expect(saved.response.status).toBe(200);
+    const stored = lead(saved.result.lead_id);
+    expect(stored.address_line2).toBe("Unit C"); expect(stored.address_entry).toMatchObject({ validation: "not_performed", components });
+    expect(stored.primary_intent).toBe("sell"); expect(stored.lead_type).toBe("seller"); expect(stored.question_raw).toContain(question);
+    expect(stored.consent_email).toBe(false); expect(stored.consent_call).toBe(false);
+    expect(stored.source_detail).toBe("seller_page / owned_media / amm_owned_demand_2026");
+    expect(rows(`SELECT utm_source,utm_medium,utm_campaign,utm_content FROM source_attribution WHERE lead_id=${literal(saved.result.lead_id)}::uuid`)[0])
+      .toMatchObject({ utm_source: "ourtownproperties", utm_medium: "owned_media", utm_campaign: "amm_owned_demand_2026", utm_content: "wordpress_we_buy_homes" });
+    const records = notifications(saved.result.lead_id); expect(records).toHaveLength(2);
+    expect(records.map(record => record.recipient_reference)).toEqual(["operator:brandon", "operator:mike"]);
+    for (const record of records) {
+      const snapshot = record.private_intake_snapshot as Row;
+      expect(snapshot.submitted).toMatchObject({ question, address_entry: { components }, consent_email: false, consent_call: false });
+      expect(String(snapshot.text)).toContain(purpose); expect(String(snapshot.text)).toContain("Unit C");
+      expect(String(snapshot.text)).toContain(String(body.email)); expect(snapshot.template_version).toBe("lead_alert_email_v6");
+      expect(snapshot.subject).not.toContain(String(body.email)); expect(snapshot.subject).not.toContain(address);
+      expect(record.status).toBe("pending");
+    }
+    const { localQuery } = await import("../support/qa-audit-postgres");
+    const cohort = rows(`SELECT l.id,sa.utm_source,sa.utm_medium,sa.utm_campaign,sa.utm_content FROM leads l JOIN source_attribution sa ON sa.lead_id=l.id WHERE l.id=${literal(saved.result.lead_id)}::uuid`);
+    const delivery = await queryGrowthPlacementDelivery(localQuery, cohort);
+    expect(delivery.configured).toBe(true); expect(delivery.placements).toHaveLength(1);
+    expect(delivery.placements[0].acceptedInquiries).toBe(1);
+    for (const operator of delivery.placements[0].operators) {
+      expect(operator.counts).toMatchObject({ envelopes: 1, pending: 1, delivered: 0, no_v6_envelope_recorded: 0 });
+    }
+    const after = counts();
+    const replay = await submit(body); expect(replay.response.status).toBe(200);
+    expect(replay.response.headers.get("X-AMM-Idempotent-Replay")).toBe("1"); expect(counts()).toBe(after);
+    expect((await submit({ ...body, question: `${question}\nChanged purpose` })).response.status).toBe(409); expect(counts()).toBe(after);
+    expect(provider.send).not.toHaveBeenCalled();
+  });
+  it("keeps unstructured legacy sellers phone-required and rejects missing contacts on structured sellers", async () => {
+    const before = counts();
+    const body = fixture({ funnel_type: "seller", buyer_interest: undefined, address: "104 Synthetic Legacy Road", phone: "" });
+    expect((await submit(body)).response.status).toBe(400);
+    const address = { version: 1, enteredText: String(body.address), acceptedText: String(body.address),
+      components: { line1: "", line2: "", locality: "", region: "", postalCode: "", country: "" }, confirmation: "manual", validation: "not_performed" };
+    expect((await submit({ ...body, address_entry: address, email: "" })).response.status).toBe(400);
+    expect((await submit({ ...body, address_entry: address, name: "" })).response.status).toBe(400);
+    expect(counts()).toBe(before); expect(provider.send).not.toHaveBeenCalled();
   });
   it("root search capture invents neither a subject address nor a geography field", async () => {
     const saved = await submit(fixture({ buyer_interest: { version:1,kind:"search",desired_area:"Wilson",budget_range:"Self-reported fixture range" } }));

@@ -9,17 +9,32 @@
     "javascript_sha256": "8c01ac0914bfec29435785ae6e5a5f9a9a2a96ba91c6843dcb449b3f6bb09290"
   },
   "candidate": {
-    "version": "1.1.0",
-    "source_sha256": "700c78b77b24b0038078e45c6526908078dac46cf1a591b73dd0f13a6d840ec8"
+    "version": "1.2.0",
+    "source_sha256": "482dc3b7dccfc98d277bc37535272c16ccb24021ad2e96de9e5ef4e35337aef5"
+  },
+  "historical_1_1_0": {
+    "source_sha256": "700c78b77b24b0038078e45c6526908078dac46cf1a591b73dd0f13a6d840ec8",
+    "install_file": "output/release/ask-magic-mike-connector-1.1.0.zip",
+    "install_sha256": "56934bdcc9a8685493609ffbe76938f7889ef24a01e69d5f73bd1720eed7d4fa",
+    "rollback_file": "output/release/ask-magic-mike-connector-1.0.0-rollback.zip",
+    "rollback_sha256": "cd1d9171ff40ccc28740e5e59380bf373cacd4ebe5a853fdeabee45cc9d5d261"
+  },
+  "seller_options_extension": {
+    "required_plugin_version": "1.2.0",
+    "attribute": "seller_option",
+    "routes": ["/sell", "/we-buy-houses"],
+    "values": ["as-is", "compare", "guidance"],
+    "default": "omitted; legacy URL unchanged",
+    "activation_order": "accepted application support, verified installed connector, one backed-up visible page canary"
   },
   "packages": {
     "install": {
-      "file": "output/release/ask-magic-mike-connector-1.1.0.zip",
-      "sha256": "56934bdcc9a8685493609ffbe76938f7889ef24a01e69d5f73bd1720eed7d4fa"
+      "file": "output/release/ask-magic-mike-connector-1.2.0.zip",
+      "sha256": "dd83772d78a4b17842ea82df3355d687059b6b822f10532a22f3d9aa5d547baa"
     },
     "rollback": {
-      "file": "output/release/ask-magic-mike-connector-1.0.0-rollback.zip",
-      "sha256": "cd1d9171ff40ccc28740e5e59380bf373cacd4ebe5a853fdeabee45cc9d5d261"
+      "file": "output/release/ask-magic-mike-connector-1.1.0.zip",
+      "sha256": "56934bdcc9a8685493609ffbe76938f7889ef24a01e69d5f73bd1720eed7d4fa"
     }
   },
   "placements": [

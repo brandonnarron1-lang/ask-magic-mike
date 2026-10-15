@@ -582,6 +582,33 @@ function leadsForPlacement(
   ), 0);
 }
 
+/** Aggregate consumers must use the same exact tuple rules as lead totals.
+ * Return only catalog labels/keys, never caller-supplied attribution text. */
+export function resolveExactOwnedDemandSignalPlacement(signal: OwnedDemandAttributionSignal) {
+  if (signal.basis) return null;
+  for (const definition of CHANNEL_DEFINITIONS) {
+    const placements = [
+      { key: "general_question", label: "General question", content: definition.content },
+      ...OFFER_DEFINITIONS.map((offer) => ({
+        key: offer.key, label: offer.shortLabel, content: `${definition.content}_${offer.contentSuffix}`,
+      })),
+      ...(definition.key === "ourtown_wordpress" ? WORDPRESS_NAMED_PLACEMENT_INPUTS.map((placement) => ({
+        key: placement.placementKey, label: placement.placementLabel, content: placement.content,
+      })) : []),
+      ...(definition.key === "qr_print" ? [{
+        key: OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT,
+        label: "Open-house registration packets", content: OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT,
+      }] : []),
+    ];
+    const placement = placements.find((candidate) => leadsForPlacement([signal], definition, candidate.content) > 0);
+    if (placement) return {
+      channelKey: definition.key, channelLabel: definition.label,
+      placementKey: placement.key, placementLabel: placement.label, content: placement.content,
+    };
+  }
+  return null;
+}
+
 export function buildOwnedDemandCommand(
   intelligence: Pick<GrowthIntelligence, "summary"> & {
     ownedDemandSignals: OwnedDemandAttributionSignal[];

@@ -13,13 +13,22 @@ import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { TextAreaField, TextField } from "./FormField";
 import { LeadConsentField } from "./LeadConsentField";
 import { LuxuryCard } from "./LuxuryCard";
+import { SellerOptionsRequest } from "./SellerOptionsRequest";
+import type { SellerOption } from "../../lib/sellerOptions";
 
 type SellerIntentSectionProps = {
   surface?: LeadSourceSurface;
   compact?: boolean;
+  variant?: "options";
+  initialOption?: SellerOption;
 };
 
-export function SellerIntentSection({ surface = "seller_page", compact = false }: SellerIntentSectionProps) {
+export function SellerIntentSection({ variant, initialOption = "guidance", surface = "seller_page", compact = false }: SellerIntentSectionProps) {
+  return variant === "options" ? <SellerOptionsRequest surface={surface} compact={compact} initialOption={initialOption} />
+    : <LegacySellerIntentSection surface={surface} compact={compact} />;
+}
+
+function LegacySellerIntentSection({ surface = "seller_page", compact = false }: SellerIntentSectionProps) {
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(),
   );

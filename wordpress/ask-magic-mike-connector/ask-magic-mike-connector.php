@@ -3,7 +3,7 @@
  * Plugin Name: Ask Magic Mike Connector
  * Plugin URI: https://www.askmagicmike.com/
  * Description: Adds Ask Magic Mike CTAs, iframe embeds, UTM tracking, and an optional floating CTA for Our Town Properties.
- * Version: 1.1.0
+ * Version: 1.2.0
  * Author: Ask Magic Mike / Our Town Properties
  * License: GPLv2 or later
  * Text Domain: ask-magic-mike-connector
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! defined( 'AMM_CONNECTOR_VERSION' ) ) {
-    define( 'AMM_CONNECTOR_VERSION', '1.1.0' );
+    define( 'AMM_CONNECTOR_VERSION', '1.2.0' );
 }
 
 if ( ! defined( 'AMM_CONNECTOR_OPTION_KEY' ) ) {
@@ -267,7 +267,7 @@ function amm_connector_render_settings_page() {
 /**
  * Build Ask Magic Mike URL with UTM parameters.
  */
-function amm_connector_build_url( $route, $source, $content = '', $utm_overrides = array() ) {
+function amm_connector_build_url( $route, $source, $content = '', $utm_overrides = array(), $seller_option = '' ) {
     $options       = amm_connector_get_options();
     $base          = amm_connector_normalize_base_url( $options['base_url'], amm_connector_default_options()['base_url'] );
     $route         = amm_connector_normalize_route( $route, $options['value_route'] );
@@ -286,6 +286,14 @@ function amm_connector_build_url( $route, $source, $content = '', $utm_overrides
     );
     if ( '' !== $utm_content ) {
         $args['utm_content'] = $utm_content;
+    }
+
+    // Explicit, link-only opt-in. Never accept arbitrary query parameters or
+    // change old callers, embeds, communication permission or eligibility.
+    $seller_option = is_string( $seller_option ) ? trim( $seller_option ) : '';
+    if ( in_array( $route, array( '/sell', '/we-buy-houses' ), true )
+        && in_array( $seller_option, array( 'as-is', 'compare', 'guidance' ), true ) ) {
+        $args['seller_option'] = $seller_option;
     }
 
     return add_query_arg( $args, $url );
@@ -314,6 +322,7 @@ function amm_connector_cta_shortcode( $atts ) {
             'button'       => $options['default_button'],
             'button_text'  => '',
             'route'        => $options['value_route'],
+            'seller_option' => '',
             'class'        => '',
             'theme'        => 'dark',
         ),
@@ -335,7 +344,8 @@ function amm_connector_cta_shortcode( $atts ) {
             'utm_medium'   => $atts['utm_medium'],
             'utm_campaign' => $atts['utm_campaign'],
             'utm_content'  => $atts['utm_content'],
-        )
+        ),
+        $atts['seller_option']
     );
 
     ob_start();
