@@ -1,10 +1,39 @@
 # Ask Magic Mike Connector
 
+## Optional seller-options link support — 1.2.0
+
+Existing shortcodes, saved options, CSS, JavaScript, embeds and floating CTA
+defaults are unchanged. The CTA shortcode alone accepts `seller_option` with
+one of `as-is`, `compare`, or `guidance`, and only on `/sell` or
+`/we-buy-houses`. Missing/unknown values are omitted, never forwarded as arbitrary
+query data. The selection is a request preference, not consent, an offer,
+eligibility or independently verified property information.
+
+Example (publish only after application support is accepted and the individual
+page has a fresh authenticated backup/rollback and visible insertion point):
+
+```text
+[ask_magic_mike_cta route="/sell" seller_option="compare" source="seller_page_cta" utm_source="ourtownproperties" utm_medium="owned_media" utm_campaign="amm_owned_demand_2026" utm_content="wordpress_we_buy_homes" headline="Explore your selling options." text="Compare listing with an as-is option. Request a property review with Our Town Properties." button_text="Review selling options"]
+```
+
+The existing bridge is a separate component. This connector never forwards a
+form or sends email. Do not enable another Gravity Forms path. The packaged
+1.1.0 artifact remains an exact connector recovery option; the actual installed
+source/options must also be backed up before replacement. First roll back any
+new placement that depends on this optional attribute. Never alter existing
+Home Value/rental pages simply to match a version number.
+
+`php tests/wordpress/connector-url-runtime.php` executes the real URL/shortcode
+functions under narrow isolated WordPress stubs; it is not live WordPress,
+Beaver, installation, page-render or delivery evidence. Hosted CI also runs
+native PHP syntax lint. Installed versions and actual server PHP remain
+authenticated operational evidence, not inferred from this package.
+
 This directory source-controls the existing Our Town Properties Connector rather
 than creating another lead backend. The plugin renders CTA/embed links only. It
 does not store leads, send email or SMS, call the lead API, or contain secrets.
 
-## Current live baseline
+## Historical observed baseline — September 1, 2026
 
 - Plugin: `ask-magic-mike-connector/ask-magic-mike-connector.php`
 - Observed live version: `1.0.0`
@@ -20,7 +49,7 @@ The exact live PHP baseline is retained as a non-executable `.source.txt`
 rollback artifact. The candidate intentionally preserves the live CSS and
 JavaScript byte-for-byte.
 
-## Version 1.1.0 candidate
+## Historical version 1.1.0 package
 
 - Candidate PHP SHA-256:
   `700c78b77b24b0038078e45c6526908078dac46cf1a591b73dd0f13a6d840ec8`

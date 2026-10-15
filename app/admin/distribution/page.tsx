@@ -38,6 +38,7 @@ import {
 } from "../../lib/growth/wordpress-activation-change-set";
 import { wordpressSellerIntentDecisionManifestHref } from "../../lib/growth/wordpress-seller-intent-decision";
 import { loadGrowthIntelligence } from "../../lib/growthIntelligenceView";
+import type { GrowthPlacementDeliverySnapshot } from "../../lib/persistence/neonGrowthIntelligenceView";
 import {
   loadOwnedDemandPublicationProofLedger,
   type OwnedDemandPublicationProofLedger,
@@ -340,6 +341,62 @@ function MeasurementStateBanner({ measurement }: { measurement: OwnedDemandMeasu
       <strong className={emphasis}>{measurement.title}</strong>{" "}
       {measurement.detail}
     </div>
+  );
+}
+
+function PlacementOperatorDelivery({
+  snapshot,
+  measurementReady,
+}: {
+  snapshot?: GrowthPlacementDeliverySnapshot;
+  measurementReady: boolean;
+}) {
+  const available = measurementReady && snapshot?.configured;
+  const states = [
+    ["inquiries_with_envelope", "Inquiries with v6 envelope"],
+    ["no_v6_envelope_recorded", "No v6 envelope recorded"],
+    ["envelopes", "Recorded envelopes"],
+    ["pending", "Awaiting dispatch"],
+    ["retry_scheduled", "Retry scheduled"],
+    ["held_or_failed", "Held / failed"],
+    ["accepted_unconfirmed", "Accepted; delivery unconfirmed"],
+    ["delivered", "Recipient-server delivery"],
+    ["unknown", "Outcome unknown"],
+  ] as const;
+  return (
+    <section className="mt-5" aria-label="Placement operator delivery" data-delivery-available={Boolean(available)}>
+      <Panel eyebrow="Existing v6 delivery evidence" title="Operator envelopes by exact placement" note="30-day window · most recent at most 5,000 eligible accepted inquiries, using the same latest-touch cohort as distribution; QA and suppressed inquiries excluded. Not full-scale totals or distinct contacts.">
+        <p className="text-xs leading-6 text-[#a99f90]">Delivery-state counts are recorded v6 email envelopes, not distinct leads or callback events. Coverage columns count inquiry records with or without a recorded envelope. Two operators can have two envelopes for one inquiry. Each envelope occupies one current-state bucket. Recipient-server delivery is not mailbox receipt.</p>
+        <p className="mt-2 text-xs leading-6 text-[#a99f90]">Accepted inquiries are saved inquiry records, not email-provider acceptance. No v6 envelope recorded is an observation, not a delivery failure or an eligibility assessment: pre-cutoff or held inquiries may intentionally have none.</p>
+        {!available || !snapshot ? (
+          <p role="status" className="mt-4 text-sm leading-6 text-[#f0cf79]">
+            — Operator delivery unavailable. {!measurementReady
+              ? "Canonical distribution measurement is unavailable."
+              : snapshot?.unavailableReason === "schema_or_grants"
+                ? "Required v6 columns or server read grants are unavailable, including operator metadata."
+                : "The optional operator-delivery aggregate could not be verified."} Unavailable is not zero; existing lead totals are unchanged.
+          </p>
+        ) : snapshot.placements.length === 0 ? (
+          <p className="mt-4 text-sm leading-6 text-[#c9bdab]">0 accepted inquiries for exact owned-demand placements in this bounded cohort. This does not establish delivery or expected v6 eligibility.</p>
+        ) : snapshot.placements.map((placement) => (
+          <article key={`${placement.channelKey}:${placement.placementKey}`} className="mt-5 border-t border-white/10 pt-4">
+            <h3 className="text-sm font-semibold text-[#f4ead4]">{placement.channelLabel} · {placement.placementLabel}</h3>
+            <p className="mt-1 break-all text-[11px] text-[#8f8778]">utm_content={placement.content}</p>
+            <p className="mt-2 text-sm text-[#c9bdab]">Accepted inquiries in this bounded cohort: <strong>{placement.acceptedInquiries}</strong></p>
+            {placement.unknownOperatorEnvelopes > 0 ? <p role="status" className="mt-2 text-xs leading-6 text-[#f0cf79]">{placement.unknownOperatorEnvelopes} envelope(s) have missing or unrecognized operator metadata. Per-operator values are unavailable, not zero.</p> : null}
+            <div className="mt-3 overflow-x-auto" role="region" aria-label={`${placement.placementLabel} operator delivery table`} tabIndex={0}>
+              <table className="w-full text-left text-xs text-[#c9bdab]">
+                <caption className="sr-only">Recorded operator envelopes for {placement.placementLabel}</caption>
+                <thead><tr><th scope="col" className="px-2 py-3">Operator</th>{states.map(([key, label]) => <th key={key} scope="col" className="min-w-24 px-2 py-3">{label}</th>)}</tr></thead>
+                <tbody>{placement.operators.map(({ operator, counts }) => (
+                  <tr key={operator} className="border-t border-white/10"><th scope="row" className="whitespace-nowrap px-2 py-3 font-medium">{operator === "operator:mike" ? "Mike" : "Brandon"}</th>{states.map(([key]) => <td key={key} className="px-2 py-3">{counts ? counts[key] : "—"}</td>)}</tr>
+                ))}</tbody>
+              </table>
+            </div>
+          </article>
+        ))}
+      </Panel>
+    </section>
   );
 }
 
@@ -906,6 +963,8 @@ export default async function DistributionPage({
             </p>
           </article>
         </section>
+
+        <PlacementOperatorDelivery snapshot={growth.placementDelivery} measurementReady={measurement.ready} />
 
         <div className="mt-5 rounded-xl border border-[#cda24a55] bg-[#1a1308] px-5 py-4 text-sm leading-6 text-[#f4ead4]">
           <strong className="text-[#f0cf79]">{measurement.ready ? "Measured bottleneck:" : "Measurement boundary:"}</strong>{" "}

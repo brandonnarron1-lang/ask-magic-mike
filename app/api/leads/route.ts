@@ -501,8 +501,14 @@ function validateLead(payload: LeadPayload) {
     return "Email or phone is required for a home value request.";
   }
 
-  if (payload.funnel_type === "seller" && (!payload.address || !payload.phone)) {
-    return "Property address and phone are required for seller requests.";
+  if (payload.funnel_type === "seller") {
+    // Opt-in structured requests accept either valid contact channel. Older
+    // unstructured callers retain phone-required validation and optional name.
+    if (payload.address_entry) {
+      if (!payload.address || (!payload.email && !payload.phone)) return "Property address and email or phone are required for seller requests.";
+    } else if (!payload.address || !payload.phone) {
+      return "Property address and phone are required for seller requests.";
+    }
   }
 
   if (payload.funnel_type === "chat" && !payload.question) {

@@ -12,8 +12,10 @@ import {
 } from "../growth/intelligence";
 import {
   OWNED_DEMAND_CAMPAIGN_KEY,
+  resolveExactOwnedDemandSignalPlacement,
   type OwnedDemandAttributionSignal,
 } from "../growth/owned-demand";
+import type { OwnedDemandPublicationQuery } from "./neonOwnedDemandPublicationProofs";
 
 type Query = ReturnType<typeof neon>;
 type Row = Record<string, unknown>;
@@ -64,6 +66,23 @@ export interface GrowthDeliverySnapshot {
   error?: string;
 }
 
+export const DISTRIBUTION_OPERATORS = ["operator:mike", "operator:brandon"] as const;
+type DistributionOperator = (typeof DISTRIBUTION_OPERATORS)[number];
+const PLACEMENT_DELIVERY_STATES = ["pending", "retry_scheduled", "held_or_failed", "accepted_unconfirmed", "delivered", "unknown"] as const;
+type PlacementDeliveryState = (typeof PLACEMENT_DELIVERY_STATES)[number];
+type PlacementDeliveryCounts = Record<PlacementDeliveryState, number> & {
+  envelopes: number; inquiries_with_envelope: number; no_v6_envelope_recorded: number;
+};
+export interface GrowthPlacementDeliverySnapshot {
+  configured: boolean;
+  unavailableReason?: "schema_or_grants" | "query_failed" | "invalid_aggregate";
+  placements: Array<NonNullable<ReturnType<typeof resolveExactOwnedDemandSignalPlacement>> & {
+    acceptedInquiries: number;
+    unknownOperatorEnvelopes: number;
+    operators: Array<{ operator: DistributionOperator; counts: PlacementDeliveryCounts | null }>;
+  }>;
+}
+
 export interface GrowthWebVitalMetricSnapshot {
   p75: number | null;
   sampleSize: number;
@@ -93,6 +112,8 @@ export interface GrowthIntelligenceView extends GrowthIntelligence {
   ownedDemandSignals: OwnedDemandAttributionSignal[];
   outcomeMetrics: GrowthOutcomeMetricsSnapshot;
   delivery: GrowthDeliverySnapshot;
+  /** Optional for older callers/fixtures; absence means unavailable, not zero. */
+  placementDelivery?: GrowthPlacementDeliverySnapshot;
   webVitals: GrowthWebVitalsSnapshot;
   sourceRowsRead: number;
   spendRowsRead: number;
@@ -177,6 +198,7 @@ function emptyView(
       deliveredCustomerMessages: 0,
       customerComplaints: 0,
     },
+    placementDelivery: { configured: false, placements: [] },
     webVitals: normalizeGrowthWebVitals([], false),
     sourceRowsRead: 0,
     spendRowsRead: 0,
@@ -345,6 +367,172 @@ export function normalizeGrowthDeliverySnapshot(
     customerComplaints: numberValue(row.customer_complaints),
     ...(error ? { error } : {}),
   };
+}
+
+function emptyPlacementDeliveryCounts(): PlacementDeliveryCounts {
+  return { envelopes: 0, inquiries_with_envelope: 0, no_v6_envelope_recorded: 0,
+    pending: 0, retry_scheduled: 0, held_or_failed: 0, accepted_unconfirmed: 0, delivered: 0, unknown: 0 };
+}
+
+function aggregateCount(value: unknown): number | null {
+  const count = typeof value === "number" || (typeof value === "string" && value.trim()) ? Number(value) : NaN;
+  return Number.isSafeInteger(count) && count >= 0 ? count : null;
+}
+
+/** Rows contain SQL aggregates only. Never project raw metadata or attribution
+ * strings: only catalog placements and the two fixed operator keys escape. */
+export function normalizeGrowthPlacementDelivery(rows: Row[]): GrowthPlacementDeliverySnapshot {
+  const placements = new Map<string, GrowthPlacementDeliverySnapshot["placements"][number]>();
+  const coverage = new Map<string, { accepted: number; represented: number }>();
+  for (const row of rows) {
+    const placement = resolveExactOwnedDemandSignalPlacement({
+      source: text(row.utm_source), medium: text(row.utm_medium),
+      campaign: text(row.utm_campaign), content: text(row.utm_content), leads: 1,
+    });
+    if (!placement) continue;
+    const count = aggregateCount(row.envelopes);
+    if (count === null) {
+      return { configured: false, unavailableReason: "invalid_aggregate", placements: [] };
+    }
+    const key = `${placement.channelKey}:${placement.placementKey}`;
+    let target = placements.get(key);
+    if (!target) {
+      target = { ...placement, acceptedInquiries: 0, unknownOperatorEnvelopes: 0,
+        operators: DISTRIBUTION_OPERATORS.map((operator) => ({ operator, counts: emptyPlacementDeliveryCounts() })) };
+      placements.set(key, target);
+    }
+    const operator = target.operators.find((candidate) => candidate.operator === row.operator_key);
+    if (row.delivery_state === "coverage") {
+      const accepted = aggregateCount(row.accepted_inquiries);
+      const represented = aggregateCount(row.inquiries_with_envelope);
+      if (!operator || accepted === null || represented === null || represented > accepted || count !== 0) {
+        return { configured: false, unavailableReason: "invalid_aggregate", placements: [] };
+      }
+      const coverageKey = `${key}:${operator.operator}`;
+      const previous = coverage.get(coverageKey) || { accepted: 0, represented: 0 };
+      coverage.set(coverageKey, { accepted: previous.accepted + accepted, represented: previous.represented + represented });
+      continue;
+    }
+    if (!operator) {
+      target.unknownOperatorEnvelopes += count;
+      continue;
+    }
+    const state = PLACEMENT_DELIVERY_STATES.includes(row.delivery_state as PlacementDeliveryState)
+      ? row.delivery_state as PlacementDeliveryState : "unknown";
+    operator.counts!.envelopes += count;
+    operator.counts![state] += count;
+  }
+  // Missing/unrecognized operator metadata cannot establish zeros for either
+  // operator. Keep the uncertainty local to the affected exact placement.
+  for (const placement of placements.values()) {
+    const key = `${placement.channelKey}:${placement.placementKey}`;
+    const operatorCoverage = placement.operators.map(({ operator }) => coverage.get(`${key}:${operator}`));
+    const accepted = operatorCoverage[0]?.accepted;
+    if (accepted === undefined || !Number.isSafeInteger(accepted) || operatorCoverage.some((value) =>
+      !value || value.accepted !== accepted || !Number.isSafeInteger(value.represented) || value.represented > accepted)) {
+      return { configured: false, unavailableReason: "invalid_aggregate", placements: [] };
+    }
+    placement.acceptedInquiries = accepted;
+    if (!Number.isSafeInteger(placement.unknownOperatorEnvelopes) || placement.operators.some(({ counts }, index) =>
+      !counts || Object.values(counts).some((count) => !Number.isSafeInteger(count)) ||
+      counts.envelopes < operatorCoverage[index]!.represented ||
+      (operatorCoverage[index]!.represented === 0 && counts.envelopes > 0))) {
+      return { configured: false, unavailableReason: "invalid_aggregate", placements: [] };
+    }
+    placement.operators.forEach(({ counts }, index) => {
+      counts!.inquiries_with_envelope = operatorCoverage[index]!.represented;
+      counts!.no_v6_envelope_recorded = accepted - operatorCoverage[index]!.represented;
+    });
+    if (placement.unknownOperatorEnvelopes > 0) {
+      placement.operators = DISTRIBUTION_OPERATORS.map((operator) => ({ operator, counts: null }));
+    }
+  }
+  return { configured: true, placements: [...placements.values()].sort((a, b) =>
+    `${a.channelKey}:${a.placementKey}`.localeCompare(`${b.channelKey}:${b.placementKey}`)) };
+}
+
+const PLACEMENT_DELIVERY_COLUMNS = ["lead_id", "template_version", "notification_type", "channel", "recipient_type", "metadata", "status", "provider_message_id", "provider_accepted_at"];
+
+/** Neon permits either row arrays or a full-result envelope. Validate unknown
+ * results at this boundary; malformed evidence must never become a false zero. */
+function placementQueryRows(value: unknown): Row[] | null {
+  const candidates = Array.isArray(value) ? value
+    : value && typeof value === "object" && "rows" in value ? value.rows : null;
+  if (!Array.isArray(candidates)) return null;
+  return candidates.every((row: unknown): row is Row =>
+    row !== null && typeof row === "object" && !Array.isArray(row)) ? candidates : null;
+}
+
+/** Same bounded eligible lead cohort/latest touch as distribution totals.
+ * Optional v6 columns/grants are checked independently of legacy Growth reads. */
+export async function queryGrowthPlacementDelivery(
+  sql: OwnedDemandPublicationQuery,
+  cohort: Row[],
+): Promise<GrowthPlacementDeliverySnapshot> {
+  try {
+    const columns = placementQueryRows(await sql.query(
+      `SELECT a.attname AS column_name
+         FROM pg_catalog.pg_attribute a
+        WHERE a.attrelid = to_regclass('public.lead_notifications')
+          AND a.attnum > 0 AND NOT a.attisdropped
+          AND NOT row_security_active(a.attrelid)
+          AND has_column_privilege(current_user, a.attrelid, a.attnum, 'SELECT')`,
+    ));
+    if (!columns) return { configured: false, unavailableReason: "invalid_aggregate", placements: [] };
+    const readable = new Set(columns.map((row) => text(row.column_name)));
+    if (!PLACEMENT_DELIVERY_COLUMNS.every((column) => readable.has(column))) {
+      return { configured: false, unavailableReason: "schema_or_grants", placements: [] };
+    }
+    if (cohort.length === 0) return normalizeGrowthPlacementDelivery([]);
+    const rows = placementQueryRows(await sql.query(
+      `WITH cohort AS (
+         SELECT r.id, r.utm_source, r.utm_medium, r.utm_campaign, r.utm_content
+           FROM jsonb_to_recordset($1::jsonb) AS r(id uuid, utm_source text, utm_medium text, utm_campaign text, utm_content text)
+           JOIN public.leads l ON l.id = r.id
+          WHERE l.is_test = false AND l.communication_suppressed = false
+       ), operators(operator_key) AS (VALUES ('operator:mike'), ('operator:brandon')),
+       envelopes AS (
+         SELECT c.id AS inquiry_id, c.utm_source, c.utm_medium, c.utm_campaign, c.utm_content,
+              CASE n.metadata->>'operator'
+                WHEN 'mike' THEN 'operator:mike'
+                WHEN 'brandon' THEN 'operator:brandon'
+                ELSE NULL END AS operator_key,
+              CASE
+                WHEN n.status IN ('failed', 'permanently_failed', 'skipped')
+                  OR n.metadata->>'provider_terminal_failure' = 'true'
+                  THEN 'held_or_failed'
+                WHEN n.metadata->>'provider_delivery_confirmed' = 'true' THEN 'delivered'
+                WHEN n.provider_accepted_at IS NOT NULL
+                  OR (n.status = 'sent' AND n.provider_message_id IS NOT NULL)
+                  THEN 'accepted_unconfirmed'
+                WHEN n.status = 'pending' THEN 'pending'
+                WHEN n.status = 'retry_scheduled' THEN 'retry_scheduled'
+                ELSE 'unknown' END AS delivery_state
+         FROM cohort c JOIN public.lead_notifications n ON n.lead_id = c.id
+        WHERE n.template_version = 'lead_alert_email_v6'
+          AND n.notification_type = 'lead_alert'
+          AND n.channel = 'email' AND n.recipient_type = 'internal'
+       )
+       SELECT c.utm_source, c.utm_medium, c.utm_campaign, c.utm_content,
+              o.operator_key, 'coverage' AS delivery_state, 0::integer AS envelopes,
+              COUNT(DISTINCT c.id)::integer AS accepted_inquiries,
+              COUNT(DISTINCT e.inquiry_id)::integer AS inquiries_with_envelope
+         FROM cohort c CROSS JOIN operators o
+         LEFT JOIN envelopes e ON e.inquiry_id = c.id AND e.operator_key = o.operator_key
+        GROUP BY 1, 2, 3, 4, 5
+       UNION ALL
+       SELECT utm_source, utm_medium, utm_campaign, utm_content, operator_key, delivery_state,
+              COUNT(*)::integer AS envelopes, NULL::integer AS accepted_inquiries, NULL::integer AS inquiries_with_envelope
+         FROM envelopes GROUP BY 1, 2, 3, 4, 5, 6`,
+      [JSON.stringify(cohort.slice(0, 5000).map((row) => ({ id: text(row.id),
+        utm_source: nullableText(row.utm_source), utm_medium: nullableText(row.utm_medium),
+        utm_campaign: nullableText(row.utm_campaign), utm_content: nullableText(row.utm_content) })))],
+    ));
+    if (!rows) return { configured: false, unavailableReason: "invalid_aggregate", placements: [] };
+    return normalizeGrowthPlacementDelivery(rows);
+  } catch {
+    return { configured: false, unavailableReason: "query_failed", placements: [] };
+  }
 }
 
 function emptyWebVitalMetric(): GrowthWebVitalMetricSnapshot {
@@ -726,6 +914,10 @@ export async function loadNeonGrowthIntelligence(
       }
     }
 
+    const placementDelivery = schema.notifications
+      ? await queryGrowthPlacementDelivery(sql, leadRows)
+      : { configured: false, unavailableReason: "schema_or_grants" as const, placements: [] };
+
     let webVitalRows: Row[] = [];
     let webVitalError: string | undefined;
     if (schema.analytics) {
@@ -800,6 +992,7 @@ export async function loadNeonGrowthIntelligence(
         deliveryConfigured,
         deliveryError,
       ),
+      placementDelivery,
       webVitals: normalizeGrowthWebVitals(webVitalRows, schema.analytics, webVitalError),
       sourceRowsRead: leadRows.length,
       spendRowsRead: spendRows.length,

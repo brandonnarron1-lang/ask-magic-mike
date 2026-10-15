@@ -55,8 +55,8 @@ describe("Ask Magic Mike Connector candidate", () => {
   });
 
   it("upgrades only the existing connector contract and keeps legacy shortcodes", () => {
-    expect(candidate).toContain("* Version: 1.1.0");
-    expect(candidate).toContain("define( 'AMM_CONNECTOR_VERSION', '1.1.0' )");
+    expect(candidate).toContain(`* Version: ${contracts.candidate.version}`);
+    expect(candidate).toContain(`define( 'AMM_CONNECTOR_VERSION', '${contracts.candidate.version}' )`);
     expect(candidate).toContain("add_shortcode( 'ask_magic_mike_cta'");
     expect(candidate).toContain("add_shortcode( 'ask_magic_mike_embed'");
     expect(candidate).toMatch(/'source'\s*=>\s*'cta'/);
@@ -64,7 +64,7 @@ describe("Ask Magic Mike Connector candidate", () => {
     expect(candidate).not.toContain("wp_mail(");
     expect(candidate).not.toContain("/api/leads");
     expect(sha256(candidate)).toBe(contracts.candidate.source_sha256);
-    expect(contracts.candidate.version).toBe("1.1.0");
+    expect(contracts.candidate.version).toBe("1.2.0");
   });
 
   it("supports bounded per-instance attribution with legacy fallbacks", () => {
@@ -121,5 +121,16 @@ describe("Ask Magic Mike Connector candidate", () => {
     expect(releaseWorkflow).toContain(
       "php -l wordpress/ask-magic-mike-connector/ask-magic-mike-connector.php",
     );
+    expect(releaseWorkflow).toContain("php tests/wordpress/connector-url-runtime.php");
+  });
+  it("keeps the seller option explicit and allowlisted without extending other forms", () => {
+    expect(candidate).toContain("$seller_option = ''");
+    expect(candidate).toContain("array( '/sell', '/we-buy-houses' )");
+    expect(candidate).toContain("array( 'as-is', 'compare', 'guidance' )");
+    expect(candidate).toContain("$atts['seller_option']");
+    expect(candidate).not.toContain("$_GET");
+    expect(candidate).not.toContain("$_POST");
+    expect(sha256(readFileSync(resolve(process.cwd(), "output/release/ask-magic-mike-connector-1.1.0.zip"))))
+      .toBe("56934bdcc9a8685493609ffbe76938f7889ef24a01e69d5f73bd1720eed7d4fa");
   });
 });

@@ -86,6 +86,66 @@ async function submit(page: Page) {
   await expect(page.getByRole("heading", { name: "Your request is in.", exact: true })).toBeVisible();
 }
 
+test("opt-in seller goals retain native address/contact review and one frozen request", async ({ page }) => {
+  const capture = captures.get(page)!;
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/sell?seller_option=compare&utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes");
+  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("compare");
+  await page.getByLabel("Property address", { exact: true }).fill(ADDRESS);
+  await page.getByRole("button", { name: "Enter / edit address manually", exact: true }).click();
+  await page.getByLabel("Street address", { exact: true }).fill("102 Synthetic Fixture Road");
+  await page.getByLabel("Unit / apartment (if applicable)", { exact: true }).fill("Unit B");
+  await page.getByLabel("City / locality", { exact: true }).fill("Wilson");
+  await page.getByLabel("State / region", { exact: true }).fill("NC");
+  await page.getByLabel("ZIP / postal code", { exact: true }).fill("27893");
+  await page.getByLabel("Name", { exact: true }).fill(NAME);
+  await page.getByLabel("Email", { exact: true }).fill(EMAIL);
+  await page.getByRole("button", { name: "Review property request", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Review your property request", exact: true })).toBeFocused();
+  expect(capture.attempts).toHaveLength(0);
+  const review = page.getByRole("region", { name: "Review your property request", exact: true });
+  await expect(review).toContainText("102 Synthetic Fixture Road, Unit B, Wilson, NC 27893");
+  await expect(review).toContainText("Permission declined");
+  await page.getByRole("button", { name: "Send property review request", exact: true }).click();
+  await expect(page.getByText("Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.", { exact: true })).toBeVisible();
+  expect(capture.attempts).toHaveLength(1);
+  expect(capture.attempts[0].payload).toMatchObject({ funnel_type: "seller", phone: "", email: EMAIL, consent: false,
+    question: "Seller option requested: Compare listing with an as-is option.",
+    address_entry: { validation: "not_performed", components: { line2: "Unit B", locality: "Wilson" } },
+    attribution: { source: "ourtownproperties", medium: "owned_media", content: "wordpress_we_buy_homes" } });
+  expect(capture.appointmentBodies).toHaveLength(0);
+});
+
+for (const width of [320, 390, 430, 768, 1440]) {
+  test(`seller options keyboard and 200% text reflow at ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 960 });
+    await page.goto("/sell?seller_option=as-is");
+    await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+    const option = page.getByRole("combobox", { name: "Selling goal", exact: true });
+    await option.focus(); await page.keyboard.press("Tab");
+    await expect(page.getByLabel("Property address", { exact: true })).toBeFocused();
+    const action = page.getByRole("button", { name: "Review property request", exact: true });
+    const box = await action.boundingBox(); expect(box?.height).toBeGreaterThanOrEqual(44);
+    const overflow = await page.evaluate(() => Array.from(document.querySelectorAll("main *, footer *"))
+      .filter(element => { const box = element.getBoundingClientRect(); return box.width && box.right > innerWidth + 1; })
+      .slice(0, 15).map(element => ({ tag: element.tagName, className: element.className,
+        width: element.getBoundingClientRect().width, right: element.getBoundingClientRect().right })));
+    expect(overflow, "Visible elements must reflow within the viewport without hiding content").toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+    await page.screenshot({ path: path.join(process.env.AMM_E2E_OUTPUT_DIR || "test-results", `seller-options-${width}-200.png`), fullPage: true });
+  });
+}
+
+test("clean seller and unknown option preserve legacy defaults; alias retains valid query", async ({ page }) => {
+  await page.goto("/sell"); await expect(page.getByLabel("Phone required", { exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveCount(0);
+  await page.goto("/sell?seller_option=guaranteed-offer"); await expect(page.getByLabel("Phone required", { exact: true })).toBeVisible();
+  await page.goto("/we-buy-houses?seller_option=guidance&utm_source=ourtownproperties&utm_medium=owned_media");
+  await expect(page).toHaveURL(/\/sell\?seller_option=guidance/);
+  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("guidance");
+  expect(new URL(page.url()).searchParams.get("utm_medium")).toBe("owned_media");
+});
+
 test("rapid native typing, idle and touch-390 specific property retain a reviewed QA request", async ({ page }) => {
   const capture = captures.get(page)!;
   await page.setViewportSize({ width: 390, height: 844 }); await page.goto("/buy");
