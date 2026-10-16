@@ -43,8 +43,9 @@ export function AcquisitionReport({ report, error, filters, ledger, now }: {
       <label className="min-w-0 text-sm text-[#d8c8a9]">To (exclusive, with offset)<input name="acq_to" className={inputClass} placeholder="2026-10-16T09:00-04:00" defaultValue={acquisitionTimestamp(scalar(filters.to)) ?? ""} maxLength={35} /></label>
       <button className="min-h-11 rounded-lg border border-[#cda24a] bg-[#cda24a] px-4 py-3 font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]" type="submit">Read report</button>
     </form>
-    <p className="mt-3 text-sm leading-6 text-[#a99f90]">Baseline requires one placement and its existing live-observation proof; it is not first publication or causal lift. Select a placement and read its report before choosing an available baseline. Ranges are limited to 31 elapsed days. Explicit offsets avoid daylight-saving ambiguity. An unavailable/capped proof ledger cannot establish the first retained observation; 7/30-day windows remain available.</p>
+    <p className="mt-3 text-sm leading-6 text-[#a99f90]">7/30-day reports remain available without baseline proof. Explicit ranges are limited to 31 elapsed days.</p>
     <details className="mt-3 text-sm leading-6 text-[#c9bdab]"><summary className="min-h-11 cursor-pointer py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">Baseline evidence availability</summary>
+      <p>Baseline requires one placement and its existing live-observation proof; it is not first publication or causal lift. Select a placement and read its report before choosing an available baseline. Explicit offsets avoid daylight-saving ambiguity. An unavailable/capped proof ledger cannot establish the first retained observation.</p>
       {ACQUISITION_PLACEMENTS.map(p => <p key={p.key}>{p.label}: {baselines[p.key] ? `observed ${baselines[p.key]!.observedAt}; recorded ${baselines[p.key]!.recordedAt}` : "Unavailable—record a genuine current observation through the existing publication-proof form. No date is inferred."}</p>)}
     </details>
     {error ? <p role="alert" className="mt-4 text-[#f0cf79]">{error} No aggregate query was executed for these invalid filters.</p> : null}
@@ -59,7 +60,16 @@ export function AcquisitionReport({ report, error, filters, ledger, now }: {
         </div>
         <Delivery counts={report.totals} />
         <div className="mt-4" role="region" aria-label="Acquisition placement totals">
-          <table className="w-full table-fixed text-left text-sm leading-6 text-[#c9bdab]">
+          <div className="space-y-3 text-sm leading-6 text-[#c9bdab] md:hidden" aria-label="Placement totals on narrow screens">
+            {report.placements.map(row => {const p=ACQUISITION_PLACEMENTS.find(p=>p.key===row.key)!;return <article key={row.key} className="min-w-0 rounded-lg border border-white/10 p-3">
+              <h3 className="font-semibold text-[#f4ead4]">{p.label} · page {p.page}</h3>
+              <dl className="mt-2 space-y-1"><div><dt className="inline">Inquiries: </dt><dd className="inline font-semibold">{row.counts.inquiries}</dd></div><div><dt className="inline">Recorded contacts: </dt><dd className="inline font-semibold">{row.counts.contacts}</dd></div><div><dt className="inline">Unresolved linkage: </dt><dd className="inline font-semibold">{row.counts.unresolved}</dd></div></dl>
+              <details className="mt-2"><summary className="min-h-11 cursor-pointer py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">Placement and operator detail</summary>
+                <a href={p.pageUrl} className="inline-block min-h-11 py-2 underline">Public page</a><p>{p.destinations.join(" · ")}</p><p className="text-xs">{p.key}</p><Delivery counts={row.counts}/>
+              </details>
+            </article>;})}
+          </div>
+          <table className="hidden w-full table-fixed text-left text-sm leading-6 text-[#c9bdab] md:table">
             <caption className="py-3 text-left">Exact tracking-tag totals. A shared contact can appear in several rows; row contact counts must not be summed.</caption>
             <thead><tr><th scope="col" className="w-1/2 p-2">Placement</th><th scope="col" className="p-2">Inquiries</th><th scope="col" className="p-2">Contacts / unresolved</th></tr></thead>
             <tbody>{report.placements.map(row => { const p = ACQUISITION_PLACEMENTS.find(p => p.key === row.key)!; return <tr key={row.key} className="border-t border-white/10 align-top"><th scope="row" className="p-2 font-normal"><p className="font-semibold">{p.label} · page {p.page}</p><a href={p.pageUrl} className="inline-block min-h-11 py-2 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">Public page</a><p>{p.destinations.join(" · ")}</p><p className="text-xs text-[#a99f90]">{p.key}</p><details className="mt-2"><summary className="min-h-11 cursor-pointer py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">Operator detail</summary><Delivery counts={row.counts} /></details></th><td className="p-2">{row.counts.inquiries}</td><td className="p-2">{row.counts.contacts} / {row.counts.unresolved}</td></tr>; })}</tbody>
@@ -67,6 +77,6 @@ export function AcquisitionReport({ report, error, filters, ledger, now }: {
         </div>
       </> : null}
     </> : null}
-    <p className="mt-4 text-sm leading-6 text-[#a99f90]">Definition: one durable accepted inquiry row; same-key replay adds none. Repeat property requests remain inquiries even when linked to one canonical contact ID. Test/suppressed records and spam/test statuses are excluded; declined contact permission alone is not an exclusion. Exact stored source=ourtownproperties, medium=owned_media, campaign=amm_owned_demand_2026 and the displayed content tag establish latest-touch attribution—not signed capture or causation. Homepage choices share one tag; this report does not invent a branch split. No v6 envelope recorded is not a failure or proof of eligibility; legacy/pre-cutoff records may intentionally have none. Provider acceptance, recipient-server delivery and mailbox receipt are different evidence.</p>
+    <details className="mt-4 text-sm leading-6 text-[#a99f90]"><summary className="min-h-11 cursor-pointer py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">Count and delivery definitions</summary><p>Definition: one durable accepted inquiry row; same-key replay adds none. Repeat property requests remain inquiries even when linked to one canonical contact ID. Test/suppressed records and spam/test statuses are excluded; declined contact permission alone is not an exclusion. Exact stored source=ourtownproperties, medium=owned_media, campaign=amm_owned_demand_2026 and the displayed content tag establish latest-touch attribution—not signed capture or causation. Homepage choices share one tag; this report does not invent a branch split. No v6 envelope recorded is not a failure or proof of eligibility; legacy/pre-cutoff records may intentionally have none. Provider acceptance, recipient-server delivery and mailbox receipt are different evidence.</p></details>
   </section>;
 }

@@ -50,5 +50,6 @@ for(const width of [320,390,768,1440])test(`compiled report reflow/keyboard at $
   await expect(report.getByRole("button",{name:"Read report",exact:true})).toBeFocused();
   const geometry=await report.evaluate(el=>({width:el.clientWidth,scroll:el.scrollWidth,rootFont:getComputedStyle(document.documentElement).fontSize}));
   expect(geometry.rootFont).toBe("32px");expect(geometry.scroll).toBeLessThanOrEqual(geometry.width+1);
-  await page.screenshot({path:join(output,`acquisition-${width}-root200.png`),fullPage:true});expect(errors).toEqual([]);await page.close();
+  if(width<768){const cards=report.getByLabel("Placement totals on narrow screens");await expect(cards).toBeVisible();await expect(cards.getByText("Recorded contacts:",{exact:true})).toHaveCount(3);await expect(report.getByRole("table")).toHaveCount(0);}
+  await report.screenshot({path:join(output,`acquisition-${width}-root200.png`)});expect(errors).toEqual([]);await page.close();
 });
