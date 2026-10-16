@@ -6,6 +6,39 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Acquisition operations — October 16, 2026 candidate
+
+Open **More tools → Distribution** (`/admin/distribution`). The deployment receipt,
+not this dated candidate note, establishes activation. Use the top **Acquisition
+operations** panel: choose 7/30 elapsed days and a placement, then **Read report**.
+An explicit range needs UTC offsets and must span at most 31 elapsed days. The
+acceptance window is start-inclusive/end-exclusive; delivery is the current state
+at the displayed snapshot, not a reconstruction of past delivery.
+
+Inquiries are eligible saved inquiry rows; same-key replay adds none. Several
+inquiries can share one canonical contact. The global distinct-contact total is
+not the sum of placement contacts; missing contact linkage is shown separately.
+QA/suppressed/spam/test records are excluded, but declining contact permission
+alone does not exclude an inquiry. Mike and Brandon show separate recorded v6
+envelopes, provider acceptance and recipient-server delivery. **No envelope** is
+not a failure/eligibility decision, and delivery is not mailbox observation.
+
+The homepage's three choices share one tracking tag; We Buy Homes and Property
+Search each add one choice/tag. Exact retained UTMs are latest-touch claims, not
+signed capture or causal lift. **Since first verified live observation** is
+available only for one placement with a valid existing proof inside 31 days.
+Observation and recording times remain separate. No proof means no inferred date.
+
+Administrators/analysts see aggregate counts only; the primary owner's report
+is assigned-workspace scoped. This panel adds no contact export or drill-through.
+UNAVAILABLE/STALE is not zero: retry the read or resolve the stated grant/schema/
+snapshot issue without changing alert settings. Legacy sections below remain an
+independently labeled 30-day/latest-5,000 sample and do not follow these filters.
+
+Use `public/launch-20261013/seven-day-sharing.md` for the existing-asset organic
+sequence. READY TO SHARE does not mean scheduled, published or audience traffic.
+No reporting action sends a message, changes a lead or invokes a monitor.
+
 ## Seller/buyer launch candidate — October 13, 2026
 
 PR #299 combines the unchanged PR #298 address-entry work with structured
