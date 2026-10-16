@@ -87,6 +87,9 @@ jobs:
       - name: Isolated PostgreSQL conversion atomicity and complete reporting
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/conversion-transaction-postgres.test.ts tests/persistence/conversion-reporting-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
+      - name: Exact acquisition totals, canonical contacts and operator evidence above old reporting cap
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/acquisition-report-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+
       - name: Typecheck
         run: pnpm run typecheck
 
@@ -107,6 +110,9 @@ jobs:
 
       - name: Built application conversion journey and responsive acceptance
         run: AMM_CONVERSION_SESSION_ACCEPTANCE=1 pnpm run test:reference:sessions
+
+      - name: Built acquisition report with genuine isolated sessions and no sends
+        run: AMM_ACQUISITION_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/acquisition-ci pnpm run test:reference:sessions
 
       - name: Built lead navigation and optional-tool acceptance (isolated, no sends)
         run: AMM_LEAD_READABILITY_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/lead-navigation-ci pnpm run test:reference:sessions
@@ -139,6 +145,9 @@ jobs:
             .amm-run/reference-session-acceptance/performance.json
             .amm-run/lead-navigation-ci/receipt.json
             .amm-run/lead-navigation-ci/screenshots/*.png
+            .amm-run/acquisition-ci/receipt.json
+            .amm-run/acquisition-ci/screenshots/*.png
+            .amm-run/acquisition-report/scale-*.json
             .amm-run/home-value-intake-ci/home-value-ui-receipt.json
             .amm-run/home-value-intake-ci/screenshots/*.png
             .amm-run/home-value-intake-ci/screenshots/*-diagnostics.json

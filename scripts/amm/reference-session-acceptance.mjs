@@ -13,6 +13,8 @@ if (process.env.AMM_QA_POSTGRES_TEST !== "1" || process.env.VERCEL_ENV === "prod
 const readability = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1";
 const homeValue = process.env.AMM_HOME_VALUE_ACCEPTANCE === "1";
 const launchIntake = process.env.AMM_LAUNCH_INTAKE_UI_ACCEPTANCE === "1";
+const acquisition = process.env.AMM_ACQUISITION_ACCEPTANCE === "1";
+if (acquisition && (launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_acquisition_acceptance_selection_required");
 if (launchIntake && (homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_launch_intake_acceptance_selection_required");
 if (homeValue && (readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_home_value_acceptance_selection_required");
 // An explicit private output directory keeps later verification from replacing
@@ -80,6 +82,14 @@ try {
   psql(`INSERT INTO audit_logs(actor,action,resource_type,resource_id,metadata,after_state,created_at) SELECT 'isolated-fixture','lead.lifecycle_changed','lead',${literal(leads.agent)},'{"fixture":true}','{"status":"new","reason":"isolated_fixture"}',now()-i*interval '1 minute' FROM generate_series(1,35) i;
     INSERT INTO tasks(lead_id,agent_id,created_by,title,status,priority,category,due_at) VALUES(${literal(leads.agent)},${literal(agents.agent)},${literal(ids.admin)},'SYNTHETIC follow-up — DO NOT CONTACT','open','high','followup:manual_callback',now()-interval '1 hour');`);
   psql(`INSERT INTO communication_permissions(lead_id,channel,purpose,state,consent_text,consent_version,source,evidence_at) VALUES(${literal(leads.agent)},'email','requested_service_response','allowed','ISOLATED SYNTHETIC PERMISSION — NOT A REAL CONSUMER','isolated_fixture_v1','isolated_session_acceptance',now());`);
+  if (acquisition) {
+    const contact=randomUUID();
+    psql(`INSERT INTO contacts(id,email) VALUES(${literal(contact)},'synthetic-acquisition-contact@example.test');
+      UPDATE leads SET contact_id=${literal(contact)} WHERE id IN (${literal(leads.agent)},${literal(leads.other)});
+      INSERT INTO source_attribution(lead_id,session_id,utm_source,utm_medium,utm_campaign,utm_content)
+      SELECT id,session_id,'ourtownproperties','owned_media','amm_owned_demand_2026',CASE WHEN id=${literal(leads.owner)}::uuid THEN 'wordpress_we_buy_homes' ELSE 'wordpress_homepage_ask_mike' END
+      FROM leads WHERE id IN (${literal(leads.owner)},${literal(leads.agent)},${literal(leads.other)});`);
+  }
   const fixture = { ids, agents, leads, phones, offers, codes: Object.fromEntries(Object.entries(offers).map(([key, rows]) => [key, rows.map(o => code(o))])) };
   const fixturePath = path.join(runDir, "fixtures.json");
   writeFileSync(fixturePath, JSON.stringify(fixture), { mode: 0o600 });
@@ -92,6 +102,7 @@ try {
     ...(readability ? { AMM_LEAD_READABILITY_ACCEPTANCE: "1" } : {}),
     ...(homeValue ? { AMM_HOME_VALUE_ACCEPTANCE: "1" } : {}),
     ...(launchIntake ? { AMM_LAUNCH_INTAKE_UI_ACCEPTANCE: "1" } : {}),
+    ...(acquisition ? { AMM_ACQUISITION_ACCEPTANCE: "1" } : {}),
     ...(artifactOverride || homeValue || launchIntake ? { AMM_E2E_OUTPUT_DIR: path.join(runDir, "screenshots"), AMM_SESSION_ARTIFACT_DIR: runDir } : {}),
     // The existing Playwright switch permits an explicit local development
     // diagnostic. It is never evidence for the default built-app gate.
@@ -107,7 +118,7 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
   child = spawn("pnpm", ["exec", "playwright", "test", suite], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });

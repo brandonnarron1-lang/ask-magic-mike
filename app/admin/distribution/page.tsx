@@ -51,6 +51,9 @@ import { CopyDemandAsset } from "./CopyDemandAsset";
 import { NativePublicationHandoff } from "./NativePublicationHandoff";
 import { OpenHouseQrPacketBuilder } from "./OpenHouseQrPacketBuilder";
 import { recordOwnedDemandPublicationProofAction } from "./actions";
+import { AcquisitionReport } from "./AcquisitionReport";
+import { parseAcquisitionWindow } from "../../lib/growth/acquisition-window";
+import { loadAcquisitionReport } from "../../lib/persistence/neonAcquisitionReport";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -866,6 +869,10 @@ export default async function DistributionPage({
     publication_action?: string;
     proof_channel?: string | string[];
     proof_placement?: string | string[];
+    acq_window?: string | string[];
+    acq_placement?: string | string[];
+    acq_from?: string | string[];
+    acq_to?: string | string[];
   }>;
 }) {
   const principal = await requireLeadCenterPermission("report:view");
@@ -876,6 +883,10 @@ export default async function DistributionPage({
     searchParams,
   ]);
   const command = buildOwnedDemandCommand(growth);
+  const acquisitionNow = new Date();
+  const acquisitionFilters = { window: query?.acq_window, placement: query?.acq_placement, from: query?.acq_from, to: query?.acq_to };
+  const acquisitionWindow = parseAcquisitionWindow(acquisitionFilters, ledger, acquisitionNow);
+  const acquisition = acquisitionWindow.ok ? await loadAcquisitionReport(acquisitionWindow.value, principal) : null;
   const measurement = assessOwnedDemandMeasurement(growth);
   const wordpressReadiness = wordpressChangeSets.map(
     toOwnedDemandPlacementReadiness,
@@ -931,6 +942,9 @@ export default async function DistributionPage({
           </div>
         </header>
 
+        <AcquisitionReport report={acquisition} error={acquisitionWindow.ok ? undefined : acquisitionWindow.error} filters={acquisitionFilters} ledger={ledger} now={acquisitionNow} />
+
+        <p className="mt-8 text-sm leading-6 text-[#a99f90]">Legacy distribution sections below: last 30 days, latest at most 5,000 eligible inquiry records. They do not follow the exact report filters above, establish complete totals beyond that bound, or measure distinct contacts.</p>
         <MeasurementStateBanner measurement={measurement} />
 
         <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Owned demand measurement status">

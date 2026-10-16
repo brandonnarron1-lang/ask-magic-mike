@@ -39,7 +39,10 @@ globalThis.fetch = async (input, init) => {
       return { rows: result.rows, fields: result.fields.map(field => ({ name: field.name, dataTypeID: field.dataTypeID })), rowCount: result.rowCount, command: result.command };
     };
     if (body.queries) {
-      await client.query("BEGIN");
+      const levels={ReadUncommitted:"READ UNCOMMITTED",ReadCommitted:"READ COMMITTED",RepeatableRead:"REPEATABLE READ",Serializable:"SERIALIZABLE"};
+      const level=headers.get("Neon-Batch-Isolation-Level"), readOnly=headers.get("Neon-Batch-Read-Only");
+      if ((level&&!levels[level])||(readOnly!==null&&!["true","false"].includes(readOnly))) throw new Error("isolated_invalid_transaction_options");
+      await client.query(`BEGIN${level?` ISOLATION LEVEL ${levels[level]}`:""}${readOnly===null?"":readOnly==="true"?" READ ONLY":" READ WRITE"}`);
       const results = [];
       for (const query of body.queries) results.push(await execute(query));
       await client.query("COMMIT");
