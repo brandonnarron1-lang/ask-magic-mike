@@ -114,23 +114,10 @@ export async function loadAcquisitionReport(window: AcquisitionWindow, principal
       const sql = neon(process.env.DATABASE_URL!, { fetchOptions: { signal: AbortSignal.timeout(8_000) } });
       // The pinned Neon HTTP driver batches both statements on one read-only
       // transaction. SET LOCAL applies before the aggregate starts executing.
-      const inspect = preview && binding.preview_endpoint_identity_confirmed;
-      const setup = inspect ? sql.query(`SELECT set_config('statement_timeout', '5000', true), current_user::text AS role,
-        current_setting('transaction_read_only') AS read_only, current_setting('transaction_isolation') AS isolation,
-        (SELECT rolbypassrls FROM pg_roles WHERE rolname=current_user) AS bypass_rls,
-        current_setting('neon.endpoint_id',true)=$1::text AS endpoint_match,
-        current_setting('server_version_num') AS server_version`, [process.env.PREVIEW_NEON_ENDPOINT_ID])
-        : sql.query("SELECT set_config('statement_timeout', '5000', true)");
       const results = await sql.transaction([
-        setup, sql.query(text, params),
+        sql.query("SELECT set_config('statement_timeout', '5000', true)"), sql.query(text, params),
       ], { readOnly: true, isolationLevel: "RepeatableRead" });
       trace.transactionContainer = kind(results);
-      if (inspect) {
-        const meta = results[0]?.[0] as Record<string, unknown> | undefined;
-        trace.databaseContext = meta ? { role: typeof meta.role === "string" && /^amm_(?:report|catalog)_qa_(?:readonly|runtime)_\d{8}$/.test(meta.role) ? meta.role : "other",
-          readOnly: meta.read_only === "on", isolation: meta.isolation === "repeatable read" ? "repeatable read" : "other", bypassRls: meta.bypass_rls === true,
-          endpointMatch: meta.endpoint_match === true, version: /^\d{6}$/.test(String(meta.server_version)) ? String(meta.server_version) : "unknown" } : { kind: kind(results[0]) };
-      }
       return results[1];
     });
     trace.stage = "transport"; trace.gateMs = Math.round(performance.now()-started); trace.aggregateExecution = "attempted_unconfirmed"; emit("query:start");
