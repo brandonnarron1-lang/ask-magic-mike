@@ -67,6 +67,9 @@
     "/api/appointments/request",
     "/api/experiments/event",
     "/api/experience/v1",
+    "/api/consumer-auth/[...all]",
+    "/api/consumer/v1/account",
+    "/api/consumer/v1/workspace",
     "/api/chat",
     "/api/chat/message",
     "/api/chat/session",
@@ -99,6 +102,7 @@
     "/lead-center-set-password",
     "/manifest.webmanifest",
     "/my",
+    "/my/account",
     "/open-house/[propertyOrId]",
     "/plan",
     "/phone-alerts/install/[token]",
@@ -138,9 +142,11 @@
       "/admin/revival"
     ],
     "auth": [
+      "/my/account", "/api/consumer-auth/[...all]",
       "/lead-center-login", "/lead-center-password-help", "/lead-center-set-password", "/api/lead-center-auth/[...all]"
     ],
     "api": [
+      "/api/consumer/v1/account", "/api/consumer/v1/workspace",
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
       "/api/experience/v1",
@@ -196,6 +202,10 @@
     "/plan": "active-public-device-private-recurring-value",
     "/my": "active-guest-memory-only-comparison-explicit-canonical-intake-no-account-access",
     "/api/experience/v1": "active-public-bundled-contract-no-private-data-or-side-effects",
+    "/my/account": "active-optional-consumer-private-comparison-feature-gated-no-staff-access",
+    "/api/consumer-auth/[...all]": "active-feature-gated-separate-consumer-auth-no-mail-or-staff-roles",
+    "/api/consumer/v1/account": "active-feature-gated-own-profile-export-confirmed-deletion-no-inquiry-linkage",
+    "/api/consumer/v1/workspace": "active-feature-gated-subject-scoped-comparison-versioned-no-intake-effects",
     "/preview/lead-alert-identity": "preview-only-synthetic-no-send-production-404"
   },
   "acknowledgedRootSrcDuplicates": [

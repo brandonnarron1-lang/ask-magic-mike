@@ -7,6 +7,7 @@ and scope, never values.
 | --- | --- | --- | --- |
 | Canonical DB | `DATABASE_URL`, `DATABASE_ENV`, `PREVIEW_NEON_ENDPOINT_ID`, `PRODUCTION_NEON_ENDPOINT_ID` | server, Production/Preview separated; endpoint IDs are Preview-scoped attestation inputs | durable Neon capture and fail-closed Preview identity |
 | Lead Center identity | `LEAD_CENTER_RBAC_ENABLED`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET` | server sensitive except URL | Better Auth sessions and RBAC |
+| Optional consumer comparison | `CONSUMER_WORKSPACE_ACCOUNTS_ENABLED` | server, false/absent by default; requires reviewed consumer schema and the existing approved database/auth configuration | separate consumer cookie/models/domain-derived signing key, own saved comparisons/export/deletion; no staff permission, email verification, password-reset mail, prior-inquiry linking or provider action |
 | Break-glass/operations | `ADMIN_SECRET`, `AUTH_SECRET`, `CRON_SECRET` | server sensitive | disabled-RBAC fallback and protected cron/health operations; not normal staff login |
 | Internal email | `LEAD_NOTIFICATION_TO`, `LEAD_NOTIFICATION_BCC`, `EMAIL_PROVIDER`, `EMAIL_ENABLED`, `RESEND_API_KEY`, `RESEND_WEBHOOK_*`, `SMTP_*`, `LEAD_NOTIFICATION_*` | server sensitive except modes | internal alert/outbox and provider status |
 | Staff push | `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `PHONE_SETUP_SIGNING_SECRET`, `AGENT_PUSH_NOTIFICATIONS_ENABLED` | public key browser-safe; all others server sensitive | free phone alerts |

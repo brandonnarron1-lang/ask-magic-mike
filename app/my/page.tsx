@@ -13,6 +13,7 @@ export default function MyWorkspacePage() {
     <section id="page-content" tabIndex={-1} className="mx-auto min-w-0 max-w-7xl space-y-8 px-5 py-8 [overflow-wrap:anywhere] sm:px-8 lg:px-10">
       <header><p className="amm-eyebrow">Your next move</p><h1 className="mt-3 font-serif text-4xl leading-tight sm:text-5xl">A little clarity, before a commitment.</h1><p className="mt-4 max-w-3xl leading-7">Compare interests without an account. This guest version does not sync across devices or link earlier inquiries by email. Your existing planner below remains separate and device-saved; saved property references are memory-only.</p></header>
       <GuestWorkspace />
+      <p className="leading-7">Prefer a separate online comparison? <a className="underline" href="/my/account">Open the optional account beta</a>, when enabled. Guest requests never require it; past inquiries are not linked by email.</p>
       <section aria-label="Existing seller checklist and buying plan"><RealEstateReviewPlanner /></section>
     </section><Footer />
   </main>;

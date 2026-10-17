@@ -90,6 +90,9 @@ jobs:
       - name: Exact acquisition totals, canonical contacts and operator evidence above old reporting cap
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/acquisition-report-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
+      - name: Isolated consumer identity, subject RLS, atomic account recovery and no intake effects
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/consumer-workspace-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+
       - name: Typecheck
         run: pnpm run typecheck
 
@@ -116,6 +119,9 @@ jobs:
 
       - name: Built guest workspace and loopback Origin refusal (isolated SQL, no sends)
         run: AMM_CONSUMER_WORKSPACE_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/consumer-workspace-ci pnpm run test:reference:sessions
+
+      - name: Built consumer account real-session isolation, explicit saves and no sends
+        run: AMM_CONSUMER_ACCOUNT_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/consumer-account-ci pnpm run test:reference:sessions
 
       - name: Built lead navigation and optional-tool acceptance (isolated, no sends)
         run: AMM_LEAD_READABILITY_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/lead-navigation-ci pnpm run test:reference:sessions
@@ -157,6 +163,8 @@ jobs:
             .amm-run/acquisition-ci/screenshots/*.png
             .amm-run/consumer-workspace-ci/receipt.json
             .amm-run/consumer-workspace-ci/screenshots/*.png
+            .amm-run/consumer-account-ci/receipt.json
+            .amm-run/consumer-account-ci/screenshots/*.png
             .amm-run/consumer-workspace-intake-ci/receipt.json
             .amm-run/acquisition-report/scale-*.json
             .amm-run/home-value-intake-ci/home-value-ui-receipt.json

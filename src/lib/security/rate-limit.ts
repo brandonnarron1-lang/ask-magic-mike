@@ -279,6 +279,10 @@ const _memStore = new InMemoryRateLimitStore();
 // ─── Preset configurations ──────────────────────────────────────────────────────
 
 export const LIMITS = {
+  /** Confirmed consumer-account deletion — five credential checks per15minutes. */
+  consumerAccountDelete: { limit: 5, windowMs: 15 * 60 * 1000 },
+  /** Explicit online comparison saves; separate from inquiry/notification limits. */
+  consumerWorkspaceSave: { limit: 30, windowMs: 60 * 1000 },
   /** /api/intake/submit — 10 per 10 minutes */
   intakeSubmit:   { limit: 10, windowMs: 10 * 60 * 1000 },
   /** /api/intake/step — 30 per 5 minutes */
