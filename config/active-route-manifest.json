@@ -66,6 +66,7 @@
     "/api/address-suggestions",
     "/api/appointments/request",
     "/api/experiments/event",
+    "/api/experience/v1",
     "/api/chat",
     "/api/chat/message",
     "/api/chat/session",
@@ -97,6 +98,7 @@
     "/lead-center-password-help",
     "/lead-center-set-password",
     "/manifest.webmanifest",
+    "/my",
     "/open-house/[propertyOrId]",
     "/plan",
     "/phone-alerts/install/[token]",
@@ -121,7 +123,7 @@
   ],
   "required": {
     "public": [
-      "/", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
+      "/", "/my", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
       "/privacy", "/terms", "/accessibility", "/contact", "/go/[code]", "/go/open-house/[reference]", "/plan", "/phone-alerts/install/[token]", "/phone-alerts/install/[token]/manifest.webmanifest", "/phone-alerts/setup", "/phone-alerts/setup/claim",
       "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"
@@ -141,6 +143,7 @@
     "api": [
       "/admin/api/push/test",
       "/admin/api/phone-alerts/invite",
+      "/api/experience/v1",
       "/api/leads", "/api/listings/search", "/api/listings/[id]", "/api/valuation", "/api/appointments/request", "/api/experiments/event", "/api/chat", "/api/chat/message", "/api/chat/session", "/api/events", "/api/health/live", "/api/health/ready", "/api/phone-alerts/invite", "/api/phone-alerts/subscription", "/api/phone-alerts/test", "/api/webhooks/sms/inbound", "/api/webhooks/sms/status", "/api/widget/events",
       "/api/admin/copilot", "/api/admin/copilot/drafts/[draftKey]", "/api/admin/copilot/jobs", "/api/admin/copilot/jobs/process", "/api/admin/distribution/assets/[channelKey]/[placementKey]", "/api/admin/distribution/open-house/[reference]", "/api/admin/distribution/wordpress-change-set/[placementKey]", "/api/admin/growth/vendor-ingress/test", "/api/admin/growth/local-profile-ingress/preview", "/api/admin/growth/local-profile-ingress/commit", "/api/admin/growth/search-ingress/preview", "/api/admin/growth/search-ingress/commit", "/api/admin/growth/spend-ingress/preview", "/api/admin/growth/spend-ingress/commit", "/api/admin/health", "/api/admin/leads", "/api/admin/leads/[id]", "/api/admin/leads/[id]/assign", "/api/admin/leads/[id]/communication-permissions", "/api/admin/leads/[id]/notes", "/api/admin/leads/[id]/sequences", "/api/admin/leads/[id]/tasks", "/api/admin/leads/search", "/api/admin/message-templates", "/api/admin/operations/first-live", "/api/admin/qa/email", "/api/admin/sequences/process", "/api/admin/sla/sweep", "/api/webhooks/email/events"
     ]
@@ -191,6 +194,8 @@
     "/phone-alerts/install/[token]": "active-private-one-time-copy-device-install-handoff",
     "/phone-alerts/install/[token]/manifest.webmanifest": "active-private-token-scoped-install-manifest",
     "/plan": "active-public-device-private-recurring-value",
+    "/my": "active-guest-memory-only-comparison-explicit-canonical-intake-no-account-access",
+    "/api/experience/v1": "active-public-bundled-contract-no-private-data-or-side-effects",
     "/preview/lead-alert-identity": "preview-only-synthetic-no-send-production-404"
   },
   "acknowledgedRootSrcDuplicates": [

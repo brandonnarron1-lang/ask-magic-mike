@@ -1,0 +1,14 @@
+{
+  "version": "amm.experience.v1",
+  "canonicalOrigin": "https://www.askmagicmike.com",
+  "brokerage": "Our Town Properties, Inc.",
+  "representative": "Mike Eatmon",
+  "offers": {
+    "homeValue": {"intent":"home_value","destination":"/home-value","label":"Home value review","required":"Property address and email or phone; review before submission","claim":"Broker-reviewed guidance, not an instant valuation or appraisal","evidence":"User-reported address; property facts require verification"},
+    "buyer": {"intent":"buyer","destination":"/buy","label":"Buying plan","required":"Name, property reference or search area, and email or phone; review before submission","claim":"Request local buying guidance; availability and financing are not established","evidence":"References and preferences are user-reported, not verified listings"},
+    "compare": {"intent":"seller","destination":"/sell?seller_option=compare","label":"Compare selling options","required":"Name, property address and email or phone; review before submission","claim":"Compare listing with an as-is option; no guaranteed offer or sale","evidence":"Property review and human verification required"}
+  },
+  "tracking": {"source":"ourtownproperties","medium":"owned_media","campaign":"amm_owned_demand_2026","groups":["wordpress_homepage_ask_mike","wordpress_we_buy_homes","wordpress_listing_buyer"]},
+  "compatibility": {"publicIntake":"/api/leads","widget":"/widget/v1","shareKit":"/launch-20261013/index.html","legacyValue":"/value","sellerOptions":["as-is","compare","guidance"],"sellerOptionRoutes":["/sell","/we-buy-houses"],"sourceIsNotMedium":true},
+  "availability": {"publicIntake":"existing runtime capability and server guards remain authoritative","guestWorkspace":"in-memory only; reload discards saved references","crossDeviceAccounts":"not enabled by this contract","licensedEnrichment":"not established","carrierActivation":"held; not required for ordinary intake"}
+}

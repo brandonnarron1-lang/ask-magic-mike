@@ -1,10 +1,11 @@
 import { buildUtmUrl } from "../../../src/lib/admin/utm-link-builder";
+import { experienceContract, experienceDestination } from "../experienceContract";
 
 /** A choice is evidence of a URL, not another attribution/counting dimension. */
 export const WORDPRESS_ACQUISITION_GROUPS = [
-  { key: "wordpress_homepage_ask_mike", page: 149, label: "Homepage choices", pageUrl: "https://www.ourtownproperties.com/", destinations: ["/home-value", "/buy", "/sell?seller_option=compare"], historicalDestinations: ["/ask"] },
-  { key: "wordpress_we_buy_homes", page: 3631, label: "We Buy Homes", pageUrl: "https://www.ourtownproperties.com/we-buy-homes/", destinations: ["/sell?seller_option=compare"], historicalDestinations: ["/sell"] },
-  { key: "wordpress_listing_buyer", page: 2994, label: "Property Search", pageUrl: "https://www.ourtownproperties.com/property-search/", destinations: ["/buy"], historicalDestinations: [] },
+  { key: "wordpress_homepage_ask_mike", page: 149, label: "Homepage choices", pageUrl: "https://www.ourtownproperties.com/", destinations: [experienceDestination("homeValue"), experienceDestination("buyer"), experienceDestination("compare")], historicalDestinations: ["/ask"] },
+  { key: "wordpress_we_buy_homes", page: 3631, label: "We Buy Homes", pageUrl: "https://www.ourtownproperties.com/we-buy-homes/", destinations: [experienceDestination("compare")], historicalDestinations: ["/sell"] },
+  { key: "wordpress_listing_buyer", page: 2994, label: "Property Search", pageUrl: "https://www.ourtownproperties.com/property-search/", destinations: [experienceDestination("buyer")], historicalDestinations: [] },
 ] as const;
 
 export function wordpressAcquisitionGroup(key: string) {
@@ -14,10 +15,10 @@ export function wordpressAcquisitionGroup(key: string) {
 export function wordpressTrackedChoices(key: string) {
   const group = wordpressAcquisitionGroup(key);
   return group?.destinations.map(path => {
-    const destination = new URL(path, "https://www.askmagicmike.com");
+    const destination = new URL(path, experienceContract.canonicalOrigin);
     const tracked = new URL(buildUtmUrl(destination.origin + destination.pathname, {
-      utm_source: "ourtownproperties", utm_medium: "owned_media",
-      utm_campaign: "amm_owned_demand_2026", utm_content: group.key,
+      utm_source: experienceContract.tracking.source, utm_medium: experienceContract.tracking.medium as "owned_media",
+      utm_campaign: experienceContract.tracking.campaign, utm_content: group.key,
     }));
     destination.searchParams.forEach((value, name) => tracked.searchParams.set(name, value));
     return { destination: destination.toString(), trackedUrl: tracked.toString() };

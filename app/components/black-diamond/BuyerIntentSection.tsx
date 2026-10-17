@@ -13,6 +13,7 @@ import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { LeadConsentField } from "./LeadConsentField";
 import { LuxuryCard } from "./LuxuryCard";
 import { SelectField, TextAreaField, TextField } from "./FormField";
+import type { BuyerInterestV1 } from "../../lib/buyerInterest";
 
 type BuyerIntentSectionProps = {
   surface?: LeadSourceSurface;
@@ -21,9 +22,11 @@ type BuyerIntentSectionProps = {
   propertyId?: string;
   propertyLabel?: string;
   attributionOverrides?: Partial<Attribution>;
+  /** Explicit in-memory guest handoff only; never URL/storage-derived contact data. */
+  initialInterest?: BuyerInterestV1;
 };
 
-export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", compact = false, propertyId, propertyLabel, attributionOverrides }: BuyerIntentSectionProps) {
+export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", compact = false, propertyId, propertyLabel, attributionOverrides, initialInterest }: BuyerIntentSectionProps) {
   const [attribution] = useState<Attribution>(() => {
     // Omitted defaults must not erase independent standalone URL claims.
     const defaults: Partial<Attribution> = {
@@ -35,7 +38,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
   });
   const intakeMode = usePublicIntakeCapability();
   const recovery = usePublicIntakeRecovery();
-  const [kind, setKind] = useState<"specific" | "search">("specific");
+  const [kind, setKind] = useState<"specific" | "search">(initialInterest?.kind ?? "specific");
   const [review, setReview] = useState<BuyerFormSnapshot | null>(null);
   const [error, setError] = useState<{ field?: string; message: string } | null>(null);
   const committedReview = useRef("");
@@ -149,15 +152,15 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
             </fieldset>
             {/* Keep native values mounted across path changes; serialize only the selected path. */}
             <div hidden={kind !== "specific"} className="space-y-4 sm:col-span-2">
-              <TextField name="buyer-address" label="Property address (or provide a listing URL)" autoComplete="off" maxLength={500} placeholder="Address of the property you are considering" />
-              <TextField name="buyer-listing-url" label="Listing URL (or provide an address)" type="url" autoComplete="off" maxLength={2048} placeholder="https://…" />
+              <TextField name="buyer-address" label="Property address (or provide a listing URL)" autoComplete="off" maxLength={500} placeholder="Address of the property you are considering" defaultValue={initialInterest?.kind === "specific" ? initialInterest.properties[0]?.address_text : undefined} />
+              <TextField name="buyer-listing-url" label="Listing URL (or provide an address)" type="url" autoComplete="off" maxLength={2048} placeholder="https://…" defaultValue={initialInterest?.kind === "specific" ? initialInterest.properties[0]?.listing_url : undefined} />
               <p className="text-xs leading-5 text-[#b7aa94]">Listing links are references only. We do not fetch or verify the listing here.</p>
               <TextField name="buyer-unit" label="Unit or apartment (optional)" autoComplete="off" maxLength={100} />
               <TextField name="buyer-reference" label="Listing reference (optional)" autoComplete="off" maxLength={160} />
             </div>
             <div hidden={kind !== "search"} className="space-y-4 sm:col-span-2">
-              <TextField name="buyer-desired-area" label="Desired area" autoComplete="off" maxLength={500} placeholder="Wilson or Eastern NC" required={kind === "search"} />
-              <TextField name="buyer-budget" label="Budget range (optional)" autoComplete="off" maxLength={160} placeholder="Your approximate range, if known" />
+              <TextField name="buyer-desired-area" label="Desired area" autoComplete="off" maxLength={500} placeholder="Wilson or Eastern NC" required={kind === "search"} defaultValue={initialInterest?.kind === "search" ? initialInterest.desired_area : undefined} />
+              <TextField name="buyer-budget" label="Budget range (optional)" autoComplete="off" maxLength={160} placeholder="Your approximate range, if known" defaultValue={initialInterest?.kind === "search" ? initialInterest.budget_range : undefined} />
             </div>
           </> : <TextField name="buyer-area" label={openHouse ? "Property or event location" : "Target area"} placeholder={propertyLabel || "Wilson or Eastern NC"} defaultValue={propertyLabel} maxLength={500} />}
           <TextField name="buyer-name" label="Name" autoComplete="name" placeholder="Your name" maxLength={160} required={buyer} aria-invalid={error?.field === "buyer-name" || undefined} />

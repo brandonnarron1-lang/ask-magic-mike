@@ -6,6 +6,28 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Consumer workspace — R1 guest increment, October 17 candidate
+
+`/my` compares up to eight user-reported property references or search preferences,
+without login, enrichment, contact capture or a new lead store. References remain
+in page memory only: reload or navigation discards them. The existing `/plan`
+organizer is reused unchanged, including its separate device-saved non-contact
+checklist. Cross-device accounts, prior-request linking and licensed property
+facts are **not enabled** by this increment.
+
+**Save for comparison** sends nothing. **Prepare a help request** opens one
+existing buyer form with the selected declared interest and empty contact fields.
+The visitor reviews native values, chooses any contact permission and separately
+confirms submission. Existing idempotency/recovery, canonical persistence and
+consumer-safe receipt semantics remain authoritative; saving is not delivery,
+contact, assignment acknowledgement or an appointment. No background replay.
+
+`config/experience-contract.v1.json` is bundled public configuration, consumed by
+the existing WordPress choice catalog, local launch generator and guest client.
+`GET /api/experience/v1` returns that public contract, not records or credentials.
+Connector1.2.0 remains unchanged; compatibility is checked, not silently installed.
+This dated candidate note does not establish release activation.
+
 ## Acquisition operations — October 16, 2026 candidate
 
 Open **More tools → Owned demand** (`/admin/distribution`). The deployment receipt,

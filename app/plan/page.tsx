@@ -35,6 +35,7 @@ export default function PlanPage() {
             <p className="mt-3 text-sm leading-6 text-[#d9ceb8]">
               The planner asks for no contact details, property address, or personal narrative. It creates no lead and starts no alerts, emails, or texts. Non-contact usage events may record controlled selections, progress, campaign attribution, and device context.
             </p>
+            <a className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-[#e2c06f] underline" href="/my">Compare your own saved interests</a>
           </aside>
         </div>
       </section>
