@@ -42,7 +42,13 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("Consumer account — act
     INSERT INTO lead_notifications(lead_id,agent_id,notification_type,channel,recipient_type,recipient_reference,template_version,idempotency_key) VALUES(${literal(lead)},'00000000-0000-4000-8000-000000009901','internal_new_lead','email','agent','synthetic_operator','lead_alert_email_v4',${literal(randomUUID())});
     INSERT INTO audit_logs(actor,action,resource_type,resource_id,metadata) VALUES('isolated-fixture','migration.fixture','lead',${literal(lead)},'{"synthetic":true}')`);
   const canonicalHash=()=>createHash("sha256").update(psql("SELECT jsonb_build_object('leads',(SELECT jsonb_agg(l ORDER BY id) FROM leads l),'contacts',(SELECT jsonb_agg(c ORDER BY id) FROM contacts c),'consents',(SELECT jsonb_agg(c ORDER BY id) FROM consents c),'outbox',(SELECT jsonb_agg(n ORDER BY id) FROM lead_notifications n),'audit',(SELECT jsonb_agg(a ORDER BY id) FROM audit_logs a))::text")).digest("hex");
-  const before=canonicalHash();psql(readFileSync(`supabase/migrations/${migration}`,"utf8"));migrationPreserved=canonicalHash()===before;
+  // Actual Neon QA revealed these legacy browser roles can be absent. Rename
+  // only this owned local cluster's roles, preserving their OID-bound grants,
+  // and prove the complete upgrade before restoring the fixture names.
+  const before=canonicalHash();
+  psql("ALTER ROLE anon RENAME TO amm_legacy_anon_fixture; ALTER ROLE authenticated RENAME TO amm_legacy_authenticated_fixture");
+  try{expect(psql("SELECT count(*) FROM pg_roles WHERE rolname IN ('anon','authenticated')")).toBe("0");psql(readFileSync(`supabase/migrations/${migration}`,"utf8"));migrationPreserved=canonicalHash()===before;}
+  finally{psql("ALTER ROLE amm_legacy_anon_fixture RENAME TO anon; ALTER ROLE amm_legacy_authenticated_fixture RENAME TO authenticated");}
   install("amm_qa_fresh",true,new Set([migration]));
   const migrationSQL=readFileSync(`supabase/migrations/${migration}`,"utf8");
   try{psql(migrationSQL.replace("COMMIT;","SELECT 1/0; COMMIT;"),"amm_qa_fresh");throw Error("expected_isolated_migration_failure");}catch(error){if(!String(error).includes("division by zero"))throw error;}

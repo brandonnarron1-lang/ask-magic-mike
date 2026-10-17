@@ -50,7 +50,14 @@ CREATE TABLE public.consumer_workspaces (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 REVOKE ALL ON public.consumer_users,public.consumer_sessions,public.consumer_accounts,
-  public.consumer_verifications,public.consumer_rate_limits,public.consumer_workspaces FROM PUBLIC,anon,authenticated;
+  public.consumer_verifications,public.consumer_rate_limits,public.consumer_workspaces FROM PUBLIC;
+-- Neon does not necessarily retain the legacy browser roles. Revoke them
+-- when present; do not create unused roles merely to satisfy this migration.
+DO $$ DECLARE browser_role TEXT; BEGIN
+  FOR browser_role IN SELECT rolname FROM pg_roles WHERE rolname IN ('anon','authenticated') LOOP
+    EXECUTE format('REVOKE ALL ON public.consumer_users,public.consumer_sessions,public.consumer_accounts,public.consumer_verifications,public.consumer_rate_limits,public.consumer_workspaces FROM %I',browser_role);
+  END LOOP;
+END $$;
 GRANT SELECT,INSERT,UPDATE,DELETE ON public.consumer_users,public.consumer_sessions,
   public.consumer_accounts,public.consumer_verifications,public.consumer_rate_limits TO service_role;
 ALTER TABLE public.consumer_users ENABLE ROW LEVEL SECURITY;
