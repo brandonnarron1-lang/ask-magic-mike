@@ -12,4 +12,20 @@ describe("shared Next build acceptance ordering", () => {
     for (const step of compiled) expect(step.index, step[1]).toBeLessThan(diagnostic);
     expect(workflow.slice(diagnostic)).toContain("AMM_E2E_BUILT=0");
   });
+  it("bounds the receipt wait beyond the required gate budget without accepting an unfinished gate", () => {
+    const gate=readFileSync(".github/workflows/release-gate.yml","utf8");
+    const post=readFileSync(".github/workflows/production-post-deploy.yml","utf8");
+    const script=readFileSync("scripts/release/generate-production-acceptance-receipt.mjs","utf8");
+    const gateMinutes=Number(gate.match(/timeout-minutes: (\d+)/)?.[1]);
+    const receiptMinutes=Number(post.match(/timeout-minutes: (\d+)/)?.[1]);
+    const attempts=Number(script.match(/RELEASE_GATE_WAIT_ATTEMPTS \|\| (\d+)/)?.[1]);
+    const delay=Number(script.match(/RELEASE_GATE_WAIT_MS \|\| ([\d_]+)/)?.[1]?.replaceAll("_",""));
+    const waitMinutes=(attempts-1)*delay/60_000;
+    expect(waitMinutes).toBeGreaterThan(gateMinutes);
+    expect(waitMinutes+3).toBeLessThan(receiptMinutes);
+    expect(script).toContain("Math.min(100,");
+    expect(script).toContain("Math.min(15_000,");
+    expect(script).toContain('if (run.conclusion !== "success") throw new Error("receipt_release_gate_failed")');
+    expect(script).toContain('throw new Error("receipt_release_gate_timeout")');
+  });
 });
