@@ -7,6 +7,8 @@ import { resolve } from "node:path";
 import QRCode from "qrcode";
 
 const root = process.cwd();
+const experience = JSON.parse(readFileSync(resolve(root, "config/experience-contract.v1.json"), "utf8"));
+if (experience.version !== "amm.experience.v1" || experience.canonicalOrigin !== "https://www.askmagicmike.com") throw new Error("unsupported_experience_contract");
 const out = resolve(root, "public/launch-20261013");
 const photo = resolve(root, "public/brand/black-diamond/hero-social-4x5.jpg");
 const logo = resolve(root, "public/brand/black-diamond/our-town-logo.png");
@@ -22,7 +24,9 @@ const audiences = [
 function run(args) { execFileSync("magick", args, { cwd: root, maxBuffer: 2_000_000 }); }
 const files = [];
 for (const a of audiences) {
-  const canonical = `https://www.askmagicmike.com${a.route}`;
+  const approvedRoute = experience.offers[a.key === "seller" ? "homeValue" : "buyer"].destination;
+  if (a.route !== approvedRoute) throw new Error("launch_offer_contract_drift");
+  const canonical = new URL(approvedRoute, experience.canonicalOrigin).href;
   links[a.key] = { canonical };
   for (const channel of ["facebook", "instagram", "owned_site", "qr"]) {
     const u = new URL(canonical);
