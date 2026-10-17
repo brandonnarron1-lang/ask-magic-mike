@@ -1,0 +1,22 @@
+{
+  "version": "amm.public-knowledge.v1",
+  "sources": [{
+    "id": "ourtown-experience",
+    "owner": "Our Town Properties, Inc.",
+    "provider": "Ask Magic Mike approved bundled experience contract",
+    "url": "https://www.askmagicmike.com/api/experience/v1",
+    "licenseScope": "Owned service and intake wording only; no property, listing or market dataset",
+    "grantReference": "Owner unified-platform master sections 4, 6 and 7; R1 accepted experience contract",
+    "audience": "public",
+    "permissions": {"display": true, "ai": true, "marketing": false, "embedding": false, "training": false},
+    "geography": ["Wilson, North Carolina and brokerage service area; no coverage guarantee"],
+    "fieldMapping": {"passage": "offers.{key}.required + claim + evidence", "destination": "offers.{key}.destination"},
+    "effectiveAt": "2026-10-17T00:00:00Z",
+    "upstreamModifiedAt": null,
+    "fetchedAt": "2026-10-17T21:05:48.635Z",
+    "freshnessHours": 720,
+    "status": "active",
+    "revocation": "deny retrieval immediately on revoked or deleted status; no persistent derivative cache or embeddings",
+    "refresh": "bundled reviewed snapshot; scheduled remote refresh NOT INSTALLED"
+  }]
+}

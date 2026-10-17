@@ -8,6 +8,8 @@ import {
 } from "@/lib/security/rate-limit";
 import { isPreviewRuntime } from "@/lib/preview-security";
 import { delimitUntrusted, detectPromptInjection, redactLeadText } from "../../../src/lib/ai/guardrails";
+import { answerFromApprovedSources } from "../../../src/lib/intelligence/public-knowledge";
+import { PUBLIC_KNOWLEDGE_VERSION } from "../../lib/groundedConciergeContract";
 
 function clean(input: unknown) {
   return typeof input === "string" ? input.trim() : "";
@@ -127,6 +129,9 @@ export async function POST(req: Request) {
   // external AI provider. The same deterministic answer keeps visual QA and
   // product review useful without creating a second persistence path.
   if (isPreviewRuntime()) {
+    if (input.knowledge_version === PUBLIC_KNOWLEDGE_VERSION) {
+      return respond(answerFromApprovedSources(message));
+    }
     return respond({ message: fallback, mode: "preview_fallback" });
   }
 
@@ -160,6 +165,12 @@ export async function POST(req: Request) {
       },
       503,
     );
+  }
+
+  // Opt-in additive projection. Never fall through to a paid, uncited answer
+  // when approved evidence is missing. Legacy callers retain their contract.
+  if (input.knowledge_version === PUBLIC_KNOWLEDGE_VERSION) {
+    return respond(answerFromApprovedSources(message));
   }
 
   const apiKey = process.env.OPENAI_API_KEY;

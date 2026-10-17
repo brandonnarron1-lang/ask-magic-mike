@@ -52,6 +52,45 @@ afterEach(() => {
 });
 
 describe("Ask Mike conversion clarity and keyboard access", () => {
+  it("shows approved sources and lets the visitor correct the handoff without submitting", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({
+      message:"Approved buying-plan requirements.",
+      citations:[{id:"offer-buyer",title:"Approved source",url:"https://www.askmagicmike.com/api/experience/v1",version:"v1",asOf:"2026-10-17T21:05:48.635Z"}],
+      limitation:"Not Mike personally.",
+    }), {status:200}));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<AskMikeChatPanel />);
+    await user.type(screen.getByLabelText(/Your real estate question/), "How do I buy?");
+    await user.click(screen.getByRole("button",{name:"Send Question"}));
+    expect(await screen.findByRole("link",{name:"Approved source"})).toHaveAttribute("href","https://www.askmagicmike.com/api/experience/v1");
+    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toMatchObject({knowledge_version:"amm.public-knowledge.v1"});
+    const review = screen.getByRole("textbox",{name:/Question for local follow-up/});
+    await user.clear(review);
+    expect(review).toBeVisible();
+    await user.type(review,"My corrected, user-reviewed question");
+    expect(review).toHaveValue("My corrected, user-reviewed question");
+    expect(screen.getByLabelText("Email")).toHaveValue("");
+    expect(screen.getByRole("checkbox",{name:/I agree that Our Town Properties/})).not.toBeChecked();
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("cancels an in-flight answer without creating or submitting a handoff", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn((_input: RequestInfo | URL, init?: RequestInit) => new Promise<Response>((_resolve,reject) => {
+      init?.signal?.addEventListener("abort",()=>reject(new DOMException("Stopped","AbortError")),{once:true});
+    }));
+    vi.stubGlobal("fetch",fetchMock);
+    render(<AskMikeChatPanel />);
+    await user.type(screen.getByLabelText(/Your real estate question/),"How do I buy?");
+    await user.click(screen.getByRole("button",{name:"Send Question"}));
+    await user.click(screen.getByRole("button",{name:"Stop answer"}));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No follow-up request was submitted");
+    expect(screen.queryByRole("textbox",{name:/Question for local follow-up/})).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][1]?.signal?.aborted).toBe(true);
+  });
+
   it("makes the skip link the first public-header control and points it at one focus target", () => {
     render(
       <>

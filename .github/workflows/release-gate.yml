@@ -108,6 +108,9 @@ jobs:
       - name: Built public enlarged-text reflow acceptance (no writes)
         run: AMM_E2E_BUILT=1 pnpm exec playwright test tests/e2e/public-text-reflow.spec.ts --workers 1 --reporter=line
 
+      - name: Built cited-guidance projection and native Origin refusal (disconnected no-send)
+        run: AMM_PUBLIC_CONCIERGE_ACCEPTANCE=1 AMM_E2E_BUILT=1 DATABASE_ENV=preview PREVIEW_DATA_MODE=disabled pnpm exec playwright test tests/e2e/public-concierge.spec.ts --workers 1 --reporter=line
+
       - name: Built application real-session and signed HTTP-to-SQL acceptance
         run: pnpm run test:reference:sessions
 
@@ -145,6 +148,9 @@ jobs:
       # the production build, including the route-manifest assertion.
       - name: Development guest canonical intake diagnostic (real isolated SQL, no sends)
         run: AMM_E2E_BUILT=0 AMM_CONSUMER_WORKSPACE_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/consumer-workspace-intake-ci pnpm run test:reference:sessions
+
+      - name: Intentional reviewed concierge handoff (real isolated SQL, development Origin, no sends)
+        run: AMM_CONCIERGE_HANDOFF_ACCEPTANCE=1 AMM_E2E_BUILT=0 AMM_SESSION_ARTIFACT_DIR=.amm-run/concierge-handoff-ci pnpm run test:reference:sessions
 
       - name: Upload artifacts
         if: always()

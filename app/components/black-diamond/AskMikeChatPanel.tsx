@@ -15,10 +15,13 @@ import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { TextField } from "./FormField";
 import { LeadConsentField } from "./LeadConsentField";
 import { LuxuryCard } from "./LuxuryCard";
+import { PUBLIC_KNOWLEDGE_VERSION, readPublicCitations, type PublicCitation } from "../../lib/groundedConciergeContract";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
+  citations?: PublicCitation[];
+  limitation?: string;
 };
 
 type AskMikeChatPanelProps = {
@@ -46,6 +49,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   const [followUpError, setFollowUpError] = useState<string | null>(null);
   const [followUpMessage, setFollowUpMessage] = useState<string | null>(null);
   const leadCaptureInFlightRef = useRef(false);
+  const answerRequestRef = useRef<AbortController | null>(null);
   const followUpEmailRef = useRef<HTMLInputElement>(null);
   const followUpPhoneRef = useRef<HTMLInputElement>(null);
   const followUpConsentRef = useRef<HTMLInputElement>(null);
@@ -56,6 +60,10 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
 
   useEffect(() => {
     setChatSessionId(tryCreateBrowserSubmissionId());
+    return () => {
+      answerRequestRef.current?.abort();
+      answerRequestRef.current = null;
+    };
   }, []);
 
   function markStarted(stepName: string) {
@@ -73,7 +81,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
 
   async function sendMessage(message: string) {
     const trimmed = message.trim();
-    if (!trimmed) return;
+    if (!trimmed || answerRequestRef.current) return;
     if (!chatSessionId) {
       setChatError("This browser could not create a secure submission reference. Refresh and try again.");
       return;
@@ -84,6 +92,8 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     setLastMessage(trimmed);
     setInput("");
     setMessages((current) => [...current, { role: "user", content: trimmed }]);
+    const controller = new AbortController();
+    answerRequestRef.current = controller;
     trackEvent("chat_message_sent", attribution, {
       funnel_name: "ask_mike_chat",
       lead_source_surface: surface,
@@ -93,25 +103,39 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
       const res = await fetch("/api/chat/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: trimmed, attribution, lead_source_surface: surface }),
+        body: JSON.stringify({ message: trimmed, attribution, lead_source_surface: surface, knowledge_version: PUBLIC_KNOWLEDGE_VERSION }),
+        signal: controller.signal,
       });
-      const data = (await res.json()) as { message?: string };
+      const data = (await res.json()) as { message?: string; citations?: unknown; limitation?: string };
       if (!res.ok) throw new Error("chat_failed");
+      if (controller.signal.aborted || answerRequestRef.current !== controller) return;
       setMessages((current) => [
-        ...current,
+        ...current.slice(-19),
         {
           role: "assistant",
           content:
             data.message ||
             "For address-specific advice, send the property address and best contact information so Mike can follow up.",
+          citations: readPublicCitations(data.citations),
+          limitation: typeof data.limitation === "string" ? data.limitation.slice(0, 500) : undefined,
         },
       ]);
       setAnsweredQuestion(trimmed);
     } catch {
-      setChatError("Mike's answer did not come through. You can retry, or send the property address through the home-value path for direct follow-up.");
+      if (!controller.signal.aborted) setChatError("The assistant's answer did not come through. You can retry, or use the home-value form for local follow-up.");
     } finally {
-      setSubmitting(false);
+      if (answerRequestRef.current === controller) {
+        answerRequestRef.current = null;
+        setSubmitting(false);
+      }
     }
+  }
+
+  function cancelAnswer() {
+    answerRequestRef.current?.abort();
+    answerRequestRef.current = null;
+    setSubmitting(false);
+    setChatError("Answer stopped. No follow-up request was submitted.");
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -129,7 +153,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     setFollowUpError(null);
     setFollowUpMessage(null);
 
-    if (!answeredQuestion) {
+    if (!answeredQuestion?.trim()) {
       setFollowUpError("Ask a question first so Mike can review the right context.");
       return;
     }
@@ -184,7 +208,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           name: clean(followUpName) || undefined,
           email: email || undefined,
           phone: phone || undefined,
-          question: answeredQuestion,
+          question: answeredQuestion.trim(),
           status: "new",
           assigned_agent_id: null,
           widget_session_id: chatSessionId,
@@ -251,18 +275,18 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   return (
     <LuxuryCard
       id="ask-mike"
-      className={`min-w-0 [overflow-wrap:anywhere] bg-[radial-gradient(circle_at_top_right,rgba(34,198,210,.14),transparent_32%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025))] ${compact ? "p-4" : "p-5 sm:p-7"}`}
+      className={`min-w-0 [overflow-wrap:anywhere] [&_.amm-form-field]:p-[12px] bg-[radial-gradient(circle_at_top_right,rgba(34,198,210,.14),transparent_32%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025))] ${compact ? "p-[16px]" : "p-[20px] sm:p-[28px]"}`}
     >
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">Ask Mike</p>
       <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">
         Start with the real estate question on your mind.
       </h2>
-      <div className="mt-6 rounded-lg border border-white/10 bg-black/45 p-4">
+      <div className="mt-6 rounded-lg border border-white/10 bg-black/45 p-[16px]">
         <div className="flex flex-wrap items-center gap-3 border-b border-white/10 pb-4">
           <Image src="/brand/black-diamond/our-town-logo.png" alt="Our Town Properties" width={96} height={41} className="h-auto w-20" />
           <div>
-            <p className="font-semibold text-[#f4ead4]">Mike Eatmon</p>
-            <p className="text-xs text-[#22c6d2]">Local guidance from Our Town Properties</p>
+            <p className="font-semibold text-[#f4ead4]">AI assistant for Mike's team</p>
+            <p className="text-xs text-[#22c6d2]">Our Town Properties · not Mike personally</p>
           </div>
         </div>
         <div className="py-5 text-sm leading-6 text-[#d9ceb8]">
@@ -281,24 +305,38 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           ))}
         </div>
         {messages.length ? (
-          <div className="mt-4 max-h-64 space-y-3 overflow-auto border-t border-white/10 pt-4">
+          <div role="log" aria-label="Conversation" aria-live="polite" className="mt-4 max-h-64 space-y-3 overflow-auto border-t border-white/10 pt-4">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
                 className={`rounded-md px-3 py-2 text-sm leading-6 ${
                   message.role === "user"
-                    ? "ml-8 border border-[#cda24a33] bg-[#cda24a12] text-[#f4ead4]"
-                    : "mr-8 border border-[#22c6d24a] bg-[#22c6d212] text-[#d9ceb8]"
+                    ? "ml-[16px] border border-[#cda24a33] bg-[#cda24a12] text-[#f4ead4]"
+                    : "mr-[16px] border border-[#22c6d24a] bg-[#22c6d212] text-[#d9ceb8]"
                 }`}
               >
-                {message.content}
+                <p>{message.content}</p>
+                {message.citations?.length ? (
+                  <ul className="mt-3 space-y-2" aria-label="Answer sources">
+                    {message.citations.map((citation) => (
+                      <li key={citation.id}>
+                        <a href={citation.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline text-[#88e7ee]">
+                          {citation.title}
+                        </a>
+                        <p className="text-xs">Bundled snapshot: {citation.asOf.slice(0, 10)}. Not a live property feed.</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {message.limitation ? <p className="mt-2 text-xs">{message.limitation}</p> : null}
               </div>
             ))}
           </div>
         ) : null}
         {submitting ? (
           <div className="mt-4 mr-8 rounded-md border border-[#22c6d24a] bg-[#22c6d212] px-3 py-2 text-sm leading-6 text-[#d9ceb8]" role="status">
-            Mike is drafting a careful answer...
+            Checking approved guidance…
+            <button type="button" onClick={cancelAnswer} className="ml-3 min-h-11 underline">Stop answer</button>
           </div>
         ) : null}
         {chatError ? (
@@ -343,11 +381,11 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           Sending a question by itself does not create a contact lead or trigger a lead alert. For pricing, listing strategy, or property-specific facts, Mike or the Our Town Properties team should verify details directly.
         </p>
 
-        {answeredQuestion && !leadReference.leadId ? (
+        {answeredQuestion !== null && !leadReference.leadId ? (
           <form
             noValidate
             onSubmit={submitFollowUp}
-            className="mt-5 space-y-4 rounded-lg border border-[#cda24a33] bg-[#cda24a0d] p-4"
+            className="mt-5 space-y-4 rounded-lg border border-[#cda24a33] bg-[#cda24a0d] p-[16px]"
             aria-describedby={followUpError ? "ask-follow-up-requirement ask-follow-up-status" : "ask-follow-up-requirement"}
           >
             <div>
@@ -357,6 +395,11 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
                 Enter at least one contact method and confirm permission. This separate request creates the contact lead and lead alert.
               </p>
             </div>
+            <label className="block text-sm font-semibold">
+              Question for local follow-up
+              <textarea value={answeredQuestion} onChange={(event) => setAnsweredQuestion(event.target.value)} maxLength={2_000} rows={4} className="amm-form-field mt-2 w-full" required />
+              <span className="mt-2 block font-normal text-[#d9ceb8]">Review or correct your question. Only this text and the contact details you enter are submitted when you request follow-up. The assistant's answer is not a verified property fact.</span>
+            </label>
             <TextField
               label="Your name (optional)"
               name="follow-up-name"

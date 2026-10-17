@@ -59,7 +59,8 @@ describe("public UX visual completion", () => {
 
   it("keeps chat loading, retry, and handoff states available", () => {
     const chat = read("app/components/black-diamond/AskMikeChatPanel.tsx");
-    expect(chat).toContain("Mike is drafting a careful answer");
+    expect(chat).toContain("Checking approved guidance");
+    expect(chat).toContain("Stop answer");
     expect(chat).toContain("Retry");
     expect(chat).toContain("property-specific facts");
     expect(chat).toContain('role="alert"');
