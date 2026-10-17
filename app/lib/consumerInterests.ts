@@ -7,7 +7,7 @@ export const MAX_GUEST_INTERESTS = 8;
 /** Reuse canonical validation. No URL fetching, enrichment or inferred facts. */
 export function guestInterest(input: { kind: "property" | "search"; value: string; budget: string }, id: string): GuestInterest {
   const value = input.value.trim();
-  if (!value || value.length > 500 || /[\u0000-\u001f\u007f]/.test(value)) throw new Error("Add a plain-text reference or search area, within 500 characters.");
+  if (!value || value.length > 500 || Array.from(value).some(character => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127)) throw new Error("Add a plain-text reference or search area, within 500 characters.");
   if (input.budget.length > 160) throw new Error("Keep the budget within 160 characters.");
   const isUrl = /^[a-z][a-z0-9+.-]*:/i.test(value) || value.startsWith("//");
   if (input.kind === "property" && isUrl && !isSafeListingReference(value)) throw new Error("Use an http or https listing link without sign-in details, or enter an address.");
