@@ -1,4 +1,5 @@
 {
+  "git": { "deploymentEnabled": { "codex/consumer-account-workspace-20261017": false } },
   "crons": [
     {
       "path": "/api/admin/notifications/retry",
