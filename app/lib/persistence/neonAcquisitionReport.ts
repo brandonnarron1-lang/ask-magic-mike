@@ -1,6 +1,8 @@
 import { neon } from "@neondatabase/serverless";
+import { createHash, randomUUID } from "node:crypto";
 import { hasLeadCenterPermission, isLeadCenterRole, type LeadCenterPrincipal } from "../../../src/lib/admin/rbac-policy";
-import { isPreviewDataDisabled } from "../../../src/lib/preview-security";
+import { isPreviewDataDisabled, isPreviewRuntime } from "../../../src/lib/preview-security";
+import { computeNeonEndpointAttestation } from "../../../src/lib/security/neon-endpoint-identity";
 import { ACQUISITION_PLACEMENTS, acquisitionTimestamp, MAX_ACQUISITION_RANGE_MS, type AcquisitionWindow } from "../growth/acquisition-window";
 
 export const ACQUISITION_STATEMENT_TIMEOUT_MS = 5_000;
@@ -72,69 +74,117 @@ SELECT i.key,i.inquiries,i.contacts,i.unresolved,o.operator,o.envelopes,o.repres
 FROM inquiries i JOIN operators o ON o.key=i.key ORDER BY i.key,o.operator`;
 
 type AggregateQuery = (text: string, params: unknown[]) => Promise<unknown>;
-const validCount = (value: unknown): number => {
-  if ((typeof value !== "string" && typeof value !== "number") || value === "") throw new Error("invalid_aggregate");
-  const n = Number(value); if (!Number.isSafeInteger(n) || n < 0) throw new Error("invalid_aggregate"); return n;
+// Pinned-driver diagnostic label is checked against the installed lockfile in tests.
+export const ACQUISITION_DRIVER = "@neondatabase/serverless@1.1.0";
+type Diagnostic = Record<string, unknown>;
+class InvalidAggregate extends Error { constructor(readonly condition: string) { super("invalid_aggregate"); } }
+const kind = (value: unknown): string => value === null ? "null" : Array.isArray(value) ? "array" : value instanceof Date ? "date" : typeof value;
+const validCount = (value: unknown, field: string): number => {
+  if ((typeof value !== "string" && typeof value !== "number") || value === "") throw new InvalidAggregate(`count_type:${field}`);
+  const n = Number(value); if (!Number.isSafeInteger(n) || n < 0) throw new InvalidAggregate(`count_value:${field}`); return n;
 };
 
 export async function loadAcquisitionReport(window: AcquisitionWindow, principal: LeadCenterPrincipal | null,
-  options: { query?: AggregateQuery; now?: Date } = {}): Promise<AcquisitionReport> {
+  options: { query?: AggregateQuery; now?: Date; onDiagnostic?: (event: Diagnostic) => void } = {}): Promise<AcquisitionReport> {
+  const started = performance.now(), binding = computeNeonEndpointAttestation(process.env);
+  const preview = isPreviewRuntime();
+  const trace: Diagnostic = { schema: 1, correlation: randomUUID(), queryId: "acquisition.aggregate.v1", stage: "gate", aggregateExecution: "not_attempted",
+    source: /^[a-f0-9]{40}$/.test(process.env.VERCEL_GIT_COMMIT_SHA ?? "") ? process.env.VERCEL_GIT_COMMIT_SHA : "local",
+    deploymentFingerprint: process.env.VERCEL_URL ? createHash("sha256").update(process.env.VERCEL_URL).digest("hex").slice(0,16) : "local",
+    runtime: process.versions.node, driver: ACQUISITION_DRIVER, targetBinding: binding.preview_endpoint_identity_confirmed,
+    transaction: { readOnly: true, isolationLevel: "RepeatableRead", fullResults: false, arrayMode: false } };
+  const emit = (condition: string) => {
+    const elapsedMs = Math.round(performance.now()-started);
+    const event = { ...trace, condition, elapsedMs, ...(trace.stage === "validation" ? { validationMs: Math.max(0,elapsedMs-Number(trace.gateMs)-Number(trace.queryMs)) } : {}) };
+    // No raw error, SQL, parameters, contact data, session or connection URL.
+    // At most query-start and final event; diagnostics never change the result.
+    try { if (options.onDiagnostic) options.onDiagnostic(event); else if (preview) console.info("AMM_ACQUISITION_REPORT", JSON.stringify(event)); } catch { /* logging is not a data dependency */ }
+  };
   const scope = principal?.role === "primary_lead_owner" ? "assigned_workspace" : "all_eligible";
-  const empty = (reason: string): AcquisitionReport => ({ coverage: "unavailable", reason, window, scope, generatedAt: null, totals: null, placements: [] });
-  if (!principal || !isLeadCenterRole(principal.role) || !hasLeadCenterPermission(principal.role, "report:view")) return empty("Report permission required; no query executed.");
-  if (isPreviewDataDisabled()) return empty("Preview data is disconnected or its physical isolation is unverified; no query executed.");
-  if (scope === "assigned_workspace" && (!principal.agentId || !/^[a-f0-9-]{36}$/i.test(principal.agentId))) return empty("Assigned-workspace identity is unavailable; no query executed.");
+  const empty = (reason: string, condition: string): AcquisitionReport => { emit(condition); return { coverage: "unavailable", reason, window, scope, generatedAt: null, totals: null, placements: [] }; };
+  if (!principal || !isLeadCenterRole(principal.role) || !hasLeadCenterPermission(principal.role, "report:view")) return empty("Report permission required; no query executed.", "gate:permission");
+  if (isPreviewDataDisabled()) return empty("Preview data is disconnected or its physical isolation is unverified; no query executed.", "gate:preview_binding");
+  if (scope === "assigned_workspace" && (!principal.agentId || !/^[a-f0-9-]{36}$/i.test(principal.agentId))) return empty("Assigned-workspace identity is unavailable; no query executed.", "gate:assignment_identity");
   const now = options.now ?? new Date();
   if (!acquisitionTimestamp(window.from) || !acquisitionTimestamp(window.to) || Date.parse(window.from) >= Date.parse(window.to) || Date.parse(window.to) > now.getTime() || Date.parse(window.to)-Date.parse(window.from)>MAX_ACQUISITION_RANGE_MS ||
-    (window.placement !== "all" && !ACQUISITION_PLACEMENTS.some(p=>p.key===window.placement))) return empty("Invalid bounded acquisition window; no query executed.");
-  if (!options.query && !process.env.DATABASE_URL) return empty("Canonical database is disconnected.");
+    (window.placement !== "all" && !ACQUISITION_PLACEMENTS.some(p=>p.key===window.placement))) return empty("Invalid bounded acquisition window; no query executed.", "gate:window");
+  if (!options.query && !process.env.DATABASE_URL) return empty("Canonical database is disconnected.", "gate:database_configuration");
   try {
     const query: AggregateQuery = options.query ?? (async (text, params) => {
       const sql = neon(process.env.DATABASE_URL!, { fetchOptions: { signal: AbortSignal.timeout(8_000) } });
       // The pinned Neon HTTP driver batches both statements on one read-only
       // transaction. SET LOCAL applies before the aggregate starts executing.
+      const inspect = preview && binding.preview_endpoint_identity_confirmed;
+      const setup = inspect ? sql.query(`SELECT set_config('statement_timeout', '5000', true), current_user::text AS role,
+        current_setting('transaction_read_only') AS read_only, current_setting('transaction_isolation') AS isolation,
+        (SELECT rolbypassrls FROM pg_roles WHERE rolname=current_user) AS bypass_rls,
+        current_setting('neon.endpoint_id',true)=$1::text AS endpoint_match,
+        current_setting('server_version_num') AS server_version`, [process.env.PREVIEW_NEON_ENDPOINT_ID])
+        : sql.query("SELECT set_config('statement_timeout', '5000', true)");
       const results = await sql.transaction([
-        sql.query("SELECT set_config('statement_timeout', '5000', true)"), sql.query(text, params),
+        setup, sql.query(text, params),
       ], { readOnly: true, isolationLevel: "RepeatableRead" });
+      trace.transactionContainer = kind(results);
+      if (inspect) {
+        const meta = results[0]?.[0] as Record<string, unknown> | undefined;
+        trace.databaseContext = meta ? { role: typeof meta.role === "string" && /^amm_(?:report|catalog)_qa_(?:readonly|runtime)_\d{8}$/.test(meta.role) ? meta.role : "other",
+          readOnly: meta.read_only === "on", isolation: meta.isolation === "repeatable read" ? "repeatable read" : "other", bypassRls: meta.bypass_rls === true,
+          endpointMatch: meta.endpoint_match === true, version: /^\d{6}$/.test(String(meta.server_version)) ? String(meta.server_version) : "unknown" } : { kind: kind(results[0]) };
+      }
       return results[1];
     });
+    trace.stage = "transport"; trace.gateMs = Math.round(performance.now()-started); trace.aggregateExecution = "attempted_unconfirmed"; emit("query:start");
+    const queryStarted = performance.now();
     const result = await query(ACQUISITION_AGGREGATE_SQL, [window.from, window.to, JSON.stringify(ACQUISITION_PLACEMENTS.map(({ key }) => ({ key }))), window.placement, scope === "assigned_workspace" ? principal.agentId : null]);
-    if (!Array.isArray(result) || result.length === 0 || result.length > 12) return empty("Invalid or missing aggregate; not a measured zero.");
+    trace.queryMs = Math.round(performance.now()-queryStarted); trace.aggregateExecution = "response_received"; trace.stage = "validation"; trace.resultContainer = kind(result);
+    if (!Array.isArray(result) || result.length === 0 || result.length > 12) return empty("Invalid or missing aggregate; not a measured zero.", "result:container_or_size");
     const rows = result as Record<string, unknown>[];
+    if (rows.some(r=>!r || typeof r!=="object" || Array.isArray(r))) return empty("Invalid or missing aggregate; not a measured zero.", "result:row_shape");
     const keys = ["all", ...ACQUISITION_PLACEMENTS.filter(p => window.placement === "all" || window.placement === p.key).map(p => p.key)];
-    if (rows.length !== keys.length * 3 || rows.some(r => r.access_allowed !== true)) return empty("Required full-cohort read grants or row-security boundary unavailable.");
+    trace.rowCount = rows.length; trace.expectedRows = keys.length*3;
+    const fields = ["inquiries","contacts","unresolved","envelopes","represented","accepted","delivered","pending","retry","failed","unknown","access_allowed","generated_at"];
+    trace.scalarTypes = Object.fromEntries(fields.map(field=>[field,[...new Set(rows.map(r=>kind(r?.[field])))]]));
+    if (rows.length !== keys.length * 3 || rows.some(r => r.access_allowed !== true)) return empty("Required full-cohort read grants or row-security boundary unavailable.", rows.length !== keys.length*3 ? "result:dimensions" : "result:full_cohort_grants");
     let generatedAt: string | null = null;
     const mapped = keys.map(key => {
       const group = rows.filter(r => r.key === key);
-      if (group.length !== 3 || new Set(group.map(r => r.operator)).size !== 3) throw new Error("invalid_aggregate");
+      if (group.length !== 3 || new Set(group.map(r => r.operator)).size !== 3) throw new InvalidAggregate("operator_dimensions");
       const base = group[0];
-      const counts = { inquiries: validCount(base.inquiries), contacts: validCount(base.contacts), unresolved: validCount(base.unresolved), unknownOperatorEnvelopes: 0 } as AcquisitionCounts;
-      if (counts.contacts + counts.unresolved > counts.inquiries) throw new Error("invalid_aggregate");
+      const counts = { inquiries: validCount(base.inquiries,"inquiries"), contacts: validCount(base.contacts,"contacts"), unresolved: validCount(base.unresolved,"unresolved"), unknownOperatorEnvelopes: 0 } as AcquisitionCounts;
+      if (counts.contacts + counts.unresolved > counts.inquiries) throw new InvalidAggregate("contact_total");
       for (const r of group) {
         const parsedDate = Date.parse(String(r.generated_at));
-        if (!Number.isFinite(parsedDate)) throw new Error("invalid_aggregate");
+        if (!Number.isFinite(parsedDate)) throw new InvalidAggregate("snapshot_parse");
         const date = new Date(parsedDate).toISOString();
-        if ((generatedAt && generatedAt !== date) || r.inquiries !== base.inquiries || r.contacts !== base.contacts || r.unresolved !== base.unresolved) throw new Error("invalid_aggregate");
+        if (generatedAt && generatedAt !== date) throw new InvalidAggregate("snapshot_consistency");
+        if (r.inquiries !== base.inquiries || r.contacts !== base.contacts || r.unresolved !== base.unresolved) throw new InvalidAggregate("cohort_scalar_consistency");
         generatedAt = date;
-        if (r.operator === "unknown") { counts.unknownOperatorEnvelopes = validCount(r.envelopes); continue; }
-        if (r.operator !== "mike" && r.operator !== "brandon") throw new Error("invalid_operator");
-        const represented = validCount(r.represented);
-        if (represented > counts.inquiries) throw new Error("invalid_aggregate");
+        if (r.operator === "unknown") { counts.unknownOperatorEnvelopes = validCount(r.envelopes,"envelopes"); continue; }
+        if (r.operator !== "mike" && r.operator !== "brandon") throw new InvalidAggregate("operator_value");
+        const represented = validCount(r.represented,"represented");
+        if (represented > counts.inquiries) throw new InvalidAggregate("represented_total");
         counts[r.operator] = { inquiriesWithEnvelope: represented, noV6Recorded: counts.inquiries - represented,
-          envelopes: validCount(r.envelopes), providerAccepted: validCount(r.accepted), delivered: validCount(r.delivered),
-          pending: validCount(r.pending), retry: validCount(r.retry), failed: validCount(r.failed), unknown: validCount(r.unknown) };
+          envelopes: validCount(r.envelopes,"envelopes"), providerAccepted: validCount(r.accepted,"accepted"), delivered: validCount(r.delivered,"delivered"),
+          pending: validCount(r.pending,"pending"), retry: validCount(r.retry,"retry"), failed: validCount(r.failed,"failed"), unknown: validCount(r.unknown,"unknown") };
         const op = counts[r.operator];
-        if (op.envelopes < represented || op.delivered + op.pending + op.retry + op.failed + op.unknown !== op.envelopes || op.providerAccepted > op.envelopes) throw new Error("invalid_aggregate");
+        if (op.envelopes < represented || op.delivered + op.pending + op.retry + op.failed + op.unknown !== op.envelopes || op.providerAccepted > op.envelopes) throw new InvalidAggregate("operator_total");
       }
       return { key, counts };
     });
     const total=mapped[0].counts, placements=mapped.slice(1);
     if (placements.reduce((n,p)=>n+p.counts.inquiries,0)!==total.inquiries || placements.reduce((n,p)=>n+p.counts.unresolved,0)!==total.unresolved ||
-      total.contacts>placements.reduce((n,p)=>n+p.counts.contacts,0) || total.contacts<Math.max(0,...placements.map(p=>p.counts.contacts))) throw new Error("invalid_aggregate");
+      total.contacts>placements.reduce((n,p)=>n+p.counts.contacts,0) || total.contacts<Math.max(0,...placements.map(p=>p.counts.contacts))) throw new InvalidAggregate("placement_rollup");
     const age = now.getTime() - Date.parse(generatedAt!);
-    if (age > 300_000 || age < -30_000) return { coverage: "stale", reason: "Snapshot clock/age exceeds five-minute freshness allowance. Refresh before operational use.", window, scope, generatedAt, totals: null, placements: [] };
+    if (age > 300_000 || age < -30_000) { emit("snapshot:stale"); return { coverage: "stale", reason: "Snapshot clock/age exceeds five-minute freshness allowance. Refresh before operational use.", window, scope, generatedAt, totals: null, placements: [] }; }
+    emit("complete");
     return { coverage: "complete", window, scope, generatedAt, totals: mapped[0].counts, placements: mapped.slice(1) };
-  } catch {
-    return empty("Aggregate unavailable: timeout, schema/grants or invalid result. Retry this read; do not infer zero or change delivery settings.");
+  } catch (error) {
+    if (trace.stage === "transport") trace.queryMs = Math.max(0,Math.round(performance.now()-started)-Number(trace.gateMs));
+    const e=error as {name?:string;code?:string;cause?:{code?:string}};
+    trace.error = { name: ["Error","TypeError","NeonDbError","AbortError","TimeoutError"].includes(e?.name??"") ? e.name : "other",
+      sqlstate: /^[0-9A-Z]{5}$/.test(e?.code??"") ? e.code : null,
+      abort: ["AbortError","TimeoutError"].includes(e?.name??"") || e?.code==="ABORT_ERR", statementTimeout: e?.code==="57014",
+      transportCode: ["ECONNRESET","ETIMEDOUT","ENOTFOUND","ECONNREFUSED","UND_ERR_CONNECT_TIMEOUT"].includes(e?.cause?.code??"") ? e.cause?.code : null };
+    return empty("Aggregate unavailable: timeout, schema/grants or invalid result. Retry this read; do not infer zero or change delivery settings.", error instanceof InvalidAggregate ? `validation:${error.condition}` : "exception");
   }
 }
