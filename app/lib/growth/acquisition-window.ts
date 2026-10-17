@@ -1,10 +1,7 @@
 import type { OwnedDemandPublicationProofLedger } from "../persistence/neonOwnedDemandPublicationProofs";
+import { WORDPRESS_ACQUISITION_GROUPS, currentWordPressChoice, matchesWordPressEvidencePage } from "./wordpress-placement-catalog";
 
-export const ACQUISITION_PLACEMENTS = [
-  { key: "wordpress_homepage_ask_mike", page: 149, label: "Homepage choices", pageUrl: "https://www.ourtownproperties.com/", destinations: ["/home-value", "/buy", "/sell?seller_option=compare"] },
-  { key: "wordpress_we_buy_homes", page: 3631, label: "We Buy Homes", pageUrl: "https://www.ourtownproperties.com/we-buy-homes/", destinations: ["/sell?seller_option=compare"] },
-  { key: "wordpress_listing_buyer", page: 2994, label: "Property Search", pageUrl: "https://www.ourtownproperties.com/property-search/", destinations: ["/buy"] },
-] as const;
+export const ACQUISITION_PLACEMENTS = WORDPRESS_ACQUISITION_GROUPS;
 export type AcquisitionPlacement = (typeof ACQUISITION_PLACEMENTS)[number]["key"];
 export type AcquisitionFilters = { window?: string | string[]; placement?: string | string[]; from?: string | string[]; to?: string | string[] };
 export type AcquisitionWindow = {
@@ -28,15 +25,27 @@ export function acquisitionTimestamp(value: string): string | null {
 }
 
 export function acquisitionBaselines(ledger: OwnedDemandPublicationProofLedger, now: Date) {
+  // Retained PostgreSQL timestamps can have microseconds. Validate those
+  // without rewriting stored observation/record times or widening form input.
+  const retainedTime = (value: string) => acquisitionTimestamp(value.replace(/(\.\d{3})\d{1,3}(?=Z|[+-]\d{2}:\d{2}$)/, "$1"));
   return Object.fromEntries(ACQUISITION_PLACEMENTS.map(placement => {
     // A capped ledger cannot establish the earliest retained observation.
-    const proof = ledger.configured && ledger.schemaReady && !ledger.error && ledger.proofs.length < 250
+    const proofs = ledger.configured && ledger.schemaReady && !ledger.error && ledger.proofs.length < 250
       ? ledger.proofs.filter(p => p.channelKey === "ourtown_wordpress" && p.placementKey === placement.key &&
         p.platformState === "live" && ["public_url", "screenshot_reference"].includes(p.proofType) &&
         p.source === "ourtownproperties" && p.medium === "owned_media" && p.campaignKey === "amm_owned_demand_2026" && p.content === placement.key &&
-        acquisitionTimestamp(p.observedAt) && acquisitionTimestamp(p.createdAt) && Date.parse(p.observedAt) <= now.getTime())
-        .sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt))[0] : undefined;
-    return [placement.key, proof ? { observedAt: proof.observedAt, recordedAt: proof.createdAt } : null];
+        retainedTime(p.observedAt) && retainedTime(p.createdAt) && Date.parse(p.observedAt) <= now.getTime() &&
+        currentWordPressChoice(placement.key, p.trackedUrl) &&
+        (p.proofType !== "public_url" || matchesWordPressEvidencePage(placement.key, p.evidenceUrl)))
+        .sort((a, b) => Date.parse(a.observedAt) - Date.parse(b.observedAt) || Date.parse(a.createdAt) - Date.parse(b.createdAt)) : [];
+    const observed = placement.destinations.map(path => proofs.find(p => currentWordPressChoice(placement.key, p.trackedUrl)?.destination === new URL(path, "https://www.askmagicmike.com").toString()));
+    if (observed.some(p => !p)) return [placement.key, null];
+    // A group becomes observed only once EVERY required choice has evidence.
+    // No row multiplication enters the unchanged tag-level aggregate SQL.
+    const complete = observed.filter(p => Boolean(p));
+    const lastObserved = complete.reduce((latest, p) => Date.parse(p!.observedAt) > Date.parse(latest!.observedAt) ? p : latest);
+    const lastRecorded = complete.reduce((latest, p) => Date.parse(p!.createdAt) > Date.parse(latest!.createdAt) ? p : latest);
+    return [placement.key, { observedAt: lastObserved!.observedAt, recordedAt: lastRecorded!.createdAt }];
   })) as Record<AcquisitionPlacement, { observedAt: string; recordedAt: string } | null>;
 }
 

@@ -8,7 +8,7 @@ import { normalizeGrowthPlacementDelivery as normalizeAggregate } from "../../ap
 const mocks = vi.hoisted(() => ({ growth: vi.fn(), permission: vi.fn(), wordpress: vi.fn() }));
 vi.mock("../../app/lib/growthIntelligenceView", () => ({ loadGrowthIntelligence: mocks.growth }));
 vi.mock("../../src/lib/admin/rbac-session", () => ({ requireLeadCenterPermission: mocks.permission }));
-vi.mock("../../src/lib/preview-security", () => ({ isPreviewDataDisabled: () => true }));
+vi.mock("../../src/lib/preview-security", () => ({ isPreviewDataDisabled: () => true, isPreviewRuntime: () => true }));
 vi.mock("../../app/lib/growth/wordpress-activation-change-set", async (importOriginal) => ({
   ...await importOriginal<typeof import("../../app/lib/growth/wordpress-activation-change-set")>(),
   loadWordPressActivationChangeSets: mocks.wordpress,

@@ -21,6 +21,7 @@ export async function recordOwnedDemandPublicationProofAction(formData: FormData
     proofType: String(formData.get("proof_type") ?? ""),
     evidenceUrl: String(formData.get("evidence_url") ?? "") || null,
     evidenceReference: String(formData.get("evidence_reference") ?? "") || null,
+    observedTrackedUrls: String(formData.get("observed_tracked_urls") ?? "").split(/\r?\n/).map(value => value.trim()).filter(Boolean),
     finalCopy: String(formData.get("final_copy") ?? ""),
     creativeAssetKey: String(formData.get("creative_asset_key") ?? "") || null,
     approvalReference: String(formData.get("approval_reference") ?? ""),

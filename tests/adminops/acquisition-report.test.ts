@@ -1,6 +1,7 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { ACQUISITION_AGGREGATE_SQL, loadAcquisitionReport } from "../../app/lib/persistence/neonAcquisitionReport";
+import { ACQUISITION_AGGREGATE_SQL, ACQUISITION_DRIVER, loadAcquisitionReport } from "../../app/lib/persistence/neonAcquisitionReport";
 import { ACQUISITION_PLACEMENTS, type AcquisitionWindow } from "../../app/lib/growth/acquisition-window";
 import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 const now = new Date("2026-10-16T12:00:00.000Z");
@@ -47,5 +48,35 @@ describe("private acquisition aggregate boundary", () => {
     expect(ACQUISITION_AGGREGATE_SQL).toContain("l.created_at < $2::timestamptz");
     expect(ACQUISITION_AGGREGATE_SQL).not.toContain("consent_email");
     expect(ACQUISITION_AGGREGATE_SQL).not.toContain("duplicate_of_lead_id IS NULL");
+  });
+  it("identifies the exact validation condition without logging row values, private extras, principal or window", async () => {
+    const events: Record<string,unknown>[]=[];
+    const malformed=rows();malformed[0].generated_at="untrusted-private-timestamp";
+    const r=await loadAcquisitionReport(window,analyst,{query:async()=>malformed,now,onDiagnostic:e=>events.push(e)});
+    expect(r.coverage).toBe("unavailable");expect(events).toHaveLength(2);
+    expect(events[1]).toMatchObject({stage:"validation",condition:"validation:snapshot_parse",aggregateExecution:"response_received",rowCount:12,expectedRows:12,scalarTypes:{generated_at:["string"]}});
+    expect(JSON.stringify(events)).not.toMatch(/untrusted-private|private-never|example\.test|2026-10-09|DATABASE_URL|postgres/);
+    expect(events[0].correlation).toBe(events[1].correlation);
+  });
+  it("classifies a transport/SQL timeout without retaining the error message or response", async () => {
+    const events:Record<string,unknown>[]=[];
+    const error=Object.assign(new Error("private-driver-body and private parameters"),{code:"57014"});
+    await loadAcquisitionReport(window,analyst,{query:async()=>{throw error;},now,onDiagnostic:e=>events.push(e)});
+    expect(events[1]).toMatchObject({stage:"transport",aggregateExecution:"attempted_unconfirmed",condition:"exception",error:{sqlstate:"57014",statementTimeout:true}});
+    expect(events[1].queryMs).toBeTypeOf("number");expect(JSON.stringify(events)).not.toContain("private-driver-body");
+  });
+  it("records a non-query gate and never turns logging failure into a data-path failure", async () => {
+    const events:Record<string,unknown>[]=[];const query=vi.fn();
+    await loadAcquisitionReport(window,null,{query,now,onDiagnostic:e=>events.push(e)});
+    expect(query).not.toHaveBeenCalled();expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({condition:"gate:permission",aggregateExecution:"not_attempted"});
+    expect((await loadAcquisitionReport(window,analyst,{query:async()=>rows(),now,onDiagnostic:()=>{throw Error("logger failure");}})).coverage).toBe("complete");
+  });
+  it("records a malformed row container explicitly and keeps the driver label pinned to installed source", async () => {
+    const events:Record<string,unknown>[]=[];
+    await loadAcquisitionReport(window,analyst,{query:async()=>[null],now,onDiagnostic:e=>events.push(e)});
+    expect(events.at(-1)).toMatchObject({condition:"result:row_shape"});
+    const pkg=JSON.parse(readFileSync("node_modules/@neondatabase/serverless/package.json","utf8"));
+    expect(ACQUISITION_DRIVER).toBe(`@neondatabase/serverless@${pkg.version}`);
   });
 });

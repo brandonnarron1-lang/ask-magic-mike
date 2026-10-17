@@ -7,6 +7,7 @@ import {
   type OwnedDemandPlatformState,
   type OwnedDemandProofType,
 } from "../growth/publication-proof";
+import { currentWordPressChoice, wordpressAcquisitionGroup, wordpressTrackedChoices } from "../growth/wordpress-placement-catalog";
 import type { OwnedDemandPlacementKey } from "../growth/owned-demand";
 
 type Row = Record<string, unknown>;
@@ -183,8 +184,19 @@ export async function recordOwnedDemandPublicationProof(
     now?: Date;
   } = {},
 ): Promise<RecordOwnedDemandPublicationProofResult> {
-  const validated = validateOwnedDemandPublicationProof(input, options.now || new Date());
+  const now = options.now || new Date();
+  const group = input.channelKey === "ourtown_wordpress" ? wordpressAcquisitionGroup(input.placementKey) : undefined;
+  const urls = input.observedTrackedUrls ?? (input.observedTrackedUrl ? [input.observedTrackedUrl] : []);
+  if (group && group.destinations.length > 1) {
+    const choices = urls.map(url => currentWordPressChoice(group.key, url));
+    if (urls.length !== group.destinations.length || choices.some(choice => !choice) || new Set(choices.map(choice => choice?.trackedUrl)).size !== group.destinations.length) return { ok: false, statusCode: 400, error: "complete_choice_group_required" };
+  } else if (urls.length > 1) return { ok: false, statusCode: 400, error: "one_observed_destination_required" };
+  // Fixed catalog order makes replay independent of line/query ordering.
+  const ordered = group && group.destinations.length > 1 ? wordpressTrackedChoices(group.key).map(choice => choice.trackedUrl) : [urls[0]];
+  const validations = ordered.map(observedTrackedUrl => validateOwnedDemandPublicationProof({ ...input, observedTrackedUrl }, now));
+  const validated = validations[0];
   if (!validated.ok) return { ok: false, statusCode: 400, error: validated.error };
+  for (const value of validations) if (!value.ok) return { ok: false, statusCode: 400, error: value.error };
 
   const mutation = assertDatabaseMutationAllowed(options.env);
   if (!mutation.ok) return { ok: false, statusCode: mutation.statusCode, error: mutation.error };
@@ -195,6 +207,24 @@ export async function recordOwnedDemandPublicationProof(
   try {
     if (!(await schemaReady(sql))) {
       return { ok: false, statusCode: 503, error: "publication_proof_schema_not_ready" };
+    }
+    const parameters = validations.map(value => {
+      if (!value.ok) throw new Error("invalid_choice_group");
+      const proof=value.value;
+      return [proof.idempotencyKey, proof.placement.channelKey, proof.placement.placementKey,
+        proof.platformState, proof.proofType, proof.placement.campaign, proof.placement.source,
+        proof.placement.medium, proof.placement.content, proof.placement.trackedUrl,
+        proof.evidenceUrl, proof.evidenceReference, proof.finalCopySha256, proof.creativeAssetKey,
+        proof.approvalReference, proof.observedAt, proof.actor, proof.isTest];
+    });
+    if (parameters.length > 1) {
+      // One PostgreSQL statement/transaction, existing RPC only. A failed RPC
+      // result raises division-by-zero, rolling back ALL proof/audit rows.
+      const calls=parameters.map((_, i) => `SELECT public.record_owned_demand_publication_proof_v1(${Array.from({length:18},(_,j)=>`$${i*18+j+1}${j===15?"::timestamptz":""}`).join(",")}) AS result`).join(" UNION ALL ");
+      const aggregate=rows(await sql.query(`WITH receipts AS MATERIALIZED (${calls}) SELECT jsonb_agg(result) AS results, 1/min(COALESCE((result->>'ok')::boolean,false)::int) AS atomic_guard FROM receipts`,parameters.flat()));
+      const results=rows(aggregate[0]?.results);
+      if(results.length!==parameters.length || results.some(result=>result.ok!==true || !text(result.proof_id))) return {ok:false,statusCode:500,error:"publication_proof_record_failed"};
+      return {ok:true,proofId:text(results[0].proof_id),auditId:nullableText(results[0].audit_id),idempotentReplay:results.every(result=>booleanValue(result.idempotent_replay))};
     }
     const proof = validated.value;
     const resultRows = rows(await sql.query(

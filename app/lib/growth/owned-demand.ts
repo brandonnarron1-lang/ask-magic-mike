@@ -1,5 +1,6 @@
 import type { GrowthIntelligence } from "./intelligence";
 import { buildUtmUrl, type UtmMedium } from "../../../src/lib/admin/utm-link-builder";
+import { wordpressTrackedChoices } from "./wordpress-placement-catalog";
 
 export type OwnedDemandStatus = "signal_detected" | "ready_unmeasured";
 
@@ -98,6 +99,8 @@ export interface OwnedDemandPlacementDefinition {
   content: string;
   destination: string;
   trackedUrl: string;
+  /** All currently required URL observations; shared attribution is counted once. */
+  destinationChoices?: Array<{ destination: string; trackedUrl: string }>;
 }
 
 export interface OwnedDemandCreativeDefinition extends OwnedDemandPlacementDefinition {
@@ -203,7 +206,7 @@ export function buildOwnedDemandChannelPacket(channel: OwnedDemandChannel) {
   const namedPlacements = channel.namedPlacements.length
     ? [
         "NAMED BROKERAGE PLACEMENTS",
-        ...channel.namedPlacements.map((placement) => `${placement.placementLabel.toUpperCase()} — ${placement.trackedUrl}`),
+        ...channel.namedPlacements.flatMap((placement) => (placement.destinationChoices ?? [placement]).map(choice => `${placement.placementLabel.toUpperCase()} — ${choice.trackedUrl}`)),
         "",
       ]
     : [];
@@ -402,7 +405,7 @@ const WORDPRESS_NAMED_PLACEMENT_INPUTS = [
   {
     placementKey: "wordpress_homepage_ask_mike",
     placementLabel: "Homepage Ask Magic Mike",
-    destination: "https://www.askmagicmike.com/ask",
+    destination: wordpressTrackedChoices("wordpress_homepage_ask_mike")[0].destination,
     content: "wordpress_homepage_ask_mike",
   },
   {
@@ -414,7 +417,7 @@ const WORDPRESS_NAMED_PLACEMENT_INPUTS = [
   {
     placementKey: "wordpress_we_buy_homes",
     placementLabel: "We Buy Homes",
-    destination: "https://www.askmagicmike.com/sell",
+    destination: wordpressTrackedChoices("wordpress_we_buy_homes")[0].destination,
     content: "wordpress_we_buy_homes",
   },
   {
@@ -451,7 +454,9 @@ const WORDPRESS_NAMED_PLACEMENT_INPUTS = [
 function wordpressNamedPlacements(): OwnedDemandPlacementDefinition[] {
   const channel = CHANNEL_DEFINITIONS.find((candidate) => candidate.key === "ourtown_wordpress");
   if (!channel) return [];
-  return WORDPRESS_NAMED_PLACEMENT_INPUTS.map((placement) => ({
+  return WORDPRESS_NAMED_PLACEMENT_INPUTS.map((placement) => {
+    const choices = wordpressTrackedChoices(placement.placementKey);
+    return {
     channelKey: channel.key,
     channelLabel: channel.label,
     placementKey: placement.placementKey,
@@ -460,14 +465,15 @@ function wordpressNamedPlacements(): OwnedDemandPlacementDefinition[] {
     medium: channel.medium,
     campaign: OWNED_DEMAND_CAMPAIGN_KEY,
     content: placement.content,
-    destination: placement.destination,
-    trackedUrl: buildUtmUrl(placement.destination, {
+    destination: choices[0]?.destination ?? placement.destination,
+    ...(choices.length ? { destinationChoices: choices } : {}),
+    trackedUrl: choices[0]?.trackedUrl ?? buildUtmUrl(placement.destination, {
       utm_source: channel.source,
       utm_medium: channel.medium,
       utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
       utm_content: placement.content,
     }),
-  }));
+  }; });
 }
 
 function normalized(value: string) {

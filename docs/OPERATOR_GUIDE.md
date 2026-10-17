@@ -8,7 +8,7 @@ This guide covers daily operation of the Ask Magic Mike platform for brokers and
 
 ## Acquisition operations — October 16, 2026 candidate
 
-Open **More tools → Distribution** (`/admin/distribution`). The deployment receipt,
+Open **More tools → Owned demand** (`/admin/distribution`). The deployment receipt,
 not this dated candidate note, establishes activation. Use the top **Acquisition
 operations** panel: choose 7/30 elapsed days and a placement, then **Read report**.
 An explicit range needs UTC offsets and must span at most 31 elapsed days. The
@@ -26,8 +26,16 @@ not a failure/eligibility decision, and delivery is not mailbox observation.
 The homepage's three choices share one tracking tag; We Buy Homes and Property
 Search each add one choice/tag. Exact retained UTMs are latest-touch claims, not
 signed capture or causal lift. **Since first verified live observation** is
-available only for one placement with a valid existing proof inside 31 days.
+available only for one tracking group with current destination proof inside 31 days.
 Observation and recording times remain separate. No proof means no inferred date.
+For the homepage, paste all three visible tracked links (one per line) into the
+existing **Record native observation** form. One submission commits three ordinary
+per-URL proof/audit rows atomically; repeating the same observation adds none.
+The group baseline begins only when every current choice has been observed.
+We Buy Homes requires its exact `seller_option=compare` link. Historical `/ask`
+or plain `/sell` records remain historical and do not certify current choices.
+Property Search retains its existing proof and observation time. Recording proof
+does not publish a page, submit an inquiry, or send a notification.
 
 Administrators/analysts see aggregate counts only; the primary owner's report
 is assigned-workspace scoped. This panel adds no contact export or drill-through.
