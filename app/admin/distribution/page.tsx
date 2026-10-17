@@ -155,6 +155,11 @@ function PublicationProofForm({
         </label>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
+        {channel.key === "ourtown_wordpress" ? <label className={labelClass}>
+          Observed tracked destinations
+          <textarea name="observed_tracked_urls" className={`${fieldClass} min-h-36 resize-y`} disabled={disabled} maxLength={6144} autoComplete="off" />
+          <span className="mt-1 block normal-case tracking-normal text-[#a99f90]">One exact visible CTA link per line. Required for homepage and Compare proofs. Include all three homepage choices: they commit together as three per-URL proof/audit rows. One choice or historical /ask proof cannot certify all three.</span>
+        </label> : null}
         <label className={labelClass}>
           Public evidence URL
           <input name="evidence_url" type="url" inputMode="url" className={fieldClass} disabled={disabled} maxLength={2048} placeholder="https://native-platform.example/post" autoComplete="off" />
@@ -774,9 +779,13 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
                         : "Unmeasured"}
                   </span>
                 </div>
-                <code className="mt-2 block break-all text-[10px] leading-5 text-[#9edbe2]">{placement.trackedUrl}</code>
+                {(placement.destinationChoices ?? [{ destination: placement.destination, trackedUrl: placement.trackedUrl }]).map(choice => <div key={choice.trackedUrl} className="mt-2">
+                  <p className="text-xs text-[#c9bdab]">{new URL(choice.destination).pathname}{new URL(choice.destination).search}</p>
+                  <code className="block break-all text-[10px] leading-5 text-[#9edbe2]">{choice.trackedUrl}</code>
+                  <CopyDemandAsset label="Copy tracked link" value={choice.trackedUrl} />
+                </div>)}
+                {(placement.destinationChoices?.length ?? 0) > 1 ? <p className="mt-2 text-xs leading-5 text-[#c9bdab]">One tracking group. All three choices require their own current observation; inquiries are counted once by the shared tag.</p> : null}
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <CopyDemandAsset label="Copy tracked link" value={placement.trackedUrl} />
                   <WordPressActivationManifestLink placementKey={placement.placementKey} />
                 </div>
               </article>

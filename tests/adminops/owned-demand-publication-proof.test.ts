@@ -10,6 +10,7 @@ import {
   recordOwnedDemandPublicationProof,
   type OwnedDemandPublicationQuery,
 } from "../../app/lib/persistence/neonOwnedDemandPublicationProofs";
+import { wordpressTrackedChoices } from "../../app/lib/growth/wordpress-placement-catalog";
 
 const NOW = new Date("2026-08-21T17:30:00.000Z");
 const FINAL_COPY = "Wilson homeowners can request a broker-reviewed home-value and sale-readiness review from Our Town Properties.";
@@ -95,10 +96,11 @@ describe("owned-demand publication proof validation", () => {
       channelKey: "ourtown_wordpress",
       placementKey: "wordpress_we_buy_homes",
       evidenceUrl: "https://www.ourtownproperties.com/we-buy-homes/",
+      observedTrackedUrl: wordpressTrackedChoices("wordpress_we_buy_homes")[0].trackedUrl,
     }), NOW);
     expect(valid.ok).toBe(true);
     if (valid.ok) {
-      expect(valid.value.placement.destination).toBe("https://www.askmagicmike.com/sell");
+      expect(valid.value.placement.destination).toBe("https://www.askmagicmike.com/sell?seller_option=compare");
       expect(valid.value.placement.content).toBe("wordpress_we_buy_homes");
     }
     expect(validateOwnedDemandPublicationProof(validInput({
@@ -106,6 +108,20 @@ describe("owned-demand publication proof validation", () => {
       placementKey: "wordpress_we_buy_homes",
       evidenceUrl: "https://example.com/we-buy-homes/",
     }), NOW).ok).toBe(false);
+  });
+
+  it("requires an exact observed current choice, normalizes ordering only, and keys each choice separately", () => {
+    const input=validInput({channelKey:"ourtown_wordpress",placementKey:"wordpress_homepage_ask_mike",evidenceUrl:"https://www.ourtownproperties.com/"});
+    expect(validateOwnedDemandPublicationProof(input,NOW)).toMatchObject({ok:false,error:"observed_destination_required"});
+    const choices=wordpressTrackedChoices("wordpress_homepage_ask_mike");
+    const results=choices.map(choice=>validateOwnedDemandPublicationProof({...input,observedTrackedUrl:choice.trackedUrl},NOW));
+    expect(results.every(r=>r.ok)).toBe(true);
+    expect(new Set(results.map(r=>r.ok&&r.value.idempotencyKey)).size).toBe(3);
+    const reordered=new URL(choices[2].trackedUrl);reordered.searchParams.sort();
+    const repeat=validateOwnedDemandPublicationProof({...input,observedTrackedUrl:reordered.toString()},new Date("2026-08-22"));
+    expect(repeat.ok&&repeat.value.idempotencyKey).toBe(results[2].ok&&results[2].value.idempotencyKey);
+    for(const url of [choices[0].trackedUrl.replace("www.askmagicmike.com","evil.example"),choices[0].trackedUrl.replace("/home-value?","/ask?"),choices[2].trackedUrl.replace("&seller_option=compare",""),choices[2].trackedUrl.replace("seller_option=compare","seller_option=guidance"),choices[2].trackedUrl+"&seller_option=compare",choices[0].trackedUrl+"&utm_source=evil",choices[0].trackedUrl+"&extra=1",choices[0].trackedUrl.replace("wordpress_homepage_ask_mike","wordpress_listing_buyer")]) expect(validateOwnedDemandPublicationProof({...input,observedTrackedUrl:url},NOW).ok).toBe(false);
+    expect(validateOwnedDemandPublicationProof({...input,observedTrackedUrl:choices[0].trackedUrl,evidenceUrl:"https://www.ourtownproperties.com/we-buy-homes/"},NOW)).toMatchObject({ok:false,error:"evidence_page_mismatch"});
   });
 
   it("rejects raw PII, secrets, placeholders, unsupported claims, and fair-housing language", () => {
@@ -128,6 +144,18 @@ describe("owned-demand publication proof validation", () => {
 });
 
 describe("Neon owned-demand publication proof repository", () => {
+  it("refuses an incomplete or repeated homepage choice before querying and uses one atomic statement for the full group", async () => {
+    const choices=wordpressTrackedChoices("wordpress_homepage_ask_mike").map(choice=>choice.trackedUrl);
+    const input=validInput({channelKey:"ourtown_wordpress",placementKey:"wordpress_homepage_ask_mike",evidenceUrl:"https://www.ourtownproperties.com/",observedTrackedUrls:choices});
+    for(const observedTrackedUrls of [choices.slice(0,1),choices.slice(0,2),[choices[0],choices[0],choices[2]]]) {
+      const sql=new QueryStub([]);
+      expect(await recordOwnedDemandPublicationProof({...input,observedTrackedUrls},{query:sql,now:NOW,env:{}})).toMatchObject({ok:false,error:"complete_choice_group_required"});expect(sql.calls).toHaveLength(0);
+    }
+    const sql=new QueryStub([[{ready:true}],[{results:choices.map((_,i)=>({ok:true,proof_id:`proof-${i}`,audit_id:`audit-${i}`,idempotent_replay:false})),atomic_guard:1}]]);
+    expect(await recordOwnedDemandPublicationProof(input,{query:sql,now:NOW,env:{}})).toMatchObject({ok:true,idempotentReplay:false});
+    expect(sql.calls).toHaveLength(2);expect(sql.calls[1].text).toContain("WITH receipts AS MATERIALIZED");expect(sql.calls[1].text).toContain("atomic_guard");
+    expect(sql.calls[1].params).toHaveLength(54);for(const url of choices)expect(sql.calls[1].params).toContain(url);
+  });
   it("reports unconfigured and schema-pending states without querying proof rows", async () => {
     expect(await loadOwnedDemandPublicationProofLedger({ query: null, now: NOW })).toMatchObject({ configured: false, schemaReady: false, proofs: [] });
     const sql = new QueryStub([[{ ready: false }]]);

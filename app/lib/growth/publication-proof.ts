@@ -5,6 +5,7 @@ import {
   type OwnedDemandPlacementDefinition,
   type OwnedDemandPlacementKey,
 } from "./owned-demand";
+import { currentWordPressChoice, exactTrackedUrl, matchesWordPressEvidencePage, wordpressAcquisitionGroup } from "./wordpress-placement-catalog";
 
 export const OWNED_DEMAND_PLATFORM_STATES = [
   "live",
@@ -36,6 +37,9 @@ export interface OwnedDemandPublicationProofInput {
   proofType: string;
   evidenceUrl?: string | null;
   evidenceReference?: string | null;
+  observedTrackedUrl?: string | null;
+  /** Complete current choice group; persisted as ordinary per-URL proof rows. */
+  observedTrackedUrls?: string[];
   finalCopy: string;
   creativeAssetKey?: string | null;
   approvalReference: string;
@@ -184,8 +188,17 @@ export function validateOwnedDemandPublicationProof(
   input: OwnedDemandPublicationProofInput,
   now = new Date(),
 ): OwnedDemandPublicationProofValidation {
-  const placement = resolveOwnedDemandPlacement(input.channelKey, input.placementKey);
+  let placement = resolveOwnedDemandPlacement(input.channelKey, input.placementKey);
   if (!placement) return { ok: false, error: "invalid_owned_demand_placement" };
+  const group = placement.channelKey === "ourtown_wordpress" ? wordpressAcquisitionGroup(placement.placementKey) : undefined;
+  const needsExplicitChoice = Boolean(group?.historicalDestinations.length);
+  const observedTrackedUrl = text(input.observedTrackedUrl);
+  if (needsExplicitChoice && !observedTrackedUrl) return { ok: false, error: "observed_destination_required" };
+  if (observedTrackedUrl) {
+    const choice = group ? currentWordPressChoice(placement.placementKey, observedTrackedUrl) : undefined;
+    if (group ? !choice : exactTrackedUrl(observedTrackedUrl) !== exactTrackedUrl(placement.trackedUrl)) return { ok: false, error: "observed_destination_mismatch" };
+    if (choice) placement = { ...placement, ...choice };
+  }
 
   const policy = CHANNEL_POLICIES[placement.channelKey];
   if (!policy) return { ok: false, error: "unsupported_owned_demand_channel" };
@@ -209,6 +222,7 @@ export function validateOwnedDemandPublicationProof(
     if (!evidenceUrl) {
       return { ok: false, error: "invalid_public_evidence_url" };
     }
+    if (group && !matchesWordPressEvidencePage(group.key, evidenceUrl)) return { ok: false, error: "evidence_page_mismatch" };
   } else if (evidenceUrlText) {
     return { ok: false, error: "evidence_url_not_allowed" };
   }
@@ -267,6 +281,8 @@ export function validateOwnedDemandPublicationProof(
     creativeAssetKey,
     approvalReference,
     isTest: Boolean(input.isTest),
+    // Preserve unchanged single-route/Property Search historical replay keys.
+    ...(needsExplicitChoice ? { observedTrackedUrl: exactTrackedUrl(placement.trackedUrl) } : {}),
   }));
 
   return {

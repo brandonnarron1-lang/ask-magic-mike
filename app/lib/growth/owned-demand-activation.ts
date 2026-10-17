@@ -6,6 +6,7 @@ import type {
   OwnedDemandPublicationProofLedger,
   OwnedDemandPublicationProofRow,
 } from "../persistence/neonOwnedDemandPublicationProofs";
+import { currentWordPressChoice, exactTrackedUrl, matchesWordPressEvidencePage, wordpressAcquisitionGroup, wordpressTrackedChoices } from "./wordpress-placement-catalog";
 
 export type OwnedDemandActivationState =
   | "evidence_unavailable"
@@ -273,13 +274,26 @@ export function buildOwnedDemandActivationLoop(
     const placementReadiness = readinessByPlacement.get(
       `${placement.channelKey}:${placement.placementKey}`,
     ) || null;
-    const proofMatchesAttribution = !latestProof || (
+    let proofMatchesAttribution = !latestProof || (
       latestProof.campaignKey === placement.campaign
       && latestProof.source === placement.source
       && latestProof.medium === placement.medium
       && latestProof.content === placement.content
-      && latestProof.trackedUrl === placement.trackedUrl
+      && exactTrackedUrl(latestProof.trackedUrl) === exactTrackedUrl(placement.trackedUrl)
     );
+    const group = placement.channelKey === "ourtown_wordpress" ? wordpressAcquisitionGroup(placement.placementKey) : undefined;
+    if (group && latestProof) {
+      const current = ledger.proofs.filter(p => p.channelKey === placement.channelKey && p.placementKey === placement.placementKey &&
+        p.source === placement.source && p.medium === placement.medium && p.campaignKey === placement.campaign && p.content === placement.content &&
+        currentWordPressChoice(group.key, p.trackedUrl) && (p.proofType !== "public_url" || matchesWordPressEvidencePage(group.key, p.evidenceUrl)));
+      const observedChoices = wordpressTrackedChoices(group.key).map(choice => current.filter(p => exactTrackedUrl(p.trackedUrl) === exactTrackedUrl(choice.trackedUrl))
+        .reduce<OwnedDemandPublicationProofRow | null>((latest, p) => !latest || isNewerProof(p, latest) ? p : latest, null));
+      // A latest row for just one choice (or a historical /ask row) never
+      // certifies the current group. Historical rows remain in the ledger.
+      proofMatchesAttribution = latestProof.platformState === "live"
+        ? current.some(p => p.id === latestProof.id) && observedChoices.every(p => p?.platformState === "live")
+        : Boolean(currentWordPressChoice(group.key, latestProof.trackedUrl)) && proofMatchesAttribution;
+    }
     const state = stateForPlacement(
       evidenceAvailable,
       measurementAvailable,

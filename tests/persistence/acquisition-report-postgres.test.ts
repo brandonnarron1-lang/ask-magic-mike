@@ -5,7 +5,10 @@ import { performance } from "node:perf_hooks";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { bind, install, literal, psql, startDatabase, stopDatabase } from "../support/qa-audit-postgres";
+import { bind, install, literal, localQuery, psql, startDatabase, stopDatabase } from "../support/qa-audit-postgres";
+import { loadOwnedDemandPublicationProofLedger, recordOwnedDemandPublicationProof } from "../../app/lib/persistence/neonOwnedDemandPublicationProofs";
+import { wordpressTrackedChoices } from "../../app/lib/growth/wordpress-placement-catalog";
+import { acquisitionBaselines } from "../../app/lib/growth/acquisition-window";
 import { ACQUISITION_AGGREGATE_SQL, loadAcquisitionReport } from "../../app/lib/persistence/neonAcquisitionReport";
 import { ACQUISITION_PLACEMENTS, type AcquisitionWindow } from "../../app/lib/growth/acquisition-window";
 import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
@@ -145,5 +148,24 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("acquisition full-cohor
     const denied=new Client({connectionString:connection});await denied.connect();await denied.query("SET ROLE anon");
     try { expect((await loadAcquisitionReport(window,admin,{query:async(text,params)=>(await denied.query(text,params)).rows})).coverage).toBe("unavailable"); }
     finally {await denied.end();}
+  });
+  it("commits a complete homepage proof group atomically, replays without another audit, and never multiplies inquiries", async () => {
+    const urls=wordpressTrackedChoices("wordpress_homepage_ask_mike").map(choice=>choice.trackedUrl);
+    const input={channelKey:"ourtown_wordpress",placementKey:"wordpress_homepage_ask_mike",platformState:"live",proofType:"public_url",evidenceUrl:"https://www.ourtownproperties.com/",observedTrackedUrls:urls,finalCopy:"INTERNAL QA LOCAL ONLY. Synthetic homepage choices, not a consumer request.",approvalReference:"Synthetic catalog proof authority",actor:"INTERNAL_QA_LOCAL_ONLY",isTest:false};
+    const effects=()=>psql("SELECT json_build_object('proofs',(SELECT count(*) FROM owned_demand_publication_proofs),'audit',(SELECT count(*) FROM audit_logs WHERE action='growth.publication_proof_recorded'),'leads',(SELECT count(*) FROM leads),'notifications',(SELECT count(*) FROM lead_notifications))");
+    const before=JSON.parse(effects());
+    expect(await recordOwnedDemandPublicationProof(input,{query:localQuery,env:{}})).toMatchObject({ok:true,idempotentReplay:false});
+    const committed=JSON.parse(effects());expect(committed).toEqual({...before,proofs:before.proofs+3,audit:before.audit+3});
+    const reversed=urls.toReversed().map(value=>{const u=new URL(value);u.searchParams.sort();return u.toString();});
+    expect(await recordOwnedDemandPublicationProof({...input,observedTrackedUrls:reversed},{query:localQuery,env:{}})).toMatchObject({ok:true,idempotentReplay:true});
+    expect(JSON.parse(effects())).toEqual(committed);
+    const ledger=await loadOwnedDemandPublicationProofLedger({query:localQuery});
+    expect(acquisitionBaselines(ledger,new Date()).wordpress_homepage_ask_mike).not.toBeNull();
+    expect((await read()).totals!.inquiries).toBe(10001);
+    // A genuine existing-RPC false result in the second row must roll back the
+    // first inserted proof/audit as well, not merely return a failed UI status.
+    const failingQuery={query:async(text:string,params:unknown[]=[])=>{const altered=[...params];if(text.includes("WITH receipts AS MATERIALIZED"))altered[34]="";return localQuery.query(text,altered);}};
+    expect(await recordOwnedDemandPublicationProof({...input,finalCopy:input.finalCopy+" Distinct rollback fixture."},{query:failingQuery,env:{}})).toMatchObject({ok:false,error:"publication_proof_record_failed"});
+    expect(JSON.parse(effects())).toEqual(committed);
   });
 });

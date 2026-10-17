@@ -8,6 +8,7 @@ import {
   type OwnedDemandAttributionSignal,
 } from "../../app/lib/growth/owned-demand";
 import type { GrowthSummary } from "../../app/lib/growth/intelligence";
+import { wordpressTrackedChoices } from "../../app/lib/growth/wordpress-placement-catalog";
 import type {
   OwnedDemandPublicationProofLedger,
   OwnedDemandPublicationProofRow,
@@ -119,6 +120,16 @@ function placement(
 }
 
 describe("owned-demand per-placement activation loop", () => {
+  it("requires all homepage choices without multiplying attribution or certifying historical /ask", () => {
+    const choices=wordpressTrackedChoices("wordpress_homepage_ask_mike");
+    const current=choices.map((choice,i)=>proof({id:`homepage-${i}`,channelKey:"ourtown_wordpress",placementKey:"wordpress_homepage_ask_mike",trackedUrl:choice.trackedUrl,evidenceUrl:"https://www.ourtownproperties.com/"}));
+    const historical={...current[0],trackedUrl:current[0].trackedUrl.replace("/home-value?","/ask?")};
+    const measured=command([signal("ourtownproperties","owned_media","wordpress_homepage_ask_mike",2)]);
+    for(const proofs of [[historical],current.slice(0,1),current.slice(0,2)]) expect(placement(buildOwnedDemandActivationLoop(measured,ledger(proofs)),"ourtown_wordpress","wordpress_homepage_ask_mike")?.state).toBe("proof_attribution_mismatch");
+    const complete=buildOwnedDemandActivationLoop(measured,ledger([historical,...current,current[0]]));
+    expect(complete.attributedLeads).toBe(2);expect(complete.activeProofPlacements).toBe(1);
+    expect(placement(complete,"ourtown_wordpress","wordpress_homepage_ask_mike")?.state).toBe("measured_signal");
+  });
   it("fails closed when the canonical proof ledger cannot be read", () => {
     const result = buildOwnedDemandActivationLoop(command(), ledger([], { configured: false, schemaReady: false }));
     expect(result.evidenceAvailable).toBe(false);
