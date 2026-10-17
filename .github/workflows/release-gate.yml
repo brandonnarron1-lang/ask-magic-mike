@@ -114,8 +114,11 @@ jobs:
       - name: Built acquisition report with genuine isolated sessions and no sends
         run: AMM_ACQUISITION_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/acquisition-ci pnpm run test:reference:sessions
 
-      - name: Built guest workspace and canonical synthetic intake (isolated SQL, no sends)
+      - name: Built guest workspace and loopback Origin refusal (isolated SQL, no sends)
         run: AMM_CONSUMER_WORKSPACE_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/consumer-workspace-ci pnpm run test:reference:sessions
+
+      - name: Development guest canonical intake diagnostic (real isolated SQL, no sends)
+        run: AMM_E2E_BUILT=0 AMM_CONSUMER_WORKSPACE_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/consumer-workspace-intake-ci pnpm run test:reference:sessions
 
       - name: Built lead navigation and optional-tool acceptance (isolated, no sends)
         run: AMM_LEAD_READABILITY_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/lead-navigation-ci pnpm run test:reference:sessions
@@ -152,6 +155,7 @@ jobs:
             .amm-run/acquisition-ci/screenshots/*.png
             .amm-run/consumer-workspace-ci/receipt.json
             .amm-run/consumer-workspace-ci/screenshots/*.png
+            .amm-run/consumer-workspace-intake-ci/receipt.json
             .amm-run/acquisition-report/scale-*.json
             .amm-run/home-value-intake-ci/home-value-ui-receipt.json
             .amm-run/home-value-intake-ci/screenshots/*.png
