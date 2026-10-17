@@ -15,6 +15,8 @@ const homeValue = process.env.AMM_HOME_VALUE_ACCEPTANCE === "1";
 const launchIntake = process.env.AMM_LAUNCH_INTAKE_UI_ACCEPTANCE === "1";
 const acquisition = process.env.AMM_ACQUISITION_ACCEPTANCE === "1";
 const consumerWorkspace = process.env.AMM_CONSUMER_WORKSPACE_ACCEPTANCE === "1";
+const consumerAccount = process.env.AMM_CONSUMER_ACCOUNT_ACCEPTANCE === "1";
+if (consumerAccount && (consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_consumer_account_acceptance_selection_required");
 if (consumerWorkspace && (acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_consumer_workspace_acceptance_selection_required");
 if (acquisition && (launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_acquisition_acceptance_selection_required");
 if (launchIntake && (homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_launch_intake_acceptance_selection_required");
@@ -92,7 +94,9 @@ try {
       SELECT id,session_id,'ourtownproperties','owned_media','amm_owned_demand_2026',CASE WHEN id=${literal(leads.owner)}::uuid THEN 'wordpress_we_buy_homes' ELSE 'wordpress_homepage_ask_mike' END
       FROM leads WHERE id IN (${literal(leads.owner)},${literal(leads.agent)},${literal(leads.other)});`);
   }
-  const fixture = { ids, agents, leads, phones, offers, codes: Object.fromEntries(Object.entries(offers).map(([key, rows]) => [key, rows.map(o => code(o))])) };
+  const consumerUsers = consumerAccount ? {alice:randomUUID(),bob:randomUUID()} : null;
+  if (consumerUsers) for(const [key,id] of Object.entries(consumerUsers)) psql(`INSERT INTO consumer_users(id,name,email) VALUES(${literal(id)},${literal(`SYNTHETIC CONSUMER ${key}`)},${literal(`${key}@example.test`)}); INSERT INTO consumer_accounts(id,"accountId","providerId","userId",password) VALUES(${literal(randomUUID())},${literal(id)},'credential',${literal(id)},${literal(hash)});`);
+  const fixture = { ids, agents, leads, phones, offers, ...(consumerUsers?{consumerUsers}:{}), codes: Object.fromEntries(Object.entries(offers).map(([key, rows]) => [key, rows.map(o => code(o))])) };
   const fixturePath = path.join(runDir, "fixtures.json");
   writeFileSync(fixturePath, JSON.stringify(fixture), { mode: 0o600 });
   // Inherit tool/runtime paths only. Never carry user provider credentials into
@@ -106,6 +110,7 @@ try {
     ...(launchIntake ? { AMM_LAUNCH_INTAKE_UI_ACCEPTANCE: "1" } : {}),
     ...(acquisition ? { AMM_ACQUISITION_ACCEPTANCE: "1" } : {}),
     ...(consumerWorkspace ? { AMM_CONSUMER_WORKSPACE_ACCEPTANCE: "1" } : {}),
+    ...(consumerAccount ? { AMM_CONSUMER_ACCOUNT_ACCEPTANCE: "1",CONSUMER_WORKSPACE_ACCOUNTS_ENABLED:"true" } : {}),
     ...(artifactOverride || homeValue || launchIntake ? { AMM_E2E_OUTPUT_DIR: path.join(runDir, "screenshots"), AMM_SESSION_ARTIFACT_DIR: runDir } : {}),
     // The existing Playwright switch permits an explicit local development
     // diagnostic. It is never evidence for the default built-app gate.
@@ -121,9 +126,9 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
-  child = spawn("pnpm", ["exec", "playwright", "test", suite], { env, stdio: "inherit" });
+  child = spawn("pnpm", ["exec", "playwright", "test", suite, ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });
   const counts = JSON.parse(psql(`SELECT json_build_object('leads',count(*),'notifications',(SELECT count(*) FROM lead_notifications),'provider_ids',(SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL),'reservations',(SELECT count(*) FROM lead_allocation_send_reservations)) FROM leads;`));
   const receiptName = launchIntake ? "launch-intake-ui-receipt.json" : homeValue ? "home-value-ui-receipt.json" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? "conversion-receipt.json" : "receipt.json";

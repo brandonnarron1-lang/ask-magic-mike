@@ -8,6 +8,27 @@ This guide covers daily operation of the Ask Magic Mike platform for brokers and
 
 ## Consumer workspace — R1 guest increment, October 17 candidate
 
+**R1b optional account-state candidate:** `/my/account` is independently gated by
+`CONSUMER_WORKSPACE_ACCOUNTS_ENABLED` (absent/false by default) and its additive
+consumer schema. This note is not activation evidence. Separate Better Auth
+consumer models/cookie/domain-derived key never confer staff roles. Only the
+verified session subject's declared comparisons can be read/saved/exported;
+optimistic revisions reject conflicting saves without silently replacing them.
+Account email is unverified; no old inquiries, staff notes, scoring or ownership
+are linked by matching email. Public capture/routing/consent and v6 delivery are
+unchanged. Nothing here sends authentication mail, outreach or notifications.
+
+Explicit **Save comparison online** is not an inquiry. Unsaved edits remain
+local; a failed/ambiguous save requires reading the saved version, not automatic
+replay. Session expiry/revocation removes stale private UI. **Sign out all
+devices** revokes consumer sessions only. **Download my account data** projects
+only the own consumer profile/comparison. Confirmed deletion atomically removes
+active consumer data/sessions and records a minimized immutable audit; separately
+submitted inquiries and required records remain. Password-reset mail and prior-
+request linking are unavailable, clearly disclosed, and not bypassed. Recovery
+can disable this optional feature or use the R1a app while retaining new data;
+never drop the tables or overwrite inquiries. No new provider or sender exists.
+
 `/my` compares up to eight user-reported property references or search preferences,
 without login, enrichment, contact capture or a new lead store. References remain
 in page memory only: reload or navigation discards them. The existing `/plan`

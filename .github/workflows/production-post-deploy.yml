@@ -32,7 +32,7 @@ jobs:
     needs: verify-production
     if: needs.verify-production.result == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     permissions:
       actions: read
       contents: write
