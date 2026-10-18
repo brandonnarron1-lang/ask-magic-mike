@@ -14,7 +14,7 @@ export const workerJobSchema = z.object({
   risk: z.literal("read_draft_review"), approval: z.literal("human_required"),
   budget: z.object({ steps: z.number().int().min(1).max(8), tokens: z.literal(0), costUsd: z.literal(0) }).strict(),
   input: z.object({ question: z.string().max(2000), offer: z.enum(["homeValue", "buyer", "compare"]),
-    source: publicSourceSchema, checkpoint: z.string().max(180).nullable() }).strict(),
+    source: publicSourceSchema, checkpoint: z.string().max(180).nullable(), contextFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional() }).strict(),
 }).strict();
 export type WorkerJob = z.infer<typeof workerJobSchema>;
 export const workerResultSchema = z.object({
@@ -27,7 +27,7 @@ export type WorkerResult = z.infer<typeof workerResultSchema>;
 export type WorkerQuery = { query: (query: string, params?: unknown[]) => Promise<Array<Record<string, unknown>>> };
 export type WorkerPrincipal = { tenant: "ask-magic-mike"; actor: string; permittedRoles: readonly WorkerJob["role"][]; permittedLeadIds: readonly string[] };
 export type WorkerLead = { id: string; version: string; owner: string | null; intent: string;
-  propertyReference: string | null; missing: string[]; permissions: string[]; isTest: boolean; suppressed: boolean };
+  propertyReference: string | null; missing: string[]; permissions: string[]; isTest: boolean; suppressed: boolean; contactBlocked?: boolean };
 
 /** Existing jobs store, not a second queue. Caller must derive principal and
  * lead scope from current server authorization, never a request's role claim. */
@@ -87,7 +87,8 @@ export async function executeWorker(raw: unknown, context: {
     return result("review_required", ["Review saved inquiry; no contact or task has been executed.", `Intent: ${lead.intent}.`,
       `Property reference: ${lead.propertyReference || "Not recorded"} (user-reported, not verified).`,
       `Canonical owner: ${lead.owner || "Not assigned"}.`, `Contact permissions: ${lead.permissions.join(", ") || "Not established"}.`,
-      lead.isTest || lead.suppressed ? "DO NOT CONTACT: test or suppressed record." : "Fresh permission review is required before any contact.",
+      `Approved service source as of ${job.input.source.fetchedAt}; freshness limit ${job.input.source.freshnessHours} hours. This is not property verification.`,
+      lead.isTest || lead.suppressed || lead.contactBlocked ? "DO NOT CONTACT: test, suppressed or closed record." : "Fresh permission review is required before any contact.",
       `Proposed next task: review missing context before ${job.deadline}; not scheduled.`,
       `/admin/leads/${lead.id}`].join("\n"), { evidence: [job.input.source.url], missing: lead.missing });
   }
@@ -110,8 +111,11 @@ export function currentWorkerSourceVersions() { return { ...sourceVersions }; }
 
 /** Runs one claimed job. No live endpoint/cron installation is introduced.
  * Result and a lead action-review request (when relevant) commit together. */
-export async function runOneWorker(sql: WorkerQuery, workerId: string, context: Parameters<typeof executeWorker>[1]) {
-  const rows = await sql.query("SELECT public.claim_r2_worker_v1($1,$2,$3::text[]) AS job", [workerId, context.principal.actor, [...context.principal.permittedRoles]]);
+export async function runOneWorker(sql: WorkerQuery, workerId: string, context: Parameters<typeof executeWorker>[1], targetJobId?: string) {
+  if (targetJobId && !context.principal.permittedRoles.includes("concierge_handoff")) throw new Error("worker_scope_denied");
+  const rows = targetJobId
+    ? await sql.query("SELECT public.claim_r2_handoff_v1($1::uuid,$2,$3) AS job", [targetJobId, workerId, context.principal.actor])
+    : await sql.query("SELECT public.claim_r2_worker_v1($1,$2,$3::text[]) AS job", [workerId, context.principal.actor, [...context.principal.permittedRoles]]);
   const row = rows[0]?.job as { id: string; lead_id: string | null; r2_lease_token: string; r2_contract: unknown; requested_by: string } | null;
   if (!row) return { processed: 0 };
   if (row.lead_id && (!context.principal.permittedLeadIds.includes(row.lead_id) || context.lead?.id !== row.lead_id)) throw new Error("worker_current_lead_scope_denied");

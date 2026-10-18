@@ -6,6 +6,37 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## R2 staff handoff — October 18 local candidate, not released
+
+This addition reuses **AI draft tools (review required)** inside an already
+authorized saved lead. It does not activate the model, send messages or add a
+second work queue. The accepted deployment receipt, not this note, establishes
+what is live. Existing public intake and internal alerts remain unchanged.
+
+After a separately accepted release, an assigned maintainer or administrator can:
+
+1. Open the permitted saved inquiry and expand **AI draft tools (review required)**.
+2. Select **Prepare handoff review**. Read the saved intent, user-reported property
+   reference, missing facts, current owner, permission evidence and dated service
+   source. Missing facts stay missing; the brief verifies no property claim.
+3. Correct the brief with **Save edit**, then deliberately **Approve draft** or
+   **Reject**. Each decision creates an immutable review version. Approval is
+   neither contact permission, a scheduled task nor an appointment.
+4. Use the existing permission-aware contact/task controls separately, only for
+   an actual authorized action. Record its real outcome, never a fictional one.
+
+Repeated preparation of the same context returns the same saved job/draft. New
+facts or permissions require a fresh review; stale approval expires rather than
+silently trusting the old snapshot. If access changes or a session expires,
+contact content disappears until a new authorized sign-in. QA and suppressed
+records cannot prepare a handoff, even for an administrator. No task, lead,
+assignment, consent, notification or provider action is created by this panel.
+
+This is local engineering acceptance with synthetic records, not staff/human
+acceptance. The two additive R2 migrations, hosted/protected gates, compatible
+recovery build and source-refresh/feedback activation remain separate release
+work. No development credential becomes a Production credential.
+
 ## Consumer workspace — R1 guest increment, October 17 candidate
 
 **R1b optional account-state candidate:** `/my/account` is independently gated by

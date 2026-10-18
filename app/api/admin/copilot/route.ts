@@ -21,10 +21,12 @@ import { requireLeadCenterApiPermission } from "@/lib/admin/rbac-session";
 import { hasLeadCenterPermission } from "@/lib/admin/rbac-policy";
 import { copilotToolsForRole } from "@/lib/ai/copilot-tool-register";
 import { assertDatabaseMutationAllowed } from "@/lib/preview-security";
+import { prepareOperatorHandoff } from "@/lib/intelligence/operator-handoff";
 
 const requestSchema = z.object({
   leadId: z.string().uuid(),
   artifactType: z.enum(AI_ARTIFACT_TYPES).default("lead_summary"),
+  mode: z.enum(["ai_draft", "reviewed_handoff"]).default("ai_draft"),
 });
 const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
 
@@ -38,7 +40,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403, headers: NO_STORE });
   }
   const auth = await requireLeadCenterApiPermission(request, "lead:view_assigned");
-  if (!auth.ok) return auth.response;
+  if (!auth.ok) { auth.response.headers.set("Cache-Control", "private, no-store, max-age=0"); return auth.response; }
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "invalid_request" }, { status: 400, headers: NO_STORE });
@@ -52,6 +54,17 @@ export async function POST(request: NextRequest) {
   }
 
   const sql = neon(process.env.DATABASE_URL);
+  if (parsed.data.mode === "reviewed_handoff") {
+    if (!hasLeadCenterPermission(auth.principal.role, "lead:update_assigned")) return NextResponse.json({ ok:false,error:"forbidden" },{status:403,headers:NO_STORE});
+    if (parsed.data.artifactType !== "lead_summary") return NextResponse.json({ok:false,error:"invalid_request"},{status:400,headers:NO_STORE});
+    try {
+      return NextResponse.json(await prepareOperatorHandoff(sql, auth.principal, parsed.data.leadId), {headers:{"Cache-Control":"private, no-store, max-age=0"}});
+    } catch (caught) {
+      const code = caught instanceof Error ? caught.message : "handoff_unavailable";
+      const error = ["lead_not_found","handoff_scope_denied","handoff_record_blocked","handoff_context_changed","handoff_pending_review_or_processing"].includes(code) ? code : "handoff_unavailable";
+      return NextResponse.json({ok:false,error,sendsCommunication:false},{status:error==="lead_not_found"?404:error==="handoff_scope_denied"?403:error==="handoff_unavailable"?503:409,headers:{"Cache-Control":"private, no-store, max-age=0"}});
+    }
+  }
   const scoped = !hasLeadCenterPermission(auth.principal.role, "lead:view_all");
   if (scoped && !auth.principal.agentId) {
     return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403, headers: NO_STORE });

@@ -94,7 +94,7 @@ jobs:
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/consumer-workspace-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Isolated bounded intelligence roles, leases, review-only effects and evaluation budgets (no provider)
-        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/bounded-intelligence-postgres.test.ts tests/persistence/evaluation-checkpoint-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/bounded-intelligence-postgres.test.ts tests/persistence/evaluation-checkpoint-postgres.test.ts tests/persistence/operator-handoff-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Typecheck
         run: pnpm run typecheck
@@ -131,6 +131,9 @@ jobs:
 
       - name: Built lead navigation and optional-tool acceptance (isolated, no sends)
         run: AMM_LEAD_READABILITY_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/lead-navigation-ci pnpm run test:reference:sessions
+
+      - name: Built staff handoff review with real sessions and current scoped context (isolated, no sends)
+        run: AMM_CONCIERGE_HANDOFF_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/operator-handoff-built-ci pnpm run test:reference:sessions
 
       - name: Built Home Value UI failure and replay acceptance (intercepted synthetic receipts, no intake writes)
         run: AMM_SESSION_ARTIFACT_DIR=.amm-run/home-value-intake-ci pnpm run test:home-value:sessions

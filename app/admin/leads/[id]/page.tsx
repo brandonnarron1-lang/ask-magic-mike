@@ -717,6 +717,7 @@ export default async function AdminLeadDetailPage({
                 leadId={lead.id}
                 isTest={lead.is_test}
                 suppressed={lead.communication_suppressed}
+                canPrepareHandoff={canMaintainRecords}
                 initialDrafts={detail.aiDrafts || []}
               /></div></details>
 
