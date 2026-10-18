@@ -67,9 +67,9 @@ export function answerFromApprovedSources(question: string, options: {
   if (!intent) return reply("I can explain the approved buying-plan, home-value review and compare-selling-options paths. For other questions, review your question below and deliberately request local follow-up.");
   const now = options.now ?? new Date();
   const registry = options.sources ?? approvedPublicSources;
-  const passages = (options.passages ?? approvedPublicPassages).filter((p) => p.intent === intent);
+  const passages = (options.passages ?? approvedPublicPassages).filter((p) => p && p.intent === intent);
   const eligible = passages.filter((p) => {
-    const matching = registry.filter((s) => s.id === p.sourceId);
+    const matching = registry.filter((s) => s && s.id === p.sourceId);
     // Duplicate identities or conflicting passage versions are quarantined,
     // not silently resolved by whichever record happened to arrive last.
     return matching.length === 1 && sourceRetrievable(matching[0], now);
@@ -81,7 +81,7 @@ export function answerFromApprovedSources(question: string, options: {
   if (!approvedPublicPassages.some((p) => p.id === passage.id && p.version === passage.version && p.text === passage.text && p.sourceId === passage.sourceId && p.intent === passage.intent)) {
     return reply("This source update needs review before it can be used in an answer.", "source_unavailable");
   }
-  const source = registry.find((s) => s.id === passage.sourceId)!;
+  const source = registry.find((s) => s && s.id === passage.sourceId)!;
   return {
     message: passage.text, mode: "approved_source", limitation,
     citations: [{ id: passage.id, title: "Our Town: approved service and intake requirements", url: source.url, version: passage.version, asOf: source.fetchedAt }],

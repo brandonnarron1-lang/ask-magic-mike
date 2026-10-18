@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
   const jobs = await sql.query(
     `WITH candidate AS (
        SELECT id FROM public.ai_intelligence_jobs
-        WHERE status = 'queued' AND not_before <= now() AND attempt_count < max_attempts
+        WHERE feature = 'lead_center_copilot' AND status = 'queued' AND not_before <= now() AND attempt_count < max_attempts
         ORDER BY created_at ASC LIMIT 1 FOR UPDATE SKIP LOCKED
      )
      UPDATE public.ai_intelligence_jobs jobs
