@@ -1,5 +1,4 @@
 {
-  "git": { "deploymentEnabled": { "codex/r3-native-slice-20261019": false } },
   "crons": [
     {
       "path": "/api/admin/notifications/retry",
