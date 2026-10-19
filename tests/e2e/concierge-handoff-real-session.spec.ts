@@ -150,9 +150,19 @@ test.describe("staff handoff uses existing review services without contact effec
     expect((await prepare("analyst",fixture.leads.agent)).status).toBe(403);
     expect((await prepare("other",fixture.leads.agent)).status).toBe(404);
     const page=pages.other,panel=await openTools(page,fixture.leads.other);
-    await query("UPDATE leads SET assigned_agent_id=$2 WHERE id=$1",[fixture.leads.other,fixture.agents.agent]);
+    let ownershipChanges=0;
+    // Exercise ownership loss after a real native request exists. Revoking it
+    // before click/actionability races the independent contact-privacy refresh,
+    // which correctly removes this entire panel without sending a copilot POST.
+    // Forward the original request unchanged; the actual server must deny it.
+    await page.route(new URL("/api/admin/copilot",page.url()).href,async route=>{
+      expect(route.request().method()).toBe("POST");
+      ownershipChanges=(await query("UPDATE leads SET assigned_agent_id=$2 WHERE id=$1 RETURNING id",[fixture.leads.other,fixture.agents.agent])).length;
+      await route.continue();
+    },{times:1});
     const denied=page.waitForResponse(r=>new URL(r.url()).pathname==="/api/admin/copilot"&&r.request().method()==="POST");
     await panel.getByRole("button",{name:"Prepare handoff review",exact:true}).click();expect((await denied).status()).toBe(404);
+    expect(ownershipChanges).toBe(1);
     await expect(page.getByRole("status",{name:"Lead access unavailable"})).toBeVisible();
     expect(await page.locator("body").innerText()).not.toContain("private-other@example.test");
     expect(await unchanged()).toEqual(before);
