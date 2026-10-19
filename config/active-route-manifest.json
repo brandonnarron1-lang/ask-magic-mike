@@ -80,6 +80,8 @@
     "/api/health/ready",
     "/api/intelligence/answers",
     "/api/intelligence/feedback",
+    "/api/native/v1/feedback",
+    "/api/native/v1/feedback-token",
     "/api/lead-center-auth/[...all]",
     "/api/leads",
     "/api/listings/[id]",

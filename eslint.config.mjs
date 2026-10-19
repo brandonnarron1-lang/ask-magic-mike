@@ -23,7 +23,14 @@ export default [
       "test-results/**",
       "docs/**",
       "scripts/**",
-      "node_modules/**"
+      "node_modules/**",
+      "clients/native/node_modules/**",
+      "clients/native/android/**",
+      "clients/native/ios/**",
+      "clients/native/.cache/**",
+      "clients/native/.expo/**",
+      "clients/native/dist-ios/**",
+      "clients/native/dist-android/**"
     ]
   },
 

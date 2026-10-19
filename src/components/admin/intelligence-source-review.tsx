@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
-type Version={id:string;ordinal:number;validation:string;revoked:boolean;reason:string;content_hash:string;snapshot:{source:{fetchedAt:string;effectiveAt:string;freshnessHours:number;url:string;owner:string}}};
+type Version={id:string;ordinal:number;validation:string;revoked:boolean;reason:string;content_hash:string;snapshot:{source:{fetchedAt:string;effectiveAt:string;freshnessHours:number;url:string;owner:string;licenseScope?:string;upstreamModifiedAt?:string|null;permissions?:Record<string,boolean>};passages?:{id:string;version:string;text:string;intent:string}[]}};
 type Source={id:string;revision:number;active_version:string|null;revoked:boolean;versions:Version[]};
 type Draft={id:string;role:string;status:string;source_valid:boolean;result:{text?:string;evidence?:string[]}|null};
 const date=(value:string)=>{const d=new Date(value);return Number.isFinite(d.getTime())?new Intl.DateTimeFormat("en-US",{dateStyle:"medium",timeStyle:"short",timeZone:"America/New_York"}).format(d):"Not established";};
@@ -35,6 +35,12 @@ export function IntelligenceSourceReview(){
    {s.versions.map(v=><details key={v.id} className="my-3 min-w-0 rounded border border-white/10 p-3"><summary className="min-h-11 cursor-pointer py-2">Version {v.ordinal} · {v.validation} · {v.revoked?"revoked":s.active_version===v.id?"selected active":"not active"}</summary>
     <p className="my-2 break-words text-sm">Effective <time dateTime={v.snapshot.source.effectiveAt}>{date(v.snapshot.source.effectiveAt)}</time>; retrieved <time dateTime={v.snapshot.source.fetchedAt}>{date(v.snapshot.source.fetchedAt)}</time> Eastern; freshness {v.snapshot.source.freshnessHours} hours. Publication date not recorded. {v.reason}</p>
     <a href="https://www.askmagicmike.com/api/experience/v1" className="block min-h-11 py-2 text-sm underline">Our Town approved source</a>
+    <p className="my-2 break-words text-sm">Saved version: {v.id}. Content SHA-256: {v.content_hash}. Validation is not a human approval or permission to activate paid AI.</p>
+    <p className="my-2 text-sm">Scope: {v.snapshot.source.licenseScope||"Not recorded"}. Not an MLS, listing or comps dataset.</p>
+    <p className="my-2 text-sm">Permitted uses in this saved snapshot: {v.snapshot.source.permissions?Object.entries(v.snapshot.source.permissions).map(([use,allowed])=>`${use}: ${allowed===true?"permitted":allowed===false?"not permitted":"not established"}`).join("; "):"Not recorded"}. These rights do not authorize publication or paid activation.</p>
+    <p className="my-2 text-sm">Upstream modification date: {v.snapshot.source.upstreamModifiedAt?date(v.snapshot.source.upstreamModifiedAt):"Not recorded"}.</p>
+    <h4 className="mt-3 font-semibold">Exact retained passages for review</h4>
+    {v.snapshot.passages?.length?<ul className="my-2 space-y-3">{v.snapshot.passages.map(p=><li key={p.id} className="min-w-0 break-words text-sm"><p>{p.intent} · {p.text}</p><p className="mt-1 text-[#b9ae9d]">Passage version: {p.version}</p></li>)}</ul>:<p className="my-2 text-sm">No retained passage is recorded. Do not infer it from the current public page.</p>}
     <p className="my-2 text-sm">Promotion changes future retrieval and may invalidate answers, jobs and handoff approvals bound to the earlier authorization revision.</p>
     <div className="flex flex-wrap gap-2"><button className={button} disabled={busy||v.revoked} onClick={()=>act("validate",s,v)}>Validate candidate</button><button className={button} disabled={busy||s.revoked||v.revoked||v.validation!=="validated"} onClick={()=>act("promote",s,v)}>Promote validated version</button><button className={button} disabled={busy||v.revoked||!reason.trim()} onClick={()=>act("revoke_version",s,v)}>Revoke this version</button><button className={button} disabled={busy||v.revoked||v.validation!=="validated"||!reason.trim()} onClick={()=>act("recover",s,v)}>Restore eligible version</button></div>
    </details>)}

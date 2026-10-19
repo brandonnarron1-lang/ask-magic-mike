@@ -60,6 +60,12 @@ jobs:
       - name: Unit tests
         run: pnpm run test
 
+      - name: Pinned native contracts, protected guest transport and no-key runtime
+        run: |
+          pnpm --dir clients/native install --frozen-lockfile --ignore-scripts
+          pnpm --dir clients/native run typecheck
+          node --test clients/native/candidate.test.cjs clients/native/runtime.test.cjs clients/native/build.test.cjs
+
       - name: Isolated PostgreSQL QA audit atomicity and replay
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/automatic-qa-audit-evidence.test.ts tests/persistence/qa-audit-harness-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
@@ -138,6 +144,9 @@ jobs:
       - name: Built R2 source lifecycle, scoped answer, feedback and immutable handoff (real sessions and isolated SQL, no sends)
         run: AMM_R2_LIFECYCLE_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/r2-lifecycle-ci pnpm run test:reference:sessions
 
+      - name: Built native guest CSRF, current source, revocation and exact feedback (isolated SQL, no sends)
+        run: AMM_R3_NATIVE_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/r3-native-api-ci pnpm run test:reference:sessions
+
       - name: Built Home Value UI failure and replay acceptance (intercepted synthetic receipts, no intake writes)
         run: AMM_SESSION_ARTIFACT_DIR=.amm-run/home-value-intake-ci pnpm run test:home-value:sessions
 
@@ -181,6 +190,7 @@ jobs:
             .amm-run/consumer-account-ci/receipt.json
             .amm-run/consumer-account-ci/screenshots/*.png
             .amm-run/r2-lifecycle-ci/receipt.json
+            .amm-run/r3-native-api-ci/receipt.json
             .amm-run/r2-lifecycle-ci/screenshots/*.png
             .amm-run/consumer-workspace-intake-ci/receipt.json
             .amm-run/acquisition-report/scale-*.json

@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Ask Magic Mike · R3 prototype",
+    "slug": "amm-r3-native-candidate",
+    "version": "0.0.0",
+    "platforms": ["ios", "android"],
+    "userInterfaceStyle": "dark",
+    "plugins": [["expo-secure-store", { "configureAndroidBackup": true, "faceIDPermission": false }]],
+    "updates": { "enabled": false },
+    "ios": { "bundleIdentifier": "com.askmagicmike.r3preview", "supportsTablet": false },
+    "android": { "allowBackup": false, "package": "com.askmagicmike.r3preview", "blockedPermissions": ["android.permission.READ_EXTERNAL_STORAGE", "android.permission.WRITE_EXTERNAL_STORAGE", "android.permission.SYSTEM_ALERT_WINDOW", "android.permission.VIBRATE"] }
+  }
+}
