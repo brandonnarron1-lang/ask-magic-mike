@@ -43,7 +43,14 @@ export function readConsumerWorkspace(principal: ConsumerPrincipal) {
     const user=await subject(client,principal);
     await scoped(client,principal.userId);
     const row=(await client.query("SELECT revision,interests,updated_at FROM public.consumer_workspaces WHERE user_id=$1",[principal.userId])).rows[0];
-    return { profile:{...user,audience:"consumer"} as ConsumerProfile, workspace:snapshot(row) };
+    await client.query("RESET ROLE");
+    // Own minimized answer/feedback evidence only. No staff identity, draft,
+    // inquiry, score or cross-account lookup is introduced by account export.
+    const intelligence=process.env.R2_SOURCE_GOVERNANCE_ENABLED==="true"?{
+      answers:(await client.query("SELECT id,revision,created_at,expires_at,reply,source_refs,public.r2_sources_valid_v1(source_refs,'public') AS current_source_valid FROM public.intelligence_answers WHERE consumer_user_id=$1 ORDER BY created_at",[principal.userId])).rows,
+      feedback:(await client.query("SELECT id,answer_id,answer_revision,kind,category,comment,status,revision,created_at,expires_at FROM public.intelligence_answer_feedback WHERE consumer_user_id=$1 ORDER BY created_at",[principal.userId])).rows,
+    }:undefined;
+    return { profile:{...user,audience:"consumer"} as ConsumerProfile, workspace:snapshot(row),...(intelligence?{intelligence}:{} ) };
   });
 }
 export function saveConsumerWorkspace(principal: ConsumerPrincipal, input: ReturnType<typeof readConsumerWorkspaceWrite>) {

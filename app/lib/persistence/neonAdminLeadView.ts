@@ -120,7 +120,9 @@ const TIMELINE_SOURCE_QUERIES = {
 async function loadTimelineSources(sql: Query, leadId: string, cap: number) {
   const entries = Object.entries(TIMELINE_SOURCE_QUERIES);
   const settled = await Promise.allSettled(
-    entries.map(([, statement]) => sql.query(statement, [leadId, cap])),
+    entries.map(([name, statement]) => sql.query(name==="aiReviews"&&process.env.R2_SOURCE_GOVERNANCE_ENABLED==="true"
+      ? statement.replace("FROM public.ai_draft_reviews",`, CASE WHEN schema_version='amm.r2.workers.v1' THEN coalesce((SELECT public.r2_sources_valid_v1(j.r2_contract->'input'->'sourceAuthorization','public') FROM public.ai_intelligence_jobs j WHERE j.id=draft_key),false) ELSE NULL END AS current_source_valid FROM public.ai_draft_reviews`)
+      : statement, [leadId, cap])),
   );
   const rows: Record<string, Array<Record<string, unknown>>> = {};
   const incompleteSources: string[] = [];
@@ -163,6 +165,7 @@ function normalizeAiDraft(row: Record<string, unknown>): AdminAiDraftReviewRow |
     content_hash: String(row.content_hash),
     source_fingerprint: String(row.source_fingerprint),
     schema_version: typeof row.schema_version === "string" ? row.schema_version : undefined,
+    current_source_valid: typeof row.current_source_valid === "boolean" ? row.current_source_valid : undefined,
     evidence_references: stringArray(row.evidence_references),
     missing_facts: stringArray(row.missing_facts),
     limitations: stringArray(row.limitations),

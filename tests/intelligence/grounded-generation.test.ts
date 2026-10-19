@@ -14,6 +14,15 @@ function fixture() {
   return { budget, data, transport, options };
 }
 describe("grounded adapter: no real key, provider or paid calls", () => {
+  it("authoritative revocation before retrieval prevents reservation and provider use",async()=>{
+    const f=fixture();const r=await generateGroundedAnswer("buy a home",{...f.options,eligible:async()=>false});
+    expect(r.reply.mode).toBe("source_unavailable");expect(f.transport).not.toHaveBeenCalled();expect(f.budget.reserve).not.toHaveBeenCalled();
+  });
+  it("authoritative revision change during model latency suppresses buffered output while retaining actual usage",async()=>{
+    const f=fixture();let current=true;f.transport.mockImplementation(async()=>{current=false;return Response.json(f.data);});
+    const r=await generateGroundedAnswer("buy a home",{...f.options,eligible:async()=>current});
+    expect(r.reason).toBe("source_changed_during_generation");expect(r.reply.mode).toBe("source_unavailable");expect(r.reply.citations).toEqual([]);expect(f.budget.settle).toHaveBeenCalledOnce();
+  });
   it("accepts only exact approved selection, derives citations server-side and settles usage", async () => {
     const f = fixture(), result = await generateGroundedAnswer("How do I buy?", f.options);
     expect(result.mode).toBe("validated_selection"); expect(result.reply.message).toBe(passage.text);

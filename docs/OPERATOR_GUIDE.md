@@ -33,9 +33,44 @@ records cannot prepare a handoff, even for an administrator. No task, lead,
 assignment, consent, notification or provider action is created by this panel.
 
 This is local engineering acceptance with synthetic records, not staff/human
-acceptance. The two additive R2 migrations, hosted/protected gates, compatible
-recovery build and source-refresh/feedback activation remain separate release
-work. No development credential becomes a Production credential.
+acceptance. The four additive R2 migrations, hosted/protected gates, compatible
+recovery build and source/feedback activation remain separate release work.
+No development credential becomes a Production credential.
+
+### Source and answer feedback — prospective R2 controls
+
+After acceptance and explicit `R2_SOURCE_GOVERNANCE_ENABLED` activation, an
+administrator opens **Activity → Approved source review**. Register the approved
+owned service source, fetch a candidate, validate it and deliberately promote
+the validated version. Refreshing is not approval. The panel shows retrieval,
+effective date, freshness and revisions; unknown publication dates remain
+unknown. A changed upstream claim is quarantined, not silently adopted.
+
+Revoke a version or the source with a reason. Restoration requires a different
+eligible, non-tombstoned version and current owned rights. Promotion/revocation
+invalidates earlier authorization references; historical approved handoffs stay
+recorded but are separately marked unusable. A stale save preserves the edit;
+refresh and read the current version before another decision. Do not claim that
+already delivered text can be recalled.
+
+Visitors use **Helpful**, **Not helpful** or **Report a problem** below a cited
+answer. Reports belong to their current account or HTTP-only guest session,
+not anyone holding an answer ID. The optional comment is limited to 2,000
+characters; avoid private details. Activity's **Answer feedback** queue lets an
+administrator classify, resolve, reopen and optionally create a synthetic
+regression-case draft. That draft is not an executed test, training, knowledge
+approval, deployment, notification or task. Acknowledgments survive reloads in
+the same valid scope. Account export includes own retained answer/feedback
+evidence; account deletion removes linked details and scrubs minimal review
+audit linkage. Expired feedback is hidden immediately, then physically removed
+on a later accepted submission or authorized cleanup—not a promised scheduled
+30-day purge. No automatic cleanup schedule is installed by this increment.
+
+The answer release boundary is a short atomic current-eligibility/receipt commit
+before buffered text leaves the server. Public paid AI, recurring workers and
+marketing publication remain independently held. Recovery must retain source
+tombstones, immutable reviews, consumer data and v6 notification readers; an old
+pre-R2 app is not a safe blind rollback after governance activation.
 
 ## Consumer workspace — R1 guest increment, October 17 candidate
 

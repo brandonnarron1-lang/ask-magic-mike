@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("server-only",()=>({})); // Node route unit venue; never a runtime authorization bypass.
 
 const mocks = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
@@ -178,7 +179,7 @@ describe("POST /api/chat secure public boundary", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it.each(["preview", "production"])("answers the opt-in source contract without provider use in %s", async (venue) => {
+  it.each(["preview", "production"])("does not resurrect static sources when governance is disabled in %s", async (venue) => {
     process.env.VERCEL_ENV = venue;
     process.env.DATABASE_ENV = venue;
     process.env.AI_PUBLIC_CHAT_ENABLED = "true";
@@ -192,7 +193,7 @@ describe("POST /api/chat secure public boundary", () => {
         body: JSON.stringify({ message: "How do I buy?", knowledge_version: "amm.public-knowledge.v1" }),
       }));
       expect(response.status).toBe(200);
-      expect(await response.json()).toMatchObject({mode:"approved_source",citations:[{url:"https://www.askmagicmike.com/api/experience/v1"}]});
+      expect(await response.json()).toMatchObject({mode:"source_unavailable",citations:[]});
       expect(response.headers.get("cache-control")).toContain("private, no-store");
       expect(fetch).not.toHaveBeenCalled();
       if (venue === "preview") expect(mocks.checkRateLimit).not.toHaveBeenCalled();
@@ -208,7 +209,7 @@ describe("POST /api/chat secure public boundary", () => {
       method: "POST", headers: { "content-type": "application/json", origin: "https://www.askmagicmike.com" },
       body: JSON.stringify({message:"Guarantee my home price",knowledge_version:"amm.public-knowledge.v1"}),
     }));
-    expect(await response.json()).toMatchObject({mode:"review_required",citations:[]});
+    expect(await response.json()).toMatchObject({mode:"source_unavailable",citations:[]});
     expect(fetch).not.toHaveBeenCalled();
   });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { AiLeadIntelligenceResult } from "@/lib/ai/openai-responses";
 import type { AiArtifactType } from "@/lib/ai/neon-intelligence";
 import { useInvalidateContactDisclosure } from "../../../app/components/admin/LeadContactDisclosure";
@@ -26,6 +26,7 @@ type DraftRecord = {
   created_at: string;
   updated_at: string;
   schema_version?: string;
+  current_source_valid?: boolean;
 };
 
 type CopilotResponse = Partial<AiLeadIntelligenceResult> & {
@@ -64,6 +65,8 @@ export function Phase6CopilotPanel({
   const [result, setResult] = useState<CopilotResponse | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const errorRef=useRef<HTMLParagraphElement>(null);
+  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
   const activeDraft = useMemo(
     () => drafts.find((draft) => draft.artifact_type === artifactType) || null,
     [drafts, artifactType],
@@ -88,7 +91,7 @@ export function Phase6CopilotPanel({
       setEditContent(data.draft.content);
     } catch (caught) {
       const code = caught instanceof Error ? caught.message : "copilot_unavailable";
-      setError(code === "lead_access_changed" ? "Access changed. Refresh and sign in before reviewing this lead." : code.startsWith("handoff_") ? "The handoff is unavailable or still processing. Refresh before trying again; no message or task was created." : code === "preview_mutation_disabled" || code === "preview_data_disabled"
+      setError(code === "handoff_source_invalid" ? "Current source support is unavailable, revoked or expired. An administrator must recover an eligible source before preparing a fresh handoff." : code === "lead_access_changed" ? "Access changed. Refresh and sign in before reviewing this lead." : code.startsWith("handoff_") ? "The handoff is unavailable or still processing. Refresh before trying again; no message or task was created." : code === "preview_mutation_disabled" || code === "preview_data_disabled"
         ? "Preview is read-only. Generate durable drafts only in an authorized writable environment."
         : "The draft could not be generated. No lead, assignment, or communication state changed.");
     } finally {
@@ -115,13 +118,14 @@ export function Phase6CopilotPanel({
       if (data.expired && data.version && data.status === "expired") {
         setDrafts(current => current.map(item => item.draft_key === activeDraft.draft_key ? { ...item, version: data.version!, status: "expired" } : item));
       }
+      if(data.error==="source_invalid")setDrafts(current=>current.map(item=>item.draft_key===activeDraft.draft_key?{...item,current_source_valid:false}:item));
       if (!response.ok || !data.ok || !data.version || !data.status) throw new Error(data.error || "draft_review_failed");
       setDrafts((current) => current.map((item) => item.draft_key === activeDraft.draft_key
         ? { ...item, version: data.version!, status: data.status!, content: action === "edit" ? editContent : item.content }
         : item));
     } catch (caught) {
       const code = caught instanceof Error ? caught.message : "draft_review_failed";
-      setError(code === "lead_access_changed" ? "Access changed. Refresh and sign in before reviewing this lead." : code === "communication_permission_missing"
+      setError(code === "source_invalid" ? "The source was revoked, replaced or expired. Historical review is unchanged, but this brief cannot be used or approved. Prepare a fresh brief only after source recovery." : code === "lead_access_changed" ? "Access changed. Refresh and sign in before reviewing this lead." : code === "communication_permission_missing"
         ? "Approval is blocked because the required channel and purpose permission is not currently allowed."
         : code === "stale_draft_version"
           ? "This draft changed in another session. Refresh before reviewing it."
@@ -133,7 +137,7 @@ export function Phase6CopilotPanel({
     }
   }
 
-  const reviewable = activeDraft && ["generated", "edited"].includes(activeDraft.status);
+  const reviewable = activeDraft && activeDraft.current_source_valid!==false && ["generated", "edited"].includes(activeDraft.status);
   const consent = result?.context?.deterministicControls?.consent;
 
   return (
@@ -186,7 +190,7 @@ export function Phase6CopilotPanel({
           {isTest ? "TEST RECORD — AI draft generation and contact are blocked." : "Communication is suppressed; AI draft generation is blocked."}
         </p>
       ) : null}
-      {error ? <p role="alert" className="mt-4 rounded-md border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">{error}</p> : null}
+      {error ? <p role="alert" ref={errorRef} tabIndex={-1} className="mt-4 rounded-md border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">{error}</p> : null}
 
       {activeDraft ? (
         <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,.65fr)]">
@@ -196,6 +200,7 @@ export function Phase6CopilotPanel({
               <span className="rounded-full border border-cyan-300/25 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-100">{activeDraft.status} · v{activeDraft.version}</span>
             </div>
             {activeDraft.schema_version === "amm.r2.workers.v1" ? <p role="status" className="mt-3 text-sm text-cyan-100">Saved handoff brief — {reviewable ? "review required" : activeDraft.status}. Approval does not send or schedule anything.</p> : null}
+            {activeDraft.current_source_valid===false?<p role="alert" className="mt-3 text-sm text-[#ffb4b4]">Current source invalid. Historical {activeDraft.status} review remains recorded; new use and approval are blocked.</p>:null}
             <textarea
               value={editContent || activeDraft.content}
               onChange={(event) => setEditContent(event.target.value)}

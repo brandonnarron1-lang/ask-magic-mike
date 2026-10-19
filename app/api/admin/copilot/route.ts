@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(await prepareOperatorHandoff(sql, auth.principal, parsed.data.leadId), {headers:{"Cache-Control":"private, no-store, max-age=0"}});
     } catch (caught) {
       const code = caught instanceof Error ? caught.message : "handoff_unavailable";
-      const error = ["lead_not_found","handoff_scope_denied","handoff_record_blocked","handoff_context_changed","handoff_pending_review_or_processing"].includes(code) ? code : "handoff_unavailable";
+      const error = ["lead_not_found","handoff_scope_denied","handoff_record_blocked","handoff_context_changed","handoff_source_invalid","handoff_pending_review_or_processing"].includes(code) ? code : "handoff_unavailable";
       return NextResponse.json({ok:false,error,sendsCommunication:false},{status:error==="lead_not_found"?404:error==="handoff_scope_denied"?403:error==="handoff_unavailable"?503:409,headers:{"Cache-Control":"private, no-store, max-age=0"}});
     }
   }

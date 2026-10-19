@@ -16,12 +16,16 @@ import { TextField } from "./FormField";
 import { LeadConsentField } from "./LeadConsentField";
 import { LuxuryCard } from "./LuxuryCard";
 import { PUBLIC_KNOWLEDGE_VERSION, readPublicCitations, type PublicCitation } from "../../lib/groundedConciergeContract";
+import { AnswerFeedback } from "./AnswerFeedback";
 
 type Message = {
   role: "user" | "assistant";
   content: string;
   citations?: PublicCitation[];
   limitation?: string;
+  answerId?: string;
+  revision?: number;
+  currentSourceValidity?: string;
 };
 
 type AskMikeChatPanelProps = {
@@ -60,7 +64,17 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
 
   useEffect(() => {
     setChatSessionId(tryCreateBrowserSubmissionId());
+    // Only opaque receipt IDs are retained here; each reload needs the current
+    // HTTP-only guest/account session and authoritative source validity again.
+    let cancelled=false;
+    try{const ids=JSON.parse(sessionStorage.getItem("amm-r2-answer-receipts")||"[]");
+      if(Array.isArray(ids))void Promise.all(ids.slice(-3).filter(id=>typeof id==="string"&&/^[0-9a-f-]{36}$/i.test(id)).map(async id=>{
+        const r=await fetch(`/api/intelligence/answers?id=${encodeURIComponent(id)}`,{cache:"no-store"});if(!r.ok)return null;const d=await r.json();
+        return {role:"assistant" as const,content:d.reply?.message||d.message,citations:readPublicCitations(d.reply?.citations),limitation:d.reply?.limitation,answerId:id,revision:d.revision,currentSourceValidity:d.currentSourceValidity};
+      })).then(rows=>{if(!cancelled)setMessages(current=>current.length?current:rows.filter((m):m is NonNullable<typeof m>=>Boolean(m)));}).catch(()=>{/* A failed read never creates a new session or exposes old text. */});
+    }catch{/* Storage may be blocked;the current interaction remains usable. */}
     return () => {
+      cancelled=true;
       answerRequestRef.current?.abort();
       answerRequestRef.current = null;
     };
@@ -106,7 +120,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         body: JSON.stringify({ message: trimmed, attribution, lead_source_surface: surface, knowledge_version: PUBLIC_KNOWLEDGE_VERSION }),
         signal: controller.signal,
       });
-      const data = (await res.json()) as { message?: string; citations?: unknown; limitation?: string };
+      const data = (await res.json()) as { message?: string; citations?: unknown; limitation?: string; answerId?: string;revision?: number;currentSourceValidity?: string };
       if (!res.ok) throw new Error("chat_failed");
       if (controller.signal.aborted || answerRequestRef.current !== controller) return;
       setMessages((current) => [
@@ -118,9 +132,11 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             "For address-specific advice, send the property address and best contact information so Mike can follow up.",
           citations: readPublicCitations(data.citations),
           limitation: typeof data.limitation === "string" ? data.limitation.slice(0, 500) : undefined,
+          answerId:data.answerId,revision:data.revision,currentSourceValidity:data.currentSourceValidity,
         },
       ]);
       setAnsweredQuestion(trimmed);
+      if(data.answerId){try{const prior=JSON.parse(sessionStorage.getItem("amm-r2-answer-receipts")||"[]");sessionStorage.setItem("amm-r2-answer-receipts",JSON.stringify([...(Array.isArray(prior)?prior:[]),data.answerId].slice(-3)));}catch{/* Feedback acknowledgment is still server-saved. */}}
     } catch {
       if (!controller.signal.aborted) setChatError("The assistant's answer did not come through. You can retry, or use the home-value form for local follow-up.");
     } finally {
@@ -305,7 +321,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           ))}
         </div>
         {messages.length ? (
-          <div role="log" aria-label="Conversation" aria-live="polite" className="mt-4 max-h-64 space-y-3 overflow-auto border-t border-white/10 pt-4">
+          <div role="log" aria-label="Conversation" aria-live="polite" className="mt-4 space-y-3 border-t border-white/10 pt-4">
             {messages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
@@ -323,12 +339,13 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
                         <a href={citation.url} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline text-[#88e7ee]">
                           {citation.title}
                         </a>
-                        <p className="text-xs">Bundled snapshot: {citation.asOf.slice(0, 10)}. Not a live property feed.</p>
+                        <p className="text-xs">Retrieved {citation.asOf.slice(0, 10)}. Version {citation.version.slice(0,24)}. Not a live property feed.</p>
                       </li>
                     ))}
                   </ul>
                 ) : null}
                 {message.limitation ? <p className="mt-2 text-xs">{message.limitation}</p> : null}
+                {message.answerId&&message.revision?<><p className="mt-2 text-sm">Saved answer revision {message.revision} · {message.currentSourceValidity==="valid"?"source valid at release; rechecked on reopen":"source-invalid; do not rely on earlier text"}</p><AnswerFeedback answerId={message.answerId} revision={message.revision}/></>:null}
               </div>
             ))}
           </div>

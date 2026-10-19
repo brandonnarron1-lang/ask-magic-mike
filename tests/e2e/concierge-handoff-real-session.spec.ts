@@ -16,11 +16,10 @@ test("reviewed question reaches canonical test capture once; answer does not bec
     await page.goto("/ask");
     await page.getByRole("textbox",{name:/Your real estate question/}).fill("How do I buy a home?");
     await page.getByRole("button",{name:"Send Question",exact:true}).click();
-    if(process.env.AMM_E2E_BUILT==="1"){
-      await expect(page.getByRole("alert").filter({hasText:"The assistant's answer"})).toContainText("answer did not come through");
-      expect(await counts()).toEqual(before);expect(errors).toEqual([]);return;
-    }
-    await expect(page.getByRole("link",{name:"Our Town: approved service and intake requirements",exact:true})).toBeVisible();
+    // This legacy fixture has no registered sources. It may still capture a
+    // deliberately reviewed question, but cannot resurrect bundled citations.
+    await expect(page.getByRole("log",{name:"Conversation"})).toContainText("Current approved guidance is unavailable");
+    await expect(page.getByRole("link",{name:"Our Town: approved service and intake requirements",exact:true})).toHaveCount(0);
     expect(await counts()).toEqual(before);
     await expect(page.getByLabel("Email",{exact:true})).toHaveValue("");
     await expect(page.getByRole("checkbox",{name:/I agree that Our Town Properties/})).not.toBeChecked();

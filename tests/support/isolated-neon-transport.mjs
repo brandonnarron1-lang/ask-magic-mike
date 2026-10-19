@@ -26,6 +26,12 @@ globalThis.fetch = async (input, init) => {
   diagnostic({ stage: "fetch", sql: Boolean(connection), rssBytes:process.memoryUsage().rss });
   if (!connection) {
     const target = new URL(typeof input === "string" || input instanceof URL ? input : input.url);
+    // Explicit synthetic owned-source transport, not a network allow-list or
+    // database-result mock. Only this test suite's source fixture can change.
+    if(process.env.AMM_R2_LIFECYCLE_ACCEPTANCE==="1" && target.href==="https://www.askmagicmike.com/api/experience/v1" && (!init?.method||init.method==="GET")) {
+      const result=await pool.query("SELECT body FROM isolated_source_feed WHERE id=true");
+      return result.rows[0]?Response.json(result.rows[0].body):new Response(null,{status:404});
+    }
     if (!["127.0.0.1", "localhost"].includes(target.hostname)) throw new Error("isolated_acceptance_external_fetch_denied");
     return originalFetch(input, init);
   }

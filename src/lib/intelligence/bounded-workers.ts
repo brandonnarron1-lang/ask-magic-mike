@@ -3,6 +3,7 @@ import { z } from "zod";
 import { experienceContract } from "../../../app/lib/experienceContract";
 import { answerFromApprovedSources, approvedPublicPassages, approvedPublicSources, publicSourceSchema, sourceRetrievable } from "./public-knowledge";
 import { reviewedLaunchWorkItem } from "../content/reviewed-launch-work-item";
+import {validateSourceSnapshot,sourceRefsValid,observeRegisteredSource,snapshotSchema} from "./source-lifecycle";
 
 export const WORKER_VERSION = "amm.r2.workers.v1";
 export const workerRoles = ["source_steward", "research_assistant", "concierge_handoff", "marketing_producer", "quality_operations"] as const;
@@ -14,7 +15,9 @@ export const workerJobSchema = z.object({
   risk: z.literal("read_draft_review"), approval: z.literal("human_required"),
   budget: z.object({ steps: z.number().int().min(1).max(8), tokens: z.literal(0), costUsd: z.literal(0) }).strict(),
   input: z.object({ question: z.string().max(2000), offer: z.enum(["homeValue", "buyer", "compare"]),
-    source: publicSourceSchema, checkpoint: z.string().max(180).nullable(), contextFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional() }).strict(),
+    source: publicSourceSchema, checkpoint: z.string().max(180).nullable(), contextFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+    sourceAuthorization:z.array(z.object({sourceId:z.string(),versionId:z.string().uuid(),revision:z.number().int().positive()}).strict()).min(1).max(3).optional(),
+    sourceRefresh:z.object({expectedRevision:z.number().int().positive(),freshnessHours:z.number().int().min(1).max(720)}).strict().optional() }).strict(),
 }).strict();
 export type WorkerJob = z.infer<typeof workerJobSchema>;
 export const workerResultSchema = z.object({
@@ -22,6 +25,7 @@ export const workerResultSchema = z.object({
   text: z.string().min(1).max(5000), evidence: z.array(z.string().max(220)).max(10),
   missing: z.array(z.string().max(150)).max(10), steps: z.number().int().min(0).max(8),
   sourceCheckpoint: z.string().max(180).nullable(), effects: z.literal("draft_only_no_send"),
+  sourceRefresh:z.object({snapshot:snapshotSchema,contentHash:z.string().regex(/^[a-f0-9]{64}$/),identityHash:z.string().regex(/^[a-f0-9]{64}$/)}).strict().optional(),
 }).strict();
 export type WorkerResult = z.infer<typeof workerResultSchema>;
 export type WorkerQuery = { query: (query: string, params?: unknown[]) => Promise<Array<Record<string, unknown>>> };
@@ -58,8 +62,20 @@ export async function executeWorker(raw: unknown, context: {
   if (!Number.isFinite(current) || deadline <= current || deadline - current > 7 * 86_400_000
     || job.actor !== context.principal.actor || job.tenant !== context.principal.tenant
     || !context.principal.permittedRoles.includes(job.role)) return result("blocked", "Current actor, scope or deadline is not valid.");
-  if (JSON.stringify(Object.entries(job.sourceVersions).sort()) !== JSON.stringify(Object.entries(sourceVersions).sort())
-    || !approvedPublicSources.some(s => JSON.stringify(s) === JSON.stringify(job.input.source))
+  if (JSON.stringify(Object.entries(job.sourceVersions).sort()) !== JSON.stringify(Object.entries(sourceVersions).sort())) return result("quarantined", "Source passage version changed; review required.");
+  if(job.input.sourceRefresh){
+    const refresh=job.input.sourceRefresh;
+    if(job.role!=="source_steward"||job.entityId!==job.input.source.id||job.entityVersion!==String(refresh.expectedRevision)
+      ||!validateSourceSnapshot({source:{...job.input.source,fetchedAt:context.now.toISOString()},passages:approvedPublicPassages},context.now).valid
+      ||!context.fetchSource||job.budget.steps<2)return result("blocked","A registered Source Steward revision fence, transport and two steps are required.");
+    try{
+      const observation=await observeRegisteredSource(job.entityId,refresh.freshnessHours,context.fetchSource);
+      return result(observation.snapshot.observation!.matchedPinnedContent?"review_required":"quarantined",
+        observation.snapshot.observation!.reason,{steps:2,sourceRefresh:observation,
+          evidence:[job.input.source.url,`sha256:${observation.snapshot.observation!.rawContentHash}`]});
+    }catch(error){return result("blocked",error instanceof Error&&error.message==="source_too_large"?"source_too_large":"source_fetch_unavailable",{steps:2});}
+  }
+  if (!(job.input.sourceAuthorization?validateSourceSnapshot({source:job.input.source,passages:approvedPublicPassages},context.now).valid:approvedPublicSources.some(s => JSON.stringify(s) === JSON.stringify(job.input.source)))
     || !sourceRetrievable(job.input.source, context.now)) return result("quarantined", "Source rights, version or freshness needs review.");
   if (job.role === "source_steward") {
     if (!context.fetchSource || job.budget.steps < 2) return result("blocked", "An authorized source transport and two steps are required.");
@@ -92,7 +108,8 @@ export async function executeWorker(raw: unknown, context: {
       `Proposed next task: review missing context before ${job.deadline}; not scheduled.`,
       `/admin/leads/${lead.id}`].join("\n"), { evidence: [job.input.source.url], missing: lead.missing });
   }
-  const answer = answerFromApprovedSources(job.input.question, { now: context.now });
+  const answer = answerFromApprovedSources(job.input.question, { now: context.now,
+    ...(job.input.sourceAuthorization?{sources:[job.input.source],passages:approvedPublicPassages}:{}) });
   if (job.role === "research_assistant") return result(answer.mode === "approved_source" ? "review_required" : "blocked", answer.message,
     { evidence: answer.citations.map(c => `${c.url}#${c.id}@${c.version}`), missing: ["Licensed property/comparable data not established"] });
   if (job.role === "marketing_producer") {
@@ -112,13 +129,27 @@ export function currentWorkerSourceVersions() { return { ...sourceVersions }; }
 /** Runs one claimed job. No live endpoint/cron installation is introduced.
  * Result and a lead action-review request (when relevant) commit together. */
 export async function runOneWorker(sql: WorkerQuery, workerId: string, context: Parameters<typeof executeWorker>[1], targetJobId?: string) {
-  if (targetJobId && !context.principal.permittedRoles.includes("concierge_handoff")) throw new Error("worker_scope_denied");
+  const targetedRefresh=!!targetJobId&&context.principal.permittedRoles.includes("source_steward")&&!context.principal.permittedRoles.includes("concierge_handoff");
+  if (targetJobId && !targetedRefresh&&!context.principal.permittedRoles.includes("concierge_handoff")) throw new Error("worker_scope_denied");
   const rows = targetJobId
-    ? await sql.query("SELECT public.claim_r2_handoff_v1($1::uuid,$2,$3) AS job", [targetJobId, workerId, context.principal.actor])
+    ? targetedRefresh?await sql.query("SELECT public.claim_r2_worker_v1($1,$2,$3::text[],$4::uuid) AS job",[workerId,context.principal.actor,["source_steward"],targetJobId])
+      :await sql.query("SELECT public.claim_r2_handoff_v1($1::uuid,$2,$3) AS job", [targetJobId, workerId, context.principal.actor])
     : await sql.query("SELECT public.claim_r2_worker_v1($1,$2,$3::text[]) AS job", [workerId, context.principal.actor, [...context.principal.permittedRoles]]);
   const row = rows[0]?.job as { id: string; lead_id: string | null; r2_lease_token: string; r2_contract: unknown; requested_by: string } | null;
   if (!row) return { processed: 0 };
   if (row.lead_id && (!context.principal.permittedLeadIds.includes(row.lead_id) || context.lead?.id !== row.lead_id)) throw new Error("worker_current_lead_scope_denied");
+  const contract=workerJobSchema.parse(row.r2_contract);
+  if(contract.input.sourceRefresh){
+    const fence=(await sql.query("SELECT public.r2_source_refresh_fence_v1($1::uuid,$2::uuid) AS valid",[row.id,row.r2_lease_token]))[0]?.valid;
+    if(fence!==true){
+      await sql.query("SELECT public.complete_r2_worker_v1($1::uuid,$2::uuid,$3::jsonb)",[row.id,row.r2_lease_token,JSON.stringify({version:WORKER_VERSION,role:contract.role,state:"blocked",text:"source_revision_changed",effects:"draft_only_no_send",steps:0})]);
+      throw Error("source_revision_changed");
+    }
+  }else if(contract.input.sourceAuthorization&&!await sourceRefsValid(sql,contract.input.sourceAuthorization)
+    ||!contract.input.sourceRefresh&&!contract.input.sourceAuthorization&&(await sql.query("SELECT EXISTS(SELECT 1 FROM public.intelligence_sources) AS governed"))[0]?.governed===true){
+    await sql.query("SELECT public.complete_r2_worker_v1($1::uuid,$2::uuid,$3::jsonb)",[row.id,row.r2_lease_token,JSON.stringify({version:WORKER_VERSION,role:contract.role,state:"blocked",text:"Source invalid; no retrieval or model invocation",effects:"draft_only_no_send",steps:0})]);
+    throw Error("worker_source_invalid");
+  }
   const output = await executeWorker(row.r2_contract, context);
   const completed = await sql.query("SELECT public.complete_r2_worker_v1($1::uuid,$2::uuid,$3::jsonb) AS result", [row.id, row.r2_lease_token, JSON.stringify(output)]);
   const receipt = completed[0]?.result as { ok?: boolean; error?: string } | undefined;

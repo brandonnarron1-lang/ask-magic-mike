@@ -49,9 +49,7 @@ for (const width of [320,390,430,768,1440]) test(`guest comparison, keyboard and
   expect(errors).toEqual([]);
 });
 
-test(process.env.AMM_E2E_BUILT === "1"
-  ? "compiled loopback origin fails closed and preserves the unresolved request without SQL effects"
-  : "development diagnostic: saved search reaches real canonical persistence and safe receipt once, with no sends", async ({page}) => {
+test("native configured local saved search reaches real canonical persistence and safe receipt once, with no sends", async ({page}) => {
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   const before = (await pool.query("SELECT (SELECT count(*)::int FROM leads) leads,(SELECT count(*)::int FROM lead_notifications WHERE provider_message_id IS NOT NULL) provider_receipts")).rows[0];
   await page.goto("/my");
@@ -73,16 +71,6 @@ test(process.env.AMM_E2E_BUILT === "1"
   const responsePromise = page.waitForResponse(response => new URL(response.url()).pathname === "/api/leads" && response.request().method() === "POST");
   await page.getByRole("button",{name:"Request Buyer Plan",exact:true}).click();
   const response = await responsePromise;
-  if (process.env.AMM_E2E_BUILT === "1") {
-    // Production-mode Origin allowlisting deliberately refuses loopback. Do not
-    // forge an Origin or relax the app just to turn this into capture evidence.
-    expect(response.status()).toBe(403);
-    await expect(page.getByRole("alert").filter({hasText:"This form origin is not approved."})).toBeVisible();
-    await expect(page.getByLabel("Name",{exact:true})).toBeDisabled();
-    expect((await pool.query("SELECT count(*)::int n FROM leads")).rows[0].n).toBe(before.leads);
-    expect(errors).toEqual([]);
-    return;
-  }
   expect(response.status()).toBe(200);
   await expect(page.getByRole("heading",{name:"Your request is in.",exact:true})).toBeVisible();
   const rows = (await pool.query("SELECT is_test,communication_suppressed,consent_email,consent_sms,consent_call FROM leads WHERE email=$1",["guest-workspace@example.test"])).rows;

@@ -25,16 +25,14 @@ for(const width of [320,390,430,768,1440]) test(`${built?"compiled native Origin
     await expect(page.getByRole("alert").filter({hasText:"The assistant's answer"})).toContainText("answer did not come through");
     await expect(page.getByRole("textbox",{name:/Question for local follow-up/})).toHaveCount(0);
   }else{
-    const source=page.getByRole("link",{name:"Our Town: approved service and intake requirements",exact:true});
-    await expect(source).toHaveAttribute("href","https://www.askmagicmike.com/api/experience/v1");
+    await expect(page.getByRole("log",{name:"Conversation"})).toContainText("Current approved guidance is unavailable");
+    await expect(page.getByRole("link",{name:"Our Town: approved service and intake requirements",exact:true})).toHaveCount(0);
     const question=page.getByRole("textbox",{name:/Question for local follow-up/});
     await expect(question).toHaveValue("How do I buy a home?");
     await question.fill(""); await expect(question).toBeVisible();
     await question.fill("My corrected synthetic buying-plan question.");
     await expect(page.getByLabel("Email",{exact:true})).toHaveValue("");
     await expect(page.getByRole("checkbox",{name:/I agree that Our Town Properties/})).not.toBeChecked();
-    await source.focus();await expect(source).toBeFocused();
-    expect((await source.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   }
   await page.evaluate(()=>{document.documentElement.style.fontSize="200%";});
   if(!built) expect((await page.getByRole("textbox",{name:/Question for local follow-up/}).boundingBox())!.width).toBeGreaterThanOrEqual(120);
@@ -49,9 +47,9 @@ for(const width of [320,390,430,768,1440]) test(`${built?"compiled native Origin
   }
   expect(leadRequests).toEqual([]);expect(errors).toEqual([]);
 });
-test("actual public handler returns cited projection to a non-browser client without an Origin; no database or provider",async({request})=>{
+test("disabled governance refuses a static citation even without an Origin; no database or provider",async({request})=>{
   const response=await request.post("/api/chat/message",{data:{message:"Compare selling options",knowledge_version:"amm.public-knowledge.v1"}});
   expect(response.status()).toBe(200);
-  expect(await response.json()).toMatchObject({mode:"approved_source",citations:[{id:"offer-compare"}]});
+  expect(await response.json()).toMatchObject({mode:"source_unavailable",citations:[]});
   expect(response.headers()["cache-control"]).toContain("private, no-store");
 });

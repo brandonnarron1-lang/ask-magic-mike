@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { IntelligenceSourceReview } from "../../../src/components/admin/intelligence-source-review";
+import { IntelligenceFeedbackQueue } from "../../../src/components/admin/intelligence-feedback-queue";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 import {
   ADMIN_ACTIVITY_SOURCES,
@@ -52,7 +54,7 @@ export default async function AdminActivityPage({
   const result = await loadAdminActivity({ principal, offset, limit: 40, source });
 
   return (
-    <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
+    <main className="min-h-screen min-w-0 break-words [overflow-wrap:anywhere] bg-[#050505] px-5 py-8 text-[#f4ead4]">
       <div className="mx-auto max-w-6xl">
         <header className="border-b border-[#cda24a33] pb-6">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#e2c06f]">Command Center</p>
@@ -69,6 +71,7 @@ export default async function AdminActivityPage({
             ))}
           </nav>
         </header>
+        {principal?.role === "administrator" && process.env.R2_SOURCE_GOVERNANCE_ENABLED==="true" ? <><IntelligenceSourceReview/><IntelligenceFeedbackQueue/></> : null}
 
         {result.incompleteSources.length ? (
           <div role="status" className="mt-5 rounded-lg border border-amber-300/30 bg-amber-300/5 px-4 py-3 text-sm text-amber-100">
@@ -76,7 +79,7 @@ export default async function AdminActivityPage({
           </div>
         ) : null}
 
-        <section className="mt-6 overflow-hidden rounded-xl border border-white/10 bg-[#0a0a0a]" aria-label="Activity history">
+        <section className="mt-6 min-w-0 rounded-xl border border-white/10 bg-[#0a0a0a]" aria-label="Activity history">
           {result.events.length ? result.events.map((event) => (
             <article key={event.id} className="grid gap-3 border-b border-white/10 px-5 py-4 last:border-b-0 md:grid-cols-[11rem_minmax(0,1fr)_auto]">
               <div>
@@ -85,7 +88,7 @@ export default async function AdminActivityPage({
               </div>
               <div className="min-w-0">
                 <p className="font-semibold text-[#f4ead4]">{event.summary}</p>
-                <p className="mt-1 truncate text-sm text-[#b9ae9d]">{event.leadLabel} · {event.actor}</p>
+                <p className="mt-1 break-words text-sm text-[#b9ae9d]">{event.leadLabel} · {event.actor}</p>
                 {event.detail ? <p className="mt-1 text-xs text-[#8f8778]">{event.detail}</p> : null}
                 <p className="mt-2 font-mono text-[10px] text-[#716b61]">{event.reference}</p>
               </div>
