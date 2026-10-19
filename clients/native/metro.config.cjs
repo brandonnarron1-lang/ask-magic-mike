@@ -13,7 +13,7 @@ config.maxWorkers = 1;
 // Expo's CI embed path intentionally reuses transforms. The explicit public QA
 // binding must be part of that identity or an earlier disconnected/synthetic
 // bundle can leak across build variants. This hashes NO credential.
-config.cacheVersion = `${config.cacheVersion || ""}:amm-binding:${createHash("sha256").update(process.env.EXPO_PUBLIC_AMM_NATIVE_QA_BINDING || "DISCONNECTED").digest("hex")}`;
+config.cacheVersion = `${config.cacheVersion || ""}:amm-binding:${createHash("sha256").update(JSON.stringify([process.env.EXPO_PUBLIC_AMM_NATIVE_QA_BINDING || null, process.env.EXPO_PUBLIC_AMM_NATIVE_BETA_BINDING || null])).digest("hex")}`;
 config.fileMapCacheDirectory = path.join(projectRoot, ".cache/metro-map");
 fs.mkdirSync(config.fileMapCacheDirectory, { recursive: true });
 config.cacheStores = [new FileStore({ root: path.join(projectRoot, ".cache/metro-transform") })];

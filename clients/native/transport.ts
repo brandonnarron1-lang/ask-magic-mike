@@ -19,7 +19,8 @@ export type QaBinding = {
   /** Random UUID per native consumer/guest session, NOT a user ID or token.
    * Change on logout/revocation/account switch; dispose the prior client. */
   localScopeId: string; session: NativeSessionAdapter;
-} & ({ kind: "verified-isolated-qa" } | { kind: "verified-local-loopback"; platform: "ios" | "android"; expiresAt: number });
+} & ({ kind: "verified-isolated-qa" } | { kind: "verified-local-loopback"; platform: "ios" | "android"; expiresAt: number }
+  | { kind: "connected-internal-beta"; createdAt: number; expiresAt: number; source: string });
 export type CurrentAnswer = GroundedReply & AnswerRef & { currentSourceValidity: "valid"; sourceRefs: SourceRef[] };
 type Pending = AnswerRef & { requestId: string; kind: FeedbackReceipt["kind"]; category: FeedbackCategory | null; comment: "" };
 type Journal = { version: 1; receipt: AnswerRef | null; pending: Pending | null };
@@ -68,7 +69,7 @@ export class R2Client {
   constructor(private readonly store: SecureStore, private readonly qa?: QaBinding, private readonly newId?: () => string, private readonly now: () => number = Date.now) {
     if (qa) {
       const url = new URL(qa.origin);
-      const remote = qa.kind === "verified-isolated-qa" && url.protocol === "https:";
+      const remote = (qa.kind === "verified-isolated-qa" || qa.kind === "connected-internal-beta") && url.protocol === "https:";
       const local = qa.kind === "verified-local-loopback" && url.protocol === "http:" && Number(url.port) >= 1024 && Number(url.port) <= 65535
         && ((qa.platform === "ios" && url.hostname === "127.0.0.1") || (qa.platform === "android" && url.hostname === "10.0.2.2"))
         && Number.isFinite(qa.expiresAt) && qa.expiresAt > now();

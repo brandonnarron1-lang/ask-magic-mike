@@ -64,7 +64,7 @@ jobs:
         run: |
           pnpm --dir clients/native install --frozen-lockfile --ignore-scripts
           pnpm --dir clients/native run typecheck
-          node --test clients/native/candidate.test.cjs clients/native/runtime.test.cjs clients/native/build.test.cjs
+          node --test clients/native/candidate.test.cjs clients/native/runtime.test.cjs clients/native/build.test.cjs clients/native/beta.test.cjs
 
       - name: Isolated PostgreSQL QA audit atomicity and replay
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/automatic-qa-audit-evidence.test.ts tests/persistence/qa-audit-harness-postgres.test.ts --maxWorkers=1 --no-file-parallelism

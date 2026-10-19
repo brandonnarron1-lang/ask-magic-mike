@@ -14,7 +14,7 @@ From the repository root:
 
 ```sh
 pnpm --dir clients/native run typecheck
-node --test clients/native/candidate.test.cjs clients/native/runtime.test.cjs clients/native/build.test.cjs
+node --test clients/native/candidate.test.cjs clients/native/runtime.test.cjs clients/native/build.test.cjs clients/native/beta.test.cjs
 pnpm --dir clients/native start
 ```
 
@@ -119,6 +119,46 @@ and database identity receipts must stay outside tracked source. Do not
 reconnect a retired cloud QA branch or infer authorization from a descriptor.
 
 ## Release boundary
+
+### Connected internal beta (separate from the accepted offline packages)
+
+`AMM_NATIVE_BETA_DESCRIPTOR_FILE` selects a separately verified synthetic HTTPS
+venue, never the localhost descriptor or Production. It contains public source,
+window and provenance identity only. The build has one fixed destination and a
+maximum seven-day window. No hosting bypass, account credential, model/database
+key, OTA update or automatic enrollment is embedded. Private install/backend
+links and the approved participant roster belong only in the private handoff.
+
+The owner supplies each approved participant's individual guest access code
+outside the package. Enter it in Ask Mike > Private beta access. Saving is a
+protected local write, not server verification. Deliberately ask to connect.
+No session is minted by a GET or by saving access. The server checks the exact
+beta host/window, roster scope and current canonical guest session on each
+request. It exposes only the existing cited-answer/feedback services, not
+intake, accounts, staff routes or schedulers. Native CSRF, feedback replay and
+source eligibility stay intact. Synthetic replies are not live AI or evidence
+of human approval of the owned source. Revocation, expiry and outage hold online
+work; local planning survives. A changed code cannot silently replace an old
+identity or rearm an ambiguous request.
+
+Android beta builds use `com.askmagicmike.internalbeta`, separately from the
+historical test-signed `com.askmagicmike.r3preview`. Set the explicit owner signing
+directory through `AMM_NATIVE_BETA_SIGNING_DIR`; the local helper creates/reuses
+one encrypted keystore and its dedicated macOS Keychain password. Neither the
+password nor private key enters an argument, bundle, source file or review log.
+This is owner-controlled local beta signing, not Play registration. Increment
+`AMM_NATIVE_BETA_VERSION_CODE` only for an actual update test; install with `-r`,
+not by deleting app data. Keep the original keystore and Keychain item for
+compatible updates. Physical iOS needs its own verified team, app identifier,
+device/distribution profile and legitimate signing access. Simulator entitlements
+cannot supply these. No developer membership purchase is part of this work.
+
+The dedicated beta host fails closed outside its compiled window. Provisioning
+requires independently verified synthetic provenance, native Neon branch expiry,
+bounded resource quotas and a recorded cleanup mechanism before invites. Vercel
+retention alone is not an expiry guarantee. Do not advertise an expired/removed
+backend as connected. This branch explicitly disables its automatic deployment
+to the canonical Vercel project; beta source review is not a Production release.
 
 R2's accepted release is unchanged. R3 adds a native package and two server
 feedback routes, with no migration or remote runtime change. This local source

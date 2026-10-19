@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const ts = require("typescript");
-const allowed = new Set(["protectedStore", "nativeHttp", "qaBinding"]);
+const allowed = new Set(["protectedStore", "nativeHttp", "qaBinding", "betaBinding"]);
 const loaded = new Map();
 function load(name) {
   assert.ok(allowed.has(name));
