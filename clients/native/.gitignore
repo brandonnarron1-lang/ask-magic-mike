@@ -5,6 +5,8 @@ dist-ios/
 dist-android/
 *.local.*
 vendor-hosts/
+android/
+ios/
 *-verification.json
 *-history.json
 *.log

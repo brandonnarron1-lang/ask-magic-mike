@@ -270,5 +270,10 @@ test("entry uses existing App and native primitives with QA absent by default", 
   assert.match(runtime, /Crypto\.randomUUID\(\)/); assert.match(runtime, /WHEN_UNLOCKED_THIS_DEVICE_ONLY/);
   assert.doesNotMatch(runtime, /AsyncStorage|sessionStore|https:\/\//);
   const config = JSON.parse(fs.readFileSync(path.join(__dirname, "app.json")));
-  assert.equal(config.expo.ios, undefined); assert.equal(config.expo.android.package, undefined); assert.equal(config.expo.android.allowBackup, false);
+  assert.equal(config.expo.ios.bundleIdentifier, 'com.askmagicmike.r3preview');
+  assert.equal(config.expo.android.package, 'com.askmagicmike.r3preview');
+  assert.equal(config.expo.android.allowBackup, false);
+  assert.equal(config.expo.updates.enabled, false);
+  assert.equal(config.expo.extra?.eas, undefined); // local QA identity, not a fabricated store/project identity
+  assert.deepEqual(config.expo.android.blockedPermissions, ['android.permission.READ_EXTERNAL_STORAGE', 'android.permission.WRITE_EXTERNAL_STORAGE', 'android.permission.SYSTEM_ALERT_WINDOW', 'android.permission.VIBRATE']);
 });

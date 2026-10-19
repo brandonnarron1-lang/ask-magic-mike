@@ -14,6 +14,16 @@ export function assertOwnedAndroid() {
     || android(["shell", "getprop", "ro.build.version.sdk"]) !== "35" || !android(["shell", "dumpsys", "package", HOST]).includes("versionName=57.0.9")) throw Error("exact_owned_synthetic_vendor_host_required");
   return { serial: SERIAL, avd: DEVICE, sdk: 35, vendorHost: HOST, vendorVersion: "57.0.9", ownAppIdentity: false };
 }
+export function assertOwnedBinaryAndroid() {
+  const app = "com.askmagicmike.r3preview";
+  if (android(["shell", "getprop", "ro.boot.qemu.avd_name"]) !== DEVICE || android(["shell", "getprop", "sys.boot_completed"]) !== "1"
+    || android(["shell", "getprop", "ro.build.version.sdk"]) !== "35" || !android(["shell", "dumpsys", "package", app]).includes("versionName=0.0.0")) throw Error("exact_owned_synthetic_app_required");
+  return { serial: SERIAL, avd: DEVICE, sdk: 35, app, ownBinary: true };
+}
+export function androidOpenBinary() {
+  const device = assertOwnedBinaryAndroid();
+  android(["shell", "am", "start", "-S", "-W", "-n", `${device.app}/.MainActivity`]);
+}
 export function hierarchy() {
   const xml = android(["exec-out", "uiautomator", "dump", "/dev/tty"]);
   const decode = (text: string) => text.replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");

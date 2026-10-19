@@ -1,9 +1,10 @@
 # Ask Magic Mike: native R3 slice
 
-Native React Native/Expo screens, not a site WebView. This is a local prototype,
-not a signed/distributed beta. The app has no product bundle/package identity,
-signing account, production API binding, model credential or database connection.
-Expo Go is a separate vendor development host, not our own compiled application.
+Native React Native/Expo screens, not a site WebView. Local bundled-JavaScript
+Release packages use `com.askmagicmike.r3preview` on each platform. This is a
+local QA namespace, not a registered store identity or a distributed beta.
+There is no Production API binding, model credential or database connection in
+the client. Expo Go is a separate vendor host, not our own compiled application.
 
 ## Run locally
 
@@ -13,7 +14,7 @@ From the repository root:
 
 ```sh
 pnpm --dir clients/native run typecheck
-node --test clients/native/candidate.test.cjs clients/native/runtime.test.cjs
+node --test clients/native/candidate.test.cjs clients/native/runtime.test.cjs clients/native/build.test.cjs
 pnpm --dir clients/native start
 ```
 
@@ -52,6 +53,51 @@ EXPO_OFFLINE=1 EXPO_NO_TELEMETRY=1 EXPO_NO_DOTENV=1 pnpm --dir clients/native ru
 - Expo Go's backup/host settings are not our application's privacy acceptance.
   Own-app configuration disables Android backup; signed-device acceptance and
   native account login/export/deletion remain separate work.
+
+## Own local packages (not an export or store upload)
+
+Inspect `scripts/amm/native-local-build.mjs` first. Use the existing pinned native
+dependencies, Xcode/CocoaPods, JDK21/Gradle9.3.1 and Android36/NDK27.1.12297006.
+Set `AMM_NATIVE_BUILD_ROOT` to an existing task-owned build/cache directory with
+adequate disk; never use another project's cache. Set `ANDROID_HOME` and
+`JAVA_HOME` explicitly for Android. `AMM_NATIVE_GRADLE_BIN` may select an already
+installed compatible Gradle binary; its caches still use the task-owned root.
+
+```sh
+node scripts/amm/native-local-build.mjs ios
+node scripts/amm/native-local-build.mjs android
+```
+
+The runner uses an allowlisted child environment, no dotenv/provider credential,
+CNG-generated ignored projects, the pinned CocoaPods lock and one two-worker
+native build. It emits timestamped APK/Simulator `.app.zip`, SHA-256, source/tree,
+dirty state, backend identity and build logs under that root. Both Release
+variants bundle JavaScript and need no Metro. It does not install/upload/send.
+Android uses the template **test** certificate, not a store/release owner key.
+iOS uses local Simulator ad-hoc signing; Xcode injects the simulator-only
+entitlements at link time. Do not manually sign restricted entitlements onto
+the Simulator executable or use this input for a physical-device build.
+
+Default packages are **DISCONNECTED**: the private plan works, Ask Mike is held.
+An explicit `AMM_NATIVE_QA_DESCRIPTOR_FILE` can select only a freshly verified,
+synthetic loopback venue; the harness produces this public, expiring descriptor.
+No server secret/session enters the package. The compiled bundle must contain
+that exact QA scope, and a disconnected build must not retain a previous scope.
+Metro cache identities separate these variants. Only the Android QA artifact
+allows cleartext for `10.0.2.2`; ordinary packages get no such allowance.
+After the harness destroys its database, that QA package is NOT an external beta.
+
+The opt-in `AMM_R3_NATIVE_BINARY_ACCEPTANCE=ios` (or `android`) selects the existing
+local session harness's bounded SQL observer. Actual native UI actions and
+screenshots remain separate from its SQL assertions; a marker alone is not a
+device pass. Keep all descriptors, fixtures and proofs in private `.amm-run`.
+Never supply this mode with Production/Preview credentials.
+
+On iOS, the app applies the full OS font scale to glyph AND layout size once to
+avoid a reproduced live Dynamic Type/rerender clipping issue. It does not cap
+the user's font preference, fit text down or limit lines. Android retains native
+font scaling. Fresh launch, live-size changes and subsequent navigation require
+actual device checks; a TypeScript test is not rendering evidence.
 
 ## Real local API/session acceptance
 

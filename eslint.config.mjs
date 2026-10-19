@@ -25,6 +25,8 @@ export default [
       "scripts/**",
       "node_modules/**",
       "clients/native/node_modules/**",
+      "clients/native/android/**",
+      "clients/native/ios/**",
       "clients/native/.cache/**",
       "clients/native/.expo/**",
       "clients/native/dist-ios/**",

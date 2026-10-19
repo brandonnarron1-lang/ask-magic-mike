@@ -1,29 +1,34 @@
 import React, { useEffect, useState, useRef, type ReactNode } from "react";
-import { AppState, Linking, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { AppState, Linking, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { experienceContract, experienceDestination, feedbackCategories, type ExperienceOfferKey, type FeedbackCategory } from "./contracts";
 import { addInterest, deletePlan, emptyPlan, loadPlan, savePlan, sellerSteps, sessionStore, type LocalPlan, type SecureStore } from "./localPlan";
 import { R2Client, type QaBinding } from "./transport";
+import { textScale } from "./textScale";
 
 const tokens = { black: "#0b0b0c", panel: "#171719", gold: "#c9a96e", cream: "#f5efdf", muted: "#d9ceb8", ruby: "#ffb4b4" };
 type Tab = "Home" | "Saved" | "Ask Mike" | "My Plan";
 export type CandidateRuntime = { secureStore?: SecureStore; qa?: QaBinding; newRequestId?: () => string };
 function Copy({ children, heading = false }: { children: ReactNode; heading?: boolean }) {
-  return <Text allowFontScaling accessibilityRole={heading ? "header" : undefined} style={heading ? styles.heading : styles.copy}>{children}</Text>;
+  const scale = textScale(Platform.OS, useWindowDimensions().fontScale, heading ? 20 : 16);
+  return <Text allowFontScaling={scale.allowFontScaling} accessibilityRole={heading ? "header" : undefined} style={[heading ? styles.heading : styles.copy, scale.style]}>{children}</Text>;
 }
 function Button({ title, onPress, disabled = false, selected = false }: { title: string; onPress: () => void; disabled?: boolean; selected?: boolean }) {
+  const scale = textScale(Platform.OS, useWindowDimensions().fontScale, 16);
   return <Pressable accessibilityRole="button" accessibilityLabel={title} accessibilityState={{ disabled, selected }} disabled={disabled} onPress={onPress}
-    style={[styles.button, selected && styles.selected, disabled && styles.disabled]}><Text allowFontScaling style={styles.buttonText}>{title}</Text></Pressable>;
+    style={[styles.button, selected && styles.selected, disabled && styles.disabled]}><Text allowFontScaling={scale.allowFontScaling} style={[styles.buttonText, scale.style]}>{title}</Text></Pressable>;
 }
 function Field({ label, value, onChange, maxLength, multiline = false, disabled = false }: { label: string; value: string; onChange: (s: string) => void; maxLength: number; multiline?: boolean; disabled?: boolean }) {
-  return <View style={styles.field}><Copy>{label}</Copy><TextInput accessibilityLabel={label} allowFontScaling style={styles.input}
+  const scale = textScale(Platform.OS, useWindowDimensions().fontScale, 16);
+  return <View style={styles.field}><Copy>{label}</Copy><TextInput accessibilityLabel={label} allowFontScaling={scale.allowFontScaling} style={[styles.input, scale.style]}
     value={value} onChangeText={onChange} maxLength={maxLength} multiline={multiline} editable={!disabled} autoCorrect={false}
     autoCapitalize="sentences" textAlignVertical="top" /></View>;
 }
 function More({ title, children }: { title: string; children: ReactNode }) {
+  const scale = textScale(Platform.OS, useWindowDimensions().fontScale, 16);
   const [open, setOpen] = useState(false);
   return <View style={styles.field}><Pressable accessibilityRole="button" accessibilityState={{ expanded: open }}
-    onPress={() => setOpen(value => !value)} style={styles.button}><Text allowFontScaling style={styles.buttonText}>{open ? "Hide" : "Show"} {title}</Text></Pressable>
+    onPress={() => setOpen(value => !value)} style={styles.button}><Text allowFontScaling={scale.allowFontScaling} style={[styles.buttonText, scale.style]}>{open ? "Hide" : "Show"} {title}</Text></Pressable>
     {open && children}</View>;
 }
 
@@ -31,6 +36,7 @@ function More({ title, children }: { title: string; children: ReactNode }) {
  * To change accounts, dispose/remount with a newly scoped runtime; never replace
  * a session adapter under an existing R2Client or share staff cookie storage. */
 export default function App({ runtime = {} }: { runtime?: CandidateRuntime }) {
+  const scale = textScale(Platform.OS, useWindowDimensions().fontScale, 16);
   const [services] = useState(() => {
     if (runtime.qa && !runtime.secureStore) throw Error("Connected QA requires an injected protected store.");
     const store = runtime.secureStore ?? sessionStore();
@@ -99,8 +105,8 @@ export default function App({ runtime = {} }: { runtime?: CandidateRuntime }) {
     <View style={styles.brand}><Copy heading>ASK MAGIC MIKE</Copy><Copy>Our Town Properties · development preview</Copy></View>
     <View accessibilityRole="tablist" style={styles.tabs}>{(["Home", "Saved", "Ask Mike", "My Plan"] as Tab[]).map(name =>
       <Button key={name} title={name} selected={tab === name} onPress={() => navigate(name)} />)}</View>
-    {!!notice && <Text allowFontScaling accessibilityLiveRegion="polite" style={styles.status}>{notice}</Text>}
-    {!!error && <Text allowFontScaling accessibilityRole="alert" accessibilityLiveRegion="assertive" style={[styles.status, styles.error]}>{error}</Text>}
+    {!!notice && <Text allowFontScaling={scale.allowFontScaling} accessibilityLiveRegion="polite" style={[styles.status, scale.style]}>{notice}</Text>}
+    {!!error && <Text allowFontScaling={scale.allowFontScaling} accessibilityRole="alert" accessibilityLiveRegion="assertive" style={[styles.status, styles.error, scale.style]}>{error}</Text>}
     <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
       <View style={styles.card}><Copy>{services.persistent ? "Private on this device. Not synced to an account." : "Session only. Saved items disappear on app restart."}</Copy>
         <Copy>{services.client.connected ? "Synthetic QA connection · no customer messages." : "Ask Mike is not connected. Your local plan still works."}</Copy></View>
