@@ -1,9 +1,4 @@
 {
-  "git": {
-    "deploymentEnabled": {
-      "codex/grounded-concierge-20261017": false
-    }
-  },
   "crons": [
     {
       "path": "/api/admin/notifications/retry",
