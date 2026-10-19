@@ -1,6 +1,41 @@
 import { aiLeadIntelligenceSchema, AI_LEAD_INTELLIGENCE_JSON_SCHEMA, type AiLeadIntelligence } from "./lead-intelligence-schema";
 import { delimitUntrusted, detectPromptInjection, redactLeadText } from "./guardrails";
 
+/** Shared Responses transport. Explicit credentials only; this entry point does
+ * not consult process.env, retry, follow redirects, or authorize any tool. */
+export async function requestStructuredResponse(input: {
+  apiKey: string; projectId: string; model: string; instructions: string;
+  input: string; schema: Record<string, unknown>; schemaName: string;
+  maxOutputTokens: number; timeoutMs: number; signal?: AbortSignal;
+}, transport: typeof fetch = fetch): Promise<unknown> {
+  if (!input.apiKey || !/^proj_[A-Za-z0-9]+$/.test(input.projectId)
+    || !/^[a-z0-9][a-z0-9.-]{1,100}$/.test(input.model)
+    || input.input.length > 16_000 || input.maxOutputTokens < 128 || input.maxOutputTokens > 1_200
+    || input.timeoutMs < 1_000 || input.timeoutMs > 20_000) throw new Error("invalid_explicit_ai_binding");
+  const response = await transport("https://api.openai.com/v1/responses", {
+    method: "POST", redirect: "error",
+    headers: { Authorization: `Bearer ${input.apiKey}`, "OpenAI-Project": input.projectId, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: input.model, store: false, instructions: input.instructions,
+      input: input.input, max_output_tokens: input.maxOutputTokens,
+      text: { format: { type: "json_schema", name: input.schemaName, strict: true, schema: input.schema } } }),
+    signal: input.signal ? AbortSignal.any([input.signal, AbortSignal.timeout(input.timeoutMs)]) : AbortSignal.timeout(input.timeoutMs),
+  });
+  if (!response.ok) throw new Error(`openai_http_${response.status}`);
+  // A malformed/oversized response is ambiguous expenditure, never a free retry.
+  const reader = response.body?.getReader();
+  if (!reader) throw new Error("openai_response_body_missing");
+  const chunks: Uint8Array[] = []; let bytes = 0;
+  try {
+    while (true) {
+      const part = await reader.read(); if (part.done) break;
+      bytes += part.value.length;
+      if (bytes > 100_000) throw new Error("openai_response_too_large");
+      chunks.push(part.value);
+    }
+  } finally { await reader.cancel(); }
+  return JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown;
+}
+
 export type LeadIntelligenceFacts = {
   leadType: string;
   status: string;

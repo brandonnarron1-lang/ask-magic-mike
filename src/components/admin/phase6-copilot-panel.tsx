@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { AiLeadIntelligenceResult } from "@/lib/ai/openai-responses";
 import type { AiArtifactType } from "@/lib/ai/neon-intelligence";
+import { useInvalidateContactDisclosure } from "../../../app/components/admin/LeadContactDisclosure";
 
 type DraftRecord = {
   id: string;
@@ -24,6 +25,8 @@ type DraftRecord = {
   reviewed_at: string | null;
   created_at: string;
   updated_at: string;
+  schema_version?: string;
+  current_source_valid?: boolean;
 };
 
 type CopilotResponse = Partial<AiLeadIntelligenceResult> & {
@@ -48,40 +51,47 @@ export function Phase6CopilotPanel({
   isTest,
   suppressed,
   initialDrafts = [],
+  canPrepareHandoff = false,
 }: {
   leadId: string;
   isTest: boolean;
   suppressed: boolean;
   initialDrafts?: DraftRecord[];
+  canPrepareHandoff?: boolean;
 }) {
   const [artifactType, setArtifactType] = useState<AiArtifactType>("lead_summary");
+  const invalidateDisclosure = useInvalidateContactDisclosure();
   const [drafts, setDrafts] = useState(initialDrafts);
   const [result, setResult] = useState<CopilotResponse | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const errorRef=useRef<HTMLParagraphElement>(null);
+  useEffect(()=>{if(error)errorRef.current?.focus();},[error]);
   const activeDraft = useMemo(
     () => drafts.find((draft) => draft.artifact_type === artifactType) || null,
     [drafts, artifactType],
   );
   const [editContent, setEditContent] = useState("");
 
-  async function generate() {
+  async function generate(mode: "ai_draft" | "reviewed_handoff" = "ai_draft") {
     setBusy(true);
     setError("");
     try {
       const response = await fetch("/api/admin/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId, artifactType }),
+        body: JSON.stringify({ leadId, artifactType: mode === "reviewed_handoff" ? "lead_summary" : artifactType, mode }),
       });
       const data = (await response.json()) as CopilotResponse;
+      if ([401,403,404].includes(response.status)) { setDrafts([]); setEditContent(""); setResult(null); invalidateDisclosure?.(); throw new Error("lead_access_changed"); }
       if (!response.ok || !data.ok || !data.draft) throw new Error(data.error || "copilot_unavailable");
       setResult(data);
+      if (mode === "reviewed_handoff") setArtifactType("lead_summary");
       setDrafts((current) => [data.draft!, ...current.filter((item) => item.draft_key !== data.draft!.draft_key)]);
       setEditContent(data.draft.content);
     } catch (caught) {
       const code = caught instanceof Error ? caught.message : "copilot_unavailable";
-      setError(code === "preview_mutation_disabled"
+      setError(code === "handoff_source_invalid" ? "Current source support is unavailable, revoked or expired. An administrator must recover an eligible source before preparing a fresh handoff." : code === "lead_access_changed" ? "Access changed. Refresh and sign in before reviewing this lead." : code.startsWith("handoff_") ? "The handoff is unavailable or still processing. Refresh before trying again; no message or task was created." : code === "preview_mutation_disabled" || code === "preview_data_disabled"
         ? "Preview is read-only. Generate durable drafts only in an authorized writable environment."
         : "The draft could not be generated. No lead, assignment, or communication state changed.");
     } finally {
@@ -103,14 +113,19 @@ export function Phase6CopilotPanel({
           ...(action === "edit" ? { content: editContent } : {}),
         }),
       });
-      const data = await response.json() as { ok?: boolean; error?: string; version?: number; status?: string };
+      const data = await response.json() as { ok?: boolean; error?: string; version?: number; status?: string; expired?: boolean };
+      if ([401,403,404].includes(response.status)) { setDrafts([]); setEditContent(""); setResult(null); invalidateDisclosure?.(); throw new Error("lead_access_changed"); }
+      if (data.expired && data.version && data.status === "expired") {
+        setDrafts(current => current.map(item => item.draft_key === activeDraft.draft_key ? { ...item, version: data.version!, status: "expired" } : item));
+      }
+      if(data.error==="source_invalid")setDrafts(current=>current.map(item=>item.draft_key===activeDraft.draft_key?{...item,current_source_valid:false}:item));
       if (!response.ok || !data.ok || !data.version || !data.status) throw new Error(data.error || "draft_review_failed");
       setDrafts((current) => current.map((item) => item.draft_key === activeDraft.draft_key
         ? { ...item, version: data.version!, status: data.status!, content: action === "edit" ? editContent : item.content }
         : item));
     } catch (caught) {
       const code = caught instanceof Error ? caught.message : "draft_review_failed";
-      setError(code === "communication_permission_missing"
+      setError(code === "source_invalid" ? "The source was revoked, replaced or expired. Historical review is unchanged, but this brief cannot be used or approved. Prepare a fresh brief only after source recovery." : code === "lead_access_changed" ? "Access changed. Refresh and sign in before reviewing this lead." : code === "communication_permission_missing"
         ? "Approval is blocked because the required channel and purpose permission is not currently allowed."
         : code === "stale_draft_version"
           ? "This draft changed in another session. Refresh before reviewing it."
@@ -122,11 +137,11 @@ export function Phase6CopilotPanel({
     }
   }
 
-  const reviewable = activeDraft && ["generated", "edited"].includes(activeDraft.status);
+  const reviewable = activeDraft && activeDraft.current_source_valid!==false && ["generated", "edited"].includes(activeDraft.status);
   const consent = result?.context?.deterministicControls?.consent;
 
   return (
-    <section className="rounded-lg border border-cyan-400/20 bg-[linear-gradient(145deg,rgba(14,116,144,.12),rgba(11,11,11,.96)_45%)] p-5">
+    <section className="min-w-0 rounded-lg border border-cyan-400/20 bg-[linear-gradient(145deg,rgba(14,116,144,.12),rgba(11,11,11,.96)_45%)] p-3 sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">Agent Command Center · grounded drafts</p>
@@ -155,7 +170,7 @@ export function Phase6CopilotPanel({
           </label>
           <button
             type="button"
-            onClick={generate}
+            onClick={() => generate()}
             disabled={busy || isTest || suppressed}
             className="min-h-11 rounded-md border border-cyan-300/35 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-100 transition hover:border-cyan-200 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -164,20 +179,28 @@ export function Phase6CopilotPanel({
         </div>
       </div>
 
+      {canPrepareHandoff ? <div className="mt-4 rounded-md border border-[#cda24a33] bg-black/20 p-3">
+        <button type="button" onClick={() => generate("reviewed_handoff")} disabled={busy || isTest || suppressed}
+          className="min-h-11 rounded-md border border-[#cda24a66] px-3 py-2 text-sm font-semibold text-[#f4ead4] disabled:opacity-50">Prepare handoff review</button>
+        <p className="mt-2 text-sm leading-6 text-[#bdb4a4]">Uses saved facts and recorded permissions. No AI call, message, task or appointment is created. Review and approve separately.</p>
+      </div> : null}
+
       {isTest || suppressed ? (
         <p className="mt-4 rounded-md border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">
           {isTest ? "TEST RECORD — AI draft generation and contact are blocked." : "Communication is suppressed; AI draft generation is blocked."}
         </p>
       ) : null}
-      {error ? <p role="alert" className="mt-4 rounded-md border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">{error}</p> : null}
+      {error ? <p role="alert" ref={errorRef} tabIndex={-1} className="mt-4 rounded-md border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">{error}</p> : null}
 
       {activeDraft ? (
         <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(18rem,.65fr)]">
-          <div className="rounded-md border border-white/10 bg-black/30 p-4">
+          <div className="min-w-0 rounded-md border border-white/10 bg-black/30 p-3 sm:p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#e2c06f]">{ARTIFACTS.find((item) => item.value === artifactType)?.label}</p>
               <span className="rounded-full border border-cyan-300/25 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-100">{activeDraft.status} · v{activeDraft.version}</span>
             </div>
+            {activeDraft.schema_version === "amm.r2.workers.v1" ? <p role="status" className="mt-3 text-sm text-cyan-100">Saved handoff brief — {reviewable ? "review required" : activeDraft.status}. Approval does not send or schedule anything.</p> : null}
+            {activeDraft.current_source_valid===false?<p role="alert" className="mt-3 text-sm text-[#ffb4b4]">Current source invalid. Historical {activeDraft.status} review remains recorded; new use and approval are blocked.</p>:null}
             <textarea
               value={editContent || activeDraft.content}
               onChange={(event) => setEditContent(event.target.value)}
@@ -188,16 +211,16 @@ export function Phase6CopilotPanel({
             />
             {reviewable ? (
               <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" disabled={busy || !editContent.trim()} onClick={() => review("edit")} className="rounded-md border border-white/15 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#d9ceb8] disabled:opacity-40">Save edit</button>
-                <button type="button" disabled={busy} onClick={() => review("approve")} className="rounded-md border border-cyan-300/35 bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-cyan-100 disabled:opacity-40">Approve draft</button>
-                <button type="button" disabled={busy} onClick={() => review("reject")} className="rounded-md border border-[#7f1d1d] bg-[#2a0909] px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#ffd7d7] disabled:opacity-40">Reject</button>
+                <button type="button" disabled={busy || !editContent.trim()} onClick={() => review("edit")} className="min-h-11 rounded-md border border-white/15 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#d9ceb8] disabled:opacity-40">Save edit</button>
+                <button type="button" disabled={busy} onClick={() => review("approve")} className="min-h-11 rounded-md border border-cyan-300/35 bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-cyan-100 disabled:opacity-40">Approve draft</button>
+                <button type="button" disabled={busy} onClick={() => review("reject")} className="min-h-11 rounded-md border border-[#7f1d1d] bg-[#2a0909] px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#ffd7d7] disabled:opacity-40">Reject</button>
               </div>
             ) : null}
             <p className="mt-3 text-xs text-[#8f8778]">Approval records review only. Sending remains a separate, unavailable action in this panel.</p>
           </div>
 
           <aside className="space-y-3">
-            <div className="rounded-md border border-white/10 bg-black/30 p-4">
+            <div className="min-w-0 rounded-md border border-white/10 bg-black/30 p-3 sm:p-4">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan-200">Evidence status</p>
               <p className="mt-3 text-sm text-[#d9ceb8]">{activeDraft.evidence_references.length} durable reference{activeDraft.evidence_references.length === 1 ? "" : "s"}</p>
               <p className="mt-1 text-sm text-[#d9ceb8]">{activeDraft.missing_facts.length ? `${activeDraft.missing_facts.length} missing fact(s)` : "No missing facts declared"}</p>
@@ -205,7 +228,7 @@ export function Phase6CopilotPanel({
                 {activeDraft.evidence_references.map((reference) => <li key={reference}>{reference}</li>)}
               </ul>
             </div>
-            <div className="rounded-md border border-[#7f1d1d66] bg-[#2a090966] p-4">
+            <div className="min-w-0 rounded-md border border-[#7f1d1d66] bg-[#2a090966] p-3 sm:p-4">
               <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#ffb4b4]">Hard controls</p>
               <ul className="mt-3 space-y-2 text-xs leading-5 text-[#ffd7d7]">
                 <li>AI send: disabled</li>

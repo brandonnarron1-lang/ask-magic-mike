@@ -15,7 +15,7 @@ const requestSchema = z.object({
   action: z.enum(["edit", "approve", "reject", "expire"]),
   content: z.string().max(12_000).optional(),
 });
-const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
+const NO_STORE = { "Cache-Control": "private, no-store, max-age=0" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function sameOrigin(request: NextRequest) {
@@ -29,7 +29,7 @@ export async function PATCH(
 ) {
   if (!sameOrigin(request)) return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403, headers: NO_STORE });
   const auth = await requireLeadCenterApiPermission(request, "lead:update_assigned");
-  if (!auth.ok) return auth.response;
+  if (!auth.ok) { auth.response.headers.set("Cache-Control", NO_STORE["Cache-Control"]); return auth.response; }
   const { draftKey } = await context.params;
   if (!UUID.test(draftKey)) return NextResponse.json({ ok: false, error: "invalid_draft_key" }, { status: 400, headers: NO_STORE });
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
@@ -44,14 +44,25 @@ export async function PATCH(
   const scoped = !hasLeadCenterPermission(auth.principal.role, "lead:view_all");
   if (scoped && !auth.principal.agentId) return NextResponse.json({ ok: false, error: "draft_not_found" }, { status: 404, headers: NO_STORE });
   const authorized = await sql.query(
-    `SELECT d.lead_id, d.source_fingerprint, d.version
+    `SELECT d.lead_id, d.source_fingerprint, d.version, d.schema_version
        FROM public.ai_draft_reviews d
        JOIN public.leads l ON l.id = d.lead_id
       WHERE d.draft_key = $1::uuid${scoped ? " AND l.assigned_agent_id = $2::uuid" : ""}
       ORDER BY d.version DESC LIMIT 1`,
     scoped ? [draftKey, auth.principal.agentId] : [draftKey],
-  ) as Array<{ lead_id: string; source_fingerprint: string; version: number }>;
+  ) as Array<{ lead_id: string; source_fingerprint: string; version: number; schema_version: string }>;
   if (!authorized[0]) return NextResponse.json({ ok: false, error: "draft_not_found" }, { status: 404, headers: NO_STORE });
+
+  if (authorized[0].schema_version === "amm.r2.workers.v1") {
+    const content = parsed.data.action === "edit" ? parsed.data.content!.trim() : "";
+    try {
+      const rows = await sql.query("SELECT public.review_r2_handoff_v1($1::uuid,$2,$3,$4,$5,$6) AS result",
+        [draftKey,parsed.data.expectedVersion,parsed.data.action,content,content?createHash("sha256").update(content).digest("hex"):"",auth.principal.userId]) as Array<{result:Record<string,unknown>}>;
+      const result=rows[0]?.result||{ok:false,error:"handoff_review_unavailable"};
+      const status=result.ok===true?200:result.error==="draft_not_found"?404:409;
+      return NextResponse.json({...result,sendsCommunication:false,createsTask:false},{status,headers:{"Cache-Control":"private, no-store, max-age=0"}});
+    } catch { return NextResponse.json({ok:false,error:"handoff_review_unavailable",sendsCommunication:false},{status:503,headers:NO_STORE}); }
+  }
 
   if (parsed.data.action !== "expire") {
     let currentFacts: Awaited<ReturnType<typeof loadLeadIntelligenceFacts>>;

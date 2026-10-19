@@ -6,8 +6,11 @@ import {
   nonDurableRateLimitFallbackAllowed,
   rateLimitKey,
 } from "@/lib/security/rate-limit";
-import { isPreviewRuntime } from "@/lib/preview-security";
+import { isPreviewRuntime,assertDatabaseMutationAllowed } from "@/lib/preview-security";
 import { delimitUntrusted, detectPromptInjection, redactLeadText } from "../../../src/lib/ai/guardrails";
+import { governedReply,unavailableReply } from "../../../src/lib/intelligence/source-lifecycle";
+import { ensureR2Viewer,r2Enabled,r2Query } from "../../../src/lib/intelligence/viewer";
+import { PUBLIC_KNOWLEDGE_VERSION } from "../../lib/groundedConciergeContract";
 
 function clean(input: unknown) {
   return typeof input === "string" ? input.trim() : "";
@@ -122,11 +125,21 @@ export async function POST(req: Request) {
       413,
     );
   }
+  async function groundedResponse(){
+    if(!r2Enabled())return respond(unavailableReply());
+    const mutation=assertDatabaseMutationAllowed();
+    if(!mutation.ok)return respond({...unavailableReply(),code:mutation.error},mutation.statusCode);
+    try{
+      const {viewer,cookie}=await ensureR2Viewer(req);
+      const answer=await governedReply(r2Query(),message,viewer);
+      return respond(answer,200,cookie?{"Set-Cookie":cookie}:{});
+    }catch{return respond({...unavailableReply(),code:"source_or_session_unavailable"},503);}
+  }
 
-  // Read-only Preview must not mutate the shared limiter or spend against the
-  // external AI provider. The same deterministic answer keeps visual QA and
-  // product review useful without creating a second persistence path.
-  if (isPreviewRuntime()) {
+  // A genuinely read-only Preview refuses durable answers before touching the
+  // limiter. An authorized writable synthetic venue uses the normal limiter.
+  if (isPreviewRuntime() && (!r2Enabled() || !assertDatabaseMutationAllowed().ok)) {
+    if (input.knowledge_version === PUBLIC_KNOWLEDGE_VERSION) return groundedResponse();
     return respond({ message: fallback, mode: "preview_fallback" });
   }
 
@@ -160,6 +173,12 @@ export async function POST(req: Request) {
       },
       503,
     );
+  }
+
+  // Opt-in additive projection. Never fall through to a paid, uncited answer
+  // when approved evidence is missing. Legacy callers retain their contract.
+  if (input.knowledge_version === PUBLIC_KNOWLEDGE_VERSION) {
+    return groundedResponse();
   }
 
   const apiKey = process.env.OPENAI_API_KEY;

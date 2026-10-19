@@ -75,4 +75,12 @@ describe("public origin boundary", () => {
   it("allows origin-less server-to-server requests without adding a host wildcard", () => {
     expect(isApprovedPublicOrigin(null, testEnv({}))).toBe(true);
   });
+  it("permits only the explicitly configured loopback auth origin in a locally compiled venue",()=>{
+    const local=testEnv({NODE_ENV:"production",VERCEL_ENV:"development",BETTER_AUTH_URL:"http://localhost:3049"});
+    expect(isApprovedPublicOrigin("http://localhost:3049",local)).toBe(true);
+    expect(isApprovedPublicOrigin("http://localhost:3050",local)).toBe(false);
+    expect(isApprovedPublicOrigin("http://localhost:3049",{...local,VERCEL:"1"})).toBe(false);
+    expect(isApprovedPublicOrigin("http://localhost:3049",{...local,VERCEL_ENV:"production"})).toBe(false);
+    expect(isApprovedPublicOrigin("http://localhost:3049",{...local,BETTER_AUTH_URL:undefined})).toBe(false);
+  });
 });

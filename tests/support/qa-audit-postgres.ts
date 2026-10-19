@@ -154,13 +154,20 @@ export async function startDatabase(options: { loopbackTcp?: boolean } = {}): Pr
 
 export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: boolean, excluded: ReadonlySet<string> = new Set()): void {
   psql("CREATE SCHEMA extensions; CREATE EXTENSION pgcrypto WITH SCHEMA extensions;", db);
+  // Historical upgrade rehearsals intentionally omit predecessors. Defer their
+  // dependent wrappers too, rather than compiling them against missing columns
+  // or functions. An ordinary full install still applies every migration.
+  const omitted = new Set(excluded);
+  if (!includeRepair) for (const file of [migration, reliabilityMigration, addressCaptureMigration]) omitted.add(file);
+  const predecessors: Readonly<Record<string, readonly string[]>> = {
+    [launchIntakeMigration]: [addressCaptureMigration],
+    "20261018163000_reviewed_handoff_operator.sql": [launchIntakeMigration, "20261017220000_bounded_intelligence_workers.sql"],
+    "20261018180000_grounded_source_lifecycle.sql": ["20261018163000_reviewed_handoff_operator.sql", "20261017180000_consumer_saved_workspace.sql"],
+    "20261018181000_grounded_answer_feedback.sql": ["20261018180000_grounded_source_lifecycle.sql"],
+  };
   for (const file of readdirSync("supabase/migrations").filter((file) => file.endsWith(".sql")).sort()) {
-    if (excluded.has(file)) continue;
-    if (!includeRepair && file === migration) continue;
-    if (!includeRepair && file === reliabilityMigration) continue;
-    // The pre-v2 rehearsal intentionally has no predecessor for this wrapper.
-    if (!includeRepair && file === addressCaptureMigration) continue;
-    if ((!includeRepair || excluded.has(addressCaptureMigration)) && file === launchIntakeMigration) continue;
+    if (predecessors[file]?.some((predecessor) => omitted.has(predecessor))) omitted.add(file);
+    if (omitted.has(file)) continue;
     psql(readFileSync(`supabase/migrations/${file}`, "utf8"), db);
   }
   // Emulate server-role table access; browser roles receive no table grants.

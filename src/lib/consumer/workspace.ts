@@ -43,7 +43,18 @@ export function readConsumerWorkspace(principal: ConsumerPrincipal) {
     const user=await subject(client,principal);
     await scoped(client,principal.userId);
     const row=(await client.query("SELECT revision,interests,updated_at FROM public.consumer_workspaces WHERE user_id=$1",[principal.userId])).rows[0];
-    return { profile:{...user,audience:"consumer"} as ConsumerProfile, workspace:snapshot(row) };
+    await client.query("RESET ROLE");
+    // Own minimized answer/feedback evidence only. No staff identity, draft,
+    // inquiry, score or cross-account lookup is introduced by account export.
+    const intelligence=process.env.R2_SOURCE_GOVERNANCE_ENABLED==="true"?{
+      answers:(await client.query(`WITH own AS MATERIALIZED (
+        SELECT id,revision,created_at,expires_at,reply,source_refs,public.r2_sources_valid_v1(source_refs,'public') AS current_source_valid
+        FROM public.intelligence_answers WHERE consumer_user_id=$1 AND expires_at>clock_timestamp()
+       ) SELECT id,revision,created_at,expires_at,CASE WHEN current_source_valid THEN reply ELSE NULL::jsonb END AS reply,
+         source_refs,current_source_valid FROM own ORDER BY created_at`,[principal.userId])).rows,
+      feedback:(await client.query("SELECT f.id,f.answer_id,f.answer_revision,f.kind,f.category,f.comment,f.status,f.revision,f.created_at,f.expires_at FROM public.intelligence_answer_feedback f JOIN public.intelligence_answers a ON a.id=f.answer_id AND a.revision=f.answer_revision AND a.consumer_user_id=f.consumer_user_id WHERE f.consumer_user_id=$1 AND f.expires_at>clock_timestamp() AND a.expires_at>clock_timestamp() ORDER BY f.created_at",[principal.userId])).rows,
+    }:undefined;
+    return { profile:{...user,audience:"consumer"} as ConsumerProfile, workspace:snapshot(row),...(intelligence?{intelligence}:{} ) };
   });
 }
 export function saveConsumerWorkspace(principal: ConsumerPrincipal, input: ReturnType<typeof readConsumerWorkspaceWrite>) {

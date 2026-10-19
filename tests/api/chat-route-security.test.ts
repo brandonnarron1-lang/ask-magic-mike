@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("server-only",()=>({})); // Node route unit venue; never a runtime authorization bypass.
 
 const mocks = vi.hoisted(() => ({
   checkRateLimit: vi.fn(),
@@ -176,6 +177,40 @@ describe("POST /api/chat secure public boundary", () => {
     await expect(response.json()).resolves.toMatchObject({ mode: "preview_fallback" });
     expect(mocks.checkRateLimit).not.toHaveBeenCalled();
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it.each(["preview", "production"])("does not resurrect static sources when governance is disabled in %s", async (venue) => {
+    process.env.VERCEL_ENV = venue;
+    process.env.DATABASE_ENV = venue;
+    process.env.AI_PUBLIC_CHAT_ENABLED = "true";
+    process.env.OPENAI_API_KEY = "synthetic-not-a-credential";
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-18T00:00:00Z"));
+    const fetch = vi.spyOn(globalThis, "fetch");
+    try {
+      const response = await POST(new Request("https://www.askmagicmike.com/api/chat/message", {
+        method: "POST", headers: { "content-type": "application/json", origin: "https://www.askmagicmike.com" },
+        body: JSON.stringify({ message: "How do I buy?", knowledge_version: "amm.public-knowledge.v1" }),
+      }));
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({mode:"source_unavailable",citations:[]});
+      expect(response.headers.get("cache-control")).toContain("private, no-store");
+      expect(fetch).not.toHaveBeenCalled();
+      if (venue === "preview") expect(mocks.checkRateLimit).not.toHaveBeenCalled();
+      else expect(mocks.checkRateLimit).toHaveBeenCalledOnce();
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("never falls through to a paid answer for unsupported opt-in claims", async () => {
+    process.env.AI_PUBLIC_CHAT_ENABLED = "true";
+    process.env.OPENAI_API_KEY = "synthetic-not-a-credential";
+    const fetch = vi.spyOn(globalThis, "fetch");
+    const response = await POST(new Request("https://www.askmagicmike.com/api/chat", {
+      method: "POST", headers: { "content-type": "application/json", origin: "https://www.askmagicmike.com" },
+      body: JSON.stringify({message:"Guarantee my home price",knowledge_version:"amm.public-knowledge.v1"}),
+    }));
+    expect(await response.json()).toMatchObject({mode:"source_unavailable",citations:[]});
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("fails closed before provider use when Production limiting is non-durable", async () => {

@@ -109,6 +109,8 @@ export type AdminAiDraftReviewRow = {
   content: string;
   content_hash: string;
   source_fingerprint: string;
+  schema_version?: string;
+  current_source_valid?: boolean;
   evidence_references: string[];
   missing_facts: string[];
   limitations: string[];

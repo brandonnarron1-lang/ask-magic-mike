@@ -28,9 +28,13 @@ function isExactVercelPreviewOrigin(origin: string, env: NodeJS.ProcessEnv) {
 }
 
 function isLocalDevelopmentOrigin(origin: string, env: NodeJS.ProcessEnv) {
-  return env.NODE_ENV !== "production"
-    && env.VERCEL_ENV !== "production"
-    && /^http:\/\/(localhost|127\.0\.0\.1|\[::1\]):\d+$/.test(origin);
+  if(env.VERCEL_ENV === "production"||!/^http:\/\/(localhost|127\.0\.0\.1|\[::1\]):\d+$/.test(origin))return false;
+  if(env.NODE_ENV !== "production")return true;
+  // A locally built application is still a legitimate development venue. Bind
+  // it to its configured auth origin; never trust a request Host/forwarded host
+  // to add an origin, and never apply this on hosted Vercel deployments.
+  if(env.VERCEL_ENV!=="development"||env.VERCEL==="1"||!env.BETTER_AUTH_URL)return false;
+  try{return new URL(env.BETTER_AUTH_URL).origin===origin;}catch{return false;}
 }
 
 export function isApprovedAskMagicMikeOrigin(

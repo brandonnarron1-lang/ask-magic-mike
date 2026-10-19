@@ -6,6 +6,72 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## R2 staff handoff — October 18 local candidate, not released
+
+This addition reuses **AI draft tools (review required)** inside an already
+authorized saved lead. It does not activate the model, send messages or add a
+second work queue. The accepted deployment receipt, not this note, establishes
+what is live. Existing public intake and internal alerts remain unchanged.
+
+After a separately accepted release, an assigned maintainer or administrator can:
+
+1. Open the permitted saved inquiry and expand **AI draft tools (review required)**.
+2. Select **Prepare handoff review**. Read the saved intent, user-reported property
+   reference, missing facts, current owner, permission evidence and dated service
+   source. Missing facts stay missing; the brief verifies no property claim.
+3. Correct the brief with **Save edit**, then deliberately **Approve draft** or
+   **Reject**. Each decision creates an immutable review version. Approval is
+   neither contact permission, a scheduled task nor an appointment.
+4. Use the existing permission-aware contact/task controls separately, only for
+   an actual authorized action. Record its real outcome, never a fictional one.
+
+Repeated preparation of the same context returns the same saved job/draft. New
+facts or permissions require a fresh review; stale approval expires rather than
+silently trusting the old snapshot. If access changes or a session expires,
+contact content disappears until a new authorized sign-in. QA and suppressed
+records cannot prepare a handoff, even for an administrator. No task, lead,
+assignment, consent, notification or provider action is created by this panel.
+
+This is local engineering acceptance with synthetic records, not staff/human
+acceptance. The four additive R2 migrations, hosted/protected gates, compatible
+recovery build and source/feedback activation remain separate release work.
+No development credential becomes a Production credential.
+
+### Source and answer feedback — prospective R2 controls
+
+After acceptance and explicit `R2_SOURCE_GOVERNANCE_ENABLED` activation, an
+administrator opens **Activity → Approved source review**. Register the approved
+owned service source, fetch a candidate, validate it and deliberately promote
+the validated version. Refreshing is not approval. The panel shows retrieval,
+effective date, freshness and revisions; unknown publication dates remain
+unknown. A changed upstream claim is quarantined, not silently adopted.
+
+Revoke a version or the source with a reason. Restoration requires a different
+eligible, non-tombstoned version and current owned rights. Promotion/revocation
+invalidates earlier authorization references; historical approved handoffs stay
+recorded but are separately marked unusable. A stale save preserves the edit;
+refresh and read the current version before another decision. Do not claim that
+already delivered text can be recalled.
+
+Visitors use **Helpful**, **Not helpful** or **Report a problem** below a cited
+answer. Reports belong to their current account or HTTP-only guest session,
+not anyone holding an answer ID. The optional comment is limited to 2,000
+characters; avoid private details. Activity's **Answer feedback** queue lets an
+administrator classify, resolve, reopen and optionally create a synthetic
+regression-case draft. That draft is not an executed test, training, knowledge
+approval, deployment, notification or task. Acknowledgments survive reloads in
+the same valid scope. Account export includes own retained answer/feedback
+evidence; account deletion removes linked details and scrubs minimal review
+audit linkage. Expired feedback is hidden immediately, then physically removed
+on a later accepted submission or authorized cleanup—not a promised scheduled
+30-day purge. No automatic cleanup schedule is installed by this increment.
+
+The answer release boundary is a short atomic current-eligibility/receipt commit
+before buffered text leaves the server. Public paid AI, recurring workers and
+marketing publication remain independently held. Recovery must retain source
+tombstones, immutable reviews, consumer data and v6 notification readers; an old
+pre-R2 app is not a safe blind rollback after governance activation.
+
 ## Consumer workspace — R1 guest increment, October 17 candidate
 
 **R1b optional account-state candidate:** `/my/account` is independently gated by

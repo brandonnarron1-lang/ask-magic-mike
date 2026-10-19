@@ -109,7 +109,7 @@ const TIMELINE_SOURCE_QUERIES = {
                WHERE lead_id = $1::uuid
                ORDER BY first_human_response_at DESC, id DESC LIMIT $2`,
   aiReviews: `SELECT id, draft_key, version, artifact_type, channel, purpose,
-                     status, content, content_hash, source_fingerprint,
+                     status, content, content_hash, source_fingerprint, schema_version,
                      evidence_references, missing_facts, limitations, model,
                      created_by, reviewed_by, reviewed_at, created_at, updated_at
                 FROM public.ai_draft_reviews
@@ -120,7 +120,9 @@ const TIMELINE_SOURCE_QUERIES = {
 async function loadTimelineSources(sql: Query, leadId: string, cap: number) {
   const entries = Object.entries(TIMELINE_SOURCE_QUERIES);
   const settled = await Promise.allSettled(
-    entries.map(([, statement]) => sql.query(statement, [leadId, cap])),
+    entries.map(([name, statement]) => sql.query(name==="aiReviews"&&process.env.R2_SOURCE_GOVERNANCE_ENABLED==="true"
+      ? statement.replace("FROM public.ai_draft_reviews",`, CASE WHEN schema_version='amm.r2.workers.v1' THEN coalesce((SELECT public.r2_sources_valid_v1(j.r2_contract->'input'->'sourceAuthorization','public') FROM public.ai_intelligence_jobs j WHERE j.id=draft_key),false) ELSE NULL END AS current_source_valid FROM public.ai_draft_reviews`)
+      : statement, [leadId, cap])),
   );
   const rows: Record<string, Array<Record<string, unknown>>> = {};
   const incompleteSources: string[] = [];
@@ -140,7 +142,14 @@ function stringArray(value: unknown): string[] {
 }
 
 function normalizeAiDraft(row: Record<string, unknown>): AdminAiDraftReviewRow | null {
-  const required = ["id", "draft_key", "artifact_type", "purpose", "status", "content", "content_hash", "source_fingerprint", "model", "created_by", "created_at", "updated_at"];
+  // Neon parses timestamptz into Date; the JSON review RPC returns strings.
+  // Both must round-trip through this same reader without dropping a draft.
+  const date = (value: unknown) => value instanceof Date
+    ? (Number.isFinite(value.getTime()) ? value.toISOString() : null)
+    : typeof value === "string" && Number.isFinite(Date.parse(value)) ? value : null;
+  const createdAt = date(row.created_at), updatedAt = date(row.updated_at);
+  if (!createdAt || !updatedAt) return null;
+  const required = ["id", "draft_key", "artifact_type", "purpose", "status", "content", "content_hash", "source_fingerprint", "model", "created_by"];
   if (required.some((key) => typeof row[key] !== "string")) return null;
   const version = Number(row.version);
   if (!Number.isInteger(version) || version < 1) return null;
@@ -155,15 +164,17 @@ function normalizeAiDraft(row: Record<string, unknown>): AdminAiDraftReviewRow |
     content: String(row.content),
     content_hash: String(row.content_hash),
     source_fingerprint: String(row.source_fingerprint),
+    schema_version: typeof row.schema_version === "string" ? row.schema_version : undefined,
+    current_source_valid: typeof row.current_source_valid === "boolean" ? row.current_source_valid : undefined,
     evidence_references: stringArray(row.evidence_references),
     missing_facts: stringArray(row.missing_facts),
     limitations: stringArray(row.limitations),
     model: String(row.model),
     created_by: String(row.created_by),
     reviewed_by: typeof row.reviewed_by === "string" ? row.reviewed_by : null,
-    reviewed_at: typeof row.reviewed_at === "string" ? row.reviewed_at : null,
-    created_at: String(row.created_at),
-    updated_at: String(row.updated_at),
+    reviewed_at: date(row.reviewed_at),
+    created_at: createdAt,
+    updated_at: updatedAt,
   };
 }
 

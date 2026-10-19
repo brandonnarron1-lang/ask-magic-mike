@@ -52,7 +52,11 @@ function text(value: unknown): string | null {
 }
 
 function timestamp(value: unknown, fallback?: unknown) {
-  return text(value) || text(fallback) || new Date(0).toISOString();
+  for(const candidate of[value,fallback]){
+    const date=candidate instanceof Date?candidate:typeof candidate==="string"?new Date(candidate):null;
+    if(date&&Number.isFinite(date.getTime()))return date.toISOString();
+  }
+  return null;
 }
 
 function leadLabel(row: RawActivityRow) {
@@ -67,6 +71,7 @@ function normalizeActivityRow(row: RawActivityRow): AdminActivityEvent | null {
 
   const occurredAt = timestamp(row.occurred_at, row.recorded_at);
   const recordedAt = timestamp(row.recorded_at, row.occurred_at);
+  if(!occurredAt||!recordedAt)return null;
   const eventType = text(row.event_type) || "activity.recorded";
   return {
     id: `${source}:${sourceId}`,
@@ -193,8 +198,8 @@ export async function loadNeonAdminActivity(input: {
     else incompleteSources.push(sources[index]);
   });
 
-  const ordered = rows
-    .map(normalizeActivityRow)
+  const normalized=rows.map(row=>{const event=normalizeActivityRow(row);if(!event&&row.activity_source&&!incompleteSources.includes(row.activity_source))incompleteSources.push(row.activity_source);return event;});
+  const ordered = normalized
     .filter((row): row is AdminActivityEvent => Boolean(row))
     .sort((a, b) => b.occurredAt.localeCompare(a.occurredAt)
       || b.recordedAt.localeCompare(a.recordedAt)
