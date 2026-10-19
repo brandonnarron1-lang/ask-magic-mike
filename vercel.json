@@ -1,4 +1,7 @@
 {
+  "git": {
+    "deploymentEnabled": { "codex/r3-connected-beta-20261019": false }
+  },
   "crons": [
     {
       "path": "/api/admin/notifications/retry",

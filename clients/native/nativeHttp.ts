@@ -6,7 +6,8 @@ export type VerifiedGuestQa = Pick<QaBinding, "origin" | "verificationReceipt" |
 export type VerifiedLocalLoopbackQa = Omit<VerifiedGuestQa, "kind"> & {
   kind: "verified-local-loopback"; platform: "ios" | "android";
 };
-export type GuestQaDescriptor = VerifiedGuestQa | VerifiedLocalLoopbackQa;
+export type VerifiedInternalBeta = Omit<VerifiedGuestQa, "kind"> & { kind: "connected-internal-beta"; createdAt: number; source: string };
+export type GuestQaDescriptor = VerifiedGuestQa | VerifiedLocalLoopbackQa | VerifiedInternalBeta;
 export type HttpResponse = {
   status: number; url: string; redirected: boolean;
   headers: { get(name: string): string | null; getSetCookie?(): string[] };
@@ -24,7 +25,10 @@ const UUID = "[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f
 const failed = () => Error("Native guest request unconfirmed. Recheck explicitly; no automatic retry.");
 function checkedDescriptor(d: GuestQaDescriptor, now: number) {
   const u = new URL(d.origin);
-  const remote = d.kind === "verified-isolated-qa" && u.protocol === "https:";
+  const remote = (d.kind === "verified-isolated-qa" || d.kind === "connected-internal-beta") && u.protocol === "https:";
+  if (d.kind === "connected-internal-beta" && (!/^https:\/\/amm-internal-beta-[a-f0-9]{12}\.vercel\.app$/.test(d.origin)
+    || !Number.isSafeInteger(d.createdAt) || now < d.createdAt || d.expiresAt - d.createdAt > 7 * 86400000
+    || !/^[a-f0-9]{40}$/.test(d.source) || !/^beta-provenance:[a-f0-9]{64}$/.test(d.verificationReceipt))) throw failed();
   const local = d.kind === "verified-local-loopback" && u.protocol === "http:" && Number(u.port) >= 1024 && Number(u.port) <= 65535
     && ((d.platform === "ios" && u.hostname === "127.0.0.1") || (d.platform === "android" && u.hostname === "10.0.2.2"));
   if ((!remote && !local) || u.origin !== d.origin
@@ -70,10 +74,12 @@ function readCookie(headers: string[], now: number, ceiling: number): Cookie | n
  * native contract, not a browser-header spoof. Cookie state commits before any
  * response is returned. dispose() aborts and permanently fences this adapter. */
 export function createGuestSessionAdapter(descriptor: GuestQaDescriptor, store: SecureStore, fetchNative: NativeFetch,
-  options: { now?: () => number; timeoutMs?: number } = {}): NativeSessionAdapter & { dispose(): void; clear(): Promise<void> } {
+  options: { now?: () => number; timeoutMs?: number } = {}): NativeSessionAdapter & { dispose(): void; clear(): Promise<void>; admit(code: string): Promise<void> } {
   const now = options.now ?? Date.now;
   const timeoutMs = options.timeoutMs ?? HTTP_TIMEOUT_MS;
-  checkedDescriptor(descriptor, now());
+  // Expired beta builds retain local planning; the request/admission checks
+  // enforce expiry. Construction performs no network or credential mutation.
+  checkedDescriptor(descriptor, descriptor.kind === "connected-internal-beta" ? descriptor.createdAt : now());
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > HTTP_TIMEOUT_MS) throw failed();
   const d = Object.freeze({ ...descriptor });
   const key = `amm-r3-guest-cookie-v1.${d.localScopeId}`;
@@ -83,6 +89,18 @@ export function createGuestSessionAdapter(descriptor: GuestQaDescriptor, store: 
     audience: "consumer-or-guest",
     dispose() { disposed = true; active?.abort(); },
     async clear() { disposed = true; active?.abort(); await store.removeItem(key); },
+    async admit(code) {
+      if (d.kind !== "connected-internal-beta" || disposed || busy || !/^[A-Za-z0-9_-]{43}$/.test(code)) throw failed();
+      checkedDescriptor(d, now());
+      busy = true;
+      try {
+        const prior = await store.getItem(key);
+        // Never silently replace a revoked identity or a pending exact-action
+        // journal. This app has no automatic new-key/re-enrollment path.
+        if (prior && checkedCookie(JSON.parse(prior), now(), d.expiresAt).value !== code) throw failed();
+        await store.setItem(key, JSON.stringify({ value: code, expiresAt: d.expiresAt }));
+      } finally { busy = false; }
+    },
     async request(input) {
       if (disposed || busy || input.origin !== d.origin || !validRoute(input.path, input.method)
           || (input.method === "GET" && input.body !== undefined)
@@ -105,11 +123,13 @@ export function createGuestSessionAdapter(descriptor: GuestQaDescriptor, store: 
             if (parsed.expiresAt <= now()) { await store.removeItem(key); live(); }
             else cookie = checkedCookie(parsed, now(), d.expiresAt);
           }
+          if (d.kind === "connected-internal-beta" && !cookie) throw failed();
           async function send(path: string, method: "GET" | "POST", requestBody?: string, extraHeaders: Record<string, string> = {}) {
           live();
           const headers: Record<string, string> = { Accept: "application/json", "Content-Type": "application/json", ...extraHeaders };
+          if (d.kind === "connected-internal-beta") headers["x-amm-beta-source"] = d.source;
           if (cookie) headers.Cookie = `${COOKIE}=${cookie.value}`;
-          const url = d.origin + path;
+          const url = d.origin + (d.kind === "connected-internal-beta" ? "/api/native/beta/v1" : "") + path;
           const response = await fetchNative(url, { method, headers, ...(requestBody === undefined ? {} : { body: requestBody }),
             credentials: "omit", redirect: "manual", signal: controller.signal });
           live();

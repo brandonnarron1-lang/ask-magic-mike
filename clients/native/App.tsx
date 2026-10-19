@@ -8,7 +8,8 @@ import { textScale } from "./textScale";
 
 const tokens = { black: "#0b0b0c", panel: "#171719", gold: "#c9a96e", cream: "#f5efdf", muted: "#d9ceb8", ruby: "#ffb4b4" };
 type Tab = "Home" | "Saved" | "Ask Mike" | "My Plan";
-export type CandidateRuntime = { secureStore?: SecureStore; qa?: QaBinding; newRequestId?: () => string };
+export type CandidateRuntime = { secureStore?: SecureStore; qa?: QaBinding; newRequestId?: () => string;
+  beta?: { expiresAt: number; admit(code: string): Promise<void> } };
 function Copy({ children, heading = false }: { children: ReactNode; heading?: boolean }) {
   const scale = textScale(Platform.OS, useWindowDimensions().fontScale, heading ? 20 : 16);
   return <Text allowFontScaling={scale.allowFontScaling} accessibilityRole={heading ? "header" : undefined} style={[heading ? styles.heading : styles.copy, scale.style]}>{children}</Text>;
@@ -55,6 +56,7 @@ export default function App({ runtime = {} }: { runtime?: CandidateRuntime }) {
   const [budget, setBudget] = useState("");
   const [needs, setNeeds] = useState("");
   const [question, setQuestion] = useState("");
+  const [access, setAccess] = useState("");
   const [reportCategory, setReportCategory] = useState<FeedbackCategory>("incorrect_claim");
   const scroll = useRef<ScrollView>(null);
 
@@ -102,14 +104,14 @@ export default function App({ runtime = {} }: { runtime?: CandidateRuntime }) {
   const compare = plan.compareIds;
 
   return <SafeAreaView style={styles.screen}>
-    <View style={styles.brand}><Copy heading>ASK MAGIC MIKE</Copy><Copy>Our Town Properties · development preview</Copy></View>
+    <View style={styles.brand}><Copy heading>ASK MAGIC MIKE</Copy><Copy>Our Town Properties · {runtime.beta ? "internal synthetic beta" : "development preview"}</Copy></View>
     <View accessibilityRole="tablist" style={styles.tabs}>{(["Home", "Saved", "Ask Mike", "My Plan"] as Tab[]).map(name =>
       <Button key={name} title={name} selected={tab === name} onPress={() => navigate(name)} />)}</View>
     {!!notice && <Text allowFontScaling={scale.allowFontScaling} accessibilityLiveRegion="polite" style={[styles.status, scale.style]}>{notice}</Text>}
     {!!error && <Text allowFontScaling={scale.allowFontScaling} accessibilityRole="alert" accessibilityLiveRegion="assertive" style={[styles.status, styles.error, scale.style]}>{error}</Text>}
     <ScrollView ref={scroll} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
       <View style={styles.card}><Copy>{services.persistent ? "Private on this device. Not synced to an account." : "Session only. Saved items disappear on app restart."}</Copy>
-        <Copy>{services.client.connected ? "Synthetic QA connection · no customer messages." : "Ask Mike is not connected. Your local plan still works."}</Copy></View>
+        <Copy>{runtime.beta ? `Synthetic beta ends ${new Date(runtime.beta.expiresAt).toISOString()}. No live AI or customer messages. Online access may be held; your private plan still works.` : services.client.connected ? "Synthetic QA connection · no customer messages." : "Ask Mike is not connected. Your local plan still works."}</Copy></View>
 
       {tab === "Home" && <View style={styles.card}>
         <Copy heading>Your next step, at your pace</Copy><Copy>Save up to eight unverified references or search preferences. Compare what you declared, then build a private buying or seller-preparation plan.</Copy>
@@ -146,6 +148,16 @@ export default function App({ runtime = {} }: { runtime?: CandidateRuntime }) {
       </>}
 
       {tab === "Ask Mike" && <>
+        {runtime.beta && <View style={styles.card}><Copy heading>Private beta access</Copy>
+          <Copy>Only use your individually supplied beta access code. Saving it does not verify access or send a request. Do not enter customer details; answers use labeled synthetic fixtures.</Copy>
+          <TextInput accessibilityLabel="Individual beta access code" secureTextEntry autoComplete="off" autoCorrect={false} autoCapitalize="none"
+            style={styles.input} value={access} onChangeText={setAccess} maxLength={43} editable={!busy} />
+          <Button title="Save beta access on this device" disabled={busy || access.length !== 43} onPress={() => {
+            setBusy(true); setError("");
+            void runtime.beta!.admit(access).then(() => { setAccess(""); services.client.hideAnswer(); setApi(services.client.snapshot()); setNotice("Access stored privately, not yet verified. Deliberately ask or recheck to test the connection."); })
+              .catch(() => { setAccess(""); setError("Access not saved. Check its expiry and original identity; nothing was sent."); }).finally(() => setBusy(false));
+          }} />
+        </View>}
         <View style={styles.card}><Copy heading>Ask Mike’s AI assistant</Copy><Copy>Source-supported guidance for Our Town Properties—not Mike personally. Ask a public process question; leave out personal details.</Copy>
           <Copy>{api.notice}</Copy><Copy>Source state: {api.validity === "valid" ? "valid at last explicit release/read; recheck before relying" : api.validity === "source_invalid" ? "source-invalid; earlier answer hidden" : "unverified; no current answer shown"}.</Copy>
           <Field label="Public process question (2,000 characters)" value={question} onChange={setQuestion} maxLength={2000} multiline disabled={busy} />

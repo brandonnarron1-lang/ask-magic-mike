@@ -16,9 +16,11 @@ export function createNativeRuntime(verifiedQa?: GuestQaDescriptor, fetchOverrid
     set: (key, value) => ExpoSecureStore.setItemAsync(key, value, nativeOptions),
     remove: key => ExpoSecureStore.deleteItemAsync(key, nativeOptions),
   });
+  const session = verifiedQa ? createGuestSessionAdapter(verifiedQa, secureStore, fetchOverride) : undefined;
   return {
     secureStore,
     newRequestId: () => Crypto.randomUUID(),
-    ...(verifiedQa ? { qa: { ...verifiedQa, session: createGuestSessionAdapter(verifiedQa, secureStore, fetchOverride) } } : {}),
+    ...(verifiedQa && session ? { qa: { ...verifiedQa, session },
+      ...(verifiedQa.kind === "connected-internal-beta" ? { beta: { expiresAt: verifiedQa.expiresAt, admit: session.admit } } : {}) } : {}),
   };
 }

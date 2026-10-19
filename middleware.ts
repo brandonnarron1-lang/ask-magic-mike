@@ -16,5 +16,9 @@ export const config = {
       source: "/:path*",
       has: [{ type: "host", value: "hub.ourtownproperties.com" }],
     },
+    {
+      source: "/:path*",
+      has: [{ type: "host", value: "amm-internal-beta-[a-f0-9]{12}(?:-[a-z0-9-]+)?\\.vercel\\.app" }],
+    },
   ],
 };

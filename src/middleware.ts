@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { betaWindow, validBetaOrigin, BETA_PREFIX, betaRoute } from "./lib/intelligence/beta-contract";
 import { decodeBasicPassword, edgeSecretsMatch } from "@/lib/admin/edge-secret";
 import {
   getLeadCenterRbacState,
@@ -9,6 +10,23 @@ const LEAD_CENTER_HOST = "hub.ourtownproperties.com";
 const CANONICAL_LEAD_CENTER_URL = "https://www.askmagicmike.com/admin";
 
 export async function middleware(req: NextRequest) {
+  if (req.nextUrl.hostname.startsWith("amm-internal-beta-")) {
+    const refuse = (status: number) => NextResponse.json({ ok: false, error: "internal_beta_unavailable" }, { status,
+      headers: { "Cache-Control": "private, no-store", "X-Robots-Tag": "noindex, nofollow, noarchive", "Referrer-Policy": "no-referrer" } });
+    try {
+      const origin = process.env.AMM_NATIVE_BETA_ORIGIN || "";
+      if (process.env.AMM_NATIVE_BETA_MODE !== "synthetic-v1" || !validBetaOrigin(origin) || req.nextUrl.origin !== origin) return refuse(503);
+      const window = betaWindow(JSON.parse(process.env.AMM_NATIVE_BETA_WINDOW || "null"));
+      if (process.env.VERCEL_GIT_COMMIT_SHA !== window.source) return refuse(503);
+      if (Date.now() < window.createdAt || Date.now() >= window.expiresAt) return refuse(410);
+      if (!req.nextUrl.pathname.startsWith(BETA_PREFIX + "/")
+        || !betaRoute(req.nextUrl.pathname.slice(BETA_PREFIX.length), req.method)) return refuse(404);
+      // Auth lives in the server handler; this is an independent deny-by-default
+      // boundary. All intake, account, staff, provider and scheduler routes are
+      // unavailable on the beta host, even with an admitted guest credential.
+      return NextResponse.next();
+    } catch { return refuse(503); }
+  }
   if (req.nextUrl.hostname.toLowerCase() === LEAD_CENTER_HOST) {
     // The brokerage subdomain is an address shortcut, not a second app or data
     // boundary. Drop the incoming path/query to avoid leaking identifiers or
