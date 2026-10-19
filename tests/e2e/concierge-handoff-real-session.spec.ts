@@ -46,7 +46,8 @@ test("reviewed question reaches canonical test capture once; answer does not bec
 });
 
 // These are genuine Better Auth browser sessions against a fresh owned local
-// PostgreSQL cluster. No route interception, fake cookie or disabled RBAC.
+// PostgreSQL cluster. No mocked responses, fake cookie or disabled RBAC. The
+// final case pauses one real POST only to revoke its session before dispatch.
 test.describe("staff handoff uses existing review services without contact effects",()=>{
   test.describe.configure({mode:"serial"});
   let pool:Pool;
@@ -169,9 +170,21 @@ test.describe("staff handoff uses existing review services without contact effec
   });
   test("revoked genuine session removes stale contact content and denies further review",async()=>{
     const page=pages.agent,panel=await openTools(page,fixture.leads.agent),before=await unchanged();
-    await query('DELETE FROM lead_center_sessions WHERE "userId"=$1',[fixture.ids.agent]);
+    const button=panel.getByRole("button",{name:"Prepare handoff review",exact:true});
+    await expect(button).toBeEnabled();
+    let revokedSessions=0;
+    // Keep the session valid through native click/actionability. Once its real
+    // POST exists, revoke before the unchanged request reaches the server. An
+    // independent fresh permission read may otherwise remove the contact UI
+    // before any copilot POST is made; that is a different privacy boundary.
+    await page.route(new URL("/api/admin/copilot",page.url()).href,async route=>{
+      expect(route.request().method()).toBe("POST");
+      revokedSessions=(await query('DELETE FROM lead_center_sessions WHERE "userId"=$1 RETURNING id',[fixture.ids.agent])).length;
+      await route.continue();
+    },{times:1});
     const denied=page.waitForResponse(r=>new URL(r.url()).pathname==="/api/admin/copilot"&&r.request().method()==="POST");
-    await panel.getByRole("button",{name:"Prepare handoff review",exact:true}).click();expect((await denied).status()).toBe(401);
+    await button.click();expect((await denied).status()).toBe(401);
+    expect(revokedSessions).toBeGreaterThan(0);
     await expect(page.getByRole("status",{name:"Lead access unavailable"})).toBeVisible();
     expect(await page.locator("body").innerText()).not.toContain("private-agent@example.test");
     expect(await unchanged()).toEqual(before);expect(errors).toEqual([]);
