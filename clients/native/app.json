@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Ask Magic Mike · R3 prototype",
+    "slug": "amm-r3-native-candidate",
+    "version": "0.0.0",
+    "platforms": ["ios", "android"],
+    "userInterfaceStyle": "dark",
+    "plugins": [["expo-secure-store", { "configureAndroidBackup": true, "faceIDPermission": false }]],
+    "updates": { "enabled": false },
+    "android": { "allowBackup": false }
+  }
+}

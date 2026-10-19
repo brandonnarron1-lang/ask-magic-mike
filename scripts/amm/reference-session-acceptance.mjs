@@ -17,7 +17,11 @@ const acquisition = process.env.AMM_ACQUISITION_ACCEPTANCE === "1";
 const consumerWorkspace = process.env.AMM_CONSUMER_WORKSPACE_ACCEPTANCE === "1";
 const consumerAccount = process.env.AMM_CONSUMER_ACCOUNT_ACCEPTANCE === "1";
 const concierge = process.env.AMM_CONCIERGE_HANDOFF_ACCEPTANCE === "1";
-const lifecycle = process.env.AMM_R2_LIFECYCLE_ACCEPTANCE === "1";
+const nativeClient = process.env.AMM_R3_NATIVE_ACCEPTANCE === "1";
+const nativeDevice = process.env.AMM_R3_NATIVE_DEVICE_ACCEPTANCE === "1";
+if (nativeDevice && !nativeClient) throw new Error("native_device_requires_owned_native_acceptance");
+const lifecycle = process.env.AMM_R2_LIFECYCLE_ACCEPTANCE === "1" || nativeClient;
+if (nativeClient && process.env.AMM_R2_LIFECYCLE_ACCEPTANCE === "1") throw new Error("exclusive_native_acceptance_selection_required");
 if (lifecycle && (concierge || consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_r2_lifecycle_acceptance_selection_required");
 if (concierge && (consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_concierge_acceptance_selection_required");
 if (consumerAccount && (consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_consumer_account_acceptance_selection_required");
@@ -118,6 +122,7 @@ try {
     ...(consumerAccount ? { AMM_CONSUMER_ACCOUNT_ACCEPTANCE: "1",CONSUMER_WORKSPACE_ACCOUNTS_ENABLED:"true" } : {}),
     ...(concierge ? { AMM_CONCIERGE_HANDOFF_ACCEPTANCE: "1" } : {}),
     ...(lifecycle ? {AMM_R2_LIFECYCLE_ACCEPTANCE:"1",R2_SOURCE_GOVERNANCE_ENABLED:"true",CONSUMER_WORKSPACE_ACCOUNTS_ENABLED:"true"} : {}),
+    ...(nativeClient ? {AMM_R3_NATIVE_ACCEPTANCE:"1",...(nativeDevice?{AMM_R3_NATIVE_DEVICE_ACCEPTANCE:"1"}:{})} : {}),
     ...(artifactOverride || homeValue || launchIntake ? { AMM_E2E_OUTPUT_DIR: path.join(runDir, "screenshots"), AMM_SESSION_ARTIFACT_DIR: runDir } : {}),
     // The existing Playwright switch permits an explicit local development
     // diagnostic. It is never evidence for the default built-app gate.
@@ -133,7 +138,7 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = nativeClient ? (nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
   child = spawn("pnpm", ["exec", "playwright", "test", suite, ...(artifactOverride ? ["--output",path.join(runDir,"test-results")] : []), ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });

@@ -10,6 +10,7 @@ export default defineConfig({
     globals: true,
     exclude: [
       "**/node_modules/**",
+      "**/clients/native/**",
       "**/tests/e2e/**",
       "**/.claude/**",
       "**/.amm-run/**",

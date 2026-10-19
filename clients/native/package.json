@@ -1,0 +1,27 @@
+{
+  "name": "amm-r3-native-candidate",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.tsx",
+  "packageManager": "pnpm@10.30.3",
+  "engines": { "node": "24.x" },
+  "scripts": {
+    "start": "NODE_OPTIONS=--dns-result-order=ipv4first EXPO_OFFLINE=1 EXPO_NO_TELEMETRY=1 EXPO_NO_DOTENV=1 expo start --go --localhost --max-workers 1",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "test:runtime": "node --test runtime.test.cjs",
+    "export:ios": "expo export --platform ios --max-workers 1 --output-dir dist-ios",
+    "export:android": "expo export --platform android --max-workers 1 --output-dir dist-android"
+  },
+  "dependencies": {
+    "expo": "57.0.30",
+    "expo-crypto": "57.0.4",
+    "expo-secure-store": "57.0.4",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "5.7.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.4",
+    "typescript": "6.0.3"
+  }
+}

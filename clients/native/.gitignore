@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+.cache/
+dist-ios/
+dist-android/
+*.local.*
+vendor-hosts/
+*-verification.json
+*-history.json
+*.log
