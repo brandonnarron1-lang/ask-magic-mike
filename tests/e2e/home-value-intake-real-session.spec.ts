@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { expect, test, type Locator, type Page, type Route, type TestInfo } from "@playwright/test";
+import { expect, test, type Locator, type Page, type Request as BrowserRequest, type Route, type TestInfo } from "@playwright/test";
 
 // Real compiled local UI + actual health capability in the existing isolated
 // PG/auth harness. EVERY browser mutation is intercepted. Lead receipts below
@@ -34,6 +34,9 @@ type Capture = {
   pageErrors: string[];
   addressLookupFixture?: boolean;
   checks: Promise<void>[];
+  healthInFlight: Set<BrowserRequest>;
+  healthFailures: { phase: string; browserFailure: string | null; detail: string }[];
+  historyPhase: string;
   syntheticLeadIds: Map<string, string>;
   reply: (route: Route, attempt: Attempt, index: number) => Promise<void>;
   historyResult?: "trusted_browser_bfcache" | "new_document_pending_reference_guard";
@@ -86,6 +89,7 @@ async function installBoundary(page: Page): Promise<Capture> {
   const capture: Capture = {
     attempts: [], statuses: [], violations: [], appointments: 0, auxiliaryWrites: 0,
     externalBlocked: 0, capabilityReads: 0, capabilityModes: new Set(), pageErrors: [], checks: [], syntheticLeadIds: new Map(),
+    healthInFlight: new Set(), healthFailures: [], historyPhase: "initial",
     reply: (route, attempt) => savedReply(route, capture, attempt),
   };
   page.on("pageerror", error => capture.pageErrors.push(error.stack || error.message));
@@ -99,16 +103,29 @@ async function installBoundary(page: Page): Promise<Capture> {
       if (typeof name === "string" && /^[a-z_]+$/.test(name)) state.events.push(name);
     });
   });
+  const isHealth = (request: BrowserRequest) => {
+    const url = new URL(request.url());
+    return url.origin === appOrigin && url.pathname === "/api/health/live";
+  };
+  page.on("request", request => { if (isHealth(request)) capture.healthInFlight.add(request); });
+  page.on("requestfinished", request => { capture.healthInFlight.delete(request); });
+  page.on("requestfailed", request => { capture.healthInFlight.delete(request); });
   page.on("response", response => {
     const target = new URL(response.url());
     if (target.origin !== appOrigin || target.pathname !== "/api/health/live") return;
+    const phase = capture.historyPhase;
     capture.checks.push((async () => {
       capture.capabilityReads += 1;
       const body: unknown = await response.json();
       const mode = body && typeof body === "object" ? (body as Record<string, unknown>).public_intake : null;
       if (response.status() !== 200 || mode !== "synthetic_qa") capture.violations.push("actual_health_not_synthetic_qa");
       else capture.capabilityModes.add(mode);
-    })().catch(() => { capture.violations.push("actual_health_unreadable"); }));
+    })().catch(failure => {
+      // Preserve the actual cause privately; a later pass is not an app repair.
+      capture.healthFailures.push({ phase, browserFailure: response.request().failure()?.errorText ?? null,
+        detail: failure instanceof Error ? failure.message : "unknown_body_read_failure" });
+      capture.violations.push("actual_health_unreadable");
+    }));
   });
 
   // One pre-navigation, fail-closed boundary includes aliases, unexpected API
@@ -189,6 +206,16 @@ async function openHomeValue(page: Page, width = 390) {
   await page.goto("/home-value?utm_source=internal_qa&utm_campaign=synthetic_ui_acceptance");
   await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(2);
   await expect(page.getByLabel("Property address", { exact: true })).toBeEnabled();
+}
+
+/** A page can have several capability hooks. One ready funnel or a response
+ * event does not mean ALL response bodies have completed. Await the genuine
+ * in-flight GETs and their existing observers before intentional navigation.
+ * No health response is mocked, forwarded, retried or ignored here. */
+async function settledHealth(capture: Capture) {
+  await expect.poll(() => capture.healthInFlight.size).toBe(0);
+  await Promise.all(capture.checks);
+  expect(capture.violations).toEqual([]);
 }
 
 async function contact(page: Page, phone = "") {
@@ -367,6 +394,12 @@ test.afterEach(async ({ page }, info: TestInfo) => {
     source: "browser-intercepted-synthetic-ui-receipts-not-intake-sql-proof",
     test: info.title, status: info.status, viewport: page.viewportSize(),
     actualCapabilityReads: capture.capabilityReads, actualCapabilityModes: [...capture.capabilityModes],
+    healthReadFailures: capture.healthFailures.map(failure => ({ phase: failure.phase,
+      browserAborted: failure.browserFailure === "net::ERR_ABORTED",
+      kind: /No resource with given identifier|No data found for resource/i.test(failure.detail) ? "protocol_body_unavailable"
+        : /Target.*closed|context.*destroyed/i.test(failure.detail) ? "context_closed"
+        : /aborted|cancelled|canceled/i.test(failure.detail) ? "aborted"
+        : /JSON|Unexpected token|SyntaxError/i.test(failure.detail) ? "malformed_json" : "other" })),
     canonicalLeadRequestsIntercepted: capture.attempts.length, responseStatuses: capture.statuses,
     identicalKeys: capture.attempts.every(attempt => attempt.key === capture.attempts[0]?.key),
     identicalPayloadBytes: capture.attempts.every(attempt => attempt.body === capture.attempts[0]?.body),
@@ -381,6 +414,7 @@ test.afterEach(async ({ page }, info: TestInfo) => {
   const file = path.join(outputDirectory, `synthetic-home-value-${name}-diagnostics.json`);
   writeFileSync(file, JSON.stringify(diagnostics, null, 2), { mode: 0o600 });
   if (capture.pageErrors.length) writeFileSync(path.join(outputDirectory, `${name}-page-errors-private.json`), JSON.stringify({scope:"synthetic loopback only",errors:capture.pageErrors},null,2),{mode:0o600});
+  if (capture.healthFailures.length) writeFileSync(path.join(outputDirectory, `${name}-health-errors-private.json`), JSON.stringify({ scope: "synthetic loopback only", failures: capture.healthFailures }, null, 2), { mode: 0o600 });
   await info.attach("sanitized synthetic UI request diagnostics", { path: file, contentType: "application/json" });
   expect(capture.violations, "Blocked boundary violations; never forwarded to the server").toEqual([]);
   expect(capture.pageErrors.length, "Uncaught page errors preserved privately; a later pass is not a repair").toBe(0);
@@ -747,7 +781,10 @@ test("Real browser history return reports bfcache only for a trusted persisted p
   await openHomeValue(page); await contact(page); await submit(page).click(); await assertUnconfirmed(page);
   const key = capture.attempts[0].key;
   const original = (await evidence(page)).documentId;
+  capture.historyPhase = "original-before-homepage";
+  await settledHealth(capture);
   const readsBeforeHomepage = capture.capabilityReads;
+  capture.historyPhase = "homepage";
   await page.goto("/");
   // The actual homepage mounts its own HomeValueFunnel. goto(load) alone does
   // not finish that hook's no-store fetch or this observer's response.json().
@@ -755,9 +792,11 @@ test("Real browser history return reports bfcache only for a trusted persisted p
   // retain every unreadable-health violation, including already-recorded ones.
   await expect(funnel(page).locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   await expect.poll(() => capture.capabilityReads).toBeGreaterThan(readsBeforeHomepage);
-  await Promise.all(capture.checks);
+  await settledHealth(capture);
+  capture.historyPhase = "return-navigation";
   await page.goBack();
   await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(2);
+  await settledHealth(capture);
   const restored = await evidence(page);
   const actualBfcache = restored.documentId === original && restored.pageShows.some(event => event.trusted && event.persisted);
   capture.historyResult = actualBfcache ? "trusted_browser_bfcache" : "new_document_pending_reference_guard";
