@@ -5,6 +5,7 @@ import { analyticsEvents } from "../../app/lib/constants";
 import { recordExperimentEvent } from "../../app/lib/growth/public-experiment-client";
 import { EXTERNAL_ANALYTICS_CONSENT_STORAGE_KEY } from "../../app/lib/externalAnalytics";
 import { OUR_TOWN_GTM_CONTAINER_ID } from "../../app/lib/googleTagConfig";
+import { resolveOwnedDemandPlacement } from "../../app/lib/growth/owned-demand";
 import {
   isApprovedPublicAnalyticsEvent,
   safePublicAnalyticsProperties,
@@ -78,6 +79,49 @@ afterEach(() => {
 });
 
 describe("client analytics privacy boundary", () => {
+  it("registers intake_started with exactly two controlled first-input dimensions",()=>{
+    expect(isApprovedPublicAnalyticsEvent("intake_started")).toBe(true);
+    expect(safePublicAnalyticsProperties("intake_started",{
+      funnel_name:"home_value",lead_source_surface:"home_value_page",
+      step_name:"address",experiment_key:"home_value_path",variant_key:"broker_review",
+      current_path:"/home-value",device_category:"mobile",utm_source:"facebook",utm_medium:"social_organic",utm_campaign:"amm_owned_demand_2026",
+      placement:"homepage",placement_id:"homepage-hero",is_test:true,
+      email:"person@example.test",phone:"2525550100",address:"3106 Quinn Drive",name:"Sarah Johnson",question:"Private property question",
+    })).toEqual({funnel_name:"home_value",lead_source_surface:"home_value_page"});
+    expect(safePublicAnalyticsProperties("intake_started",{
+      funnel_name:"SarahJohnson",lead_source_surface:"3106-quinn-drive",
+    })).toEqual({});
+    expect(safePublicAnalyticsProperties("intake_started",{
+      funnel_name:"person@example.test",lead_source_surface:"2525550100",
+    })).toEqual({});
+  });
+
+  it("preserves the existing funnel_started submission-time field contract",()=>{
+    expect(safePublicAnalyticsProperties("funnel_started",{
+      funnel_name:"home_value",lead_source_surface:"home_value_page",step_name:"address",
+      experiment_key:"home_value_path",variant_key:"broker_review",utm_source:"facebook",is_test:true,
+    })).toEqual({funnel_name:"home_value",lead_source_surface:"home_value_page",step_name:"address",
+      experiment_key:"home_value_path",variant_key:"broker_review",utm_source:"facebook",is_test:true});
+  });
+
+  it("allows only the registered property_search value for the Browse Homes hero CTA",()=>{
+    expect(safePublicAnalyticsProperties("hero_cta_click",{
+      funnel_name:"property_search",surface:"homepage",address:"3106 Quinn Drive",email:"person@example.test",
+    })).toEqual({funnel_name:"property_search",surface:"homepage"});
+    expect(safePublicAnalyticsProperties("hero_cta_click",{
+      funnel_name:"property_search_3106_quinn_drive",surface:"homepage",
+    })).toEqual({surface:"homepage"});
+  });
+
+  it.each(["facebook","instagram"])("comparison %s links reuse only existing registered PII-free public dimensions",channel=>{
+    const url=new URL(resolveOwnedDemandPlacement(channel,"compare_selling_options")!.trackedUrl);
+    for(const key of ["utm_source","utm_medium","utm_campaign"] as const){
+      expect(safeRegisteredPublicAnalyticsDimension(key,url.searchParams.get(key))).toBe(url.searchParams.get(key));
+      expect(safeRegisteredPublicAnalyticsDimension(key,"SarahJohnson-3106-quinn-drive")).toBeNull();
+    }
+    // Offer content stays in canonical attribution, not a new arbitrary public dimension.
+    expect(safePublicAnalyticsProperties("page_view",{utm_content:url.searchParams.get("utm_content"),email:"private@example.test",seller_option:"compare"})).toEqual({});
+  });
   it("keeps every browser funnel event public except trusted notification lifecycle events", () => {
     const trustedOnly = new Set([
       "notification_queued",

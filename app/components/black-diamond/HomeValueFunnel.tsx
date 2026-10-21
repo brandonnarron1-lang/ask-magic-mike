@@ -23,6 +23,7 @@ import { ProgressBar } from "./ProgressBar";
 import { SelectField, TextField } from "./FormField";
 import { LeadConsentField } from "./LeadConsentField";
 import { AddressEntry } from "./AddressEntry";
+import { useIntakeEngagement } from "../../lib/client/useIntakeEngagement";
 import { addressFromForm, contactReviewFingerprint, MissingAddressStreetError, type AddressValue } from "../../lib/address/addressValue";
 
 type HomeValueFunnelProps = {
@@ -92,6 +93,7 @@ export function HomeValueFunnel({
     : {};
   const experimentLeadContext = publicExperimentLeadFields(experimentContext);
   const eventOptions = { sessionId: submissionId };
+  const recordEngagement = useIntakeEngagement(attribution, "home_value", surface, submissionId);
 
   useLayoutEffect(() => {
     // Bind only a committed review, never a speculative React render.
@@ -362,7 +364,7 @@ export function HomeValueFunnel({
       <ProgressBar step={step} labels={stepLabels} />
 
       {step === 1 ? (
-        <form noValidate onSubmit={submitAddress} className="space-y-5" data-amm-step="address">
+        <form noValidate onSubmit={submitAddress} onInputCapture={recordEngagement} onChangeCapture={recordEngagement} className="space-y-5" data-amm-step="address">
           <AddressEntry inputRef={addressRef} value={addressValue} initialText={address}
             onChange={text => { setAddress(text); clearKnownRefusal(); }} onAccept={setAddressValue}
             disabled={intakeMode === "checking" || locked} invalid={formError?.field === "address"} errorId={errorId} />
@@ -373,7 +375,7 @@ export function HomeValueFunnel({
       ) : null}
 
       {step === 2 ? (
-        <form noValidate onSubmit={submitContact} className="space-y-5" data-amm-step="contact">
+        <form noValidate onSubmit={submitContact} onInputCapture={recordEngagement} onChangeCapture={recordEngagement} className="space-y-5" data-amm-step="contact">
           <div className="flex flex-wrap items-start justify-between gap-2 rounded-md border border-[#cda24a33] bg-black/30 p-3">
             <p className="min-w-0 flex-1 break-words text-sm text-[#f4ead4]"><span className="block text-xs text-[#b7aa94]">Property address</span>{address}</p>
             <button type="button" disabled={locked} onClick={(event) => {

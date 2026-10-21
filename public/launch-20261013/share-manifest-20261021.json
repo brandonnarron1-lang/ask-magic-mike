@@ -1,0 +1,270 @@
+{
+  "version": "20261021",
+  "page": "share-20261021.html",
+  "editableSource": "creative-20261021.html",
+  "identityPreserved": true,
+  "aiGeneratedIdentityUsed": false,
+  "networkUsed": false,
+  "newSpendUsd": 0,
+  "source": {
+    "photo": {
+      "file": "public/brand/black-diamond/hero-social-4x5.jpg",
+      "sha256": "4b07af9225c67cd75430eb57fd59495d9ef69534fcd05aec900cfa8c3fe62633"
+    },
+    "logo": {
+      "file": "public/brand/black-diamond/our-town-logo.png",
+      "sha256": "d6f9cf50829416c348985307e68b111f8e46665a1c603810b46b55b377c32d49"
+    }
+  },
+  "images": [
+    {
+      "file": "seller-feed.jpg",
+      "offer": "Home Value",
+      "dimensions": "1080x1350",
+      "sha256": "2a6d82eabe404c60eb0b2cf75a254043443af95be5e1bae5e9325016359b3e20",
+      "reused": true
+    },
+    {
+      "file": "seller-story.jpg",
+      "offer": "Home Value",
+      "dimensions": "1080x1920",
+      "sha256": "4277fe0ac11f8ddbcde96337bc85e536f41d8b00157b12b31ab9706071ca5cb1",
+      "reused": true
+    },
+    {
+      "file": "seller-og.jpg",
+      "offer": "Home Value",
+      "dimensions": "1200x630",
+      "sha256": "da259b3ec0bee6209b18f2b873d2fde5a2fdf0724adacfce4852f21a23747a36",
+      "reused": true
+    },
+    {
+      "file": "buyer-feed.jpg",
+      "offer": "Buying Help",
+      "dimensions": "1080x1350",
+      "sha256": "99cf3e99663e58de632d9c5e0d2d6f7483afb38fe4f17c4003f94fc02ec30e80",
+      "reused": true
+    },
+    {
+      "file": "buyer-story.jpg",
+      "offer": "Buying Help",
+      "dimensions": "1080x1920",
+      "sha256": "62154d0385264da3c2174e1028621ade19fc2604841a7f9dbbd75a2c6b5ca674",
+      "reused": true
+    },
+    {
+      "file": "buyer-og.jpg",
+      "offer": "Buying Help",
+      "dimensions": "1200x630",
+      "sha256": "fb577cb03440a12df4e1c323aead9804c5c4dc5a4d667c97f286d3578a4f2fbd",
+      "reused": true
+    },
+    {
+      "file": "compare-selling-options-feed-20261021.jpg",
+      "offer": "Compare Selling Options",
+      "dimensions": "1080x1350",
+      "sha256": "398de90d4cfa18eaf5186849f220ef7724ec779ab96701dfee34b4b44bda9e1e",
+      "reused": false
+    },
+    {
+      "file": "compare-selling-options-story-20261021.jpg",
+      "offer": "Compare Selling Options",
+      "dimensions": "1080x1920",
+      "sha256": "9039d6509d9cbdf70be52feb5a06449a72567e159b27378f2970b81c7d4fa28e",
+      "reused": false
+    },
+    {
+      "file": "compare-selling-options-og-20261021.jpg",
+      "offer": "Compare Selling Options",
+      "dimensions": "1200x630",
+      "sha256": "fe4356c70c26063881f1b5c89f3f2d82b654d44612feea13563600918306f338",
+      "reused": false
+    }
+  ],
+  "documents": [
+    {
+      "file": "share-20261021.html",
+      "sha256": "fdc06b1493582f70143523474d99871c2a88fe55d0f9d183d82427f2f98c9ecf"
+    },
+    {
+      "file": "creative-20261021.html",
+      "sha256": "5e902841878852069c2537caf82b6e2f1d06b0185282c6ac7b59def7bbe5a0bd"
+    }
+  ],
+  "registry": [
+    {
+      "file": "app/lib/growth/owned-demand.ts",
+      "sha256": "95e3351891a501cce7815106956c873b95ff6efddcda79bc646dcb5b09b3dd73"
+    },
+    {
+      "file": "app/lib/growth/wordpress-placement-catalog.ts",
+      "sha256": "28f016a80126c6d7b0132c80d39b6deeb8a979137c8c56c574b0af61f5c395ec"
+    },
+    {
+      "file": "src/lib/admin/utm-link-builder.ts",
+      "sha256": "8feafe519d480a36da8b6624dd197242743b188cf82dc597078af75f27d966d2"
+    },
+    {
+      "file": "src/lib/analytics/privacy.ts",
+      "sha256": "e7e23c3027007a560623e40012d6027215dd7cf8e820f2fb3579718e83b69ec4"
+    },
+    {
+      "file": "config/experience-contract.v1.json",
+      "sha256": "3652a28acb89b69fc16f83841b7a90f8359507fd29f41783808867071adf6d62"
+    }
+  ],
+  "offers": [
+    {
+      "offer": "Home Value",
+      "clean": "https://www.askmagicmike.com/home-value",
+      "caption": "Thinking about selling? Request a local home value review with Mike Eatmon and Our Town Properties. Share your address and best contact method for review. Broker-reviewed guidance, not an instant valuation, appraisal or guaranteed value.",
+      "alt": "Mike Eatmon with Our Town Properties branding. Request a local home value review through Ask Magic Mike. No instant valuation or appraisal is promised.",
+      "registeredLinks": [
+        {
+          "channel": "facebook",
+          "placement": "seller_review",
+          "url": "https://www.askmagicmike.com/home-value?utm_source=facebook&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=facebook_local_question_seller_review"
+        },
+        {
+          "channel": "instagram",
+          "placement": "seller_review",
+          "url": "https://www.askmagicmike.com/home-value?utm_source=instagram&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=instagram_story_question_seller_review"
+        }
+      ],
+      "historicLinks": {
+        "canonical": "https://www.askmagicmike.com/home-value",
+        "facebook": "https://www.askmagicmike.com/home-value?utm_source=facebook&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_facebook",
+        "instagram": "https://www.askmagicmike.com/home-value?utm_source=instagram&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_instagram",
+        "owned_site": "https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_owned_site",
+        "qr": "https://www.askmagicmike.com/home-value?utm_source=qr&utm_medium=print&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_qr"
+      }
+    },
+    {
+      "offer": "Buying Help",
+      "clean": "https://www.askmagicmike.com/buy",
+      "caption": "Have a home in mind? Share the address or listing link. Still searching? Tell us your preferred area. Request local buying guidance from Mike Eatmon and Our Town Properties. Availability, financing and appointments require confirmation.",
+      "alt": "Mike Eatmon with Our Town Properties branding. Share a specific property or general search area for a local buying-plan request through Ask Magic Mike.",
+      "registeredLinks": [
+        {
+          "channel": "facebook",
+          "placement": "buyer_match",
+          "url": "https://www.askmagicmike.com/buy?utm_source=facebook&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=facebook_local_question_buyer_match"
+        },
+        {
+          "channel": "instagram",
+          "placement": "buyer_match",
+          "url": "https://www.askmagicmike.com/buy?utm_source=instagram&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=instagram_story_question_buyer_match"
+        }
+      ],
+      "historicLinks": {
+        "canonical": "https://www.askmagicmike.com/buy",
+        "facebook": "https://www.askmagicmike.com/buy?utm_source=facebook&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_facebook",
+        "instagram": "https://www.askmagicmike.com/buy?utm_source=instagram&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_instagram",
+        "owned_site": "https://www.askmagicmike.com/buy?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_owned_site",
+        "qr": "https://www.askmagicmike.com/buy?utm_source=qr&utm_medium=print&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_qr"
+      }
+    },
+    {
+      "offer": "Compare Selling Options",
+      "clean": "https://www.askmagicmike.com/sell?seller_option=compare",
+      "caption": "Listing, selling as-is, or simply weighing your options? Request a property review with Mike Eatmon and Our Town Properties before deciding. Compare listing with an as-is option. No offer, valuation or closing date is promised.",
+      "alt": "Mike Eatmon with the Our Town Properties logo. Compare listing with an as-is selling option through Ask Magic Mike. Property review is required; no offer, valuation or closing date is promised.",
+      "registeredLinks": [
+        {
+          "channel": "facebook",
+          "placement": "compare_selling_options",
+          "url": "https://www.askmagicmike.com/sell?utm_source=facebook&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=facebook_local_question_compare_selling_options&seller_option=compare"
+        },
+        {
+          "channel": "instagram",
+          "placement": "compare_selling_options",
+          "url": "https://www.askmagicmike.com/sell?utm_source=instagram&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=instagram_story_question_compare_selling_options&seller_option=compare"
+        },
+        {
+          "channel": "ourtown_wordpress",
+          "placement": "wordpress_we_buy_homes",
+          "url": "https://www.askmagicmike.com/sell?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes&seller_option=compare"
+        }
+      ],
+      "historicLinks": null
+    }
+  ],
+  "discrepancies": [
+    "Historic seller/buyer organic_social + amm_seller_buyer_launch_2026 tuples are retained but absent from the current owned-demand registry; new social handoff uses existing registered social_organic + amm_owned_demand_2026 tuples."
+  ],
+  "historicFiles": [
+    {
+      "file": "START_HERE.md",
+      "sha256": "6c97932b3cb8a0eb9c98f93dc27f0a380ad0e32bba9fef6bfef13f67a3a5adc9"
+    },
+    {
+      "file": "alt-text.txt",
+      "sha256": "73222938aca3f7f3fe99ceb2f0387210d89f295bb847b5d869a5f2267d1f3ffa"
+    },
+    {
+      "file": "asset-manifest.json",
+      "sha256": "3ca4c20609c4c5715ff110105533e6fffb2916507d0c0a09eeb9fae8c45b27ba"
+    },
+    {
+      "file": "buyer-feed.jpg",
+      "sha256": "99cf3e99663e58de632d9c5e0d2d6f7483afb38fe4f17c4003f94fc02ec30e80"
+    },
+    {
+      "file": "buyer-og.jpg",
+      "sha256": "fb577cb03440a12df4e1c323aead9804c5c4dc5a4d667c97f286d3578a4f2fbd"
+    },
+    {
+      "file": "buyer-qr.png",
+      "sha256": "7e7ad7b4b728b710e7900be4a223c06be8d80e015a14d4f7fb3986ba0cbf2145"
+    },
+    {
+      "file": "buyer-story.jpg",
+      "sha256": "62154d0385264da3c2174e1028621ade19fc2604841a7f9dbbd75a2c6b5ca674"
+    },
+    {
+      "file": "index.html",
+      "sha256": "7358cd4224711179ffe170dd70af1c305fbafd9424f26857ae64743b687b7747"
+    },
+    {
+      "file": "launch-kit.zip",
+      "sha256": "1be8fa3fc7bae41f19f713c58a6c30caa025b9564e16222b5df43db8faf066ad"
+    },
+    {
+      "file": "links.json",
+      "sha256": "db20cbcf473ce9407f8ea8e87d4a91b3d497eb5b29af9da3cc507d605e68567c"
+    },
+    {
+      "file": "posts.md",
+      "sha256": "b2d5f7750eb18b6d5a49b458e59a182957ce1a7f86ca1ebcf92eb0ac309cdbc8"
+    },
+    {
+      "file": "seller-feed.jpg",
+      "sha256": "2a6d82eabe404c60eb0b2cf75a254043443af95be5e1bae5e9325016359b3e20"
+    },
+    {
+      "file": "seller-og.jpg",
+      "sha256": "da259b3ec0bee6209b18f2b873d2fde5a2fdf0724adacfce4852f21a23747a36"
+    },
+    {
+      "file": "seller-options.md",
+      "sha256": "778e7a91343cddde8b7d0307dc00da9abd68937cc51ab206e493781ca82d6d95"
+    },
+    {
+      "file": "seller-qr.png",
+      "sha256": "04c029f6d989160133469039aeace17c696f5a4de4f704bc9b08779a867cfeb1"
+    },
+    {
+      "file": "seller-story.jpg",
+      "sha256": "4277fe0ac11f8ddbcde96337bc85e536f41d8b00157b12b31ab9706071ca5cb1"
+    },
+    {
+      "file": "seven-day-sharing.md",
+      "sha256": "60a9a67c2eb9eb1908475f37b32df0ef5b26ce6ffbb2bac8580c22ed15f12596"
+    },
+    {
+      "file": "widget.html",
+      "sha256": "b593cbecdb6a3a55da7d896b050516dfc0b48d80cc546e65677f3a26e9dae0c5"
+    }
+  ],
+  "status": "locally prepared only; not published, sent, deployed or live-tracking verified"
+}

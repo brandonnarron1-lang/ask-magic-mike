@@ -127,6 +127,35 @@ textarea:focus-visible {
   backdrop-filter: blur(18px);
 }
 
+/* Offer pages only: the original form logic, fields and consent remain intact.
+   Warm paper separates the completion task from the dark brokerage frame. */
+[data-acquisition-form] .amm-glass-card {
+  background: #f6f0e4;
+  color: #26231f;
+  border-color: #d2ba82;
+  backdrop-filter: none;
+}
+[data-acquisition-form] .amm-glass-card :is(h1,h2,h3,h4,h5,h6,p,li,label,legend,summary,span) {
+  color: #39332a;
+}
+[data-acquisition-form] .amm-glass-card :is(input,textarea,select) {
+  background: #fffdf8;
+  color: #26231f;
+  border-color: #8a7b61;
+  color-scheme: light;
+}
+[data-acquisition-form] .amm-glass-card :is(input,textarea)::placeholder { color: #716553; }
+[data-acquisition-form] .amm-glass-card select option { background: #fffdf8; color: #26231f; }
+[data-acquisition-form] .amm-glass-card [role="alert"] { color: #861c32; }
+[data-acquisition-form] .amm-glass-card :is(.amm-secondary-button,.amm-cyan-button) {
+  color: #26231f;
+  background: #fffdf8;
+  border-color: #8a7b61;
+}
+[data-acquisition-form] .amm-glass-card :is(a,button,input,select,textarea):focus-visible {
+  outline-color: #096570;
+}
+
 .amm-primary-button,
 .amm-secondary-button,
 .amm-cyan-button {
@@ -216,4 +245,23 @@ textarea:focus-visible {
     -webkit-text-fill-color: CanvasText;
     box-shadow: none;
   }
+}
+
+/* Paper-surface links and consent remain distinct and readable, including
+   browser autofill. The underlying consent language and state are unchanged. */
+[data-acquisition-form] .amm-glass-card a,
+[data-acquisition-form] .amm-glass-card button.underline {
+  color: #73500b;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+[data-acquisition-form] .amm-glass-card .amm-consent-surface {
+  background: #e8dfcc;
+  border-color: #a28e66;
+}
+[data-acquisition-form] .amm-glass-card input.amm-form-field:-webkit-autofill {
+  -webkit-text-fill-color: #26231f;
+  caret-color: #26231f;
+  box-shadow: 0 0 0 1000px #fffdf8 inset;
 }

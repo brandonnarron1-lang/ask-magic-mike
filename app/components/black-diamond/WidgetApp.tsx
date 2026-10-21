@@ -71,12 +71,12 @@ export function WidgetApp() {
           <h1 className="text-xs font-bold uppercase tracking-[0.2em] text-[#e2c06f]">Ask Magic Mike</h1>
           <p className="mt-1 text-sm text-[#d9ceb8]">Local guidance from Our Town Properties</p>
         </header>
-        <nav className="grid grid-cols-2 border-b border-[#cda24a24] bg-black" role="tablist" aria-label="Ask Magic Mike paths">
+        <nav className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] border-b border-[#cda24a24] bg-black" role="tablist" aria-label="Ask Magic Mike paths">
           {[
-            ["value", "Get My Home Value"],
-            ["buy", "Find a Home"],
-            ["ask", "Ask a Question"],
+            ["value", "Home Value Review"],
+            ["buy", "Buying Help"],
             ["sell", "Selling Options"],
+            ["ask", "Ask a Question"],
           ].map(([key, label]) => (
             <button
               key={key}
@@ -89,7 +89,7 @@ export function WidgetApp() {
               disabled={pending && active !== key}
               onClick={() => selectTab(key as Tab)}
               onKeyDown={(event) => {
-                const paths: Tab[] = ["value", "buy", "ask", "sell"];
+                const paths: Tab[] = ["value", "buy", "sell", "ask"];
                 const index = paths.indexOf(key as Tab);
                 const next = event.key === "ArrowRight" ? paths[(index + 1) % paths.length]
                   : event.key === "ArrowLeft" ? paths[(index + paths.length - 1) % paths.length]
@@ -98,7 +98,7 @@ export function WidgetApp() {
                 event.preventDefault();
                 if (selectTab(next)) document.getElementById(`widget-tab-${next}`)?.focus();
               }}
-              className={`min-h-12 px-2 py-3 text-xs font-bold uppercase tracking-[0.1em] transition ${
+              className={`min-h-12 min-w-0 px-2 py-3 text-xs font-bold uppercase tracking-[0.1em] [overflow-wrap:anywhere] transition ${
                 active === key ? "bg-[#cda24a] text-black" : "text-[#d9ceb8] hover:text-[#f4ead4]"
               }`}
             >
@@ -112,10 +112,10 @@ export function WidgetApp() {
           ) : null}
           {active === "buy" ? <BuyerIntentSection surface="widget" compact attributionOverrides={attributionOverrides} /> : null}
           {active === "ask" ? <AskMikeChatPanel surface="widget" compact /> : null}
-          {active === "sell" ? <SellerIntentSection surface="widget" compact /> : null}
+          {active === "sell" ? <SellerIntentSection surface="widget" compact variant="options" initialOption="compare" /> : null}
         </div>
         <footer className="border-t border-[#cda24a24] px-4 py-3 text-sm text-[#d9ceb8]">
-          {pending ? <p role="status" className="leading-6">Keep this form open while the request is unresolved. Check its saved reference before starting another request.</p> : <a href={`https://www.askmagicmike.com${active === "buy" ? "/buy" : active === "ask" ? "/ask" : active === "sell" ? "/sell" : "/home-value"}?${fullFormQuery}`} onClick={event => { if (readPendingHomeValueRequest()) { event.preventDefault(); setPending(true); } }} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline underline-offset-4">
+          {pending ? <p role="status" className="leading-6">Keep this form open while the request is unresolved. Check its saved reference before starting another request.</p> : <a href={`https://www.askmagicmike.com${active === "buy" ? "/buy" : active === "ask" ? "/ask" : active === "sell" ? "/sell" : "/home-value"}?${active === "sell" ? "seller_option=compare&" : ""}${fullFormQuery}`} onClick={event => { if (readPendingHomeValueRequest()) { event.preventDefault(); setPending(true); } }} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center underline underline-offset-4">
             Open full form
           </a>}
           {!pending ? <p className="mt-1 text-xs">If the embedded form is unavailable, continue securely in a new tab.</p> : null}

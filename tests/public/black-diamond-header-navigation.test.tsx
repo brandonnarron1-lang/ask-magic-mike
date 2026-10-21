@@ -23,19 +23,19 @@ import { BlackDiamondHeader } from "../../app/components/black-diamond/BlackDiam
 afterEach(cleanup);
 
 describe("Black Diamond responsive navigation", () => {
-  it("exposes the complete intent navigation on mobile without removing the Ask CTA", () => {
+  it("prioritizes four consumer outcomes and separates professional sign-in", () => {
     render(<BlackDiamondHeader />);
 
     const toggle = screen.getByRole("button", { name: "Open site navigation" });
     const homeLink = screen.getByRole("link", { name: "Ask Magic Mike home" });
-    const askLink = screen.getByRole("link", { name: "Ask Mike" });
+    const staffLink = screen.getByRole("link", { name: "Agent & Broker Sign In" });
     expect(toggle).toHaveAttribute("aria-controls", "amm-mobile-navigation");
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     expect(toggle).toHaveClass("shrink-0");
     expect(homeLink).toHaveClass("shrink-0");
     expect(within(homeLink).getByRole("img", { name: "Our Town Properties" })).toHaveClass("w-24");
-    expect(askLink).toHaveAttribute("href", "/ask");
-    expect(askLink).toHaveClass("whitespace-nowrap");
+    expect(staffLink).toHaveAttribute("href", "/lead-center-login?returnTo=%2Fadmin%2Ftoday");
+    expect(staffLink).toHaveClass("min-h-11");
     expect(screen.queryByRole("navigation", { name: "Mobile primary navigation" })).not.toBeInTheDocument();
 
     fireEvent.click(toggle);
@@ -49,7 +49,8 @@ describe("Black Diamond responsive navigation", () => {
       "href",
       "/home-value",
     );
-    expect(within(mobileNavigation).getByRole("link", { name: /Sell/ })).toHaveAttribute("href", "/sell");
+    expect(within(mobileNavigation).getByRole("link", { name: /Selling Options/ })).toHaveAttribute("href", "/sell?seller_option=compare");
+    expect(within(mobileNavigation).getByRole("link", { name: "Browse Homes" })).toHaveAttribute("href", "https://www.ourtownproperties.com/property-search/");
     const currentBuyerPath = within(mobileNavigation).getByRole("link", { name: /Buy/ });
     expect(currentBuyerPath).toHaveAttribute(
       "aria-current",
@@ -61,7 +62,7 @@ describe("Black Diamond responsive navigation", () => {
     );
     expect(within(mobileNavigation).getByRole("link", { name: /Plan/ })).toHaveAttribute("href", "/plan");
     expect(within(mobileNavigation).getByRole("link", { name: /^Ask/ })).toHaveAttribute("href", "/ask");
-    expect(within(mobileNavigation).getByRole("link", { name: /^Ask/ })).toHaveClass("col-span-2");
+    expect(within(mobileNavigation).getByRole("link", { name: "My Workspace" })).toHaveAttribute("href", "/my");
   });
 
   it("closes on Escape and returns focus to the menu button", () => {
@@ -80,11 +81,11 @@ describe("Black Diamond responsive navigation", () => {
   it("does not redirect focus when Escape is pressed while the menu is closed", () => {
     render(<BlackDiamondHeader />);
 
-    const askLink = screen.getByRole("link", { name: "Ask Mike" });
-    askLink.focus();
-    fireEvent.keyDown(askLink, { key: "Escape" });
+    const staffLink = screen.getByRole("link", { name: "Agent & Broker Sign In" });
+    staffLink.focus();
+    fireEvent.keyDown(staffLink, { key: "Escape" });
 
-    expect(askLink).toHaveFocus();
+    expect(staffLink).toHaveFocus();
     expect(screen.getByRole("button", { name: "Open site navigation" })).toHaveAttribute(
       "aria-expanded",
       "false",
@@ -110,12 +111,13 @@ describe("Black Diamond responsive navigation", () => {
     render(<BlackDiamondHeader onAsk={onAsk} />);
 
     const desktopNavigation = screen.getByRole("navigation", { name: "Primary navigation" });
-    expect(within(desktopNavigation).getByRole("link", { name: "Buy" })).toHaveAttribute(
+    expect(within(desktopNavigation).getByRole("link", { name: "Buying Help" })).toHaveAttribute(
       "aria-current",
       "page",
     );
 
-    const askLink = screen.getByRole("link", { name: "Ask Mike" });
+    fireEvent.click(screen.getByRole("button", { name: "Open site navigation" }));
+    const askLink = within(screen.getByRole("navigation", {name:"Mobile primary navigation"})).getByRole("link", { name: "Ask Mike" });
     askLink.addEventListener("click", (event) => event.preventDefault(), { once: true });
     fireEvent.click(askLink);
     expect(onAsk).toHaveBeenCalledTimes(1);

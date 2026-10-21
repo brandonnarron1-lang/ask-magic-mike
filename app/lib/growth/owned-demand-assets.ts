@@ -36,6 +36,7 @@ const OWNED_DEMAND_PLACEMENT_CODES = {
   seller_review: "seller",
   buyer_match: "buyer",
   renter_plan: "renter",
+  compare_selling_options: "options",
 } as const;
 
 export const OWNED_DEMAND_SHORTLINK_ORIGIN = "https://www.askmagicmike.com";

@@ -14,6 +14,7 @@ const readability = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1";
 const homeValue = process.env.AMM_HOME_VALUE_ACCEPTANCE === "1";
 const launchIntake = process.env.AMM_LAUNCH_INTAKE_UI_ACCEPTANCE === "1";
 const acquisition = process.env.AMM_ACQUISITION_ACCEPTANCE === "1";
+const webAcquisition = process.env.AMM_WEB_ACQUISITION_ACCEPTANCE === "1";
 const consumerWorkspace = process.env.AMM_CONSUMER_WORKSPACE_ACCEPTANCE === "1";
 const consumerAccount = process.env.AMM_CONSUMER_ACCOUNT_ACCEPTANCE === "1";
 const concierge = process.env.AMM_CONCIERGE_HANDOFF_ACCEPTANCE === "1";
@@ -24,6 +25,7 @@ if (nativeBinary && (!nativeClient || !["ios", "android"].includes(nativeBinary)
 function artifactOverrideSafe() { return !!process.env.AMM_SESSION_ARTIFACT_DIR; }
 if (nativeDevice && !nativeClient) throw new Error("native_device_requires_owned_native_acceptance");
 const lifecycle = process.env.AMM_R2_LIFECYCLE_ACCEPTANCE === "1" || nativeClient;
+if (webAcquisition && (lifecycle || concierge || consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_web_acquisition_selection_required");
 if (nativeClient && process.env.AMM_R2_LIFECYCLE_ACCEPTANCE === "1") throw new Error("exclusive_native_acceptance_selection_required");
 if (lifecycle && (concierge || consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_r2_lifecycle_acceptance_selection_required");
 if (concierge && (consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_concierge_acceptance_selection_required");
@@ -46,6 +48,7 @@ const origin = `http://localhost:${port}`;
 const password = `SYNTHETIC-${randomBytes(24).toString("hex")}`;
 const commandSecret = randomBytes(32).toString("hex");
 const authToken = randomBytes(32).toString("hex");
+const webQaSession = webAcquisition ? randomUUID() : null;
 const ids = { admin: randomUUID(), owner: randomUUID(), agent: randomUUID(), analyst: randomUUID(), other: randomUUID() };
 const agents = { owner: "00000000-0000-4000-8000-000000009901", agent: randomUUID(), other: randomUUID() };
 const leads = { owner: randomUUID(), agent: randomUUID(), other: randomUUID(), offer: randomUUID(), pass: randomUUID(), sms: randomUUID() };
@@ -121,6 +124,7 @@ try {
     ...(homeValue ? { AMM_HOME_VALUE_ACCEPTANCE: "1" } : {}),
     ...(launchIntake ? { AMM_LAUNCH_INTAKE_UI_ACCEPTANCE: "1" } : {}),
     ...(acquisition ? { AMM_ACQUISITION_ACCEPTANCE: "1" } : {}),
+    ...(webAcquisition ? { AMM_WEB_ACQUISITION_ACCEPTANCE: "1", AMM_WEB_QA_SESSION_ID: webQaSession, LEAD_ALERT_V6_QA_SESSION_IDS: webQaSession, LEAD_ALERT_V6_ENABLED: "true", LEAD_ALERT_V6_WORKER_ENABLED: "false", LEAD_ALERT_V6_CUTOFF: "2000-01-01T00:00:00.000Z", LEAD_NOTIFICATION_TO: "mike@example.test", LEAD_NOTIFICATION_SECOND_OPERATOR_TO: "brandon@example.test", RESEND_FROM: "Our Town <sender@example.test>" } : {}),
     ...(consumerWorkspace ? { AMM_CONSUMER_WORKSPACE_ACCEPTANCE: "1" } : {}),
     ...(consumerAccount ? { AMM_CONSUMER_ACCOUNT_ACCEPTANCE: "1",CONSUMER_WORKSPACE_ACCOUNTS_ENABLED:"true" } : {}),
     ...(concierge ? { AMM_CONCIERGE_HANDOFF_ACCEPTANCE: "1" } : {}),
@@ -141,7 +145,7 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = webAcquisition ? "tests/e2e/web-acquisition-real-session.spec.ts" : nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
   child = spawn("pnpm", ["exec", "playwright", "test", suite, ...(artifactOverride ? ["--output",path.join(runDir,"test-results")] : []), ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });

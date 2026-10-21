@@ -12,6 +12,7 @@ export const revalidate = 0;
 const PRIMARY_NAVIGATION: Array<[string, string, LeadCenterPermission]> = [
   ["Today", "/admin/today", "lead:view_assigned"],
   ["Leads", "/admin/leads", "lead:view_assigned"],
+  ["Follow-ups", "/admin/today#today-work-heading", "lead:view_assigned"],
   ["Activity", "/admin/activity", "lead:view_assigned"],
   ["Reports", "/admin/reporting", "report:view"],
 ];

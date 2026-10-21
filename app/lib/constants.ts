@@ -41,6 +41,7 @@ export const starterPrompts = [
 
 export const analyticsEvents = [
   "page_view",
+  "intake_started",
   "funnel_started",
   "address_submitted",
   "intent_selected",

@@ -94,7 +94,7 @@ jobs:
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/conversion-transaction-postgres.test.ts tests/persistence/conversion-reporting-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Exact acquisition totals, canonical contacts and operator evidence above old reporting cap
-        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/acquisition-report-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/acquisition-report-postgres.test.ts tests/persistence/acquisition-sources-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Isolated consumer identity, subject RLS, atomic account recovery and no intake effects
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/consumer-workspace-postgres.test.ts --maxWorkers=1 --no-file-parallelism
@@ -153,6 +153,9 @@ jobs:
       - name: Built seller and structured buyer intake UI (isolated harness, intercepted receipts, no sends)
         run: AMM_LAUNCH_INTAKE_UI_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/launch-intake-ci pnpm run test:reference:sessions
 
+      - name: Built acquisition entry, seller and buyer canonical capture (real isolated SQL, v6 intents only)
+        run: AMM_WEB_ACQUISITION_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/web-acquisition-ci pnpm run test:reference:sessions
+
       - name: Assert canonical route manifest and cron targets
         run: pnpm run routes:assert
 
@@ -198,6 +201,8 @@ jobs:
             .amm-run/home-value-intake-ci/screenshots/*.png
             .amm-run/home-value-intake-ci/screenshots/*-diagnostics.json
             .amm-run/launch-intake-ci/launch-intake-ui-receipt.json
+            .amm-run/web-acquisition-ci/receipt.json
+            .amm-run/web-acquisition-ci/screenshots/*.png
             .amm-run/launch-intake-ci/screenshots/*.png
             .amm-run/launch-intake-ci/screenshots/*-diagnostics.json
           if-no-files-found: ignore

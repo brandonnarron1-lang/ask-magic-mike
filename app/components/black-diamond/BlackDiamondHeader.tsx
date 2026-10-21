@@ -5,17 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { publicNavigation, experienceDestination } from "../../lib/experienceContract";
 
 type HeaderProps = {
   onAsk?: () => void;
 };
 
 const primaryNavigation = [
-  { href: "/home-value", label: "Home Value", accent: "gold" },
-  { href: "/sell", label: "Sell", accent: "gold" },
-  { href: "/buy", label: "Buy", accent: "cyan" },
-  { href: "/plan", label: "Plan", accent: "gold" },
-  { href: "/ask", label: "Ask", accent: "cyan" },
+  { href: experienceDestination("homeValue"), label: "Home Value", accent: "gold" },
+  { href: experienceDestination("buyer"), label: "Buying Help", accent: "cyan" },
+  { href: experienceDestination("compare"), label: "Selling Options", accent: "gold" },
+  { href: publicNavigation.browseHomes.destination, label: "Browse Homes", accent: "gold" },
 ] as const;
 
 function focusPageContent(event: MouseEvent<HTMLAnchorElement>) {
@@ -51,7 +51,8 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
   }, [mobileNavigationOpen]);
 
   function isCurrentPath(href: string) {
-    return pathname === href || pathname.startsWith(`${href}/`);
+    const path = href.split("?")[0];
+    return pathname === path || pathname.startsWith(`${path}/`);
   }
 
   function closeMobileNavigation() {
@@ -88,9 +89,10 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
           className="h-auto w-24 min-[360px]:w-28 sm:w-36"
         />
       </Link>
+      <span className="hidden text-xs tracking-wide text-[#d9ceb8] xl:block">Ask Magic Mike</span>
       <nav
         aria-label="Primary navigation"
-        className="hidden items-center gap-5 text-xs font-semibold uppercase tracking-[0.16em] text-[#d9ceb8] md:flex"
+        className="hidden min-w-0 max-w-full flex-wrap items-center gap-5 text-xs font-semibold uppercase tracking-[0.16em] text-[#d9ceb8] md:flex"
       >
         {primaryNavigation.map((item) => {
           const current = isCurrentPath(item.href);
@@ -116,11 +118,10 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
       </nav>
       <div className="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-2">
         <Link
-          href="/ask"
-          onClick={onAsk}
-          className="amm-secondary-button min-h-0 whitespace-nowrap px-3 py-2 text-[#e2c06f] sm:px-4"
+          href={publicNavigation.staff.destination}
+          className="inline-flex min-h-11 max-w-36 items-center px-2 text-xs leading-5 text-[#d9ceb8] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-cyan-300"
         >
-          Ask Mike
+          Agent &amp; Broker Sign In
         </Link>
         <button
           ref={mobileNavigationButton}
@@ -173,6 +174,11 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
                 </Link>
               );
             })}
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1 border-t border-white/10 pt-2 text-sm">
+            <Link href="/ask" onClick={() => { closeMobileNavigation(); onAsk?.(); }} className="inline-flex min-h-11 items-center px-3 text-[#d9ceb8] underline">Ask Mike</Link>
+            <Link href="/my" onClick={closeMobileNavigation} className="inline-flex min-h-11 items-center px-3 text-[#d9ceb8] underline">My Workspace</Link>
+            <Link href="/plan" onClick={closeMobileNavigation} className="inline-flex min-h-11 items-center px-3 text-[#d9ceb8] underline">My Plan</Link>
           </div>
         </nav>
       ) : null}

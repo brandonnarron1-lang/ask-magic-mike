@@ -9,10 +9,13 @@ export const ACQUISITION_STATEMENT_TIMEOUT_MS = 5_000;
 export const ACQUISITION_OPERATOR_FIELDS = ["inquiriesWithEnvelope", "noV6Recorded", "envelopes", "providerAccepted", "delivered", "pending", "retry", "failed", "unknown"] as const;
 export type AcquisitionOperatorCounts = Record<(typeof ACQUISITION_OPERATOR_FIELDS)[number], number>;
 export type AcquisitionCounts = { inquiries: number; contacts: number; unresolved: number; unknownOperatorEnvelopes: number; mike: AcquisitionOperatorCounts; brandon: AcquisitionOperatorCounts };
+export const ACQUISITION_SOURCE_GROUPS = ["social", "direct", "other", "unknown"] as const;
+export type AcquisitionSourceGroup = (typeof ACQUISITION_SOURCE_GROUPS)[number];
 export type AcquisitionReport = {
   coverage: "complete" | "unavailable" | "stale"; reason?: string; window: AcquisitionWindow;
   generatedAt: string | null; scope: "all_eligible" | "assigned_workspace"; totals: AcquisitionCounts | null;
   placements: Array<{ key: string; counts: AcquisitionCounts }>;
+  allSources?: { totals: AcquisitionCounts; sources: Array<{ key: AcquisitionSourceGroup; counts: AcquisitionCounts }> } | null;
 };
 
 /** One snapshot, bounded aggregate output. Never return an inquiry/contact ID,
@@ -73,6 +76,45 @@ SELECT i.key,i.inquiries,i.contacts,i.unresolved,o.operator,o.envelopes,o.repres
   (SELECT allowed FROM access) AS access_allowed,transaction_timestamp() AS generated_at
 FROM inquiries i JOIN operators o ON o.key=i.key ORDER BY i.key,o.operator`;
 
+// Derive only the source dimension and remove ONLY the WordPress placement
+// restriction. Eligibility, assignment, distinct grains and operator states stay
+// byte-for-byte shared with the historic query above. No raw attribution leaves SQL.
+function replaceSqlOnce(sql: string, before: string, after: string) {
+  if (sql.split(before).length !== 2) throw new Error("acquisition_source_query_contract_drift");
+  return sql.replace(before, after);
+}
+let sourceSql = replaceSqlOnce(ACQUISITION_AGGREGATE_SQL,
+  "SELECT key FROM jsonb_to_recordset($3::jsonb) AS p(key text)",
+  "SELECT key FROM (VALUES ('social'),('direct'),('other'),('unknown')) AS p(key)");
+sourceSql = replaceSqlOnce(sourceSql, "SELECT l.id, l.contact_id, p.key", `SELECT l.id, l.contact_id,
+    CASE
+      WHEN lower(btrim(coalesce(a.utm_source,''))) IN ('facebook','facebook_page','facebook_personal','facebook_group','fb','facebook.com','m.facebook.com','l.facebook.com','lm.facebook.com','instagram','ig','instagram.com','threads','threads.net','linkedin','li','linkedin.com','lnkd.in','x','twitter','x.com','twitter.com','t.co','youtube','yt','youtube.com','youtu.be','nextdoor')
+        OR lower(btrim(coalesce(a.utm_medium,''))) IN ('social','social_organic','organic_social','paid_social','social_paid')
+        OR lower(btrim(coalesce(a.referrer_type,'')))='social' THEN 'social'
+      WHEN lower(btrim(coalesce(a.utm_source,''))) IN ('direct','(direct)')
+        OR (coalesce(nullif(btrim(a.utm_source),''),nullif(btrim(a.utm_medium),'')) IS NULL AND lower(btrim(a.referrer_type))='direct') THEN 'direct'
+      WHEN lower(btrim(coalesce(a.utm_source,''))) IN ('','unknown','(not set)','(none)')
+        AND lower(btrim(coalesce(a.utm_medium,''))) IN ('','unknown','(not set)','(none)')
+        AND lower(btrim(coalesce(a.referrer_type,''))) IN ('','unknown','(not set)','(none)') THEN 'unknown'
+      ELSE 'other' END AS key`);
+sourceSql = replaceSqlOnce(sourceSql, "SELECT a.utm_source,a.utm_medium,a.utm_campaign,a.utm_content", "SELECT a.utm_source,a.utm_medium,a.utm_campaign,a.utm_content,a.referrer_type");
+sourceSql = replaceSqlOnce(sourceSql, `  JOIN catalog p ON a.utm_source='ourtownproperties' AND a.utm_medium='owned_media'
+    AND a.utm_campaign='amm_owned_demand_2026' AND a.utm_content=p.key\n`, "");
+sourceSql = replaceSqlOnce(sourceSql, "    AND ($4::text='all' OR p.key=$4)\n", "");
+sourceSql = replaceSqlOnce(sourceSql, "SELECT 'all'::text AS key UNION ALL SELECT key FROM catalog WHERE $4::text='all' OR key=$4", "SELECT 'all'::text AS key UNION ALL SELECT key FROM catalog");
+export const ACQUISITION_SOURCE_AGGREGATE_SQL = sourceSql;
+// One SQL response and the existing RepeatableRead transaction: never stitch
+// separately timed snapshots. Maximum 12 historic + 15 source aggregate rows.
+export const ACQUISITION_WITH_SOURCES_SQL = `WITH wordpress_report AS (
+${ACQUISITION_AGGREGATE_SQL}
+), source_report AS (
+${ACQUISITION_SOURCE_AGGREGATE_SQL}
+)
+SELECT * FROM wordpress_report
+UNION ALL
+SELECT 'source:' || key,inquiries,contacts,unresolved,operator,envelopes,represented,accepted,
+  delivered,pending,retry,failed,unknown,access_allowed,generated_at FROM source_report`;
+
 type AggregateQuery = (text: string, params: unknown[]) => Promise<unknown>;
 // Pinned-driver diagnostic label is checked against the installed lockfile in tests.
 export const ACQUISITION_DRIVER = "@neondatabase/serverless@1.1.0";
@@ -101,7 +143,7 @@ export async function loadAcquisitionReport(window: AcquisitionWindow, principal
     try { if (options.onDiagnostic) options.onDiagnostic(event); else if (preview) console.info("AMM_ACQUISITION_REPORT", JSON.stringify(event)); } catch { /* logging is not a data dependency */ }
   };
   const scope = principal?.role === "primary_lead_owner" ? "assigned_workspace" : "all_eligible";
-  const empty = (reason: string, condition: string): AcquisitionReport => { emit(condition); return { coverage: "unavailable", reason, window, scope, generatedAt: null, totals: null, placements: [] }; };
+  const empty = (reason: string, condition: string): AcquisitionReport => { emit(condition); return { coverage: "unavailable", reason, window, scope, generatedAt: null, totals: null, placements: [], allSources: null }; };
   if (!principal || !isLeadCenterRole(principal.role) || !hasLeadCenterPermission(principal.role, "report:view")) return empty("Report permission required; no query executed.", "gate:permission");
   if (isPreviewDataDisabled()) return empty("Preview data is disconnected or its physical isolation is unverified; no query executed.", "gate:preview_binding");
   if (scope === "assigned_workspace" && (!principal.agentId || !/^[a-f0-9-]{36}$/i.test(principal.agentId))) return empty("Assigned-workspace identity is unavailable; no query executed.", "gate:assignment_identity");
@@ -122,12 +164,13 @@ export async function loadAcquisitionReport(window: AcquisitionWindow, principal
     });
     trace.stage = "transport"; trace.gateMs = Math.round(performance.now()-started); trace.aggregateExecution = "attempted_unconfirmed"; emit("query:start");
     const queryStarted = performance.now();
-    const result = await query(ACQUISITION_AGGREGATE_SQL, [window.from, window.to, JSON.stringify(ACQUISITION_PLACEMENTS.map(({ key }) => ({ key }))), window.placement, scope === "assigned_workspace" ? principal.agentId : null]);
+    const result = await query(ACQUISITION_WITH_SOURCES_SQL, [window.from, window.to, JSON.stringify(ACQUISITION_PLACEMENTS.map(({ key }) => ({ key }))), window.placement, scope === "assigned_workspace" ? principal.agentId : null]);
     trace.queryMs = Math.round(performance.now()-queryStarted); trace.aggregateExecution = "response_received"; trace.stage = "validation"; trace.resultContainer = kind(result);
-    if (!Array.isArray(result) || result.length === 0 || result.length > 12) return empty("Invalid or missing aggregate; not a measured zero.", "result:container_or_size");
+    if (!Array.isArray(result) || result.length === 0 || result.length > 27) return empty("Invalid or missing aggregate; not a measured zero.", "result:container_or_size");
     const rows = result as Record<string, unknown>[];
     if (rows.some(r=>!r || typeof r!=="object" || Array.isArray(r))) return empty("Invalid or missing aggregate; not a measured zero.", "result:row_shape");
-    const keys = ["all", ...ACQUISITION_PLACEMENTS.filter(p => window.placement === "all" || window.placement === p.key).map(p => p.key)];
+    const historicKeys = ["all", ...ACQUISITION_PLACEMENTS.filter(p => window.placement === "all" || window.placement === p.key).map(p => p.key)];
+    const keys = [...historicKeys, "source:all", ...ACQUISITION_SOURCE_GROUPS.map(key => `source:${key}`)];
     trace.rowCount = rows.length; trace.expectedRows = keys.length*3;
     const fields = ["inquiries","contacts","unresolved","envelopes","represented","accepted","delivered","pending","retry","failed","unknown","access_allowed","generated_at"];
     trace.scalarTypes = Object.fromEntries(fields.map(field=>[field,[...new Set(rows.map(r=>kind(r?.[field])))]]));
@@ -158,13 +201,24 @@ export async function loadAcquisitionReport(window: AcquisitionWindow, principal
       }
       return { key, counts };
     });
-    const total=mapped[0].counts, placements=mapped.slice(1);
+    const total=mapped[0].counts, placements=mapped.slice(1,historicKeys.length);
     if (placements.reduce((n,p)=>n+p.counts.inquiries,0)!==total.inquiries || placements.reduce((n,p)=>n+p.counts.unresolved,0)!==total.unresolved ||
       total.contacts>placements.reduce((n,p)=>n+p.counts.contacts,0) || total.contacts<Math.max(0,...placements.map(p=>p.counts.contacts))) throw new InvalidAggregate("placement_rollup");
+    const sourceTotal=mapped[historicKeys.length].counts;
+    const sources=mapped.slice(historicKeys.length+1).map(row => ({ key: row.key.slice("source:".length) as AcquisitionSourceGroup, counts: row.counts }));
+    if (sources.reduce((n,p)=>n+p.counts.inquiries,0)!==sourceTotal.inquiries || sources.reduce((n,p)=>n+p.counts.unresolved,0)!==sourceTotal.unresolved ||
+      sourceTotal.contacts>sources.reduce((n,p)=>n+p.counts.contacts,0) || sourceTotal.contacts<Math.max(0,...sources.map(p=>p.counts.contacts)) ||
+      sourceTotal.inquiries<total.inquiries || sourceTotal.contacts<total.contacts || sourceTotal.unresolved<total.unresolved ||
+      sources.reduce((n,p)=>n+p.counts.unknownOperatorEnvelopes,0)!==sourceTotal.unknownOperatorEnvelopes) throw new InvalidAggregate("source_rollup");
+    for (const operator of ["mike", "brandon"] as const) {
+      for (const field of ACQUISITION_OPERATOR_FIELDS) {
+        if (sources.reduce((n,p)=>n+p.counts[operator][field],0)!==sourceTotal[operator][field]) throw new InvalidAggregate("source_operator_rollup");
+      }
+    }
     const age = now.getTime() - Date.parse(generatedAt!);
-    if (age > 300_000 || age < -30_000) { emit("snapshot:stale"); return { coverage: "stale", reason: "Snapshot clock/age exceeds five-minute freshness allowance. Refresh before operational use.", window, scope, generatedAt, totals: null, placements: [] }; }
+    if (age > 300_000 || age < -30_000) { emit("snapshot:stale"); return { coverage: "stale", reason: "Snapshot clock/age exceeds five-minute freshness allowance. Refresh before operational use.", window, scope, generatedAt, totals: null, placements: [], allSources: null }; }
     emit("complete");
-    return { coverage: "complete", window, scope, generatedAt, totals: mapped[0].counts, placements: mapped.slice(1) };
+    return { coverage: "complete", window, scope, generatedAt, totals: total, placements, allSources: { totals: sourceTotal, sources } };
   } catch (error) {
     if (trace.stage === "transport") trace.queryMs = Math.max(0,Math.round(performance.now()-started)-Number(trace.gateMs));
     const e=error as {name?:string;code?:string;cause?:{code?:string}};

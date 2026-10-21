@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { AddressEntry } from "./AddressEntry";
+import { useIntakeEngagement } from "../../lib/client/useIntakeEngagement";
 import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
 import { SelectField, TextAreaField, TextField } from "./FormField";
 import { LeadConsentField } from "./LeadConsentField";
@@ -23,6 +24,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
   const [attribution] = useState(() => typeof window === "undefined" ? initialAttribution : readAttribution());
   const mode = usePublicIntakeCapability();
   const recovery = usePublicIntakeRecovery();
+  const recordEngagement = useIntakeEngagement(attribution, "seller", surface, recovery.key);
   const addressRef = useRef<HTMLInputElement>(null);
   const [addressValue, setAddressValue] = useState<AddressValue | null>(null);
   const [review, setReview] = useState<SellerOptionsReview | null>(null);
@@ -101,7 +103,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
     <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Our Town Properties · Seller options</p>
     <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">Explore your selling options.</h2>
     <p className="mt-3 text-sm leading-6 text-[#d9ceb8]">Request a property review with Mike Eatmon. Compare the paths before deciding how to sell.</p>
-    <form noValidate onSubmit={submit} onInput={edited} onChange={edited} className="mt-6" aria-describedby="seller-options-status">
+    <form noValidate onSubmit={submit} onInputCapture={recordEngagement} onChangeCapture={recordEngagement} onInput={edited} onChange={edited} className="mt-6" aria-describedby="seller-options-status">
       <fieldset disabled={recovery.locked} className="grid min-w-0 gap-4 sm:grid-cols-2">
         <legend className="sr-only">Property review request</legend>
         <SelectField name="seller-option" label="Selling goal" defaultValue={initialOption} className="sm:col-span-2">
