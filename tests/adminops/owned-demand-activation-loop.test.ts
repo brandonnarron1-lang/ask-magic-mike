@@ -150,8 +150,21 @@ describe("owned-demand per-placement activation loop", () => {
 
   it("enumerates every exact placement and prioritizes the audited WordPress homepage without inventing proof", () => {
     const result = buildOwnedDemandActivationLoop(command(), ledger());
-    expect(result.totalPlacements).toBe(35);
-    expect(result.unobservedPlacements).toBe(35);
+    expect(result.totalPlacements).toBe(42);
+    expect(result.unobservedPlacements).toBe(42);
+    expect(result.placements.filter((row) => row.placementKey !== "compare_selling_options")).toHaveLength(35);
+    expect(result.placements
+      .filter((row) => row.placementKey === "compare_selling_options")
+      .map((row) => row.channelKey)
+      .sort()).toEqual([
+      "email_signature",
+      "facebook",
+      "google_business_profile",
+      "instagram",
+      "linkedin",
+      "ourtown_wordpress",
+      "qr_print",
+    ]);
     expect(result.activeProofPlacements).toBe(0);
     expect(result.measuredPlacements).toBe(0);
     expect(result.nextPlacement).toMatchObject({
@@ -276,7 +289,9 @@ describe("owned-demand per-placement activation loop", () => {
     expect(placement(result, "qr_print", "general_question")?.attributedLeads).toBe(0);
     expect(result.instanceSpecificAttributedLeads).toBe(2);
     expect(result.attributedLeads).toBe(2);
-    expect(result.totalPlacements).toBe(35);
+    expect(result.totalPlacements).toBe(42);
+    expect(result.placements.map((row) => row.placementKey)).not.toContain("open_house_registration");
+    expect(result.placements.every((row) => row.attributedLeads === 0)).toBe(true);
   });
 
   it("treats attribution without a current active proof as a reconciliation issue, never publication proof", () => {

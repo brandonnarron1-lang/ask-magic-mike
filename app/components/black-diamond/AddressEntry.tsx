@@ -162,7 +162,7 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
         // Clear stale components except the separately entered unit.
         for (const [key] of fields) if (key !== "line2" && refs.current[key]) refs.current[key]!.value = "";
       }} />
-    <p id={`${id}-help`} className="text-sm leading-6 text-[#d9ceb8]">{enabled ? "Choose a suggestion to review it, or enter the address manually." : "Enter the property address manually. Address lookup is not enabled."} No postal, parcel or ownership verification is implied.</p>
+    <p id={`${id}-help`} className="text-sm leading-6 text-[#d9ceb8]">{enabled ? "Choose a suggestion to review it, or enter the address manually." : "Type the full address, including any unit. You can edit each part below."} Your entry is not postal, parcel or ownership verification.</p>
     {open ? <ul id={`${id}-list`} role="listbox" aria-label="Address suggestions" className="rounded-md border border-[#cda24a66] bg-[#11100d] p-1">
       {suggestions.map((suggestion, index) => <li role="option" aria-selected={index === active} id={`${id}-option-${index}`} key={suggestion.id}
         onPointerDown={event => event.preventDefault()} onMouseDown={event => event.preventDefault()} onClick={() => void select(suggestion)}

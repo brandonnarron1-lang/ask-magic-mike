@@ -12,7 +12,7 @@ describe("Phase 9.4 recurring-value public route", () => {
     expect(read("app/plan/page.tsx")).toContain('path: "/plan"');
     expect(read("app/sitemap.ts")).toContain('["/plan", 0.75]');
     expect(read("app/components/black-diamond/BlackDiamondHeader.tsx")).toContain(
-      '{ href: "/plan", label: "Plan"',
+      '<Link href="/plan"',
     );
     expect(read("app/components/black-diamond/BlackDiamondShell.tsx")).toContain("Review Planner");
 

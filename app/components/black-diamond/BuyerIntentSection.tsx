@@ -6,6 +6,7 @@ import { type Attribution, type LeadSourceSurface } from "../../lib/leadPayload"
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import { usePublicIntakeCapability } from "../../lib/publicIntakeCapability";
 import { usePublicIntakeRecovery } from "../../lib/client/publicIntakeRecovery";
+import { useIntakeEngagement } from "../../lib/client/useIntakeEngagement";
 import { buyerHasQaMarkers, buyerReviewFingerprint, IntakeReviewError, readBuyerForm, type BuyerFormSnapshot } from "../../lib/client/publicIntakeReview";
 import type { PublicLeadOutcome } from "../../lib/publicLeadReceipt";
 import { trackEvent } from "../../lib/analytics";
@@ -38,6 +39,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
   });
   const intakeMode = usePublicIntakeCapability();
   const recovery = usePublicIntakeRecovery();
+  const recordEngagement = useIntakeEngagement(attribution, preset, surface, recovery.key);
   const [kind, setKind] = useState<"specific" | "search">(initialInterest?.kind ?? "specific");
   const [review, setReview] = useState<BuyerFormSnapshot | null>(null);
   const [error, setError] = useState<{ field?: string; message: string } | null>(null);
@@ -136,7 +138,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
         {openHouse ? "Register interest in " + (propertyLabel || "this open house") + "." : renter ? "See what a path from renting to owning could look like." : "Turn your next move into a clear local buying plan."}
       </h2>
       <p className="mt-3 text-sm leading-6 text-[#d9ceb8]">Share the basics. Mike or the approved team can review the request and follow up with practical next steps.</p>
-      {!saved ? <form noValidate onSubmit={submit} onInput={invalidateReview} onChange={invalidateReview} className="mt-6" aria-describedby={error ? "buyer-form-status" : undefined}>
+      {!saved ? <form noValidate onSubmit={submit} onInputCapture={recordEngagement} onChangeCapture={recordEngagement} onInput={invalidateReview} onChange={invalidateReview} className="mt-6" aria-describedby={error ? "buyer-form-status" : undefined}>
         <fieldset disabled={recovery.locked} className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">
           <legend className="sr-only">Your request</legend>
           <p id="buyer-contact-requirement" className="text-xs leading-5 text-[#b7aa94] sm:col-span-2">

@@ -14,7 +14,7 @@ export const metadata: Metadata = publicPageMetadata({
 
 export default function BuyPage() {
   return (
-    <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
+    <main data-acquisition-form className="min-h-screen bg-[#050505] text-[#f4ead4]">
       <PageTracker funnelName="buyer" />
       <section className="bg-[#050505] px-5 py-6 sm:px-8 lg:px-10"><div className="mx-auto max-w-7xl"><BlackDiamondHeader /></div></section>
       <section id="page-content" tabIndex={-1} className="px-5 py-6 sm:px-8 lg:px-10 lg:py-14">

@@ -18,10 +18,10 @@ describe("additive buyer path in the actual versioned widget", () => {
   it("native keyboard selects the buyer, with a visible owned full-form fallback", async () => {
     render(<WidgetApp />);
     const user = userEvent.setup();
-    screen.getByRole("tab", { name: "Get My Home Value" }).focus();
+    screen.getByRole("tab", { name: "Home Value Review" }).focus();
     await user.keyboard("{ArrowRight}");
-    expect(screen.getByRole("tab", { name: "Find a Home" })).toHaveFocus();
-    expect(screen.getByRole("tab", { name: "Find a Home" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Buying Help" })).toHaveFocus();
+    expect(screen.getByRole("tab", { name: "Buying Help" })).toHaveAttribute("aria-selected", "true");
     const fallback = screen.getByRole("link", { name: "Open full form" });
     expect(new URL(fallback.getAttribute("href")!).pathname).toBe("/buy");
     expect(new URL(fallback.getAttribute("href")!).searchParams.get("utm_medium")).toBe("owned_media");
@@ -31,7 +31,7 @@ describe("additive buyer path in the actual versioned widget", () => {
     const requests: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => { if (String(url) !== "/api/leads") throw new Error("unexpected_local_request"); requests.push(String(init?.body)); throw new TypeError("SYNTHETIC lost response"); }));
     render(<WidgetApp />); const user = userEvent.setup();
-    await user.click(screen.getByRole("tab", { name: "Find a Home" }));
+    await user.click(screen.getByRole("tab", { name: "Buying Help" }));
     await user.type(screen.getByLabelText("Property address (or provide a listing URL)"), "101 Synthetic Road");
     await user.type(screen.getByLabelText("Name"), "INTERNAL QA | DO NOT CONTACT | LOST RESPONSE");
     await user.type(screen.getByLabelText("Email"), "widget-lost@example.test");
@@ -39,9 +39,9 @@ describe("additive buyer path in the actual versioned widget", () => {
     await user.click(screen.getByRole("button", { name: "Request Buyer Plan" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "Retry identical request" })).toBeVisible());
     expect(screen.getByRole("tab", { name: "Selling Options" })).toBeDisabled();
-    expect(screen.getByRole("tab", { name: "Get My Home Value" })).toBeDisabled();
+    expect(screen.getByRole("tab", { name: "Home Value Review" })).toBeDisabled();
     await user.click(screen.getByRole("tab", { name: "Selling Options" }));
-    expect(screen.getByRole("tab", { name: "Find a Home" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Buying Help" })).toHaveAttribute("aria-selected", "true");
     expect(screen.queryByRole("link", { name: "Open full form" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Send Seller Details" })).not.toBeInTheDocument();
     expect(requests).toHaveLength(1);
@@ -56,7 +56,7 @@ describe("additive buyer path in the actual versioned widget", () => {
         return new Response(JSON.stringify({ lead_id: "00000000-0000-4000-8000-000000000501", session_id: payload.idempotency_key, correlation_id: "00000000-0000-4000-8000-000000000502", message: "Synthetic save only" }), { headers: { "Content-Type": "application/json", "X-AMM-Correlation-Id": "00000000-0000-4000-8000-000000000502" } });
       }));
       render(<WidgetApp />); const user = userEvent.setup();
-      await user.click(screen.getByRole("tab", { name: "Find a Home" }));
+      await user.click(screen.getByRole("tab", { name: "Buying Help" }));
       if (kind === "specific") await user.type(screen.getByLabelText("Property address (or provide a listing URL)"), "101 Synthetic Road | INTERNAL QA | DO NOT CONTACT");
       else { await user.click(screen.getByRole("radio", { name: "A general home search" })); await user.type(screen.getByLabelText("Desired area"), "Synthetic Wilson area"); }
       await user.type(screen.getByLabelText("Name"), "INTERNAL QA | DO NOT CONTACT | WIDGET");

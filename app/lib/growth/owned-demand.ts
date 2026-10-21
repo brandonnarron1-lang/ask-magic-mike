@@ -1,5 +1,6 @@
 import type { GrowthIntelligence } from "./intelligence";
-import { buildUtmUrl, type UtmMedium } from "../../../src/lib/admin/utm-link-builder";
+import { buildUtmUrl, type UtmMedium, type UtmParams } from "../../../src/lib/admin/utm-link-builder";
+import { experienceContract, experienceDestination } from "../experienceContract";
 import { wordpressTrackedChoices } from "./wordpress-placement-catalog";
 
 export type OwnedDemandStatus = "signal_detected" | "ready_unmeasured";
@@ -73,7 +74,7 @@ export interface OwnedDemandAttributionSignal {
   basis?: "legacy_wordpress_compatibility";
 }
 
-export type OwnedDemandOfferKey = "seller_review" | "buyer_match" | "renter_plan";
+export type OwnedDemandOfferKey = "seller_review" | "buyer_match" | "renter_plan" | "compare_selling_options";
 export const OWNED_DEMAND_OPEN_HOUSE_REGISTRATION_CONTENT =
   "open_house_registration" as const;
 export type OwnedDemandInstancePlacementKey =
@@ -293,6 +294,21 @@ const OFFER_DEFINITIONS = [
     creativeBody: "Share your current situation and goals for a human-reviewed readiness conversation.",
     reviewNote: "Do not promise eligibility, affordability, financing, inventory, or a timeline. Keep protected-class data and proxies out of targeting and copy.",
   },
+  {
+    key: "compare_selling_options",
+    label: "Compare selling options",
+    shortLabel: "Selling options",
+    contentSuffix: "compare_selling_options",
+    destination: new URL(experienceDestination("compare"), experienceContract.canonicalOrigin).href,
+    draftTitle: "Request a review of your selling options",
+    draftBody: "Listing, selling as-is, or simply weighing your options? Share your property and timing for review with Mike Eatmon and Our Town Properties. Compare listing with an as-is option. No offer, valuation or closing date is promised.",
+    creativePath: "/brand/black-diamond/hero-social-4x5.jpg",
+    creativeExportPath: "/brand/black-diamond/hero-social-4x5.jpg",
+    creativeAlt: "Mike Eatmon in front of a home at dusk. Request a property review to compare listing with an as-is selling option.",
+    creativeHeadline: "Compare your selling options.",
+    creativeBody: "Share your property and timing for review. No offer, valuation or closing date is promised.",
+    reviewNote: "Keep the review conditional and human-reviewed. No offer, valuation, financing, appointment, response time or closing date is promised.",
+  },
 ] as const satisfies readonly (OwnedDemandOfferBrief & {
   contentSuffix: string;
   creativeHeadline: string;
@@ -480,6 +496,13 @@ function normalized(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
 }
 
+/** Retain contract-owned choices without changing any historical UTM tuple. */
+function offerTrackedUrl(destination: string, params: UtmParams): string {
+  const url = new URL(destination);
+  const tracked = buildUtmUrl(url.origin + url.pathname, params);
+  return url.search ? `${tracked}&${url.searchParams.toString()}` : tracked;
+}
+
 export function resolveOwnedDemandPlacement(
   channelKey: string,
   placementKey: string,
@@ -525,7 +548,7 @@ export function resolveOwnedDemandPlacement(
     campaign: OWNED_DEMAND_CAMPAIGN_KEY,
     content,
     destination: offer.destination,
-    trackedUrl: buildUtmUrl(offer.destination, {
+    trackedUrl: offerTrackedUrl(offer.destination, {
       utm_source: channel.source,
       utm_medium: channel.medium,
       utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,
@@ -636,7 +659,7 @@ export function buildOwnedDemandCommand(
       return {
         ...offer,
         content,
-        trackedUrl: buildUtmUrl(offer.destination, {
+        trackedUrl: offerTrackedUrl(offer.destination, {
           utm_source: definition.source,
           utm_medium: definition.medium,
           utm_campaign: OWNED_DEMAND_CAMPAIGN_KEY,

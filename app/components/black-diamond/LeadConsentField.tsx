@@ -10,8 +10,8 @@ type LeadConsentFieldProps = {
 
 export function LeadConsentField({ checked, onChange, required = false, inputRef }: LeadConsentFieldProps) {
   return (
-    <div className="rounded-md border border-white/15 bg-black/30 p-4 sm:col-span-2">
-      <label className="flex cursor-pointer items-start gap-3 text-[15px] leading-6 text-[#e4dac8]">
+    <div className="amm-consent-surface rounded-md border border-white/15 bg-black/30 p-4 sm:col-span-2">
+      <label className="flex cursor-pointer items-start gap-3 text-[.9375rem] leading-6 text-[#e4dac8]">
         <input
           ref={inputRef}
           type="checkbox"

@@ -13,6 +13,7 @@ import {
   REQUIRED_CTA_DOCS,
   REQUIRED_ROUTES,
   REQUIRED_CTA_LINKS,
+  requiredCtaPresent,
 } from "../../scripts/amm/public-cta-final-check.mjs";
 
 const ROOT = process.cwd();
@@ -268,7 +269,11 @@ describe("REQUIRED_CTA_LINKS", () => {
 
   it("finds every required link in its canonical source file", () => {
     for (const link of REQUIRED_CTA_LINKS) {
-      expect(fileContains(join(ROOT, link.file), link.href), `${link.file} -> ${link.href}`).toBe(true);
+      expect(requiredCtaPresent(ROOT, link), `${link.file} -> ${link.href}`).toBe(true);
     }
+  });
+  it("rejects a wrong contract binding rather than passing an unrelated string", () => {
+    expect(requiredCtaPresent(ROOT, { file: "app/components/black-diamond/HeroSection.tsx", href: "/ask", contract: "homeValue" })).toBe(false);
+    expect(requiredCtaPresent(ROOT, { file: "app/components/black-diamond/HeroSection.tsx", href: "/buy", contract: "unknown" })).toBe(false);
   });
 });

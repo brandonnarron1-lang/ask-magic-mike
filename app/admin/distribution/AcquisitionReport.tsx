@@ -17,6 +17,25 @@ function Delivery({ counts }: { counts: AcquisitionCounts }) {
     <div className="grid gap-3 md:grid-cols-2"><Operator name="Mike" counts={counts.mike} /><Operator name="Brandon" counts={counts.brandon} /></div>
   </div>;
 }
+function AllSources({ report }: { report: Report }) {
+  const summary=report.coverage === "complete" ? report.allSources : null;
+  return <section aria-labelledby="all-sources-heading" className="mt-6 min-w-0 border-t border-white/10 pt-5">
+    <h3 id="all-sources-heading" className="font-serif text-xl text-[#f4ead4]">All eligible sources — separate summary</h3>
+    <p className="mt-2 text-sm leading-6 text-[#c9bdab]">Same acceptance window, exclusions, authorized workspace and snapshot as the WordPress report above. The placement selector filters only that historic three-tag report; this summary includes all eligible sources and is not added to its totals. A WordPress observation baseline supplies the time window only, not evidence of social publication or causal lift.</p>
+    {summary ? <>
+      <p className="mt-3 text-sm leading-6 text-[#f4ead4]" aria-label="All-source totals">{summary.totals.inquiries} eligible inquiries · {summary.totals.contacts} globally distinct recorded contacts · {summary.totals.unresolved} unresolved contact linkages.</p>
+      <details className="mt-2 text-sm leading-6 text-[#c9bdab]"><summary className="min-h-11 cursor-pointer py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">All-source operator delivery</summary><Delivery counts={summary.totals}/></details>
+      <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-2" aria-label="Eligible source groups">
+        {summary.sources.map(row=><article key={row.key} className="min-w-0 rounded-lg border border-white/10 p-3 text-sm leading-6 text-[#c9bdab]">
+          <h4 className="font-semibold capitalize text-[#f4ead4]">{row.key}</h4>
+          <p>{row.counts.inquiries} inquiries · {row.counts.contacts} recorded contacts · {row.counts.unresolved} unresolved.</p>
+          <details className="mt-2"><summary className="min-h-11 cursor-pointer py-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">Source operator delivery</summary><Delivery counts={row.counts}/></details>
+        </article>)}
+      </div>
+      <p className="mt-3 text-sm leading-6 text-[#a99f90]">Each inquiry belongs to one source group. A contact can appear in several groups; do not sum row contact counts. Social means a recognized social source, social medium (including historic organic_social), or recorded social referrer type; it is not proof of a registered campaign. Direct requires an explicit direct source, or a direct referrer type without source/medium. Other means remaining recorded attribution. Missing/unknown attribution stays Unknown, not Direct. These are latest stored attribution categories, not visits, reach, signed capture or causation.</p>
+    </> : <p role="status" className="mt-3 text-sm text-[#f0cf79]">All-source summary unavailable; no zero is inferred.</p>}
+  </section>;
+}
 export function AcquisitionReport({ report, error, filters, ledger, now }: {
   report: Report | null; error?: string; filters: AcquisitionFilters;
   ledger: OwnedDemandPublicationProofLedger; now: Date;
@@ -78,5 +97,6 @@ export function AcquisitionReport({ report, error, filters, ledger, now }: {
       </> : null}
     </> : null}
     <details className="mt-4 text-sm leading-6 text-[#a99f90]"><summary className="min-h-11 cursor-pointer py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#9edbe2]">Count and delivery definitions</summary><p>Definition: one durable accepted inquiry row; same-key replay adds none. Repeat property requests remain inquiries even when linked to one canonical contact ID. Test/suppressed records and spam/test statuses are excluded; declined contact permission alone is not an exclusion. Exact stored source=ourtownproperties, medium=owned_media, campaign=amm_owned_demand_2026 and the displayed content tag establish latest-touch attribution—not signed capture or causation. Homepage choices share one tag; this report does not invent a branch split. No v6 envelope recorded is not a failure or proof of eligibility; legacy/pre-cutoff records may intentionally have none. Provider acceptance, recipient-server delivery and mailbox receipt are different evidence.</p></details>
+    {report ? <AllSources report={report}/> : null}
   </section>;
 }

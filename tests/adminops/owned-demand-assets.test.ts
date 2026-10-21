@@ -70,14 +70,14 @@ function dataUrlFor(relativePublicPath: string) {
 }
 
 describe("owned-demand asset studio", () => {
-  it("derives all 28 launch assets from the canonical Phase 9 placements", () => {
+  it("preserves all 28 original launch short codes and adds seven selling-options assets", () => {
     const command = buildOwnedDemandCommand({ summary: emptySummary(), ownedDemandSignals: [] });
     expect(command.channels).toHaveLength(7);
     const shortCodes = new Set<string>();
 
     for (const channel of command.channels) {
       const placementKeys = ["general_question", ...channel.offers.map((offer) => offer.key)];
-      expect(placementKeys).toHaveLength(4);
+      expect(placementKeys).toHaveLength(5);
       for (const placementKey of placementKeys) {
         const creative = resolveOwnedDemandCreative(channel.key, placementKey);
         expect(creative).not.toBeNull();
@@ -106,7 +106,11 @@ describe("owned-demand asset studio", () => {
         }
       }
     }
-    expect(shortCodes.size).toBe(28);
+    expect(shortCodes.size).toBe(35);
+    for (const channel of ["otp", "gbp", "fb", "ig", "li", "email", "qr"]) {
+      for (const original of ["ask", "seller", "buyer", "renter"]) expect(shortCodes.has(`${channel}-${original}`)).toBe(true);
+      expect(shortCodes.has(`${channel}-options`)).toBe(true);
+    }
   });
 
   it("fails closed for unknown channels, placements, and formats", () => {
@@ -274,7 +278,7 @@ describe("owned-demand asset route boundary", () => {
         checked += 1;
       }
     }
-    expect(checked).toBe(28);
+    expect(checked).toBe(35);
 
     const missing = await resolveOwnedDemandRedirect(
       new NextRequest("https://www.askmagicmike.com/go/not-approved"),

@@ -7,39 +7,36 @@ import { HomeValueFunnel } from "./HomeValueFunnel";
 import { PageTracker } from "./PageTracker";
 import { SellerIntentSection } from "./SellerIntentSection";
 import { TrustProofStrip } from "./TrustProofStrip";
+import { HomepageRequestDetails } from "./HomepageRequestDetails";
+import { publicNavigation, experienceDestination } from "../../lib/experienceContract";
 
 const paths = [
   {
-    title: "Home Value",
+    title: "Home Value Review",
     copy: "Start with the property address and get practical local next steps.",
-    href: "/home-value",
+    href: experienceDestination("homeValue"),
   },
   {
-    title: "Sell Direct / Seller Strategy",
+    title: "Compare Selling Options",
     copy: "Talk through timing, condition, repairs, and options before you commit.",
-    href: "/sell",
+    href: experienceDestination("compare"),
   },
   {
-    title: "Buyer Property Match",
+    title: "Buying Help",
     copy: "Request a local buying-plan and property-match review for Wilson or Eastern North Carolina.",
-    href: "/buy",
+    href: experienceDestination("buyer"),
   },
   {
-    title: "Ask Mike",
-    copy: "Use a focused local-advisor chat flow for real estate questions.",
-    href: "/ask",
-  },
-  {
-    title: "Real Estate Review Planner",
-    copy: "Build a private, practical next-step plan and return to it on this device.",
-    href: "/plan",
+    title: "Browse Homes",
+    copy: "Explore Our Town Properties’ existing property search. Ask for buying help when you are ready.",
+    href: publicNavigation.browseHomes.destination,
   },
 ];
 
 export function BlackDiamondShell() {
   return (
     <>
-      <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
+      <main className="min-h-screen min-w-0 bg-[#050505] text-[#f4ead4] [overflow-wrap:anywhere]">
         <PageTracker funnelName="homepage" />
         <HeroSection />
         <TrustProofStrip />
@@ -70,9 +67,9 @@ export function BlackDiamondShell() {
       <section className="bg-[#050505] px-5 py-16 sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Choose your path</p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {paths.map((path) => (
-              <Link key={path.title} href={path.href} className="rounded-lg border border-[#cda24a33] bg-[#111113] p-6 transition hover:border-[#e2c06f]">
+              <Link key={path.title} href={path.href} className="min-w-0 rounded-lg border border-[#cda24a33] bg-[#111113] p-6 transition hover:border-[#e2c06f]">
                 <h3 className="font-serif text-3xl text-[#f4ead4]">{path.title}</h3>
                 <p className="mt-4 leading-7 text-[#d9ceb8]">{path.copy}</p>
               </Link>
@@ -81,25 +78,19 @@ export function BlackDiamondShell() {
         </div>
       </section>
 
-      <section id="home-value" className="border-t border-[#cda24a2e] bg-[#080808] px-5 py-16 sm:px-8 lg:px-10">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[.85fr_1.15fr] lg:items-start">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Home-value intake</p>
-            <h2 className="mt-4 font-serif text-4xl leading-tight text-[#f4ead4] sm:text-5xl">
-              Start with the address. Mike will bring the local context.
-            </h2>
-            <p className="mt-5 max-w-xl text-[#d9ceb8]">
-              No instant fake estimate. This creates a real valuation request with local follow-up from Our Town Properties.
-            </p>
-          </div>
-          <HomeValueFunnel surface="homepage" />
-        </div>
-      </section>
-
-      <section className="bg-[#0b0b0d] px-5 py-16 sm:px-8 lg:px-10">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2">
-          <SellerIntentSection surface="homepage" />
-          <AskMikeChatPanel surface="homepage" />
+      <section className="border-t border-[#cda24a2e] px-5 py-10 sm:px-8 lg:px-10">
+        <div className="mx-auto max-w-7xl space-y-4">
+          <h2 className="font-serif text-3xl">Already started here?</h2>
+          <p className="max-w-2xl leading-7 text-[#d9ceb8]">Continue an existing form below, or choose the focused review above. A saved request is a request for follow-up—not a valuation, offer or appointment.</p>
+          <HomepageRequestDetails id="home-value" title="Continue the homepage Home Value form"><HomeValueFunnel surface="homepage" /></HomepageRequestDetails>
+          <HomepageRequestDetails id="seller-strategy" title="Continue the homepage seller form"><SellerIntentSection surface="homepage" /></HomepageRequestDetails>
+          <HomepageRequestDetails id="ask-mike" title="Ask a general real estate question"><AskMikeChatPanel surface="homepage" /></HomepageRequestDetails>
+          <nav aria-label="Planning and account options" className="flex flex-wrap gap-4 text-sm">
+            <Link href="/ask" className="inline-flex min-h-11 items-center text-[#e2c06f] underline">Ask Mike</Link>
+            <Link href="/plan" className="inline-flex min-h-11 items-center text-[#e2c06f] underline">My Plan</Link>
+            <Link href="/my" className="inline-flex min-h-11 items-center text-[#e2c06f] underline">My Workspace</Link>
+            <Link href="/my/account" className="inline-flex min-h-11 items-center text-[#e2c06f] underline">Optional account</Link>
+          </nav>
         </div>
       </section>
 
@@ -132,6 +123,7 @@ export function Footer() {
           <AnalyticsPreferencesButton />
           <Link href="/terms" className="text-[#e2c06f] hover:text-[#f4ead4]">Terms</Link>
           <Link href="/accessibility" className="text-[#e2c06f] hover:text-[#f4ead4]">Accessibility</Link>
+          <Link href={publicNavigation.staff.destination} className="inline-flex min-h-11 items-center text-[#d9ceb8] underline">Agent &amp; Broker Sign In</Link>
         </nav>
       </div>
     </footer>

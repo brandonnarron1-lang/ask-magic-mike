@@ -199,7 +199,7 @@ test("eventless native contact and consent require an updated visible review bef
 
 test("phone-only widget buyer uses intercepted LIVE capability and no outbound capture", async ({ page }) => {
   const capture = captures.get(page)!; capture.mode = "live"; await page.goto("/widget");
-  await page.getByRole("tab", { name: "Find a Home", exact: true }).click(); await buyer(page, true);
+  await page.getByRole("tab", { name: "Buying Help", exact: true }).click(); await buyer(page, true);
   await page.getByLabel("Property address (or provide a listing URL)").fill(ADDRESS); await review(page); await submit(page);
   expect(capture.attempts).toHaveLength(1);
   expect(capture.attempts[0].payload).toMatchObject({ funnel_type: "buyer", lead_source_surface: "widget", email: "", phone: PHONE, consent: false, consent_email: false, consent_call: false });
@@ -251,16 +251,19 @@ test("ordinary saved-receipt UI passes its exact IDs to the shared appointment C
   expect(capture.appointmentBodies).toEqual([{ lead_id: capture.lead, session_id: capture.attempts[0].key, request_surface: "buyer_page" }]);
 });
 
-test("legacy Selling Options does not treat a bare 202 as a saved inquiry", async ({ page }) => {
+test("reviewed widget Selling Options does not treat a bare 202 as a saved inquiry", async ({ page }) => {
   const capture = captures.get(page)!;
   capture.reply = route => route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ message: "Got it." }) });
   await page.goto("/widget/v1"); await page.getByRole("tab", { name: "Selling Options", exact: true }).click();
   await page.getByLabel("Property address", { exact: true }).fill(ADDRESS);
-  await page.getByLabel("Name optional", { exact: true }).fill(NAME);
-  await page.getByLabel("Phone required", { exact: true }).fill(PHONE);
-  await page.getByLabel("Email optional", { exact: true }).fill(EMAIL);
-  await page.getByRole("button", { name: "Send Seller Details", exact: true }).click();
-  await expect(page.locator("#seller-form-status")).toContainText("couldn't confirm");
+  await page.getByLabel("Name", { exact: true }).fill(NAME);
+  await page.getByLabel("Phone", { exact: true }).fill(PHONE);
+  await page.getByLabel("Email", { exact: true }).fill(EMAIL);
+  await page.getByRole("button", { name: "Review property request", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Review your property request", exact: true })).toBeFocused();
+  expect(capture.attempts).toHaveLength(0);
+  await page.getByRole("button", { name: "Send property review request", exact: true }).click();
+  await expect(page.locator("#seller-options-status")).toContainText("couldn't confirm");
   await expect(page.getByLabel("Property address", { exact: true })).toHaveValue(ADDRESS);
   await expect(page.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
   expect(capture.attempts).toHaveLength(1); expect(capture.appointmentBodies).toHaveLength(0);
@@ -273,15 +276,18 @@ test("unknown Selling Options result holds other widget paths and retries identi
     : saved(route, attempt, capture.lead, true);
   await page.goto("/widget/v1"); await page.getByRole("tab", { name: "Selling Options", exact: true }).click();
   await page.getByLabel("Property address", { exact: true }).fill(ADDRESS);
-  await page.getByLabel("Name optional", { exact: true }).fill(NAME);
-  await page.getByLabel("Phone required", { exact: true }).fill(PHONE);
-  await page.getByLabel("Email optional", { exact: true }).fill(EMAIL);
-  await page.getByRole("button", { name: "Send Seller Details", exact: true }).click();
-  await expect(page.locator("#seller-form-status")).toContainText("couldn't confirm");
-  for (const name of ["Get My Home Value", "Find a Home", "Ask a Question"]) await expect(page.getByRole("tab", { name, exact: true })).toBeDisabled();
+  await page.getByLabel("Name", { exact: true }).fill(NAME);
+  await page.getByLabel("Phone", { exact: true }).fill(PHONE);
+  await page.getByLabel("Email", { exact: true }).fill(EMAIL);
+  await page.getByRole("button", { name: "Review property request", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Review your property request", exact: true })).toBeFocused();
+  expect(capture.attempts).toHaveLength(0);
+  await page.getByRole("button", { name: "Send property review request", exact: true }).click();
+  await expect(page.locator("#seller-options-status")).toContainText("couldn't confirm");
+  for (const name of ["Home Value Review", "Buying Help", "Ask a Question"]) await expect(page.getByRole("tab", { name, exact: true })).toBeDisabled();
   await expect(page.getByRole("link", { name: "Open full form", exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Retry identical request", exact: true }).click();
-  await expect(page.locator("#seller-form-status")).toContainText("stored for review");
+  await expect(page.locator("#seller-options-status")).toContainText("stored for review");
   expect(capture.attempts).toHaveLength(2); expect(capture.attempts[1]).toEqual(capture.attempts[0]);
   expect(capture.appointmentBodies).toHaveLength(0);
 });

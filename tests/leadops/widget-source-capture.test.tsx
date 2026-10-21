@@ -39,9 +39,12 @@ describe("actual widget components retain explicit URL claims without third-part
         } else if (tab === "sell") {
           await user.click(screen.getByRole("tab", { name: "Selling Options" }));
           await user.type(screen.getByLabelText("Property address"), "1 Synthetic Fixture Road");
-          await user.type(screen.getByLabelText("Phone required"), "2025550199");
+          await user.type(screen.getByLabelText("Name", { exact: true }), "INTERNAL QA DO NOT CONTACT");
+          await user.type(screen.getByLabelText("Phone", { exact: true }), "2025550199");
           await user.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }));
-          await user.click(screen.getByRole("button", { name: "Send Seller Details" }));
+          await user.click(screen.getByRole("button", { name: "Review property request" }));
+          expect(captures).toHaveLength(0);
+          await user.click(screen.getByRole("button", { name: "Send property review request" }));
         } else {
           await user.click(screen.getByRole("tab", { name: "Ask a Question" }));
           await user.type(screen.getByLabelText(/Your real estate question/), "Synthetic timing question");

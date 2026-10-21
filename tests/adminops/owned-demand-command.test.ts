@@ -6,10 +6,13 @@ import {
   buildOwnedDemandChannelPacket,
   buildOwnedDemandCommand,
   resolveOwnedDemandPlacement,
+  resolveOwnedDemandCreative,
+  resolveExactOwnedDemandSignalPlacement,
   type OwnedDemandAttributionSignal,
 } from "../../app/lib/growth/owned-demand";
 import type { GrowthSummary } from "../../app/lib/growth/intelligence";
 import { buildOwnedDemandAttributionSignals } from "../../app/lib/persistence/neonGrowthIntelligenceView";
+import { experienceContract, experienceDestination } from "../../app/lib/experienceContract";
 
 const root = process.cwd();
 
@@ -128,7 +131,7 @@ describe("Owned Demand Command", () => {
     });
     const facebook = result.channels.find((row) => row.key === "facebook");
     expect(facebook?.attributedLeads).toBe(7);
-    expect(facebook?.offers.map((offer) => offer.attributedLeads)).toEqual([3, 1, 1]);
+    expect(facebook?.offers.map((offer) => offer.attributedLeads)).toEqual([3, 1, 1, 0]);
     expect(result.attributedLiveLeads).toBe(7);
   });
 
@@ -286,6 +289,7 @@ describe("Owned Demand Command", () => {
       "/home-value",
       "/buy",
       "/rent",
+      "/sell",
     ]);
 
     const seller = resolveOwnedDemandPlacement("ourtown_wordpress", "seller_review");
@@ -366,13 +370,13 @@ describe("Owned Demand Command", () => {
     expect(result.bottleneck).toContain("do not count compatibility evidence as an exact KPI");
   });
 
-  it("creates a seller, buyer, and renter flight for every existing channel", () => {
+  it("appends comparison to the existing seller, buyer, and renter flight", () => {
     const result = buildOwnedDemandCommand({ summary: summary(), ownedDemandSignals: [] });
-    expect(result.offers.map((offer) => offer.key)).toEqual(["seller_review", "buyer_match", "renter_plan"]);
-    expect(result.offers.map((offer) => new URL(offer.destination).pathname)).toEqual(["/home-value", "/buy", "/rent"]);
+    expect(result.offers.map((offer) => offer.key)).toEqual(["seller_review", "buyer_match", "renter_plan", "compare_selling_options"]);
+    expect(result.offers.map((offer) => new URL(offer.destination).pathname)).toEqual(["/home-value", "/buy", "/rent", "/sell"]);
 
     for (const channel of result.channels) {
-      expect(channel.offers).toHaveLength(3);
+      expect(channel.offers).toHaveLength(4);
       for (const offer of channel.offers) {
         const url = new URL(offer.trackedUrl);
         expect(url.origin).toBe("https://www.askmagicmike.com");
@@ -384,6 +388,53 @@ describe("Owned Demand Command", () => {
         expect(offer.content).toBe(`${channel.content}_${offer.key}`);
       }
     }
+  });
+
+  it.each(["facebook", "instagram"])("resolves the exact %s comparison tuple and retains the contract-owned choice",channel=>{
+    const content=`${channel === "facebook" ? "facebook_local_question" : "instagram_story_question"}_compare_selling_options`;
+    const placement=resolveOwnedDemandPlacement(channel,"compare_selling_options")!;
+    expect(placement.destination).toBe(new URL(experienceDestination("compare"),experienceContract.canonicalOrigin).href);
+    expect(placement.trackedUrl).toBe(`https://www.askmagicmike.com/sell?utm_source=${channel}&utm_medium=social_organic&utm_campaign=amm_owned_demand_2026&utm_content=${content}&seller_option=compare`);
+    expect(resolveOwnedDemandCreative(channel,"compare_selling_options")).toMatchObject({destination:placement.destination,creativeHeadline:"Compare your selling options."});
+    const url=new URL(placement.trackedUrl);
+    expect([...url.searchParams.keys()]).toHaveLength(5);
+    for(const key of ["utm_source","utm_medium","utm_campaign","utm_content"])url.searchParams.delete(key);
+    expect(url.href).toBe(placement.destination);
+    expect(resolveExactOwnedDemandSignalPlacement(signal(channel,"social_organic",content,1))).toMatchObject({channelKey:channel,placementKey:"compare_selling_options",content});
+    expect(resolveExactOwnedDemandSignalPlacement(signal(channel,"organic_social",content,1))).toBeNull();
+    expect(resolveExactOwnedDemandSignalPlacement(signal(channel,"social_organic",content,1,"unregistered_campaign"))).toBeNull();
+  });
+
+  it("counts new comparison social signals once without repurposing WordPress or historic offer tags",()=>{
+    const command=buildOwnedDemandCommand({summary:summary({leads:5,attributedLeadRate:100}),ownedDemandSignals:[
+      signal("facebook","social_organic","facebook_local_question_compare_selling_options",2),
+      signal("instagram","social_organic","instagram_story_question_compare_selling_options",3),
+    ]});
+    expect(command.attributedLiveLeads).toBe(5);
+    expect(command.channels.find(row=>row.key==="facebook")?.offers.map(offer=>offer.attributedLeads)).toEqual([0,0,0,2]);
+    expect(command.channels.find(row=>row.key==="instagram")?.offers.map(offer=>offer.attributedLeads)).toEqual([0,0,0,3]);
+    for(const channel of command.channels){
+      for(const offer of channel.offers.slice(0,3)){
+        const route={seller_review:"home-value",buyer_match:"buy",renter_plan:"rent"}[offer.key as "seller_review"|"buyer_match"|"renter_plan"];
+        expect(offer.trackedUrl).toBe(`https://www.askmagicmike.com/${route}?utm_source=${channel.source}&utm_medium=${channel.medium}&utm_campaign=amm_owned_demand_2026&utm_content=${channel.content}_${offer.key}`);
+      }
+    }
+    expect(resolveOwnedDemandPlacement("ourtown_wordpress","wordpress_we_buy_homes")?.trackedUrl).toBe("https://www.askmagicmike.com/sell?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes&seller_option=compare");
+  });
+
+  it("hands off the actual comparison social registry URLs without a false approval blocker",()=>{
+    const html=fs.readFileSync(path.join(root,"public/launch-20261013/share-20261021.html"),"utf8");
+    const manifest=JSON.parse(fs.readFileSync(path.join(root,"public/launch-20261013/share-manifest-20261021.json"),"utf8"));
+    const compare=manifest.offers.find((offer:{offer:string})=>offer.offer==="Compare Selling Options");
+    for(const channel of ["facebook","instagram"]){
+      const actual=resolveOwnedDemandPlacement(channel,"compare_selling_options")!;
+      expect(compare.registeredLinks).toContainEqual({channel,placement:"compare_selling_options",url:actual.trackedUrl});
+      expect(html).toContain(`href="${actual.trackedUrl.replaceAll("&","&amp;")}"`);
+    }
+    expect(compare.clean).toBe(new URL(experienceDestination("compare"),experienceContract.canonicalOrigin).href);
+    expect(compare.registeredLinks).toContainEqual({channel:"ourtown_wordpress",placement:"wordpress_we_buy_homes",url:resolveOwnedDemandPlacement("ourtown_wordpress","wordpress_we_buy_homes")!.trackedUrl});
+    expect(html).not.toMatch(/No dedicated selling-options social placement|There is no dedicated social tuple|Owner-approved registry work is a separate next action|new tracking placements or guarantees/);
+    expect(manifest.historicFiles).toHaveLength(18);
   });
 
   it("ships only local retained visuals and compliance-bounded offer copy", () => {

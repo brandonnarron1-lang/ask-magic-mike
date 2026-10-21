@@ -234,6 +234,7 @@ const PUBLIC_EVENT_PROPERTY_KEYS: Record<string, readonly string[]> = {
   session_created: ["deviceType", "referrerType"],
   page_view: ["context", "funnel_name", "page", "path", "route", "step_name", "surface"],
   landing_page_viewed: ["path", "referrerType", "surface"],
+  intake_started: ["funnel_name", "lead_source_surface"],
   funnel_started: ["experiment_key", "funnel_name", "lead_source_surface", "step_name", "variant_key"],
   home_value_started: ["experiment_key", "funnel_name", "lead_source_surface", "variant_key"],
   address_started: ["funnel_name", "lead_source_surface", "step_name"],
@@ -422,6 +423,7 @@ const ENUM_VALUES: Partial<Record<string, ReadonlySet<string>>> = {
     "home_value",
     "homepage",
     "open_house",
+    "property_search",
     "renter",
     "review_planner",
     "seller",
@@ -705,7 +707,11 @@ export function safePublicAnalyticsProperties(
 ) {
   const eventKeys = PUBLIC_EVENT_PROPERTY_KEYS[eventName];
   if (!eventKeys) return {};
-  const allowed = new Set<string>([...PUBLIC_ATTRIBUTION_KEYS, ...eventKeys, "is_test"]);
+  // First-input measurement has exactly two controlled dimensions; do not
+  // inherit attribution or submission-time fields from the broader events.
+  const allowed = new Set<string>(eventName === "intake_started"
+    ? eventKeys
+    : [...PUBLIC_ATTRIBUTION_KEYS, ...eventKeys, "is_test"]);
   const safe = safeAnalyticsProperties(properties);
   const publicSafe: Record<string, string | number | boolean> = {};
   for (const [key, value] of Object.entries(safe)) {

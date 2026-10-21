@@ -61,9 +61,11 @@ export const REQUIRED_ROUTES = [
 ];
 
 export const REQUIRED_CTA_LINKS = [
-  { file: "app/components/black-diamond/HeroSection.tsx", href: "/home-value", label: "hero_home_value" },
-  { file: "app/components/black-diamond/HeroSection.tsx", href: "/ask", label: "hero_ask" },
-  { file: "app/components/black-diamond/BlackDiamondHeader.tsx", href: "/buy", label: "header_buy" },
+  { file: "app/components/black-diamond/HeroSection.tsx", href: "/home-value", contract: "homeValue", label: "hero_home_value" },
+  { file: "app/components/black-diamond/HeroSection.tsx", href: "/buy", contract: "buyer", label: "hero_buy" },
+  { file: "app/components/black-diamond/HeroSection.tsx", href: "/sell?seller_option=compare", contract: "compare", label: "hero_options" },
+  { file: "app/components/black-diamond/BlackDiamondHeader.tsx", href: "/ask", label: "secondary_ask" },
+  { file: "app/components/black-diamond/BlackDiamondHeader.tsx", href: "/buy", contract: "buyer", label: "header_buy" },
   { file: "app/components/black-diamond/BlackDiamondShell.tsx", href: "/sell", label: "path_sell" },
   { file: "app/components/black-diamond/BlackDiamondShell.tsx", href: "/buy", label: "path_buy" },
   { file: "app/components/black-diamond/BlackDiamondShell.tsx", href: "/plan", label: "path_plan" },
@@ -76,6 +78,21 @@ export const REQUIRED_CTA_LINKS = [
 export function fileContains(filePath, substring) {
   const content = readFileSafe(filePath);
   return content.includes(substring);
+}
+
+/** Recognize a contract-owned destination, not a misleading missing-literal
+ * failure after removing duplicate route strings. Built navigation is tested
+ * separately; this check also refuses drift in the immutable JSON contract. */
+export function requiredCtaPresent(root, link) {
+  const filePath = join(root, link.file);
+  if (!link.contract) return fileContains(filePath, link.href);
+  let contract;
+  try { contract = JSON.parse(readFileSafe(join(root, "config/experience-contract.v1.json"))); }
+  catch { return false; }
+  const source = readFileSafe(filePath);
+  return contract?.offers?.[link.contract]?.destination === link.href &&
+    source.includes('from "../../lib/experienceContract"') &&
+    source.includes(`experienceDestination("${link.contract}")`);
 }
 
 /**
@@ -142,8 +159,7 @@ if (isMain) {
   console.log("[CTA links]");
 
   for (const link of REQUIRED_CTA_LINKS) {
-    const path = join(ROOT, link.file);
-    if (fileContains(path, link.href)) {
+    if (requiredCtaPresent(ROOT, link)) {
       pass(`cta:${link.label}`, `${link.file} links to ${link.href}`);
     } else {
       fail(`cta:${link.label}`, `${link.file} does not link to ${link.href}`);

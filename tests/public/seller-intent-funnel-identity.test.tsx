@@ -331,13 +331,18 @@ describe("seller funnel identity integrity", () => {
       transport((call, index) => index === 1 ? new Promise<Response>((_resolve, reject) => { rejectFirst = reject; }) : savedResponse(call, {}, { "X-AMM-Idempotent-Replay": "1" }));
       render(<WidgetApp />); const user = userEvent.setup();
       const sellerTab = screen.getByRole("tab", { name: "Selling Options" });
-      await user.click(sellerTab); fillSeller();
-      const form = screen.getByLabelText("Phone required").closest("form")!;
+      await user.click(sellerTab);
+      fireEvent.change(screen.getByLabelText("Property address"), { target: { value: ADDRESS } });
+      fireEvent.change(screen.getByLabelText("Name", { exact: true }), { target: { value: NAME } });
+      fireEvent.change(screen.getByLabelText("Phone", { exact: true }), { target: { value: PHONE } });
+      await user.click(screen.getByRole("button", { name: "Review property request" }));
+      expect(leadCalls).toHaveLength(0);
+      const form = screen.getByLabelText("Phone", { exact: true }).closest("form")!;
       // Two synchronous submits must neither bypass the guard nor duplicate telemetry.
       fireEvent.submit(form); fireEvent.submit(form);
       expect(leadCalls).toHaveLength(1);
       expect(readPendingHomeValueRequest()?.key).toBe(leadCalls[0].key);
-      for (const name of ["Get My Home Value", "Find a Home", "Ask a Question"]) {
+      for (const name of ["Home Value Review", "Buying Help", "Ask a Question"]) {
         const tab = screen.getByRole("tab", { name }); expect(tab).toBeDisabled();
         fireEvent.click(tab); expect(sellerTab).toHaveAttribute("aria-selected", "true");
       }
@@ -347,13 +352,13 @@ describe("seller funnel identity integrity", () => {
       expect(screen.queryByRole("link", { name: "Open full form" })).not.toBeInTheDocument();
       await act(async () => { rejectFirst(new TypeError("SYNTHETIC lost response")); });
       expect(screen.getByLabelText("Property address")).toHaveValue(ADDRESS);
-      expect(screen.getByLabelText("Name optional")).toHaveValue(NAME);
+      expect(screen.getByLabelText("Name", { exact: true })).toHaveValue(NAME);
       const retry = screen.getByRole("button", { name: "Retry identical request" });
-      if (storageDenied) expect(screen.getByText(/could not retain the reference across a reload/)).toBeVisible();
+      if (storageDenied) expect(screen.getByText(/cannot retain the reference across a reload/)).toBeVisible();
       fireEvent.click(retry); await screen.findByText(PUBLIC_LEAD_SAVED_MESSAGE);
       expect(leadCalls).toHaveLength(2); expect(leadCalls[1]).toEqual(leadCalls[0]);
       expect(readPendingHomeValueRequest()).toBeNull();
-      expect(screen.getByRole("tab", { name: "Find a Home" })).toBeEnabled();
+      expect(screen.getByRole("tab", { name: "Buying Help" })).toBeEnabled();
       expect(screen.getByRole("link", { name: "Open full form" })).toBeVisible();
     });
   }

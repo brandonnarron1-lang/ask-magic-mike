@@ -15,7 +15,7 @@ export const metadata: Metadata = publicPageMetadata({
 
 export default function HomeValuePage() {
   return (
-    <main className="min-h-screen bg-[#050505] text-[#f4ead4]">
+    <main data-acquisition-form className="min-h-screen bg-[#050505] text-[#f4ead4]">
       <PageTracker funnelName="home_value" />
       <section className="bg-[#050505] px-5 py-3 sm:px-8 lg:px-10 lg:py-6">
         <div className="mx-auto max-w-7xl">

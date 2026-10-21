@@ -107,7 +107,7 @@ export async function startDatabase(options: { loopbackTcp?: boolean } = {}): Pr
   if (process.env.AMM_QA_NATIVE_POSTGRES_TEST === "1") {
     nativeDirectory = mkdtempSync(join(tmpdir(), "amm-qa-native-"));
     chmodSync(nativeDirectory, 0o700);
-    execFileSync(join(nativeBin, "initdb"), ["-D", join(nativeDirectory, "data"), "-U", "postgres", "-A", "trust", "--no-locale"], { stdio: "pipe", timeout: 30_000 });
+    execFileSync(join(nativeBin, "initdb"), ["-D", join(nativeDirectory, "data"), "-U", "postgres", "-A", "trust", "--no-locale", "--encoding=UTF8"], { stdio: "pipe", timeout: 30_000 });
     if (options.loopbackTcp) {
       const portServer = createServer();
       await new Promise<void>((resolve, reject) => { portServer.once("error", reject); portServer.listen(0, "127.0.0.1", resolve); });
