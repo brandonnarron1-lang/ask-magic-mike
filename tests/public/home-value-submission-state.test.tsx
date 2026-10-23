@@ -4,7 +4,7 @@ import { HomeValueFunnel } from "../../app/components/black-diamond/HomeValueFun
 import { clearPendingHomeValueRequest, readPendingHomeValueRequest } from "../../app/lib/homeValuePendingRequest";
 
 const fixture = vi.hoisted(() => ({ mode: "live" as "live" | "checking" | "read_only" | "synthetic_qa", events: vi.fn() }));
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => fixture.mode }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeReadiness: () => ({ mode: fixture.mode, recheck: vi.fn() }), usePublicIntakeCapability: () => fixture.mode }));
 vi.mock("../../app/lib/analytics", () => ({ trackEvent: fixture.events }));
 vi.mock("../../app/lib/widgetMessaging", () => ({ postToWidgetParent: vi.fn() }));
 const correlation = "00000000-0000-4000-8000-000000000401";
@@ -354,6 +354,8 @@ describe("Home Value logical-request integrity", () => {
 
   it("read-only disclosure is early and the demo action never calls intake", async () => {
     fixture.mode="read_only"; await contact();
+    expect(screen.getByText("Read-only demo. Do not enter personal details.")).toBeVisible();
+    fireEvent.click(screen.getByText("About this form’s availability"));
     expect(screen.getByRole("link",{name:"Open the live Home Value form"})).toHaveAttribute("href","https://www.askmagicmike.com/home-value");
     fireEvent.click(screen.getByRole("button",{name:"Review demo (not saved)"}));
     expect(screen.getByRole("alert")).toHaveTextContent("Entries here are not saved");

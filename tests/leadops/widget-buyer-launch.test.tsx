@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WidgetApp } from "../../app/components/black-diamond/WidgetApp";
 import { clearPendingHomeValueRequest, readPendingHomeValueRequest } from "../../app/lib/homeValuePendingRequest";
 vi.mock("../../app/lib/analytics", () => ({ trackEvent: vi.fn() }));
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeReadiness: () => ({ mode: "live", recheck: vi.fn() }), usePublicIntakeCapability: () => "live" }));
 
 beforeEach(() => {
   window.history.replaceState({}, "", "/widget/v1?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=launch&utm_content=buyer_widget&parent_url=https%3A%2F%2Fwww.ourtownproperties.com%2Fsynthetic%2F");

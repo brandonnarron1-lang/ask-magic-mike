@@ -12,7 +12,7 @@ import {
   type PublicExperimentContext,
 } from "../../lib/growth/experiment-registry";
 import { publicLeadOutcomeFromResponse, publicLeadTransportOutcome, type PublicLeadOutcome } from "../../lib/publicLeadReceipt";
-import { usePublicIntakeCapability } from "../../lib/publicIntakeCapability";
+import { usePublicIntakeReadiness } from "../../lib/publicIntakeCapability";
 import { clearPendingHomeValueRequest, readPendingHomeValueRequest, rememberPendingHomeValueRequest } from "../../lib/homeValuePendingRequest";
 import { IntakeModeNotice } from "./IntakeModeNotice";
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
@@ -49,7 +49,8 @@ export function HomeValueFunnel({
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(attributionOverrides),
   );
-  const intakeMode = usePublicIntakeCapability();
+  const { mode: intakeMode, recheck: recheckAvailability } = usePublicIntakeReadiness();
+  const intakeCanSave = intakeMode === "live" || intakeMode === "synthetic_qa";
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const addressRef = useRef<HTMLInputElement>(null);
@@ -216,8 +217,10 @@ export function HomeValueFunnel({
     const actual = rememberContact(event.currentTarget);
     setFormError(null);
     setLeadMessage(null);
-    if (intakeMode === "checking" || intakeMode === "read_only") {
-      setFormError({ message: "Preview only. Entries here are not saved. Open the live Home Value form to send a request." });
+    if (!intakeCanSave) {
+      setFormError({ message: intakeMode === "read_only"
+        ? "Read-only demo. Entries here are not saved. Open the live Home Value form to send a request."
+        : "Availability is not confirmed. Your details are still here. Check availability again before sending a request." });
       return;
     }
     if (intakeMode === "synthetic_qa" &&
@@ -359,7 +362,7 @@ export function HomeValueFunnel({
 
   return (
     <LuxuryCard className={`amm-home-value min-w-0 [overflow-wrap:anywhere] ${compact ? "p-4" : "p-5 sm:p-7"}`}>
-      <IntakeModeNotice mode={intakeMode} className="mb-4" />
+      <IntakeModeNotice mode={intakeMode} onRecheck={recheckAvailability} className="mb-4" />
       <div role="status" aria-live="polite" className="sr-only">{submissionStatus === "submitting" ? "Saving your request" : submissionStatus === "unconfirmed" ? "Save not confirmed" : submissionStatus === "not_saved" ? "Request not saved" : ""}</div>
       <ProgressBar step={step} labels={stepLabels} />
 
@@ -463,8 +466,8 @@ export function HomeValueFunnel({
             >
               Back
             </button>
-            <button disabled={locked || intakeMode === "checking" || (retryAt !== null && now < retryAt)} aria-busy={submitting} className="amm-primary-button min-h-11 flex-1 px-5 py-4 disabled:opacity-60">
-              {submitting ? "Submitting" : intakeMode === "read_only" ? "Review demo (not saved)" : "Request Valuation"}
+            <button disabled={locked || intakeMode === "checking" || intakeMode === "unknown" || (retryAt !== null && now < retryAt)} aria-busy={submitting} className="amm-primary-button min-h-11 flex-1 px-5 py-4 disabled:opacity-60">
+              {submitting ? "Submitting" : intakeMode === "read_only" ? "Review demo (not saved)" : intakeMode === "unknown" ? "Saving unavailable" : "Request Valuation"}
             </button>
           </div>
         </form>
@@ -513,7 +516,7 @@ export function HomeValueFunnel({
           {locked && !submitting && !restoredPending ? <p className="mt-2">Keep this page open. Your original details and request reference have not been changed. Do not refresh to start another request.</p> : null}
           {!recoveryPersistent && !restoredPending && submissionStatus !== "saved" ? <p className="mt-2">This browser could not retain the recovery reference across a reload. Keep this page open and save the reference below for Our Town Properties to check.</p> : null}
           {retryAt && now < retryAt ? <p role="status" className="mt-2">Wait {Math.max(1, Math.ceil((retryAt-now)/1000))} seconds before retrying this same request.</p> : null}
-          {retryPolicy === "same_payload" && frozenRequest.current && !submitting ? <button type="button" disabled={retryAt !== null && now < retryAt} onClick={() => void sendFrozenRequest()} className="amm-secondary-button mt-3 min-h-11 w-full px-4 py-3 disabled:opacity-60">Retry identical request</button> : null}
+          {retryPolicy === "same_payload" && frozenRequest.current && !submitting ? <button type="button" disabled={!intakeCanSave || (retryAt !== null && now < retryAt)} onClick={() => void sendFrozenRequest()} className="amm-secondary-button mt-3 min-h-11 w-full px-4 py-3 disabled:opacity-60">Retry identical request</button> : null}
           {receiptReference ? <p className="mt-2 break-words">Request reference: <span className="select-text font-mono">{receiptReference}</span></p> : null}
         </div>
       ) : null}

@@ -79,7 +79,7 @@ jobs:
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/launch-inquiry-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Ordinary intake and first-live monitor (real isolated PostgreSQL, no sends)
-        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/first-live-intake-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/first-live-intake-postgres.test.ts tests/persistence/today-ownership-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Isolated PostgreSQL reference allocation and no-send claims
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/reference-allocation-postgres.test.ts

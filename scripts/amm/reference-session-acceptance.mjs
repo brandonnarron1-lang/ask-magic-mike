@@ -147,13 +147,14 @@ try {
   };
   const suite = webAcquisition ? "tests/e2e/web-acquisition-real-session.spec.ts" : nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
-  child = spawn("pnpm", ["exec", "playwright", "test", suite, ...(artifactOverride ? ["--output",path.join(runDir,"test-results")] : []), ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });
+  const additionalSuites = webAcquisition ? ["tests/e2e/today-reliability-real-session.spec.ts", "tests/e2e/conversion-readiness-sharing.spec.ts"] : [];
+  child = spawn("pnpm", ["exec", "playwright", "test", suite, ...additionalSuites, ...(artifactOverride ? ["--output",path.join(runDir,"test-results")] : []), ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });
   const counts = JSON.parse(psql(`SELECT json_build_object('leads',count(*),'notifications',(SELECT count(*) FROM lead_notifications),'provider_ids',(SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL),'reservations',(SELECT count(*) FROM lead_allocation_send_reservations)) FROM leads;`));
   const receiptName = launchIntake ? "launch-intake-ui-receipt.json" : homeValue ? "home-value-ui-receipt.json" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? "conversion-receipt.json" : "receipt.json";
   const scope = homeValue || launchIntake
     ? `${env.AMM_E2E_BUILT === "1" ? "built-app" : "development-diagnostic"}-ui-intercepted-synthetic-lead-receipts-isolated-harness-not-intake-sql-proof`
     : env.AMM_E2E_BUILT === "1" ? "built-app-real-auth-isolated-postgresql" : "development-diagnostic-real-auth-isolated-postgresql";
-  writeFileSync(path.join(runDir, receiptName), JSON.stringify({ at: new Date().toISOString(), exit, suite, scope, productionWrites: 0, providerCalls: 0, counts }, null, 2), { mode: 0o600 });
+  writeFileSync(path.join(runDir, receiptName), JSON.stringify({ at: new Date().toISOString(), exit, suite, additionalSuites, scope, productionWrites: 0, providerCalls: 0, counts }, null, 2), { mode: 0o600 });
   process.exitCode = Number(exit || 0);
 } finally { if (child && child.exitCode === null) child.kill("SIGTERM"); stopDatabase(); }

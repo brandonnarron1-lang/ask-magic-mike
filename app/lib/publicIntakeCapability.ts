@@ -1,23 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export type PublicIntakeMode = "read_only" | "live" | "synthetic_qa";
 export type PublicIntakeCapability = "checking" | PublicIntakeMode;
+export type PublicIntakeReadiness = PublicIntakeCapability | "unknown";
+
+/** An unavailable/malformed check is not an attestation of read-only mode. */
+export function readPublicIntakeReadiness(value: unknown): PublicIntakeMode | "unknown" {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "unknown";
+  const health = value as Record<string, unknown>;
+  if (health.ok !== true || health.service !== "ask-magic-mike") return "unknown";
+  return health.public_intake === "live" || health.public_intake === "synthetic_qa" || health.public_intake === "read_only"
+    ? health.public_intake
+    : "unknown";
+}
 
 /** Only the categorical capability is consumed; health details stay opaque. */
 export function readPublicIntakeCapability(value: unknown): PublicIntakeMode {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return "read_only";
-  const health = value as Record<string, unknown>;
-  if (health.ok !== true || health.service !== "ask-magic-mike") return "read_only";
-  return health.public_intake === "live" || health.public_intake === "synthetic_qa"
-    ? health.public_intake
-    : "read_only";
+  const mode = readPublicIntakeReadiness(value);
+  return mode === "unknown" ? "read_only" : mode;
 }
 
 /** Advisory UX only: neither a successful health check nor this hook authorizes a POST. */
-export function usePublicIntakeCapability(): PublicIntakeCapability {
-  const [mode, setMode] = useState<PublicIntakeCapability>("checking");
+export function usePublicIntakeReadiness() {
+  const [mode, setMode] = useState<PublicIntakeReadiness>("checking");
+  const [generation, setGeneration] = useState(0);
+  const recheck = useCallback(() => {
+    setMode("checking");
+    setGeneration(current => current + 1);
+  }, []);
 
   useEffect(() => {
     let disposed = false;
@@ -38,7 +50,7 @@ export function usePublicIntakeCapability(): PublicIntakeCapability {
       setMode("checking");
       const timeout = window.setTimeout(() => {
         controller.abort();
-        if (!disposed && version === requestVersion) setMode("read_only");
+        if (!disposed && version === requestVersion) setMode("unknown");
       }, 8_000);
       active = { controller, timeout };
       try {
@@ -54,11 +66,11 @@ export function usePublicIntakeCapability(): PublicIntakeCapability {
         });
         const contentType = response.headers.get("content-type")?.split(";", 1)[0]?.trim();
         const capability = response.ok && !response.redirected && contentType === "application/json"
-          ? readPublicIntakeCapability(await response.json())
-          : "read_only";
+          ? readPublicIntakeReadiness(await response.json())
+          : "unknown";
         if (!disposed && !controller.signal.aborted && version === requestVersion) setMode(capability);
       } catch {
-        if (!disposed && !controller.signal.aborted && version === requestVersion) setMode("read_only");
+        if (!disposed && !controller.signal.aborted && version === requestVersion) setMode("unknown");
       } finally {
         window.clearTimeout(timeout);
         if (active?.controller === controller) active = null;
@@ -75,7 +87,13 @@ export function usePublicIntakeCapability(): PublicIntakeCapability {
       cancelRequest();
       window.removeEventListener("pageshow", pageShow);
     };
-  }, []);
+  }, [generation]);
 
-  return mode;
+  return { mode, recheck };
+}
+
+/** Compatibility for existing consumers: unknown remains closed, never live. */
+export function usePublicIntakeCapability(): PublicIntakeCapability {
+  const { mode } = usePublicIntakeReadiness();
+  return mode === "unknown" ? "read_only" : mode;
 }

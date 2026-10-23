@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { HomeValueFunnel } from "../../app/components/black-diamond/HomeValueFunnel";
 import { assignExperimentVariant } from "../../app/lib/growth/experiment-engine";
 import { HOME_VALUE_TRUST_EXPERIMENT } from "../../app/lib/growth/experiment-registry";
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeReadiness: () => ({ mode: "live", recheck: vi.fn() }), usePublicIntakeCapability: () => "live" }));
 
 const EXPERIMENT_SUBJECT_KEY = "d".repeat(64);
 const EXPERIMENT_VARIANT_KEY = assignExperimentVariant(
