@@ -7,8 +7,6 @@ import {
 } from "../../lib/growth/experiment-registry";
 import { recordExperimentEvent } from "../../lib/growth/public-experiment-client";
 import { HomeValueFunnel } from "./HomeValueFunnel";
-import { usePublicIntakeCapability } from "../../lib/publicIntakeCapability";
-import { IntakeModeNotice } from "./IntakeModeNotice";
 
 const SUBJECT_STORAGE_KEY = "amm_public_experiment_subject_v1";
 
@@ -32,7 +30,6 @@ async function hashSubject(value: string) {
 
 export function HomeValueExperimentExperience() {
   const [context, setContext] = useState<PublicExperimentContext | null>(null);
-  const intakeMode = usePublicIntakeCapability();
 
   useEffect(() => {
     let cancelled = false;
@@ -64,7 +61,6 @@ export function HomeValueExperimentExperience() {
 
   return (
     <div className="mx-auto max-w-7xl">
-      {intakeMode !== "live" ? <IntakeModeNotice mode={intakeMode} className="mb-6 lg:mb-8" /> : null}
       <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,.86fr)_minmax(0,1.14fr)] lg:items-start lg:gap-10">
         <div className="min-w-0 [overflow-wrap:anywhere]" data-experiment={context?.experimentKey} data-variant={context?.variantKey}>
           <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Home Value</p>

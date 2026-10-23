@@ -1,7 +1,8 @@
 {
   "git": {
     "deploymentEnabled": {
-      "codex/web-acquisition-reset-20261021": false
+      "codex/web-acquisition-reset-20261021": false,
+      "codex/conversion-reliability-20261023": false
     }
   },
   "crons": [

@@ -621,7 +621,7 @@ async function adminListAndDashboard() {
     dash.ok &&
     dash.text.includes("Ask Magic Mike") &&
     dash.text.includes("Command Center") &&
-    dash.text.includes("What needs attention today.")
+    dash.text.includes("Your next step.")
   )
     record("admin:dashboard", "pass", { http: dash.status });
   else

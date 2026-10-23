@@ -6,6 +6,31 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Conversion reliability follow-up — October 23 candidate
+
+This section describes the review candidate, not deployment evidence. Today uses
+the same inherited **read** ownership as Lead Center for repeat inquiries. An
+inherited-owner card is read-only: opening it grants no contact or mutation
+permission. Direct assignments and actual assignment acceptance remain distinct.
+Use **Open request** for current details, due time and communication safeguards.
+
+Unavailable counts are not zero. Limited results describe returned actions, not
+the entire request cohort; queue mutations stay held until a complete read.
+The existing bounded view covers at most 1,000 recent authorized open requests,
+excludes QA records, and can return several actions for one inquiry.
+
+The Home Value form owns one availability notice. **Check availability again**
+only repeats its read-only health GET; entered values, pending request references
+and frozen identical-key recovery remain in place. An unknown check is not
+confirmed read-only mode. Only the durable saved receipt establishes capture,
+never an appointment, appraisal or completed human contact.
+
+The existing three-offer share page can copy a complete caption plus its
+registered Facebook link, copy a clean client link or alt text, and download the
+matching image. If clipboard access is refused, the exact text is selected for
+manual copying. Instagram captions need a separate clickable Story/profile
+destination. Copying/downloading never records publication or sends anything.
+
 ## R2 staff handoff — October 18 local candidate, not released
 
 This addition reuses **AI draft tools (review required)** inside an already

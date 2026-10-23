@@ -187,7 +187,7 @@ async function installBoundary(page: Page): Promise<Capture> {
 async function openHomeValue(page: Page, width = 390) {
   await page.setViewportSize({ width, height: 1000 });
   await page.goto("/home-value?utm_source=internal_qa&utm_campaign=synthetic_ui_acceptance");
-  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(2);
+  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   await expect(page.getByLabel("Property address", { exact: true })).toBeEnabled();
 }
 
@@ -268,13 +268,17 @@ async function assertUnconfirmed(page: Page) {
 }
 
 async function fixedLiveLinks(page: Page) {
+  const help = funnel(page).locator('[data-intake-mode] details');
+  const initiallyClosed = await help.getAttribute("open") === null;
+  if (initiallyClosed) await help.locator("summary").click();
   const links = page.getByRole("link", { name: "Open the live Home Value form", exact: true });
-  await expect(links).toHaveCount(2);
+  await expect(links).toHaveCount(1);
   for (const link of await links.all()) {
     await expect(link).toHaveAttribute("href", LIVE_CTA);
     await expect(link).toHaveAttribute("referrerpolicy", "no-referrer");
     await expect(link).toHaveAttribute("rel", "noreferrer");
   }
+  if (initiallyClosed) await help.locator("summary").click();
 }
 
 async function beforeInDocument(first: Locator, second: Locator) {
@@ -408,7 +412,7 @@ test("Actual local GET /value redirects to /home-value and the browser retains t
   expect(final?.status()).toBe(200);
   expect(final?.request().redirectedFrom()?.url()).toBe(requested);
   await expect(page).toHaveURL(canonical);
-  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(2);
+  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   await expect(page.getByLabel("Property address", { exact: true })).toBeEnabled();
   await fixedLiveLinks(page); await noOverflow(page);
   expect(capture.attempts).toHaveLength(0);
@@ -488,18 +492,18 @@ test("Eventless DOM address/contact values survive health recheck, consent and t
   const address = page.getByLabel("Property address", { exact: true });
   await address.evaluate((element, value) => { (element as HTMLInputElement).value = value; }, ADDRESS);
   // Simulated pageshow triggers the real hook's asynchronous health recheck.
-  // Offline failure must stay read_only; never mock an enabling capability.
+  // Offline failure is unknown and fail-closed, not proof of read-only mode.
   // This is not evidence of a trusted bfcache return or real OS autofill.
   await page.context().setOffline(true);
   try {
     await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
-    await expect(page.locator('[data-intake-mode="read_only"]')).toHaveCount(2);
+    await expect(page.locator('[data-intake-mode="unknown"]')).toHaveCount(1);
     await expect(address).toHaveValue(ADDRESS);
   } finally {
     await page.context().setOffline(false);
   }
   await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
-  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(2);
+  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   await expect(address).toHaveValue(ADDRESS);
   await funnel(page).getByRole("button", { name: "Continue", exact: true }).click();
   await expect(page.getByLabel("Your name", { exact: true })).toBeFocused();
@@ -640,27 +644,28 @@ test("Synthetic QA rejects unlabeled fictional contact and invalid optional phon
   await submit(page).click(); await assertSaved(page);
 });
 
-test("Offline health recheck fails closed: early read-only notices on both steps and demo final action", async ({ page }, info) => {
+test("Offline health recheck fails closed: one early unknown notice preserves both steps and blocks saving", async ({ page }, info) => {
   await openHomeValue(page, 320);
   info.annotations.push({ type: "scope", description: "Actual harness GET first attests synthetic_qa; offline recheck fails closed. Synthetic pageshow dispatch is NOT bfcache evidence." });
   await page.context().setOffline(true);
   try {
     // Do not fabricate a capability JSON response. Only a failed actual fetch
-    // changes the hook to read_only. This event is explicitly simulated.
+    // changes the hook to unknown. This event is explicitly simulated.
     await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
-    const notices = page.locator('[data-intake-mode="read_only"]');
-    await expect(notices).toHaveCount(2);
-    await beforeInDocument(notices.first(), page.locator("h1"));
-    await beforeInDocument(funnel(page).locator('[data-intake-mode="read_only"]'), page.getByLabel("Property address", { exact: true }));
-    await fixedLiveLinks(page); await screenshot(page, "read-only-offline-address-320");
+    const notices = page.locator('[data-intake-mode="unknown"]');
+    await expect(notices).toHaveCount(1);
+    await beforeInDocument(notices, page.getByLabel("Property address", { exact: true }));
+    await expect(page.locator('[data-intake-mode="read_only"]')).toHaveCount(0);
+    await screenshot(page, "unknown-offline-address-320");
     await contact(page);
-    await expect(notices).toHaveCount(2);
-    await beforeInDocument(funnel(page).locator('[data-intake-mode="read_only"]'), page.getByLabel("Your name", { exact: true }));
-    await funnel(page).getByRole("button", { name: "Review demo (not saved)", exact: true }).click();
-    await expect(error(page)).toContainText("Entries here are not saved");
+    await expect(notices).toHaveCount(1);
+    await beforeInDocument(notices, page.getByLabel("Your name", { exact: true }));
+    await expect(funnel(page).getByRole("button", { name: "Saving unavailable", exact: true })).toBeDisabled();
+    await funnel(page).locator("form").evaluate((form: HTMLFormElement) => form.requestSubmit());
+    await expect(error(page)).toContainText("Availability is not confirmed");
     await expect(funnel(page).getByRole("heading", { name: "Your request is in.", exact: true })).toHaveCount(0);
     expect(captures.get(page)!.attempts).toHaveLength(0);
-    await screenshot(page, "read-only-offline-contact-320");
+    await screenshot(page, "unknown-offline-contact-320");
   } finally { await page.context().setOffline(false); }
 });
 
@@ -757,7 +762,7 @@ test("Real browser history return reports bfcache only for a trusted persisted p
   await expect.poll(() => capture.capabilityReads).toBeGreaterThan(readsBeforeHomepage);
   await Promise.all(capture.checks);
   await page.goBack();
-  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(2);
+  await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   const restored = await evidence(page);
   const actualBfcache = restored.documentId === original && restored.pageShows.some(event => event.trusted && event.persisted);
   capture.historyResult = actualBfcache ? "trusted_browser_bfcache" : "new_document_pending_reference_guard";

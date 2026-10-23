@@ -66,6 +66,10 @@ export type AdminTodayAction = {
   recordVersion: string;
   reviewVersion: number;
   recommendedAction: string;
+  ownership?: "direct" | "inherited" | "unassigned";
+  readOnly?: boolean;
+  requestContext?: string;
+  receivedAt?: string | null;
 };
 
 export type AdminTodayQueueResult = {
@@ -77,6 +81,12 @@ export type AdminTodayQueueResult = {
   counts: Record<TodayPriorityBucket, number>;
   excludedTestRecords: number;
   error?: string;
+  coverage?: {
+    state: "complete" | "limited" | "unavailable" | "restricted" | "unconfigured";
+    leadCount: number;
+    leadLimit: number;
+    limitedBy: string[];
+  };
 };
 
 type TodayLeadRow = Record<string, unknown>;
@@ -112,8 +122,11 @@ function leadName(row: TodayLeadRow) {
   return text(row.address_raw)
     || [text(row.first_name), text(row.last_name)].filter(Boolean).join(" ")
     || text(row.name)
-    || text(row.id)
-    || "Lead";
+    || "Request details not provided";
+}
+
+function effectiveOwner(row: TodayLeadRow) {
+  return text(row.assigned_agent_id) || text(row.inquiry_owner_agent_id);
 }
 
 function contactAllowed(leadId: string, permissions: PermissionRow[]) {
@@ -191,8 +204,15 @@ export function buildAdminTodayQueue(input: {
   const add = (inputAction: Omit<AdminTodayAction, "id" | "reviewVersion">) => {
     const review = reviews.get(`${inputAction.leadId}:${inputAction.actionKey}`);
     if (review?.hidden) return;
+    const lead = leadMap.get(inputAction.leadId)!;
+    const ownership = text(lead.assigned_agent_id) ? "direct" : effectiveOwner(lead) ? "inherited" : "unassigned";
     items.push({
       ...inputAction,
+      assignedAgentId: effectiveOwner(lead),
+      ownership,
+      readOnly: ownership === "inherited" && !input.canViewUnassigned,
+      requestContext: (text(lead.primary_intent) || text(lead.lead_type))?.replaceAll("_", " ") || "Request type not provided",
+      receivedAt: text(lead.created_at),
       id: `${inputAction.leadId}:${inputAction.actionKey}`,
       reviewVersion: review?.version || 0,
     });
@@ -201,7 +221,7 @@ export function buildAdminTodayQueue(input: {
   for (const lead of leads) {
     const leadId = text(lead.id);
     if (!leadId) continue;
-    const assignedAgentId = text(lead.assigned_agent_id);
+    const assignedAgentId = effectiveOwner(lead);
     const createdAt = text(lead.created_at);
     const assignedAt = text(lead.assigned_at);
     const firstResponseAt = text(lead.first_human_response_at);
@@ -314,9 +334,8 @@ export function buildAdminTodayQueue(input: {
     };
     const review = reviews.get(`${appointment.lead_id}:${actionKey}`);
     if (!review?.hidden) {
-      const normalized = { ...appointmentAction, id: `${appointment.lead_id}:${actionKey}`, reviewVersion: review?.version || 0 };
-      items.push(normalized);
-      upcomingAppointments.push(normalized);
+      add(appointmentAction);
+      upcomingAppointments.push(items[items.length - 1]);
     }
   }
 
@@ -354,6 +373,7 @@ export function buildAdminTodayQueue(input: {
     upcomingAppointments: upcomingAppointments.sort((a, b) => eventTime(a.dueAt) - eventTime(b.dueAt) || a.id.localeCompare(b.id)),
     counts: buildCounts(items),
     excludedTestRecords,
+    coverage: { state: "complete", leadCount: input.leads.length, leadLimit: 1000, limitedBy: [] },
   };
 }
 
@@ -371,6 +391,7 @@ export function emptyAdminTodayQueue(now = new Date(), timezone = "America/New_Y
     upcomingAppointments: [],
     counts: buildCounts([]),
     excludedTestRecords: 0,
+    coverage: { state: error?.endsWith("_required") ? "restricted" : error ? "unavailable" : "unconfigured", leadCount: 0, leadLimit: 1000, limitedBy: [] },
     ...(error ? { error } : {}),
   };
 }

@@ -101,7 +101,7 @@ test("Authentication-dependent command aliases render dynamically when auth was 
   const response=await page.goto("/admin/action-queue");
   expect(response?.status()).toBe(200);
   await expect(page).toHaveURL(/\/admin\/today$/);
-  await expect(page.getByRole("heading",{name:/What needs attention today/})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Your next step.",exact:true})).toBeVisible();
   await page.close();
 });
 
@@ -334,7 +334,7 @@ test("Genuine task action preserves invalid draft, replays a lost response once,
   await expect.poll(async () => (await sql("SELECT status FROM tasks WHERE id=$1", [rows[0].id]))[0].status).toBe("done");
   expect(await countResponse()).toBe(0);
   await today.reload();
-  await expect(today.getByRole("heading", { name: /What needs attention today/ })).toBeVisible();
+  await expect(today.getByRole("heading", { name: "Your next step.", exact: true })).toBeVisible();
   await expect(today.locator(`input[name="action_id"][value="${taskActionId}"]`)).toHaveCount(0);
   await today.screenshot({ path: "output/playwright/conversion-real-session-task-today-390.png", fullPage: true });
   await today.close();

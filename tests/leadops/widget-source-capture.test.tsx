@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WidgetApp } from "../../app/components/black-diamond/WidgetApp";
 vi.mock("../../app/lib/analytics", () => ({ trackEvent: vi.fn() }));
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeReadiness: () => ({ mode: "live", recheck: vi.fn() }), usePublicIntakeCapability: () => "live" }));
 
 beforeEach(() => {
   Object.defineProperty(window, "matchMedia", { configurable: true, value: () => ({ matches: false, addListener() {}, removeListener() {} }) });

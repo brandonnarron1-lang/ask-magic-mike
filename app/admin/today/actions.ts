@@ -38,8 +38,10 @@ export async function reviewTodayAction(formData: FormData, responseMode?: "inli
   if (status === "dismissed" && reason.length < 3) return finish("dismissal_reason_required", formData, responseMode);
 
   const queue = await loadAdminTodayQueue(principal);
+  if (queue.error || (queue.coverage && queue.coverage.state !== "complete")) return finish("queue_unavailable", formData, responseMode);
   const current = queue.items.find((item) => item.id === actionId && item.leadId === leadId);
   if (!current) return finish("stale_action", formData, responseMode);
+  if (current.readOnly) return finish("forbidden", formData, responseMode);
   if (!hasLeadCenterPermission(principal.role, current.requiredPermission)) return finish("forbidden", formData, responseMode);
   if (current.recordVersion !== expectedRecordVersion || current.reviewVersion !== expectedReviewVersion) {
     return finish("stale_action", formData, responseMode);
@@ -66,8 +68,10 @@ export async function completeTodayTask(formData: FormData, responseMode?: "inli
   const leadId = String(formData.get("lead_id") || "");
   const expectedRecordVersion = String(formData.get("record_version") || "");
   const queue = await loadAdminTodayQueue(principal);
+  if (queue.error || (queue.coverage && queue.coverage.state !== "complete")) return finish("queue_unavailable", formData, responseMode);
   const current = queue.items.find((item) => item.id === actionId && item.leadId === leadId);
   if (!current || current.actionKind !== "complete_task" || !current.taskId || current.blockers.length) return finish("stale_action", formData, responseMode);
+  if (current.readOnly) return finish("forbidden", formData, responseMode);
   if (!hasLeadCenterPermission(principal.role, current.requiredPermission)) return finish("forbidden", formData, responseMode);
   if (current.recordVersion !== expectedRecordVersion) return finish("stale_action", formData, responseMode);
   const token = formData.get("idempotency_key");

@@ -8,7 +8,7 @@ import { clearPendingHomeValueRequest, readPendingHomeValueRequest } from "../..
 import { PUBLIC_LEAD_SAVED_MESSAGE, PUBLIC_LEAD_UNCONFIRMED_MESSAGE } from "../../app/lib/publicLeadReceipt";
 
 const fixture = vi.hoisted(() => ({ mode: "live" as "live" | "checking" | "read_only" | "synthetic_qa" }));
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => fixture.mode }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => fixture.mode, usePublicIntakeReadiness: () => ({ mode: fixture.mode, recheck: vi.fn() }) }));
 const LEAD = "00000000-0000-4000-8000-000000000721";
 const CORRELATION = "00000000-0000-4000-8000-000000000722";
 const NAME = "INTERNAL QA | DO NOT CONTACT | SYNTHETIC SELLER";
