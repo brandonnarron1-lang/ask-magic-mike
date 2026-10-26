@@ -4,6 +4,8 @@ import type { PublicExperimentContext } from "../../app/lib/growth/experiment-re
 import { HOME_VALUE_TRUST_EXPERIMENT } from "../../app/lib/growth/experiment-registry";
 import { HomeValueExperimentExperience } from "../../app/components/black-diamond/HomeValueExperimentExperience";
 import HomeValuePage from "../../app/home-value/page";
+import { IntakeModeNotice } from "../../app/components/black-diamond/IntakeModeNotice";
+import type { PublicIntakeReadiness } from "../../app/lib/publicIntakeCapability";
 
 const mocks = vi.hoisted(() => ({ capability: vi.fn(), exposure: vi.fn() }));
 
@@ -12,6 +14,7 @@ vi.mock("../../app/lib/growth/public-experiment-client", () => ({ recordExperime
 vi.mock("../../app/components/black-diamond/HomeValueFunnel", () => ({
   HomeValueFunnel: ({ experimentContext, surface }: { experimentContext: PublicExperimentContext | null; surface: string }) => (
     <div data-testid="funnel" data-surface={surface} data-variant={experimentContext?.variantKey}>
+      <IntakeModeNotice mode={mocks.capability() as PublicIntakeReadiness} />
       <input aria-label="Property address" />
     </div>
   ),
@@ -34,13 +37,15 @@ afterEach(() => {
 });
 
 describe("Home Value capability approach", () => {
-  it.each(["checking", "read_only", "synthetic_qa"])("warns %s before the mobile approach and any input", (mode) => {
+  it.each(["checking", "unknown", "read_only", "synthetic_qa"])("shows one funnel-owned %s notice before any input", (mode) => {
     mocks.capability.mockReturnValue(mode);
     render(<HomeValueExperimentExperience />);
     const notice = screen.getByRole("status");
     const heading = screen.getByRole("heading", { level: 1 });
     const input = screen.getByLabelText("Property address");
-    expect(notice.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+    expect(screen.getByTestId("funnel")).toContainElement(notice);
+    expect(heading.compareDocumentPosition(notice) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(notice.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.getByTestId("funnel")).toHaveAttribute("data-surface", "home_value_page");
   });
@@ -48,7 +53,12 @@ describe("Home Value capability approach", () => {
   it("leaves the live approach without a demo warning", () => {
     mocks.capability.mockReturnValue("live");
     render(<HomeValueExperimentExperience />);
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+    expect(screen.getByText("Live Home Value intake — ready for your request.")).toBeVisible();
+    // JSDOM does not load Tailwind; assert both accessibility exclusion and
+    // the real built stylesheet's visibility class rather than missing CSS.
+    expect(screen.getByText("Read-only demo. Do not enter personal details.")).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByText("Read-only demo. Do not enter personal details.")).toHaveClass("invisible");
   });
 
   it("uses the short mobile heading and intro while keeping the desktop control variant", () => {

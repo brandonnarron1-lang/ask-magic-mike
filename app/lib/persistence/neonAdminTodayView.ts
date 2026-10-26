@@ -35,17 +35,19 @@ export async function loadNeonAdminTodayQueue(
     return { ...emptyAdminTodayQueue(now, "America/New_York", "lead_center_lead_permission_required"), configured: true };
   }
   const canViewAll = hasLeadCenterPermission(principal.role, "lead:view_all");
-  if (!canViewAll && !principal.agentId) return { ...emptyAdminTodayQueue(now), configured: true };
+  if (!canViewAll && !principal.agentId) return { ...emptyAdminTodayQueue(now, "America/New_York", "lead_center_agent_identity_required"), configured: true };
 
   try {
-    const leads = await sql.query(
+    const leadRows = await sql.query(
       `SELECT l.id, l.created_at, l.updated_at::text AS updated_at, l.status, l.score, l.lead_grade,
               l.is_test, l.communication_suppressed, l.assigned_agent_id,
               l.assigned_at, l.last_contacted_at, l.next_follow_up_at,
-              l.address_raw, l.first_name, l.last_name,
+              l.address_raw, l.first_name, l.last_name, l.primary_intent, l.lead_type,
+              COALESCE(l.assigned_agent_id, original.assigned_agent_id) AS inquiry_owner_agent_id,
               aa.id AS assignment_id, aa.status AS assignment_status,
               rm.first_human_response_at
          FROM public.leads l
+         LEFT JOIN public.leads original ON original.id = l.duplicate_of_lead_id
          LEFT JOIN LATERAL (
            SELECT id, status
              FROM public.agent_assignments
@@ -54,15 +56,16 @@ export async function loadNeonAdminTodayQueue(
          ) aa ON true
          LEFT JOIN public.lead_response_milestones rm ON rm.lead_id = l.id
         WHERE l.status NOT IN ('converted', 'dead', 'closed', 'closed_won', 'closed_lost', 'spam')
-          ${!canViewAll ? "AND l.assigned_agent_id = $1::uuid" : ""}
+          ${!canViewAll ? "AND (l.assigned_agent_id = $1::uuid OR (l.assigned_agent_id IS NULL AND original.assigned_agent_id = $1::uuid))" : ""}
         ORDER BY l.created_at DESC, l.id DESC
-        LIMIT 1000`,
+        LIMIT 1001`,
       !canViewAll ? [principal.agentId] : [],
     ) as Array<Record<string, unknown>>;
+    const leads = leadRows.slice(0, 1000);
 
     const leadIds = leads.flatMap((row) => typeof row.id === "string" ? [row.id] : []);
     if (!leadIds.length) {
-      return { ...emptyAdminTodayQueue(now), configured: true };
+      return buildAdminTodayQueue({ leads: [], appointments: [], tasks: [], now });
     }
 
     const [appointmentRows, taskRows, notificationRows, permissionRows, reviewRows] = await Promise.all([
@@ -70,7 +73,7 @@ export async function loadNeonAdminTodayQueue(
         `SELECT a.*, a.updated_at::text AS updated_at FROM public.lead_appointments a
           WHERE a.lead_id = ANY($1::uuid[])
             AND a.status IN ('requested','scheduled','confirmed','reschedule_requested')
-          ORDER BY COALESCE(a.starts_at, a.requested_at, a.created_at), a.id LIMIT 2000`,
+          ORDER BY COALESCE(a.starts_at, a.requested_at, a.created_at), a.id LIMIT 2001`,
         [leadIds],
       ),
       sql.query(
@@ -78,7 +81,7 @@ export async function loadNeonAdminTodayQueue(
           WHERE t.lead_id = ANY($1::uuid[])
             AND t.category LIKE 'followup:%'
             AND t.status IN ('open','in_progress')
-          ORDER BY t.due_at ASC NULLS LAST, t.id LIMIT 2000`,
+          ORDER BY t.due_at ASC NULLS LAST, t.id LIMIT 2001`,
         [leadIds],
       ),
       sql.query(
@@ -87,41 +90,47 @@ export async function loadNeonAdminTodayQueue(
            FROM public.lead_notifications n
           WHERE n.lead_id = ANY($1::uuid[])
             AND n.status IN ('failed','retry_scheduled','permanently_failed','pending','processing')
-          ORDER BY n.updated_at DESC, n.id LIMIT 1000`,
+          ORDER BY n.updated_at DESC, n.id LIMIT 1001`,
         [leadIds],
       ),
       sql.query(
         `SELECT lead_id, channel, purpose, state, manual_review_required, updated_at
            FROM public.communication_permissions
           WHERE lead_id = ANY($1::uuid[])
-          ORDER BY updated_at DESC LIMIT 4000`,
+          ORDER BY updated_at DESC LIMIT 4001`,
         [leadIds],
       ),
       sql.query(
         `SELECT lead_id, action_key, status, snooze_until, version
            FROM public.lead_action_reviews
           WHERE lead_id = ANY($1::uuid[])
-          ORDER BY updated_at DESC LIMIT 2000`,
+          ORDER BY updated_at DESC LIMIT 2001`,
         [leadIds],
       ),
-    ]);
+    ]) as Array<Array<Record<string, unknown>>>;
 
     const result = buildAdminTodayQueue({
       leads,
-      appointments: (appointmentRows as Array<Record<string, unknown>>)
+      appointments: (appointmentRows as Array<Record<string, unknown>>).slice(0, 2000)
         .map(normalizeAppointment)
         .filter((row): row is AdminAppointmentRow => Boolean(row)),
-      tasks: (taskRows as Array<Record<string, unknown>>)
+      tasks: (taskRows as Array<Record<string, unknown>>).slice(0, 2000)
         .map(normalizeTask)
         .filter((row): row is AdminFollowupTaskRow => Boolean(row)),
-      notifications: notificationRows as Array<Record<string, unknown>>,
-      permissions: permissionRows as Array<Record<string, unknown>>,
-      reviews: reviewRows as Array<Record<string, unknown>>,
+      notifications: (notificationRows as Array<Record<string, unknown>>).slice(0, 1000),
+      permissions: (permissionRows as Array<Record<string, unknown>>).slice(0, 4000),
+      reviews: (reviewRows as Array<Record<string, unknown>>).slice(0, 2000),
       now,
       timezone: "America/New_York",
       canViewUnassigned: canViewAll,
     });
-    return { ...result, configured: true };
+    const limitedBy = [
+      ["requests", leadRows.length, 1000], ["appointments", appointmentRows.length, 2000],
+      ["tasks", taskRows.length, 2000], ["notifications", notificationRows.length, 1000],
+      ["permissions", permissionRows.length, 4000], ["action reviews", reviewRows.length, 2000],
+    ].filter(([, count, limit]) => Number(count) > Number(limit)).map(([label]) => String(label));
+    return { ...result, configured: true,
+      coverage: { state: limitedBy.length ? "limited" : "complete", leadCount: leads.length, leadLimit: 1000, limitedBy } };
   } catch {
     return { ...emptyAdminTodayQueue(now, "America/New_York", "Canonical Today queue query failed"), configured: true };
   }

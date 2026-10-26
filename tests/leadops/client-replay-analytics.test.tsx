@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { HomeValueFunnel } from "../../app/components/black-diamond/HomeValueFunnel";
 import { SellerIntentSection } from "../../app/components/black-diamond/SellerIntentSection";
 import { PUBLIC_LEAD_SAVED_MESSAGE } from "../../app/lib/publicLeadReceipt";
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => "live" }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeReadiness: () => ({ mode: "live", recheck: vi.fn() }), usePublicIntakeCapability: () => "live" }));
 
 Object.defineProperty(window, "matchMedia", {
   writable: true,

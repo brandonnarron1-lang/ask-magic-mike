@@ -21,7 +21,7 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('throw new Error("synthetic_QA_identity_required")');
     expect(source).toContain('if ((mode & 0o077) !== 0)');
     expect(source).toContain('dash.text.includes("Command Center")');
-    expect(source).toContain('dash.text.includes("What needs attention today.")');
+    expect(source).toContain('dash.text.includes("Your next step.")');
     expect(source).toContain('list.text.includes("Command Center")');
     expect(source).toContain('list.text.includes("Lead inbox and routing readiness")');
     expect(source).not.toContain('dash.text.includes("Lead Center")');

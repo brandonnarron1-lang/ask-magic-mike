@@ -43,6 +43,18 @@ beforeEach(() => {
 });
 
 describe("conversion workflow server action boundaries", () => {
+  it("does not turn inherited READ access into a Today mutation", async () => {
+    const queue = await mocks.queue(); queue.items[0].readOnly = true;
+    mocks.queue.mockResolvedValue(queue);
+    await expect(completeTodayTask(data({ action_id: "action-1", record_version: "version-1" }), "inline")).resolves.toEqual({ ok: false, error: "forbidden" });
+    await expect(reviewTodayAction(data({ action_id: "action-1", record_version: "version-1", review_status: "snoozed", review_version: "0" }), "inline")).resolves.toEqual({ ok: false, error: "forbidden" });
+    expect(mocks.updateFollowupTask).not.toHaveBeenCalled(); expect(mocks.review).not.toHaveBeenCalled();
+  });
+  it("holds mutations when a fresh bounded queue cannot establish complete coverage", async () => {
+    mocks.queue.mockResolvedValue({ items: [], coverage: { state: "limited" } });
+    await expect(completeTodayTask(data({ action_id: "action-1", record_version: "version-1" }), "inline")).resolves.toEqual({ ok: false, error: "queue_unavailable" });
+    expect(mocks.updateFollowupTask).not.toHaveBeenCalled();
+  });
   it("returns only a safe inline result, preserves permission scope, derives actor and passes token", async () => {
     await expect(createAppointmentAction(data({ status: "scheduled", starts_at: "2026-10-06T15:30" }), "inline")).resolves.toEqual({ ok: true });
     expect(mocks.leadPermission).toHaveBeenCalledWith(leadId, "lead:update_assigned");

@@ -186,7 +186,7 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await openTimeline(page);
   await expect(page.getByRole("link", { name: "Newer activity" })).toBeVisible();
   await page.goto("/admin/today");
-  await expect(page.getByRole("heading", { name: /What needs attention today/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your next step.", exact: true })).toBeVisible();
   const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Complete task", exact: true }) }).filter({ has: page.locator(`input[name="lead_id"][value="${f.leads.agent}"]`) }).first();
   await expect(form).toBeVisible();
   await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="stale-synthetic-version"; });

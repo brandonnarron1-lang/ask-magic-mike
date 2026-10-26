@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 const ROUTES = [
-  ["/admin/today", /What needs attention today/i],
+  ["/admin/today", /Your next step\./i],
   ["/admin/leads", /Lead inbox and routing readiness/i],
   ["/admin/activity", /Authorized activity/i],
   ["/admin/reporting", /Analytics and reporting/i],
@@ -55,7 +55,7 @@ test("Agent Command Center remains reachable at a 200% visual zoom check", async
   const page = await context.newPage();
   await page.goto("/admin/today", { waitUntil: "networkidle" });
   await page.evaluate(() => { document.documentElement.style.zoom = "200%"; });
-  await expect(page.getByRole("heading", { name: /What needs attention today/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Your next step.", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Leads", exact: true })).toBeVisible();
   await page.screenshot({
     path: "output/playwright/agent-command-center-zoom-200.png",

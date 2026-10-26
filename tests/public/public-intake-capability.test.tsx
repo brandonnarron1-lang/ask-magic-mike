@@ -1,4 +1,4 @@
-import { act, cleanup, render, renderHook, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   readPublicIntakeCapability,
@@ -131,38 +131,41 @@ describe("IntakeModeNotice", () => {
   it("identifies configured live intake without a demo warning or forwarding link", () => {
     const { container } = render(<IntakeModeNotice mode="live" />);
     expect(container).toHaveTextContent("Live Home Value intake");
-    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("asks visitors to wait before providing personal details while checking", () => {
     render(<IntakeModeNotice mode="checking" />);
-    expect(screen.getByRole("status")).toHaveTextContent("Please wait before sharing personal details.");
+    expect(screen.getByText("Checking availability. Please wait.")).toBeVisible();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it.each(["read_only", "synthetic_qa"] as const)("links %s only to the fixed live form without forwarding data", (mode) => {
     window.history.replaceState({}, "", "/home-value?email=fictional%40example.test&consent=true#contact");
     render(<IntakeModeNotice mode={mode} className="mb-6" />);
+    fireEvent.click(screen.getByText("About this form’s availability"));
     const link = screen.getByRole("link", { name: "Open the live Home Value form" });
     expect(LIVE_HOME_VALUE_URL).toBe("https://www.askmagicmike.com/home-value");
     expect(link).toHaveAttribute("href", "https://www.askmagicmike.com/home-value");
     expect(link).toHaveAttribute("referrerpolicy", "no-referrer");
     expect(link).toHaveAttribute("rel", "noreferrer");
-    expect(screen.getByRole("status")).toHaveAttribute("data-intake-mode", mode);
-    expect(screen.getByRole("status")).toHaveClass("mb-6");
+    expect(screen.getByRole("status").closest("[data-intake-mode]")).toHaveAttribute("data-intake-mode", mode);
+    expect(screen.getByRole("status").closest("[data-intake-mode]")).toHaveClass("mb-6");
   });
 
   it("clearly labels read-only exploration as demo and warns against personal contact details", () => {
     render(<IntakeModeNotice mode="read_only" />);
-    expect(screen.getByRole("status")).toHaveTextContent("Read-only demo — requests cannot be saved here.");
-    expect(screen.getByRole("status")).toHaveTextContent("do not enter personal contact details");
+    expect(screen.getByText("Read-only demo. Do not enter personal details.")).toBeVisible();
+    fireEvent.click(screen.getByText("About this form’s availability"));
+    expect(screen.getByText(/Read-only demo — requests cannot be saved here/)).toBeVisible();
   });
 
   it("requires fictional QA details and explains independently disabled outbound contact", () => {
     render(<IntakeModeNotice mode="synthetic_qa" />);
-    expect(screen.getByRole("status")).toHaveTextContent("Synthetic QA only — not a live intake.");
-    expect(screen.getByRole("status")).toHaveTextContent("fictional test details, not personal information");
-    expect(screen.getByRole("status")).toHaveTextContent("outbound contact is disabled");
+    expect(screen.getByText("Fictional QA details only. No outbound contact.")).toBeVisible();
+    fireEvent.click(screen.getByText("About this form’s availability"));
+    expect(screen.getByText(/Synthetic QA only — not a live intake/)).toHaveTextContent("fictional test details, not personal information");
+    expect(screen.getByText(/Synthetic QA only — not a live intake/)).toHaveTextContent("outbound contact is disabled");
   });
 });
