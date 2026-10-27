@@ -11,6 +11,7 @@ import { startDatabase, stopDatabase, install, psql, literal } from "../../tests
 
 if (process.env.AMM_QA_POSTGRES_TEST !== "1" || process.env.VERCEL_ENV === "production" || process.env.VERCEL_ENV === "preview" || process.env.DATABASE_URL || process.env.PREVIEW_URL) throw new Error("explicit_clean_isolated_venue_required");
 const readability = process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1";
+const ncRouting = process.env.AMM_NC_ROUTING_ACCEPTANCE === "1";
 const homeValue = process.env.AMM_HOME_VALUE_ACCEPTANCE === "1";
 const launchIntake = process.env.AMM_LAUNCH_INTAKE_UI_ACCEPTANCE === "1";
 const acquisition = process.env.AMM_ACQUISITION_ACCEPTANCE === "1";
@@ -25,6 +26,7 @@ if (nativeBinary && (!nativeClient || !["ios", "android"].includes(nativeBinary)
 function artifactOverrideSafe() { return !!process.env.AMM_SESSION_ARTIFACT_DIR; }
 if (nativeDevice && !nativeClient) throw new Error("native_device_requires_owned_native_acceptance");
 const lifecycle = process.env.AMM_R2_LIFECYCLE_ACCEPTANCE === "1" || nativeClient;
+if (ncRouting && (webAcquisition || lifecycle || concierge || consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_nc_routing_selection_required");
 if (webAcquisition && (lifecycle || concierge || consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_web_acquisition_selection_required");
 if (nativeClient && process.env.AMM_R2_LIFECYCLE_ACCEPTANCE === "1") throw new Error("exclusive_native_acceptance_selection_required");
 if (lifecycle && (concierge || consumerAccount || consumerWorkspace || acquisition || launchIntake || homeValue || readability || process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1")) throw new Error("exclusive_r2_lifecycle_acceptance_selection_required");
@@ -121,6 +123,7 @@ try {
     AMM_QA_POSTGRES_TEST: "1", AMM_ISOLATED_SESSION_ACCEPTANCE: "1", AMM_E2E_FIXTURE_PATH: fixturePath,
     ...(process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? { AMM_CONVERSION_SESSION_ACCEPTANCE: "1" } : {}),
     ...(readability ? { AMM_LEAD_READABILITY_ACCEPTANCE: "1" } : {}),
+    ...(ncRouting ? { AMM_NC_ROUTING_ACCEPTANCE: "1" } : {}),
     ...(homeValue ? { AMM_HOME_VALUE_ACCEPTANCE: "1" } : {}),
     ...(launchIntake ? { AMM_LAUNCH_INTAKE_UI_ACCEPTANCE: "1" } : {}),
     ...(acquisition ? { AMM_ACQUISITION_ACCEPTANCE: "1" } : {}),
@@ -145,7 +148,7 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = webAcquisition ? "tests/e2e/web-acquisition-real-session.spec.ts" : nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = ncRouting ? "tests/e2e/nc-routing-real-session.spec.ts" : webAcquisition ? "tests/e2e/web-acquisition-real-session.spec.ts" : nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
   const additionalSuites = webAcquisition ? ["tests/e2e/today-reliability-real-session.spec.ts", "tests/e2e/conversion-readiness-sharing.spec.ts"] : [];
   child = spawn("pnpm", ["exec", "playwright", "test", suite, ...additionalSuites, ...(artifactOverride ? ["--output",path.join(runDir,"test-results")] : []), ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });

@@ -19,7 +19,7 @@ jobs:
   local-release-gate:
     name: local-release-gate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 24
 
     steps:
       - name: Checkout
@@ -138,6 +138,9 @@ jobs:
       - name: Built lead navigation and optional-tool acceptance (isolated, no sends)
         run: AMM_LEAD_READABILITY_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/lead-navigation-ci pnpm run test:reference:sessions
 
+      - name: Built factual qualification and read-only routing readiness (real sessions, isolated SQL, no sends)
+        run: AMM_NC_ROUTING_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/nc-routing-ci pnpm run test:reference:sessions
+
       - name: Built staff handoff review with real sessions and current scoped context (isolated, no sends)
         run: AMM_CONCIERGE_HANDOFF_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/operator-handoff-built-ci pnpm run test:reference:sessions
 
@@ -186,6 +189,9 @@ jobs:
             .amm-run/reference-session-acceptance/performance.json
             .amm-run/lead-navigation-ci/receipt.json
             .amm-run/lead-navigation-ci/screenshots/*.png
+            .amm-run/nc-routing-ci/receipt.json
+            .amm-run/nc-routing-ci/database-identity.json
+            .amm-run/nc-routing-ci/screenshots/*.png
             .amm-run/acquisition-ci/receipt.json
             .amm-run/acquisition-ci/screenshots/*.png
             .amm-run/consumer-workspace-ci/receipt.json

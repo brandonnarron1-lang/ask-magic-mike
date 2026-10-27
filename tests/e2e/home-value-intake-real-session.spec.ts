@@ -31,6 +31,8 @@ type Capture = {
   externalBlocked: number;
   capabilityReads: number;
   capabilityModes: Set<string>;
+  healthBodyFailures: { responseStage: string; failureStage: string; status: number; requestFailure: string | null }[];
+  historyStage: "not_history" | "initial_form" | "away_document" | "history_return";
   pageErrors: string[];
   addressLookupFixture?: boolean;
   checks: Promise<void>[];
@@ -85,7 +87,7 @@ async function refusal(route: Route, capture: Capture, status: number, code: str
 async function installBoundary(page: Page): Promise<Capture> {
   const capture: Capture = {
     attempts: [], statuses: [], violations: [], appointments: 0, auxiliaryWrites: 0,
-    externalBlocked: 0, capabilityReads: 0, capabilityModes: new Set(), pageErrors: [], checks: [], syntheticLeadIds: new Map(),
+    externalBlocked: 0, capabilityReads: 0, capabilityModes: new Set(), healthBodyFailures: [], historyStage: "not_history", pageErrors: [], checks: [], syntheticLeadIds: new Map(),
     reply: (route, attempt) => savedReply(route, capture, attempt),
   };
   page.on("pageerror", error => capture.pageErrors.push(error.stack || error.message));
@@ -102,13 +104,19 @@ async function installBoundary(page: Page): Promise<Capture> {
   page.on("response", response => {
     const target = new URL(response.url());
     if (target.origin !== appOrigin || target.pathname !== "/api/health/live") return;
+    const responseStage = capture.historyStage;
     capture.checks.push((async () => {
       capture.capabilityReads += 1;
       const body: unknown = await response.json();
       const mode = body && typeof body === "object" ? (body as Record<string, unknown>).public_intake : null;
       if (response.status() !== 200 || mode !== "synthetic_qa") capture.violations.push("actual_health_not_synthetic_qa");
       else capture.capabilityModes.add(mode);
-    })().catch(() => { capture.violations.push("actual_health_unreadable"); }));
+    })().catch(() => {
+      capture.violations.push("actual_health_unreadable");
+      const failure = response.request().failure()?.errorText;
+      capture.healthBodyFailures.push({ responseStage, failureStage: capture.historyStage,
+        status: response.status(), requestFailure: failure && /^net::ERR_[A-Z_]+$/.test(failure) ? failure : null });
+    }));
   });
 
   // One pre-navigation, fail-closed boundary includes aliases, unexpected API
@@ -371,6 +379,7 @@ test.afterEach(async ({ page }, info: TestInfo) => {
     source: "browser-intercepted-synthetic-ui-receipts-not-intake-sql-proof",
     test: info.title, status: info.status, viewport: page.viewportSize(),
     actualCapabilityReads: capture.capabilityReads, actualCapabilityModes: [...capture.capabilityModes],
+    healthBodyFailures: capture.healthBodyFailures,
     canonicalLeadRequestsIntercepted: capture.attempts.length, responseStatuses: capture.statuses,
     identicalKeys: capture.attempts.every(attempt => attempt.key === capture.attempts[0]?.key),
     identicalPayloadBytes: capture.attempts.every(attempt => attempt.body === capture.attempts[0]?.body),
@@ -748,11 +757,17 @@ test("Full reload after uncertainty restores only the pending reference and bloc
 
 test("Real browser history return reports bfcache only for a trusted persisted pageshow", async ({ page }, info) => {
   const capture = captures.get(page)!;
+  capture.historyStage = "initial_form";
   capture.reply = async route => { capture.statuses.push("aborted"); await route.abort("failed"); };
   await openHomeValue(page); await contact(page); await submit(page).click(); await assertUnconfirmed(page);
   const key = capture.attempts[0].key;
   const original = (await evidence(page)).documentId;
+  // The response observer reads bodies independently of the application's
+  // fetch. Finish its existing reads before destroying the first document too,
+  // not only before goBack below. Never clear or forgive a failed health read.
+  await Promise.all(capture.checks);
   const readsBeforeHomepage = capture.capabilityReads;
+  capture.historyStage = "away_document";
   await page.goto("/");
   // The actual homepage mounts its own HomeValueFunnel. goto(load) alone does
   // not finish that hook's no-store fetch or this observer's response.json().
@@ -761,6 +776,7 @@ test("Real browser history return reports bfcache only for a trusted persisted p
   await expect(funnel(page).locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   await expect.poll(() => capture.capabilityReads).toBeGreaterThan(readsBeforeHomepage);
   await Promise.all(capture.checks);
+  capture.historyStage = "history_return";
   await page.goBack();
   await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   const restored = await evidence(page);
