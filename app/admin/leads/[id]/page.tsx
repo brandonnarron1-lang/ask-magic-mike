@@ -32,6 +32,11 @@ import { presentLead, leadSubtype } from "../../../lib/leadPresentation";
 import { leadOwnership } from "../../../lib/leadOwnership";
 import { leadPageHeading, leadRequestLabel, leadSourceLabel, leadTimelineLabel } from "../../../lib/leadReadability";
 import { LeadEvidenceWorkspace } from "../../../components/admin/LeadEvidenceWorkspace";
+import { LeadQualificationPanel } from "../../../components/admin/LeadQualificationPanel";
+import { buildLeadQualificationDossier } from "../../../lib/leadQualificationDossier";
+import { simulateAllocation } from "../../../lib/allocationReadiness";
+import { projectOperationalReadiness } from "../../../lib/allocationReadinessProjection";
+import { loadAllocationWorkspace } from "../../../lib/leadAllocationReadModel";
 import {
   createAppointmentAction,
   createFollowupTaskAction,
@@ -630,6 +635,19 @@ export default async function AdminLeadDetailPage({
   // records. Preserve canonical task/appointment transitions on closed leads.
   const canMaintainRecords = Boolean(lead && canUpdateLead && !lead.is_test && !lead.communication_suppressed);
   const canFollowThrough = canUpdateLead && !contactBlocked;
+  const dossier = lead && principal ? buildLeadQualificationDossier(lead) : null;
+  // No new endpoint or mutation. Only administrators may inspect pool members;
+  // assigned agents receive their scoped inquiry dossier, never another agent's roster.
+  const readiness = dossier && principal?.role === "administrator" ? await loadAllocationWorkspace(principal) : null;
+  const simulation = dossier && readiness ? simulateAllocation({
+    at: new Date().toISOString(), policyVersion: readiness.policy?.version ?? null,
+    roster: projectOperationalReadiness(readiness),
+    inquiry: { id: dossier.inquiryId, intent: dossier.intent.value || "unknown",
+      region: dossier.jurisdiction.state === "nc" ? "NC" : dossier.property.country.value === "US" ? dossier.property.region.value?.toUpperCase() || null : null,
+      locality: dossier.property.locality.value, responsibleOwnerId: dossier.ownership.agentId,
+      inheritedOwner: dossier.ownership.kind === "inherited", requestedAgentId: null,
+      representation: "unknown", relationshipAgentId: null, contactHeld: dossier.holds.length > 0 },
+  }) : null;
 
   return (
     <LeadContactDisclosure key={id} leadId={id}><main className="min-h-screen bg-[#050505] px-4 py-5 text-[#f4ead4] [overflow-wrap:anywhere]">
@@ -675,6 +693,7 @@ export default async function AdminLeadDetailPage({
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <section className="min-w-0 space-y-5">
               {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && !isPreviewRuntime()} status={lead.status}/> : null}
+              {dossier ? <LeadQualificationPanel dossier={dossier} simulation={simulation}/> : null}
               {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <Panel title="Property evidence (optional)"><LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/></Panel> : null}
               <Panel title="Lead state">
                 <div className="flex flex-wrap gap-2">

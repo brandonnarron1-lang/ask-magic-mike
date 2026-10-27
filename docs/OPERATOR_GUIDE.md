@@ -6,6 +6,59 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Qualification and routing readiness — October 27 candidate
+
+This section describes the S1 candidate, not a deployment or activation receipt.
+Open an already-authorized inquiry from **Today** or **Leads**. Below saved
+contact details, **Qualification snapshot** separates client-reported entries
+from missing facts. **Facts and evidence** identifies each retained field;
+the date basis is inquiry creation, not independent field verification. Repeat
+inquiry evidence stays with that inquiry; inherited responsibility grants no
+new contact or mutation permission.
+
+Unknown country/region stays unknown. Buyer search areas and listing references
+are not verified property jurisdiction, ownership or availability. For explicit
+US/NC property data, the panel points to the NCREC human-review boundary:
+[WWREA at first substantial contact](https://bulletins.ncrec.gov/working-with-real-estate-agents-disclosure-update/)
+(observed October 27). A disclosure link or signature is not completed broker
+review or representation. Do not solicit confidential negotiating/financial
+facts before the applicable broker-reviewed agency workflow.
+
+Administrators can inspect the **Routing simulation** and its per-agent holds;
+assigned agents see only their scoped factual dossier. The new policy is OFF.
+Simulation has no assignment, offer, capacity, audit, task or notification
+effects. **Allocation → Future routing readiness** distinguishes current web
+binding from transport enrollment. No directory entry, channel enrollment or
+availability preference is promoted into verified licensure or acceptance.
+Current license/supervision, broker-approved service/area, working hours,
+capacity, representation policy and genuine participating-agent acceptance
+are one consolidated activation prerequisite. No backlog is reassigned.
+
+Use existing permission review above before outreach, **Review follow-up** for
+the current task flow, and **Open Today** for obligations. Record an actual
+attempt, conversation and next task separately; opening a dialer/composer does
+not establish contact. Existing request-versus-confirmed appointment meanings,
+Mike/Brandon alerts, source governance and privacy controls are unchanged.
+
+### S0 architecture decision (October 27)
+
+Choose A: canonical Neon + existing Better Auth/object authorization + current
+storage and bounded refresh. S1 has no demonstrated realtime/storage gap and
+needs no migration, new service or paid call. Neon now documents additional
+[Realtime (Beta) and storage capabilities](https://neon.com/docs/introduction);
+availability in documentation is not an enabled or accepted project feature.
+
+B (narrow Supabase Storage/Broadcast adjunct) is deferred: [Storage requires
+RLS policies](https://supabase.com/docs/guides/storage/security/access-control),
+and [private Broadcast authorization](https://supabase.com/docs/guides/realtime/broadcast)
+does not replace record authorization. A future concrete need must prove
+subject-scoped authorization, immediate revocation, failure isolation, cost
+and reversible removal before any activation. No Supabase resource is created.
+C (full migration/auth replacement) is rejected for this slice; it would need
+a separate owner-approved cutover and lossless compatibility proof. No dual
+lead, assignment or consent stores. Official capabilities were checked once;
+the changelog Markdown fetch was unavailable, not a reason to provision.
+
 ## Conversion reliability follow-up — October 23 candidate
 
 This section describes the review candidate, not deployment evidence. Today uses
