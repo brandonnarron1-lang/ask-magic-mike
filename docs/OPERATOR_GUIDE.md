@@ -8,6 +8,52 @@ This guide covers daily operation of the Ask Magic Mike platform for brokers and
 
 ## Qualification and routing readiness — October 27 candidate
 
+### S2 bounded rehearsal and claim revalidation — local review candidate
+
+This subsection describes the successor candidate, not a deployment or LIVE
+activation receipt. In **Allocation**, open **Rehearse a bounded web-only
+policy**. Use a synthetic example, select one or two existing operational
+bindings, and enter an explicitly zoned future cutoff/end with a maximum of
+ten new inquiries over at most seven days. **Run no-effect rehearsal** reuses
+the deterministic readiness engine. It does not save a policy, approve an
+agent, create an offer/task/audit, reserve capacity or send a message. Changing
+an input or refreshing the policy/roster snapshot invalidates the old result.
+
+Directory enrollment remains insufficient: current license/supervision,
+broker-approved service/coverage/representation policy, staffed hours/capacity
+and genuine participant acceptance must exist before any bounded LIVE policy.
+Missing facts stay held; neither this form nor an administrator's checkbox
+manufactures them. The result is a snapshot, not future staffing assurance.
+LIVE remains OFF; intake and normal Mike/Brandon alerts continue unchanged.
+
+The accompanying additive SQL correction revalidates operational coverage,
+service, working hours, terminal request state and reserved capacity inside
+the existing locked claim transaction. A stale offer cannot establish an
+assignment merely because it was eligible when issued. A legitimate PASS can
+still release an outstanding offer after coverage/hours change. Existing
+identity, deadline, exact version, replay and atomic task/audit/outbox checks
+remain final. Claiming is responsibility acceptance, not consumer contact.
+
+Authenticated web eligibility does not require email or carrier enrollment.
+Optional email/SMS intents still require their original channel grants;
+SMS possession/consent/STOP and staff-pilot restrictions remain intact. This
+code does not enroll anyone, activate a scheduler, drain a backlog or grant
+professional readiness. Use **Today** and the saved request for actual scoped
+follow-up; record only a real attempt, conversation and subsequent next step.
+
+Recovery keeps LIVE OFF and retains the compatible SQL guards with the
+existing source-governance/privacy/v6 readers. A prior application build may
+use the same function signatures; do not delete outbox/history or blindly
+revert the database to the stale-eligibility behavior. Source-bound local,
+hosted and protected acceptance plus migration checksum/grant/upgrade proof
+are required before any release. No new paid capacity or messaging authority
+is created by this candidate.
+
+The existing Allocation summary also wraps long source labels and constrains
+its agent selector to the available width. The built rehearsal verifies the
+whole page at 320/390/430/768/1440 CSS pixels and 200% root text; content is
+neither clipped nor reduced to make the layout pass.
+
 This section describes the S1 candidate, not a deployment or activation receipt.
 Open an already-authorized inquiry from **Today** or **Leads**. Below saved
 contact details, **Qualification snapshot** separates client-reported entries

@@ -6,7 +6,7 @@ import { test, expect, type BrowserContext } from "@playwright/test";
 
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.AMM_NC_ROUTING_ACCEPTANCE !== "1", "Dedicated synthetic loopback venue only");
 test.describe.configure({ mode: "serial" });
-let fixture: { ids: Record<string,string>; agents: Record<string,string>; leads: Record<string,string> };
+let fixture: { ids: Record<string,string>; agents: Record<string,string>; leads: Record<string,string>; offers: Record<string,Array<{id:string;version:number;agent_id:string}>> };
 let pool: Pool;
 let agent: BrowserContext, admin: BrowserContext;
 const output = process.env.AMM_E2E_OUTPUT_DIR || "output/playwright";
@@ -17,7 +17,9 @@ async function signIn(context: BrowserContext, role: string, target: string) {
   await page.goto(`/lead-center-login?returnTo=${encodeURIComponent(target)}`);
   await page.getByLabel("Work email").fill(`${role}@example.test`);
   await page.getByLabel("Password", { exact: true }).fill(process.env.AMM_E2E_FIXTURE_PASSWORD!);
+  const signedIn=page.waitForResponse(response=>response.url().endsWith("/api/lead-center-auth/sign-in/email")&&response.request().method()==="POST");
   await page.getByRole("button", { name: "Open Lead Center" }).click();
+  expect((await signedIn).status()).toBe(200);
   await expect(page).toHaveURL(new URL(target, test.info().project.use.baseURL).href);
   return page;
 }
@@ -116,9 +118,75 @@ test("allocation readiness shows absent professional proof, not SMS as the activ
   await expect(panel).toContainText("not recorded"); await expect(panel).toContainText("Carrier approval is not");
   expect(await businessHash()).toEqual(before); await page.close();
 });
-test("ownership change after channel selection removes the dossier before any stale native action", async ({ browser }) => {
+for (const width of [320,390,430,768,1440]) test(`bounded allocation rehearsal ${width}px is keyboard usable and changes no business rows`, async () => {
+  const before=await businessHash(),page=await admin.newPage(),errors:string[]=[];
+  page.on("pageerror",error=>errors.push(error.message));
+  await page.setViewportSize({width,height:1000}); await page.goto("/admin/allocation");
+  const summary=page.getByText("Rehearse a bounded web-only policy",{exact:true});
+  await summary.focus();await page.keyboard.press("Enter");
+  const panel=summary.locator("..");
+  await expect(panel).toContainText("live allocation stays OFF");
+  const start=new Date(Date.now()+60*60*1000),end=new Date(start.getTime()+24*60*60*1000);
+  await panel.getByLabel("Future inquiry cutoff",{exact:false}).fill(start.toISOString());
+  await panel.getByLabel("Window ends",{exact:false}).fill(end.toISOString());
+  await panel.getByRole("checkbox").first().check();
+  await panel.getByLabel("Synthetic property state",{exact:true}).fill("NC");
+  await panel.getByLabel("Synthetic property locality",{exact:true}).fill("Wilson");
+  const button=panel.getByRole("button",{name:"Run no-effect rehearsal"});
+  await button.focus();await page.keyboard.press("Enter");
+  const result=page.getByRole("status").filter({hasText:"SHADOW · not saved"});
+  await expect(result).toContainText("HELD");await expect(result).toContainText("license");
+  await expect(result).toContainText("Effects: NONE");await expect(result).toContainText("Mike/Brandon alerts are unchanged");
+  await expect(result.getByRole("link")).toHaveAttribute("href","/admin/today");
+  expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  // Preserve concrete built-layout evidence before the unchanged no-overflow
+  // assertion, including overflow outside the newly opened rehearsal panel.
+  const overflow=await page.evaluate(()=>Array.from(document.querySelectorAll("body *")).filter(element=>{
+    const box=element.getBoundingClientRect();return box.width>0&&(box.right>innerWidth+1||box.left < -1);
+  }).map(element=>({tag:element.tagName,classes:element.className,text:element.textContent?.slice(0,160),width:element.getBoundingClientRect().width,right:element.getBoundingClientRect().right})).slice(-25));
+  await test.info().attach("built-allocation-overflow",{body:JSON.stringify(overflow,null,2),contentType:"application/json"});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
+  await panel.screenshot({path:path.join(output,`allocation-rehearsal-${width}.png`)});
+  await page.evaluate(()=>{document.documentElement.style.fontSize="200%";});
+  await expect.poll(()=>page.evaluate(()=>getComputedStyle(document.documentElement).fontSize)).toBe("32px");
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
+  await panel.screenshot({path:path.join(output,`allocation-rehearsal-${width}-200.png`)});
+  await panel.getByLabel("Synthetic property locality",{exact:true}).fill("Changed synthetic area");
+  await expect(result).toHaveCount(0);
+  expect(await businessHash()).toEqual(before);expect(errors).toEqual([]);await page.close();
+});
+test("agents and guests cannot access the administrator routing rehearsal",async({browser})=>{
+  const context=await browser.newContext(),p=await context.newPage();await p.goto("/admin/allocation");
+  await expect(p).toHaveURL(/lead-center-login/);expect(await p.content()).not.toContain("Rehearse a bounded");
+  await context.close();
+  const current=await browser.newContext();const page=await signIn(current,"agent","/admin/leads");await page.goto("/admin/allocation");
+  await expect(page).toHaveURL(/error=forbidden/);expect(await page.content()).not.toContain("Rehearse a bounded");
+  // Keep this genuine fresh session for the remaining serial journeys. The
+  // original was intentionally expired above; do not bypass/reset auth limits
+  // or make repeated logins just to provision another browser tab.
+  await agent.close();agent=current;await page.close();
+});
+test("real authenticated claim rejects changed coverage without business writes; pass still releases the offer",async()=>{
+  const offer=fixture.offers.offer.find(o=>o.agent_id===fixture.agents.agent)!;
+  const page=await agent.newPage();await page.goto(`/admin/allocation/offers/${offer.id}`);
+  await expect(page.getByRole("button",{name:"Claim offer"})).toBeEnabled();
+  await query("UPDATE agent_operational_enrollment SET towns=ARRAY['not-covered'] WHERE agent_id=$1",[fixture.agents.agent]);
+  try{
+    const before=await businessHash();
+    const response=page.waitForResponse(r=>r.url().includes(`/api/admin/allocation/offers/${offer.id}`)&&r.request().method()==="POST");
+    await page.getByRole("button",{name:"Claim offer"}).click();
+    expect((await response).status()).toBe(409);
+    await expect(page.getByRole("status").filter({hasText:"Not saved:"})).toContainText(/Coverage|coverage/);
+    expect(await businessHash()).toEqual(before);
+    await page.reload();await page.getByRole("button",{name:"Pass offer"}).click();
+    await expect(page.getByRole("status").filter({hasText:"Saved: passed"})).toBeVisible();
+    expect((await query("SELECT state FROM lead_allocation_offers WHERE id=$1",[offer.id]))[0].state).toBe("passed");
+    expect((await query("SELECT count(*)::int AS count FROM agent_assignments WHERE lead_id=$1",[fixture.leads.offer]))[0].count).toBe(0);
+  }finally{await query("UPDATE agent_operational_enrollment SET towns=ARRAY['Wilson'] WHERE agent_id=$1",[fixture.agents.agent]);await page.close();}
+});
+test("ownership change after channel selection removes the dossier before any stale native action", async () => {
   await query("INSERT INTO communication_permissions(lead_id,channel,purpose,state,consent_text,source,evidence_at) VALUES($1,'phone','manual_one_to_one','allowed','SYNTHETIC NO CONTACT','isolated_fixture',now()) ON CONFLICT DO NOTHING", [fixture.leads.agent]);
-  const context = await browser.newContext(), page = await signIn(context, "agent", `/admin/leads/${fixture.leads.agent}`);
+  const page=await agent.newPage();await page.goto(`/admin/leads/${fixture.leads.agent}`);
   const call = page.getByRole("button", { name: "Review & call" }); await expect(call).toBeEnabled(); await call.click();
   await page.getByRole("checkbox", { name: /I reviewed the request/ }).check();
   await query("UPDATE leads SET assigned_agent_id=$2 WHERE id=$1", [fixture.leads.agent, fixture.agents.other]);
@@ -127,5 +195,5 @@ test("ownership change after channel selection removes the dossier before any st
   await expect(page.getByRole("status", { name: "Lead access unavailable" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Qualification and routing" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Open dialer" })).toHaveCount(0);
-  expect(await businessHash()).toEqual(before); await context.close();
+  expect(await businessHash()).toEqual(before); await page.close();
 });

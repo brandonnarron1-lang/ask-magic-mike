@@ -41,7 +41,7 @@ function MetricCard({ label, value, note }: { label: string; value: ReactNode; n
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="rounded-lg border border-white/10 bg-[#0b0b0b] p-5">
+    <section className="min-w-0 rounded-lg border border-white/10 bg-[#0b0b0b] p-5">
       <h2 className="text-xs font-bold uppercase tracking-[0.18em] text-[#e2c06f]">
         {title}
       </h2>
@@ -64,7 +64,7 @@ function AgentSelect({ agents }: { agents: AdminAgentAllocationAgent[] }) {
     <select
       required
       name="agent_id"
-      className="min-w-44 rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-xs font-semibold text-[#f4ead4]"
+      className="min-h-11 w-full min-w-0 max-w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-xs font-semibold text-[#f4ead4] sm:w-auto"
       aria-label="Agent"
     >
       <option value="">Select agent</option>
@@ -307,7 +307,7 @@ export default async function AdminAllocationPage({
 
   return (
     <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto min-w-0 max-w-6xl [overflow-wrap:anywhere]">
         <AllocationWorkspace state={allocationWorkspace}/>
         <header className="mb-7 border-b border-[#cda24a33] pb-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
