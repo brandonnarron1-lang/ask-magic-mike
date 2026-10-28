@@ -6,6 +6,37 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Three-offer review queue — October 28 source candidate
+
+This section describes a review candidate, not a deployment or publication
+receipt. In **Distribution**, staff with the existing **growth:manage**
+permission can open **14-day draft review queue**. Expand a day to inspect its
+audience, copy, matching existing image/alt text and registered destination.
+**Evidence and review holds** shows the asset hash and unresolved reviewer,
+freshness and source-rights checks. **Copy day … review packet** copies a marked
+draft; it does not enqueue, approve, schedule, post or contact anyone. Relative
+day numbers have no calendar dates or selected channel account.
+
+Home Value, Buying Help and Compare Selling Options reuse the accepted
+20261021 kit and existing placement registry. NC educational references are
+preparation material only, not entries in the approved retrieval registry.
+They need genuine rights/current-applicability/broker review. The Our Town
+service source does not grant reuse rights to NCREC/NCHFA content. Neutral
+feedback is for genuine customers without incentives or sentiment filtering;
+the intake link is not a review/rating endpoint. Referrals do not authorize
+uploading another person's private details. Preserve the October 15/22 posts;
+consult actual publication evidence before separately authorized distribution.
+
+The bounded Marketing Producer supports explicit template selection
+`amm.share-kit.20261021.v1`. Omitted selection preserves historical v1 behavior,
+including its held compare-option result. Existing actor/source/revision and
+zero-cost/no-send fences still apply. This interface does not create worker
+jobs. Before activating any new-version job producer, verify the rollback
+reader can parse that selection; otherwise retain the new reader and turn off
+new-version generation. Never delete, rewrite or replay old jobs to roll back.
+The contact/claim source, S2 SQL guards, R2 revocation/privacy, v6 readers and
+normal Mike/Brandon delivery remain independent and unchanged; LIVE stays OFF.
+
 ## Qualification and routing readiness — October 27 candidate
 
 ### S2 bounded rehearsal and claim revalidation — local review candidate

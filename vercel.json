@@ -4,7 +4,8 @@
       "codex/web-acquisition-reset-20261021": false,
       "codex/conversion-reliability-20261023": false,
       "codex/nc-qualified-routing-20261027": false,
-      "codex/nc-allocation-rehearsal-20261027": false
+      "codex/nc-allocation-rehearsal-20261027": false,
+      "codex/nc-guidance-review-20261028": false
     }
   },
   "crons": [

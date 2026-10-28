@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { WORKER_VERSION, currentWorkerSourceVersions, enqueueWorker, executeWorker, workerJobSchema, workerRoles, type WorkerJob, type WorkerPrincipal } from "../../src/lib/intelligence/bounded-workers";
 import { approvedPublicSources } from "../../src/lib/intelligence/public-knowledge";
 import { experienceContract } from "../../app/lib/experienceContract";
+import { CURRENT_LAUNCH_TEMPLATE } from "../../src/lib/content/reviewed-launch-work-item";
+import kit from "../../public/launch-20261013/share-manifest-20261021.json";
 
 const now = new Date("2026-10-18T00:00:00Z");
 const principal: WorkerPrincipal = { actor: "synthetic-operator", tenant: "ask-magic-mike", permittedRoles: workerRoles, permittedLeadIds: [] };
@@ -66,5 +68,38 @@ describe("five bounded workers, synthetic/no send", () => {
     const job = workerFixture("marketing_producer"); expect(job.input.source.permissions.marketing).toBe(false);
     const r = await executeWorker(job, context); expect(r.text).toContain("buyer-feed.jpg"); expect(r.evidence[0]).toContain("posts.md@");
     job.input.offer = "compare"; expect((await executeWorker(job, context)).state).toBe("blocked");
+  });
+  it.each(["homeValue", "buyer", "compare"] as const)("opts in explicitly to current %s drafting with no provider request", async offer => {
+    const job = workerFixture("marketing_producer"); job.input.offer = offer; job.input.marketingTemplateVersion = CURRENT_LAUNCH_TEMPLATE;
+    const fetchSource = vi.fn(); const output = await executeWorker(job, { ...context, fetchSource });
+    expect(output.state).toBe("review_required"); expect(output.effects).toBe("draft_only_no_send");
+    expect(output.evidence).toContain(CURRENT_LAUNCH_TEMPLATE); expect(output.text).toContain("Alt:");
+    expect(output.text).toContain("human review"); expect(fetchSource).not.toHaveBeenCalled();
+  });
+  it("does not let template selection bypass role, rights, freshness or version fences", async () => {
+    const job = workerFixture("research_assistant"); job.input.marketingTemplateVersion = CURRENT_LAUNCH_TEMPLATE;
+    expect((await executeWorker(job, context)).state).toBe("blocked");
+    job.role = "marketing_producer";
+    job.input.source = { ...job.input.source, status: "revoked" };
+    expect((await executeWorker(job, context)).state).toBe("quarantined");
+    expect(workerJobSchema.safeParse({ ...job, input: { ...job.input, marketingTemplateVersion: "latest" } }).success).toBe(false);
+    expect((await executeWorker({ ...job, sourceVersions: {} }, context)).state).toBe("quarantined");
+  });
+  it("blocks a worker result when the selected image fails integrity", async () => {
+    const job = workerFixture("marketing_producer"); job.input.marketingTemplateVersion = CURRENT_LAUNCH_TEMPLATE;
+    const image = kit.images.find(item => item.file === "buyer-feed.jpg")!, hash = image.sha256;
+    try {
+      image.sha256 = "0".repeat(64);
+      const result = await executeWorker(job, context);
+      expect(result.state).toBe("blocked"); expect(result.text).toContain("integrity"); expect(result.evidence).toEqual([]);
+    } finally { image.sha256 = hash; }
+  });
+  it("requires the new reader for new-version queued input; never relabels it as legacy-compatible", () => {
+    const job = workerFixture("marketing_producer");
+    const legacyReader = workerJobSchema.extend({ input: workerJobSchema.shape.input.omit({ marketingTemplateVersion: true }).strict() });
+    expect(legacyReader.safeParse(job).success).toBe(true);
+    job.input.marketingTemplateVersion = CURRENT_LAUNCH_TEMPLATE;
+    expect(workerJobSchema.parse(JSON.parse(JSON.stringify(job)))).toEqual(job);
+    expect(legacyReader.safeParse(job).success).toBe(false);
   });
 });
