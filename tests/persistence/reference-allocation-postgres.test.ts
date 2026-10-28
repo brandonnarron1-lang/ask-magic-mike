@@ -111,7 +111,11 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("Reference allocation —
   psql(`BEGIN; ${newDefinitions}; COMMIT;`,"amm_qa_fresh");expect(metadata()).toBe(before);
   expect(()=>psql(migration,"amm_qa_fresh")).toThrow();
   expect(psql(`SELECT string_agg(pg_get_functiondef(oid),E';\\n' ORDER BY oid) FROM pg_proc WHERE oid IN (${functions});`,"amm_qa_fresh")).toBe(newDefinitions);
- });
+ // This case installs the entire tracked schema before exercising the additive
+ // upgrade and both recovery directions. Hosted Docker took 5.27s, just over
+ // the ordinary 5s unit budget. Keep a finite per-case 30s bound; no assertion,
+ // migration, privilege check, isolation control or global timeout is relaxed.
+ },30000);
  it("web-only operational offer and claim use no transport, reservation or extra operator alert",async()=>{
   const f=await fixture(1,false);
   psql(`UPDATE agent_operational_enrollment SET email_enabled=false,sms_enabled=false,consent_at=NULL,possession_verified_at=NULL,phone_fingerprint=NULL WHERE agent_id IN ('${f.agents[0]}','${f.agents[1]}');`);
