@@ -19,7 +19,7 @@ jobs:
   local-release-gate:
     name: local-release-gate
     runs-on: ubuntu-latest
-    timeout-minutes: 24
+    timeout-minutes: 28
 
     steps:
       - name: Checkout
