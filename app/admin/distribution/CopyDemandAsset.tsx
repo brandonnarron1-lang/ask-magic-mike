@@ -17,7 +17,7 @@ function legacyCopy(value: string) {
   if (!copied) throw new Error("Clipboard copy was rejected");
 }
 
-export function CopyDemandAsset({ label, value }: { label: string; value: string }) {
+export function CopyDemandAsset({ label, value, comfortable = false }: { label: string; value: string; comfortable?: boolean }) {
   const [state, setState] = useState<CopyState>("idle");
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function CopyDemandAsset({ label, value }: { label: string; value: string
     <button
       type="button"
       onClick={copy}
-      className="rounded-full border border-white/10 bg-white/[.04] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9ceb8] transition hover:border-[#cda24a66] hover:bg-[#cda24a12] hover:text-[#f0cf79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+      className={`${comfortable ? "min-h-11 text-sm" : "text-[10px]"} min-w-0 max-w-full rounded-full border border-white/10 bg-white/[.04] px-3 py-2 font-bold uppercase tracking-[0.12em] text-[#d9ceb8] [overflow-wrap:anywhere] transition motion-reduce:transition-none hover:border-[#cda24a66] hover:bg-[#cda24a12] hover:text-[#f0cf79] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]`}
       aria-label={`${label} to clipboard`}
     >
       <span aria-live="polite">{visibleLabel}</span>

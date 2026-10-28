@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { experienceContract } from "../../../app/lib/experienceContract";
 import { answerFromApprovedSources, approvedPublicPassages, approvedPublicSources, publicSourceSchema, sourceRetrievable } from "./public-knowledge";
-import { reviewedLaunchWorkItem } from "../content/reviewed-launch-work-item";
+import { CURRENT_LAUNCH_TEMPLATE, currentLaunchWorkItem, reviewedLaunchWorkItem } from "../content/reviewed-launch-work-item";
 import {validateSourceSnapshot,sourceRefsValid,observeRegisteredSource,snapshotSchema} from "./source-lifecycle";
 
 export const WORKER_VERSION = "amm.r2.workers.v1";
@@ -17,7 +17,8 @@ export const workerJobSchema = z.object({
   input: z.object({ question: z.string().max(2000), offer: z.enum(["homeValue", "buyer", "compare"]),
     source: publicSourceSchema, checkpoint: z.string().max(180).nullable(), contextFingerprint: z.string().regex(/^[a-f0-9]{64}$/).optional(),
     sourceAuthorization:z.array(z.object({sourceId:z.string(),versionId:z.string().uuid(),revision:z.number().int().positive()}).strict()).min(1).max(3).optional(),
-    sourceRefresh:z.object({expectedRevision:z.number().int().positive(),freshnessHours:z.number().int().min(1).max(720)}).strict().optional() }).strict(),
+    sourceRefresh:z.object({expectedRevision:z.number().int().positive(),freshnessHours:z.number().int().min(1).max(720)}).strict().optional(),
+    marketingTemplateVersion: z.literal(CURRENT_LAUNCH_TEMPLATE).optional() }).strict(),
 }).strict();
 export type WorkerJob = z.infer<typeof workerJobSchema>;
 export const workerResultSchema = z.object({
@@ -59,6 +60,7 @@ export async function executeWorker(raw: unknown, context: {
     sourceCheckpoint: job.input.checkpoint, effects: "draft_only_no_send", ...extra,
   });
   const deadline = Date.parse(job.deadline), current = context.now.getTime();
+  if (job.input.marketingTemplateVersion && job.role !== "marketing_producer") return result("blocked", "Marketing template selection is restricted to the Marketing Producer.");
   if (!Number.isFinite(current) || deadline <= current || deadline - current > 7 * 86_400_000
     || job.actor !== context.principal.actor || job.tenant !== context.principal.tenant
     || !context.principal.permittedRoles.includes(job.role)) return result("blocked", "Current actor, scope or deadline is not valid.");
@@ -115,6 +117,13 @@ export async function executeWorker(raw: unknown, context: {
   if (job.role === "marketing_producer") {
     // Public-knowledge AI rights do NOT imply marketing rights. Use the separate
     // already-approved launch template/asset instead; never repurpose its text.
+    if (job.input.marketingTemplateVersion) {
+      try {
+        const work = currentLaunchWorkItem(job.input.offer, "facebook");
+        return result("review_required", `${work.caption}\n${work.link}\nAsset: ${work.asset}\nAlt: ${work.alt}\nDRAFT ONLY — human review and separate publication authority required.`,
+          { evidence: [`${work.source}@${work.sourceHash}`, `asset:sha256:${work.assetHash}`, work.version] });
+      } catch { return result("blocked", "Current launch kit integrity or registered destination changed; review required."); }
+    }
     if (job.input.offer === "compare") return result("blocked", "No compare-option template is approved in this launch kit; separate review is required.");
     const work = reviewedLaunchWorkItem(job.input.offer === "buyer" ? "buyer" : "seller", "facebook");
     return result("review_required", `${work.caption}\n${work.link}\nAsset: ${work.asset}\nDRAFT ONLY — human review and separate publication authority required.`,

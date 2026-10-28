@@ -7,6 +7,7 @@ import { WORKER_VERSION, currentWorkerSourceVersions, enqueueWorker, runOneWorke
 import { approvedPublicSources } from "../../src/lib/intelligence/public-knowledge";
 import { experienceContract } from "../../app/lib/experienceContract";
 import { evaluationBudget } from "../../src/lib/intelligence/evaluation-budget";
+import { CURRENT_LAUNCH_TEMPLATE } from "../../src/lib/content/reviewed-launch-work-item";
 
 const principal: WorkerPrincipal = { actor: "synthetic-r2-operator", tenant: "ask-magic-mike", permittedRoles: workerRoles, permittedLeadIds: [] };
 const job = (role: WorkerJob["role"]): WorkerJob => ({ version: WORKER_VERSION, tenant: "ask-magic-mike", actor: principal.actor,
@@ -42,6 +43,17 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("bounded workers: owned
     expect(psql("SELECT count(*) FROM lead_action_reviews WHERE action_key LIKE 'r2-review:%'")).toBe("1"); expect(snapshot()).toBe(baseline);
     expect(psql("SELECT count(*) FROM ai_draft_reviews WHERE schema_version='amm.r2.workers.v1' AND status='generated' AND model='none'")).toBe("1");
     expect(fetch).not.toHaveBeenCalled();
+  });
+  it("retains an explicitly versioned compare draft through the real existing job lease and replay contract", async () => {
+    const input = job("marketing_producer"); input.input.offer = "compare"; input.input.marketingTemplateVersion = CURRENT_LAUNCH_TEMPLATE;
+    const before = snapshot(); const usage = psql("SELECT count(*) FROM ai_usage_events");
+    const first = await enqueueWorker(localQuery, principal, input);
+    expect(await enqueueWorker(localQuery, principal, input)).toMatchObject({ id: first.id, replay: true });
+    const executed = await runOneWorker(localQuery, "synthetic-current-kit-worker", { now: new Date(), principal });
+    expect(executed.output?.state).toBe("review_required"); expect(executed.output?.evidence).toContain(CURRENT_LAUNCH_TEMPLATE);
+    expect(executed.output?.text).toContain("seller_option=compare");
+    expect(JSON.parse(psql(`SELECT r2_result FROM ai_intelligence_jobs WHERE id=${literal(first.id)}`))).toMatchObject({ state: "review_required", effects: "draft_only_no_send" });
+    expect(snapshot()).toBe(before); expect(psql("SELECT count(*) FROM ai_usage_events")).toBe(usage); expect(fetch).not.toHaveBeenCalled();
   });
   it("refuses conflicting replay and does not update the original contract", async () => {
     const input = job("research_assistant"); await enqueueWorker(localQuery, principal, input);

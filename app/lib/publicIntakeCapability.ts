@@ -77,8 +77,11 @@ export function usePublicIntakeReadiness() {
       }
     }
 
-    function pageShow() {
-      void check();
+    function pageShow(event: PageTransitionEvent) {
+      // A new document is already checked on mount. Its ordinary pageshow can
+      // arrive during that fetch; restarting would cancel the same body read.
+      // A cached document does not remount, so it must revalidate on return.
+      if (event.persisted) void check();
     }
     void check();
     window.addEventListener("pageshow", pageShow);

@@ -45,9 +45,9 @@ async function readJson(path, code) {
 }
 
 async function waitForReleaseGate(repository, sha) {
-  // The required push gate has a twenty-minute job budget and can still be
+  // The required push gate has a 28-minute job budget and can still be
   // running after Vercel is ready. Waiting must remain finite, not waive CI.
-  const maxAttempts = Math.max(1, Math.min(100, Number(process.env.RELEASE_GATE_WAIT_ATTEMPTS || 100)));
+  const maxAttempts = Math.max(1, Math.min(120, Number(process.env.RELEASE_GATE_WAIT_ATTEMPTS || 120)));
   const delayMs = Math.max(1_000, Math.min(15_000, Number(process.env.RELEASE_GATE_WAIT_MS || 15_000)));
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     const runs = ghApi(

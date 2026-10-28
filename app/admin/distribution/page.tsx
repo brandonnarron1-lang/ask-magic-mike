@@ -48,6 +48,7 @@ import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session
 import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 import { isPreviewDataDisabled } from "../../../src/lib/preview-security";
 import { CopyDemandAsset } from "./CopyDemandAsset";
+import { FortnightReviewQueue } from "./FortnightReviewQueue";
 import { NativePublicationHandoff } from "./NativePublicationHandoff";
 import { OpenHouseQrPacketBuilder } from "./OpenHouseQrPacketBuilder";
 import { recordOwnedDemandPublicationProofAction } from "./actions";
@@ -260,7 +261,7 @@ function PublicationLedger({
                 }`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">{channel.format}</p><h3 className="mt-1 font-serif text-2xl text-[#f4ead4]">{channel.label}</h3></div>
+                  <div className="min-w-0 max-w-full [overflow-wrap:anywhere]"><p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8bbfc6]">{channel.format}</p><h3 className="mt-1 font-serif text-2xl text-[#f4ead4]">{channel.label}</h3></div>
                   <span className={`rounded-full border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.11em] ${latest ? "border-emerald-300/30 bg-emerald-300/10 text-emerald-200" : "border-white/10 text-[#8f8778]"}`}>
                     {latest ? humanize(latest.platformState) : "No proof"}
                   </span>
@@ -505,7 +506,7 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Link
               href={`#channel-${next.channelKey}`}
-              className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-5 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
+              className="inline-block min-h-11 max-w-full rounded-full border border-[#4baab866] bg-[#4baab818] px-5 py-3 text-center text-xs font-bold uppercase tracking-[0.12em] text-[#bff8ff] [overflow-wrap:anywhere] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2]"
             >
               Open exact channel packet
             </Link>
@@ -526,7 +527,7 @@ function ActivationControlLoop({ loop }: { loop: OwnedDemandActivationLoop }) {
       <details className="group mt-4 rounded-xl border border-white/[.08] bg-black/30">
         <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
           <span className="flex items-center justify-between gap-3">
-            Inspect all {loop.totalPlacements} exact lifecycle states
+            <span className="min-w-0 [overflow-wrap:anywhere]">Inspect all {loop.totalPlacements} exact lifecycle states</span>
             <span aria-hidden="true" className="text-lg transition group-open:rotate-45">+</span>
           </span>
         </summary>
@@ -827,7 +828,7 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
             {channel.instancePlacements.map((placement) => (
               <article key={placement.key} className="rounded-lg border border-white/[.08] bg-black/35 p-3">
                 <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
+                  <div className="min-w-0 max-w-full [overflow-wrap:anywhere]">
                     <p className="text-xs font-semibold text-[#f4ead4]">{placement.label}</p>
                     <code className="mt-1 block text-[10px] text-[#b8acf5]">utm_content={placement.content}</code>
                   </div>
@@ -852,7 +853,7 @@ function ChannelCard({ channel, measurementReady }: { channel: OwnedDemandChanne
       <details className="group mt-5 rounded-xl border border-[#4baab833] bg-[#061417]">
         <summary className="cursor-pointer list-none px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-[#9edbe2] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#9edbe2]">
           <span className="flex items-center justify-between gap-3">
-            Three offer-specific placements
+            <span className="min-w-0 [overflow-wrap:anywhere]">Three offer-specific placements</span>
             <span aria-hidden="true" className="text-lg transition group-open:rotate-45">+</span>
           </span>
         </summary>
@@ -918,11 +919,11 @@ export default async function DistributionPage({
         : "Measured";
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_80%_0%,rgba(74,170,184,.13),transparent_30%),radial-gradient(circle_at_10%_5%,rgba(205,162,74,.12),transparent_28%),#040404] px-4 py-7 text-[#f4ead4] sm:px-6 sm:py-10">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_80%_0%,rgba(74,170,184,.13),transparent_30%),radial-gradient(circle_at_10%_5%,rgba(205,162,74,.12),transparent_28%),#040404] px-4 py-7 text-[#f4ead4] [overflow-wrap:anywhere] sm:px-6 sm:py-10">
       <div className="mx-auto max-w-7xl">
         <header className="rounded-2xl border border-[#cda24a33] bg-[linear-gradient(135deg,rgba(18,18,18,.97),rgba(5,5,5,.99))] p-5 shadow-[0_30px_100px_rgba(0,0,0,.55)] sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-5">
-            <div className="max-w-4xl">
+            <div className="min-w-0 max-w-4xl break-words">
               <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#d1aa53]">Ask Magic Mike · Owned Demand Command</p>
               <h1 className="mt-4 font-serif text-4xl leading-tight text-[#f4ead4] sm:text-6xl">
                 Turn the existing audience into measurable local demand.
@@ -932,13 +933,13 @@ export default async function DistributionPage({
                 It reuses the live Neon Growth ledger and existing campaign infrastructure without restoring the legacy Supabase dashboard.
               </p>
             </div>
-            <div className="rounded-xl border border-[#4baab855] bg-[#06171b] p-4 text-right">
+            <div className="min-w-0 max-w-full break-words rounded-xl border border-[#4baab855] bg-[#06171b] p-4 text-right">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8bbfc6]">Current state</p>
               <p className="mt-2 font-serif text-2xl text-[#a9edf4]">{stateLabel}</p>
               <p className="mt-1 text-xs text-[#79a4aa]">Generated {dateTime(command.generatedAt)}</p>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap gap-2 border-t border-white/10 pt-5">
+          <div className="mt-6 flex min-w-0 flex-wrap gap-2 border-t border-white/10 pt-5 [overflow-wrap:anywhere]">
             <Link href="/admin/growth?window=30" className="rounded-full border border-white/10 bg-white/[.03] px-4 py-2 text-xs font-bold uppercase tracking-[0.11em] text-[#d9ceb8] hover:border-[#cda24a66] hover:text-[#f0cf79]">
               Growth economics
             </Link>
@@ -952,6 +953,8 @@ export default async function DistributionPage({
         </header>
 
         <AcquisitionReport report={acquisition} error={acquisitionWindow.ok ? undefined : acquisitionWindow.error} filters={acquisitionFilters} ledger={ledger} now={acquisitionNow} />
+
+        {canManage ? <FortnightReviewQueue /> : null}
 
         <p className="mt-8 text-sm leading-6 text-[#a99f90]">Legacy distribution sections below: last 30 days, latest at most 5,000 eligible inquiry records. They do not follow the exact report filters above, establish complete totals beyond that bound, or measure distinct contacts.</p>
         <MeasurementStateBanner measurement={measurement} />

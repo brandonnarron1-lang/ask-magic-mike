@@ -64,6 +64,20 @@ const privatePhoneAlertHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // The protected queue verifies image bytes on the server. Dynamic asset
+  // names cannot be inferred reliably by NFT; include only these public files
+  // in this route's function, not every API or the entire public directory.
+  outputFileTracingIncludes: {
+    "/admin/distribution": [
+      "./public/launch-20261013/share-manifest-20261021.json",
+      "./public/launch-20261013/seller-feed.jpg",
+      "./public/launch-20261013/seller-story.jpg",
+      "./public/launch-20261013/buyer-feed.jpg",
+      "./public/launch-20261013/buyer-story.jpg",
+      "./public/launch-20261013/compare-selling-options-feed-20261021.jpg",
+      "./public/launch-20261013/compare-selling-options-story-20261021.jpg",
+    ],
+  },
   turbopack: {
     root: process.cwd(),
   },

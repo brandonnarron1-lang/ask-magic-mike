@@ -270,7 +270,7 @@ export function NativePublicationHandoff(props: NativePublicationHandoffProps) {
           onClick={openShareSheet}
           disabled={state === "preparing" || state === "unsupported"}
           aria-describedby={statusId}
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-[#4baab866] bg-[#4baab818] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#bff8ff] transition hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-block min-h-11 max-w-full rounded-full border border-[#4baab866] bg-[#4baab818] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.11em] text-[#bff8ff] [overflow-wrap:anywhere] transition motion-reduce:transition-none hover:bg-[#4baab82b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#9edbe2] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {label}
         </button>
