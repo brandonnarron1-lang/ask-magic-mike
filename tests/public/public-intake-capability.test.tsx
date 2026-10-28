@@ -54,6 +54,30 @@ describe("usePublicIntakeCapability", () => {
     await waitFor(() => expect(result.current).toBe(mode));
   });
 
+  it("does not cancel or duplicate the mount check when ordinary pageshow arrives before its body", async () => {
+    let settle!: (response: Response) => void;
+    const fetchMock = vi.fn((_input: string, _init: RequestInit) => new Promise<Response>(resolve => { settle = resolve; }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { result } = renderHook(() => usePublicIntakeCapability());
+    const signal = fetchMock.mock.calls[0][1].signal as AbortSignal;
+    act(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
+    expect(signal.aborted).toBe(false);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result.current).toBe("checking");
+    await act(async () => settle(jsonResponse(health("live"))));
+    expect(result.current).toBe("live");
+  });
+
+  it("does not restart a settled mount check for ordinary new-document pageshow", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(health("live")));
+    vi.stubGlobal("fetch", fetchMock);
+    const { result } = renderHook(() => usePublicIntakeCapability());
+    await waitFor(() => expect(result.current).toBe("live"));
+    act(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(result.current).toBe("live");
+  });
+
   it.each([
     () => Promise.reject(new Error("offline")),
     () => Promise.resolve(jsonResponse(health("live"), 503)),
@@ -91,7 +115,7 @@ describe("usePublicIntakeCapability", () => {
       return new Promise<Response>((resolve) => pending.push(resolve));
     }));
     const { result } = renderHook(() => usePublicIntakeCapability());
-    act(() => window.dispatchEvent(new Event("pageshow")));
+    act(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
     expect(signals[0].aborted).toBe(true);
     await act(async () => pending[1](jsonResponse(health("read_only"))));
     expect(result.current).toBe("read_only");
@@ -122,7 +146,7 @@ describe("usePublicIntakeCapability", () => {
     const signal = fetchMock.mock.calls[0][1].signal as AbortSignal;
     unmount();
     expect(signal.aborted).toBe(true);
-    act(() => window.dispatchEvent(new Event("pageshow")));
+    act(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

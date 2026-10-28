@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { expect, test, type Locator, type Page, type Route, type TestInfo } from "@playwright/test";
+import { expect, test, type Locator, type Page, type Request, type Route, type TestInfo } from "@playwright/test";
 
 // Real compiled local UI + actual health capability in the existing isolated
 // PG/auth harness. EVERY browser mutation is intercepted. Lead receipts below
@@ -31,7 +31,7 @@ type Capture = {
   externalBlocked: number;
   capabilityReads: number;
   capabilityModes: Set<string>;
-  healthBodyFailures: { responseStage: string; failureStage: string; status: number; requestFailure: string | null }[];
+  healthBodyFailures: { requestStage: string; responseStage: string; failureStage: string; status: number; requestFailure: string | null; bodyFailure: string }[];
   historyStage: "not_history" | "initial_form" | "away_document" | "history_return";
   pageErrors: string[];
   addressLookupFixture?: boolean;
@@ -90,6 +90,11 @@ async function installBoundary(page: Page): Promise<Capture> {
     externalBlocked: 0, capabilityReads: 0, capabilityModes: new Set(), healthBodyFailures: [], historyStage: "not_history", pageErrors: [], checks: [], syntheticLeadIds: new Map(),
     reply: (route, attempt) => savedReply(route, capture, attempt),
   };
+  const healthStages = new WeakMap<Request, Capture["historyStage"]>();
+  page.on("request", request => {
+    const target = new URL(request.url());
+    if (target.origin === appOrigin && target.pathname === "/api/health/live") healthStages.set(request, capture.historyStage);
+  });
   page.on("pageerror", error => capture.pageErrors.push(error.stack || error.message));
   await page.addInitScript(() => {
     const state: BrowserEvidence = { documentId: crypto.randomUUID(), events: [], pageShows: [] };
@@ -111,11 +116,19 @@ async function installBoundary(page: Page): Promise<Capture> {
       const mode = body && typeof body === "object" ? (body as Record<string, unknown>).public_intake : null;
       if (response.status() !== 200 || mode !== "synthetic_qa") capture.violations.push("actual_health_not_synthetic_qa");
       else capture.capabilityModes.add(mode);
-    })().catch(() => {
+    })().catch((error: unknown) => {
       capture.violations.push("actual_health_unreadable");
       const failure = response.request().failure()?.errorText;
-      capture.healthBodyFailures.push({ responseStage, failureStage: capture.historyStage,
-        status: response.status(), requestFailure: failure && /^net::ERR_[A-Z_]+$/.test(failure) ? failure : null });
+      const message = error instanceof Error ? error.message : "";
+      // Finite diagnostic categories only; never emit a response body, raw
+      // protocol error, resource identifier, URL, query or private form value.
+      const bodyFailure = /No resource with given identifier/i.test(message) ? "protocol_resource_missing"
+        : /evicted.*inspector cache/i.test(message) ? "protocol_body_evicted"
+          : /target.*closed|page.*closed|context.*closed/i.test(message) ? "page_or_context_closed"
+            : /unexpected end|unexpected token|JSON/i.test(message) ? "json_parse_failure"
+              : /abort|cancel/i.test(message) ? "request_or_body_cancelled" : "unclassified_body_failure";
+      capture.healthBodyFailures.push({ requestStage: healthStages.get(response.request()) ?? "not_observed", responseStage, failureStage: capture.historyStage,
+        status: response.status(), requestFailure: failure && /^net::ERR_[A-Z_]+$/.test(failure) ? failure : null, bodyFailure });
     }));
   });
 
@@ -377,7 +390,8 @@ test.afterEach(async ({ page }, info: TestInfo) => {
   // URL/query, credentials, UUIDs, server bodies, or console messages exported.
   const diagnostics = {
     source: "browser-intercepted-synthetic-ui-receipts-not-intake-sql-proof",
-    test: info.title, status: info.status, viewport: page.viewportSize(),
+    test: info.title, status: capture.violations.length || capture.pageErrors.length ? "failed" : info.status,
+    bodyStatusBeforeBoundaryAssertions: info.status, viewport: page.viewportSize(),
     actualCapabilityReads: capture.capabilityReads, actualCapabilityModes: [...capture.capabilityModes],
     healthBodyFailures: capture.healthBodyFailures,
     canonicalLeadRequestsIntercepted: capture.attempts.length, responseStatuses: capture.statuses,
@@ -500,18 +514,18 @@ test("Eventless DOM address/contact values survive health recheck, consent and t
   await openHomeValue(page);
   const address = page.getByLabel("Property address", { exact: true });
   await address.evaluate((element, value) => { (element as HTMLInputElement).value = value; }, ADDRESS);
-  // Simulated pageshow triggers the real hook's asynchronous health recheck.
+  // Use the visitor's explicit GET-only retry, not a fabricated history event.
   // Offline failure is unknown and fail-closed, not proof of read-only mode.
   // This is not evidence of a trusted bfcache return or real OS autofill.
   await page.context().setOffline(true);
   try {
-    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
+    await funnel(page).getByRole("button", { name: "Check availability again", exact: true }).click();
     await expect(page.locator('[data-intake-mode="unknown"]')).toHaveCount(1);
     await expect(address).toHaveValue(ADDRESS);
   } finally {
     await page.context().setOffline(false);
   }
-  await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
+  await funnel(page).getByRole("button", { name: "Check availability again", exact: true }).click();
   await expect(page.locator('[data-intake-mode="synthetic_qa"]')).toHaveCount(1);
   await expect(address).toHaveValue(ADDRESS);
   await funnel(page).getByRole("button", { name: "Continue", exact: true }).click();
@@ -655,12 +669,12 @@ test("Synthetic QA rejects unlabeled fictional contact and invalid optional phon
 
 test("Offline health recheck fails closed: one early unknown notice preserves both steps and blocks saving", async ({ page }, info) => {
   await openHomeValue(page, 320);
-  info.annotations.push({ type: "scope", description: "Actual harness GET first attests synthetic_qa; offline recheck fails closed. Synthetic pageshow dispatch is NOT bfcache evidence." });
+  info.annotations.push({ type: "scope", description: "Actual harness GET first attests synthetic_qa; explicit visitor retry while offline fails closed. This is not bfcache evidence." });
   await page.context().setOffline(true);
   try {
     // Do not fabricate a capability JSON response. Only a failed actual fetch
-    // changes the hook to unknown. This event is explicitly simulated.
-    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: false })));
+    // changes the hook to unknown. Use the actual visitor-facing retry control.
+    await funnel(page).getByRole("button", { name: "Check availability again", exact: true }).click();
     const notices = page.locator('[data-intake-mode="unknown"]');
     await expect(notices).toHaveCount(1);
     await beforeInDocument(notices, page.getByLabel("Property address", { exact: true }));
@@ -753,6 +767,17 @@ test("Full reload after uncertainty restores only the pending reference and bloc
   await expect(funnel(page).getByText(key, { exact: true })).toBeVisible();
   await pendingMarker(page, key); expect(capture.attempts).toHaveLength(1);
   await screenshot(page, "full-reload-reference-only-390");
+});
+
+test("Ordinary new-document pageshow retains the single mount availability check", async ({ page }) => {
+  await openHomeValue(page);
+  // Observe the browser's real event, not a dispatched restoration stand-in.
+  await expect.poll(async () => (await evidence(page)).pageShows.some(event => event.trusted && !event.persisted)).toBe(true);
+  const capture = captures.get(page)!;
+  await Promise.all(capture.checks);
+  expect(capture.capabilityReads).toBe(1);
+  expect([...capture.capabilityModes]).toEqual(["synthetic_qa"]);
+  expect(capture.attempts).toHaveLength(0);
 });
 
 test("Real browser history return reports bfcache only for a trusted persisted pageshow", async ({ page }, info) => {
