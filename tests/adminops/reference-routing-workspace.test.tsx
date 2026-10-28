@@ -27,7 +27,8 @@ describe("routing workspace and persisted checklist — no send",()=>{
  });
  it("offers all seven operational filters and keeps synthetic mutations disabled",()=>{
   const html=renderToStaticMarkup(<AllocationWorkspace state={allocationWorkspaceFixture} preview/>);
-  expect(html.match(/<select/g)).toHaveLength(7);expect(html).toContain("Provider acceptance is not human contact");
+  expect(html.match(/aria-label="Routing /g)).toHaveLength(7);expect(html).toContain("Provider acceptance is not human contact");
+  expect(html).toContain("Rehearse a bounded web-only policy");
   expect(html).toContain("SYNTHETIC REVIEWER");expect(html).not.toContain("/api/");
   expect(html).toContain("<button disabled");expect(html).not.toContain("Staff channel enrollment");
  });

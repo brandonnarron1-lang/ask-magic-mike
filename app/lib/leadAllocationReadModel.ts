@@ -2,6 +2,8 @@ import { allocationQuery } from "./leadAllocation";
 import type { LeadCenterPrincipal } from "../../src/lib/admin/rbac-policy";
 
 export type AllocationWorkspaceState = {
+  /** Generation time, not a claim-time or professional-readiness grant. */
+  observedAt?: string;
   ready: boolean;
   held: boolean;
   error?: string;
@@ -47,7 +49,7 @@ export async function loadAllocationWorkspace(principal: LeadCenterPrincipal | n
         CASE WHEN e.sms_enabled AND g.notification_sms AND e.consent_at IS NOT NULL AND e.possession_verified_at IS NOT NULL AND e.phone_fingerprint IS NOT NULL THEN 'SMS verified' END) AS channels
       FROM public.agent_operational_enrollment e JOIN public.agents g ON g.id=e.agent_id JOIN public.lead_center_users u ON u.id=e.user_id
       ORDER BY g.name,g.id LIMIT 50`);
-    return { ready:true,held:process.env.LEAD_ALLOCATION_ENABLED!=="true"||!policy?.active||!policy.approved_at||!policy.starts_at,
+    return { ready:true,observedAt:new Date().toISOString(),held:process.env.LEAD_ALLOCATION_ENABLED!=="true"||!policy?.active||!policy.approved_at||!policy.starts_at,
       metrics:{pending:Number(metrics.pending),ambiguous:Number(metrics.ambiguous),overdue:Number(metrics.overdue),oldestPendingSeconds:Number(metrics.oldest),reservedSegments:Number(metrics.segments),estimatedMicros:Number(metrics.micros)},
       policy:policy?{version:Number(policy.version),mode:String(policy.mode),offerSeconds:Number(policy.offer_seconds),startsAt:policy.starts_at as string|null,fallback:String(policy.fallback)}:null,
       leads:leads as AllocationWorkspaceState["leads"],offers:offers as AllocationWorkspaceState["offers"],roster:roster as AllocationWorkspaceState["roster"] };

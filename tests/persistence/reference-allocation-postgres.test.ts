@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { randomUUID } from "node:crypto";
-import { afterAll,beforeAll,describe,expect,it,vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { afterAll,afterEach,beforeAll,describe,expect,it,vi } from "vitest";
 import { bind,concurrent,install,literal,localQuery,psql,startDatabase,stopDatabase } from "../support/qa-audit-postgres";
 import { commandRequestHash,resolveAllocationOffer,staffPhoneFingerprint,createPossessionChallenge,processEnrolledStaffCommand,allocationCommandCode } from "../../app/lib/leadAllocation";
 import { dispatchAllocationIntent } from "../../app/lib/leadAllocationDispatch";
@@ -8,6 +9,7 @@ import type { NotificationProvider } from "../../app/lib/leadNotificationTypes";
 import { loadAllocationWorkspace } from "../../app/lib/leadAllocationReadModel";
 
 const fallback="00000000-0000-4000-8000-000000009901";
+const revalidationMigration="20261028010000_web_allocation_claim_revalidation.sql";
 async function fixture(fanout=2,initialOffers=true) {
  const lead=randomUUID(),session=randomUUID(),admin=randomUUID(),agents=[randomUUID(),randomUUID()] as string[],users=[randomUUID(),randomUUID()] as string[];
  psql(`INSERT INTO sessions(id) VALUES('${session}'); INSERT INTO leads(id,session_id,first_name,lead_type,primary_intent,city,state,is_test,communication_suppressed,assigned_agent_id,assigned_at) VALUES('${lead}','${session}','SYNTHETIC ISOLATED FIXTURE','buyer','buy','Wilson','NC',false,false,'${fallback}',now());
@@ -28,6 +30,7 @@ function resolveSql(offer:{id:string;version:number},user:string,action="claim",
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("Reference allocation — real isolated PostgreSQL",()=>{
  beforeAll(async()=>{await startDatabase();install("amm_qa_upgrade",true);vi.stubEnv("LEAD_ALLOCATION_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_SENDS_ENABLED","true");vi.stubEnv("LEAD_ALLOCATION_COMMAND_SECRET","synthetic-allocation-test-key-not-a-credential");vi.stubEnv("VERCEL_ENV","development");},120000);
  afterAll(()=>{stopDatabase();vi.unstubAllEnvs();},20000);
+ afterEach(()=>{psql("UPDATE agents SET timezone='America/New_York' WHERE email LIKE '%@example.test';");});
  it("admin routing read model uses real canonical source, roster, deadline and outbox with no private contact JSON",async()=>{
   const f=await fixture(1);
   psql(`UPDATE leads SET source='synthetic_owned_media' WHERE id='${f.lead}';`);
@@ -47,6 +50,85 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST==="1")("Reference allocation —
   expect(psql(`SELECT count(*) FROM lead_allocation_offers WHERE lead_id='${f.lead}';`)).toBe("1");
   expect(psql(`SELECT count(*) FROM lead_notifications WHERE lead_id='${f.lead}';`)).toBe("1");
   expect(psql(`SELECT assigned_agent_id FROM leads WHERE id='${f.lead}';`)).toBe(fallback);
+ });
+ it.each(["coverage","intent","hours","timezone","terminal","terminal_stage","spam","concurrent_reservation","daily_reservation"])("claim rechecks changed %s inside the canonical transaction",async change=>{
+  const f=await fixture(1),o=f.offers[0],user=f.users[f.agents.indexOf(o.agent_id)];
+  if(change==="coverage")psql(`UPDATE agent_operational_enrollment SET towns=ARRAY['not-covered'] WHERE agent_id='${o.agent_id}';`);
+  if(change==="intent")psql(`UPDATE agent_operational_enrollment SET intents=ARRAY['seller'] WHERE agent_id='${o.agent_id}';`);
+  if(change==="hours")psql(`UPDATE agents SET availability='{}' WHERE id='${o.agent_id}';`);
+  if(change==="timezone")psql(`UPDATE agents SET timezone='Not/A_Zone' WHERE id='${o.agent_id}';`);
+  if(change==="terminal")psql(`UPDATE leads SET status='dead' WHERE id='${f.lead}';`);
+  if(change==="terminal_stage")psql(`UPDATE leads SET conversion_stage='closed_lost' WHERE id='${f.lead}';`);
+  if(change==="spam")psql(`UPDATE leads SET status='spam' WHERE id='${f.lead}';`);
+  if(change==="concurrent_reservation"||change==="daily_reservation"){
+   const extra=randomUUID(),session=randomUUID();
+   psql(`UPDATE agent_operational_enrollment SET paused=true WHERE agent_id<>'${o.agent_id}'; INSERT INTO sessions(id) VALUES('${session}'); INSERT INTO leads(id,session_id,first_name,lead_type,primary_intent,city,state,assigned_agent_id,assigned_at) VALUES('${extra}','${session}','SYNTHETIC CAPACITY','buyer','buy','Wilson','NC','${fallback}',now());`);
+   expect(JSON.parse(psql(`SELECT create_lead_allocation_offers_v1('${extra}',0,'${f.admin}');`)).ok).toBe(true);
+   psql(`UPDATE agent_operational_enrollment SET ${change==="concurrent_reservation"?"concurrent_cap":"daily_cap"}=1 WHERE agent_id='${o.agent_id}';`);
+  }
+  const snapshot=()=>psql(`SELECT json_build_object('owner',l.assigned_agent_id,'version',l.allocation_version,'load',(SELECT current_load FROM agents WHERE id='${o.agent_id}'),'assignments',(SELECT count(*) FROM agent_assignments WHERE lead_id=l.id),'notifications',(SELECT count(*) FROM lead_notifications WHERE lead_id=l.id),'tasks',(SELECT count(*) FROM tasks WHERE lead_id=l.id)) FROM leads l WHERE l.id='${f.lead}';`);
+  const before=snapshot();
+  expect(JSON.parse(psql(resolveSql(o,user))).ok).toBe(false);
+  expect(snapshot()).toBe(before);
+  expect(psql(`SELECT state FROM lead_allocation_offers WHERE id='${o.id}';`)).toBe("offered");
+ });
+ it("pass after coverage and hours change releases only its own offer and exact replay stays idempotent",async()=>{
+  const f=await fixture(1),o=f.offers[0],user=f.users[f.agents.indexOf(o.agent_id)],receipt=randomUUID();
+  psql(`UPDATE agent_operational_enrollment SET towns=ARRAY['not-covered'] WHERE agent_id='${o.agent_id}'; UPDATE agents SET availability='{}' WHERE id='${o.agent_id}';`);
+  expect(JSON.parse(psql(resolveSql(o,user,"pass",receipt)))).toMatchObject({ok:true,state:"passed"});
+  const audits=psql(`SELECT count(*) FROM audit_logs WHERE resource_id='${f.lead}' AND action='allocation.passed';`);
+  expect(JSON.parse(psql(resolveSql(o,user,"pass",receipt)))).toMatchObject({ok:true,state:"passed",replayed:true});
+  expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id='${f.lead}' AND action='allocation.passed';`)).toBe(audits);
+  expect(psql(`SELECT assigned_agent_id FROM leads WHERE id='${f.lead}';`)).toBe(fallback);
+  expect(psql(`SELECT count(*) FROM agent_assignments WHERE lead_id='${f.lead}';`)).toBe("0");
+ });
+ it("availability uses explicit instants across DST and fails closed on malformed hours/timezones",()=>{
+  const available=(hours:unknown,zone:string|null,at:string)=>psql(`SET ROLE service_role; SELECT lead_allocation_available_at_v1(${literal(JSON.stringify(hours))}::jsonb,${literal(zone)},${literal(at)}::timestamptz);`);
+  for(const instant of ["2026-11-01T05:30:00Z","2026-11-01T06:30:00Z"])expect(available({sun:[1,2]},"America/New_York",instant)).toBe("t");
+  expect(available({sun:[1,2]},"America/New_York","2026-11-01T07:00:00Z")).toBe("f");
+  expect(available({sun:[2,3]},"America/New_York","2026-03-08T07:30:00Z")).toBe("f");
+  for(const malformed of [{},null,{sun:[0]},{sun:[24,24]},{sun:[22,2]},{sun:[0,25]},{sun:[0,1.5]},{sun:["0",24]},{sun:{start:0,end:24}}])expect(available(malformed,"America/New_York","2026-11-01T05:30:00Z")).toBe("f");
+  expect(available({sun:[0,24]},"Not/A_Zone","2026-11-01T05:30:00Z")).toBe("f");
+  expect(available({sun:[0,24]},null,"2026-11-01T05:30:00Z")).toBe("f");
+  expect(()=>psql("SET ROLE anon; SELECT lead_allocation_available_at_v1('{}','UTC',now());")).toThrow();
+  expect(()=>psql("SET ROLE authenticated; SELECT lead_allocation_available_at_v1('{}','UTC',now());")).toThrow();
+ });
+ it("additive upgrade preserves function identities/grants, business rows and a compatible retained-guard app rollback",()=>{
+  install("amm_qa_fresh",true,new Set([revalidationMigration]));
+  const functions="'public.create_lead_allocation_offers_v1(uuid,bigint,text)'::regprocedure,'public.resolve_lead_allocation_offer_v1(uuid,bigint,text,text,text,text)'::regprocedure";
+  const metadata=()=>psql(`SELECT json_agg(json_build_object('oid',oid,'owner',proowner,'acl',proacl,'definer',prosecdef,'settings',proconfig) ORDER BY oid) FROM pg_proc WHERE oid IN (${functions});`,"amm_qa_fresh");
+  const before=metadata();
+  const oldDefinitions=psql(`SELECT string_agg(pg_get_functiondef(oid),E';\\n' ORDER BY oid) FROM pg_proc WHERE oid IN (${functions});`,"amm_qa_fresh");
+  const migration=readFileSync(`supabase/migrations/${revalidationMigration}`,"utf8");
+  const beforeRows=psql("SELECT json_build_object('leads',(SELECT count(*) FROM leads),'offers',(SELECT count(*) FROM lead_allocation_offers),'notifications',(SELECT count(*) FROM lead_notifications),'policy',(SELECT row_to_json(p) FROM lead_allocation_policy p));","amm_qa_fresh");
+  psql(migration,"amm_qa_fresh");expect(metadata()).toBe(before);
+  expect(psql("SELECT json_build_object('leads',(SELECT count(*) FROM leads),'offers',(SELECT count(*) FROM lead_allocation_offers),'notifications',(SELECT count(*) FROM lead_notifications),'policy',(SELECT row_to_json(p) FROM lead_allocation_policy p));","amm_qa_fresh")).toBe(beforeRows);
+  const newDefinitions=psql(`SELECT string_agg(pg_get_functiondef(oid),E';\\n' ORDER BY oid) FROM pg_proc WHERE oid IN (${functions});`,"amm_qa_fresh");
+  // A guarded database recovery can restore exact pilot-aware predecessor
+  // bodies without DROP/CASCADE or deleting business history. Preferred app
+  // recovery retains the new SQL guards with the unchanged function protocol.
+  psql(`BEGIN; ${oldDefinitions}; COMMIT;`,"amm_qa_fresh");expect(metadata()).toBe(before);
+  psql(`BEGIN; ${newDefinitions}; COMMIT;`,"amm_qa_fresh");expect(metadata()).toBe(before);
+  expect(()=>psql(migration,"amm_qa_fresh")).toThrow();
+  expect(psql(`SELECT string_agg(pg_get_functiondef(oid),E';\\n' ORDER BY oid) FROM pg_proc WHERE oid IN (${functions});`,"amm_qa_fresh")).toBe(newDefinitions);
+ // This case installs the entire tracked schema before exercising the additive
+ // upgrade and both recovery directions. Hosted Docker took 5.27s, just over
+ // the ordinary 5s unit budget. Keep a finite per-case 30s bound; no assertion,
+ // migration, privilege check, isolation control or global timeout is relaxed.
+ },30000);
+ it("web-only operational offer and claim use no transport, reservation or extra operator alert",async()=>{
+  const f=await fixture(1,false);
+  psql(`UPDATE agent_operational_enrollment SET email_enabled=false,sms_enabled=false,consent_at=NULL,possession_verified_at=NULL,phone_fingerprint=NULL WHERE agent_id IN ('${f.agents[0]}','${f.agents[1]}');`);
+  const created=JSON.parse(psql(`SELECT create_lead_allocation_offers_v1('${f.lead}',${f.version},'${f.admin}');`));
+  expect(created.ok).toBe(true);
+  const offer=JSON.parse(psql(`SELECT row_to_json(o) FROM lead_allocation_offers o WHERE lead_id='${f.lead}';`));
+  const user=f.users[f.agents.indexOf(offer.agent_id)],receipt=randomUUID();
+  expect(JSON.parse(psql(resolveSql(offer,user,"claim",receipt)))).toMatchObject({ok:true,state:"accepted"});
+  expect(JSON.parse(psql(resolveSql(offer,user,"claim",receipt)))).toMatchObject({ok:true,replayed:true});
+  expect(psql(`SELECT count(*) FROM agent_assignments WHERE lead_id='${f.lead}';`)).toBe("1");
+  expect(psql(`SELECT count(*) FROM tasks WHERE lead_id='${f.lead}' AND category='allocation_followup';`)).toBe("1");
+  expect(psql(`SELECT count(*) FROM lead_notifications WHERE lead_id='${f.lead}';`)).toBe("0");
+  expect(psql(`SELECT count(*) FROM lead_allocation_send_reservations r JOIN lead_allocation_offers o ON o.id=r.offer_id WHERE o.lead_id='${f.lead}';`)).toBe("0");
  });
  it("one concurrent winner across channel receipts, one assignment/task/confirmation and replay",async()=>{
   const f=await fixture();const o0=f.offers.find(o=>o.agent_id===f.agents[0])!,o1=f.offers.find(o=>o.agent_id===f.agents[1])!;
