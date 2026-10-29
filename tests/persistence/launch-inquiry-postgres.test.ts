@@ -242,6 +242,20 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolat
     const third = await submit(fixture()); expect(lead(third.result.lead_id).contact_id).not.toBe(lead(first.result.lead_id).contact_id);
     expect(String((notifications(second.result.lead_id)[0].private_intake_snapshot as Row).text)).toContain("Existing contact; this is a separate new inquiry.");
   });
+  it("email-to-one / phone-to-another refuses ambiguous identity atomically without a false receipt", async () => {
+    const first = fixture({ phone: "+12525550181" });
+    const second = fixture({ phone: "+12525550182" });
+    const a = await submit(first); const b = await submit(second);
+    expect(a.response.status).toBe(200); expect(b.response.status).toBe(200);
+    expect(lead(a.result.lead_id).contact_id).not.toBe(lead(b.result.lead_id).contact_id);
+    const before = counts();
+    const conflict = await submit(fixture({ email: first.email, phone: second.phone }));
+    expect(conflict.response.status).toBe(409);
+    expect(conflict.result.code).toBe("identity_conflict");
+    expect(conflict.result.lead_id).toBeUndefined();
+    expect(counts()).toBe(before);
+    expect(provider.send).not.toHaveBeenCalled();
+  });
   it("another property/intent remains a separate inquiry requiring direct assignment and supervisor review", async () => {
     const { reviewRepeatInquiry, repeatInquiryReviewState } = await import("../../app/lib/repeatInquiryReview");
     const { assignCanonicalAdminLead } = await import("../../src/lib/admin/lead-operations");
