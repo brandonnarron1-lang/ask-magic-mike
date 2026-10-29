@@ -9,7 +9,7 @@ const CONTENT = new Set([
   "facebook_local_question_seller_review", "sitewide-floating", "owned-seller-buyer-launch", "full_form_fallback", "seller_plan", "buyer_plan", "annual_review", "relocation_plan",
   ...["seller", "buyer"].flatMap(a => ["facebook", "instagram", "owned_site", "qr"].map(c => `${a}_${c}`)),
 ]);
-const EXTRA: Record<string, readonly string[]> = { source: ["widget", "external", "home_value_page", "seller_page", "buyer_page", "renter_page", "ask_page", "open_house", "homepage"], medium: ["embed"], campaign: ["sitewide-widget", "full_form_fallback", "amm_seller_buyer_launch_2026"] };
+const EXTRA: Record<string, readonly string[]> = { source: ["widget", "external", "home_value_page", "seller_page", "buyer_page", "renter_page", "ask_page", "open_house", "homepage"], medium: ["embed"], campaign: ["sitewide-widget", "parent-site-widget", "full_form_fallback", "amm_seller_buyer_launch_2026"] };
 
 /** Exact registered values, never truncation of attacker-controlled text into a valid code. */
 export function publicAttributionCode(key: string, value: unknown): string | undefined {

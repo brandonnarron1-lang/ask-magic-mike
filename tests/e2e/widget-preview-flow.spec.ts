@@ -117,6 +117,12 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
     page,
   }) => {
     const capture = await installNoWriteInterception(page);
+    const widgetReferrers: (string | undefined)[] = [];
+    page.on("request", request => {
+      if (new URL(request.url()).pathname === "/widget/v1" && request.isNavigationRequest()) {
+        widgetReferrers.push(request.headers().referer);
+      }
+    });
 
     await page.goto("/widget-preview");
     await expect(page.getByRole("heading", { name: /Wilson real estate/i })).toBeVisible();
@@ -124,6 +130,7 @@ test.describe("Widget preview flow (DB-mutation-free)", () => {
 
     const widget = page.frameLocator('iframe[title="Ask Magic Mike widget"]');
     await expect(widget.getByRole("heading", { name: "Ask Magic Mike" })).toBeVisible();
+    expect(widgetReferrers).toEqual([undefined]);
     await widget.getByLabel("Property address").fill("123 Nash St NW, Wilson NC");
     await widget.getByRole("button", { name: "Continue" }).click();
     await widget.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");

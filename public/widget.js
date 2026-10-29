@@ -31,7 +31,7 @@
     var allowed = {
       source: ["ourtownproperties", "widget", "external", "facebook", "instagram", "google", "qr", "email"],
       medium: ["owned_media", "embed", "website", "referral", "organic_social", "social_organic", "print"],
-      campaign: ["amm_owned_demand_2026", "amm_seller_buyer_launch_2026", "website_widget", "sitewide-widget", "full_form_fallback"],
+      campaign: ["amm_owned_demand_2026", "amm_seller_buyer_launch_2026", "website_widget", "sitewide-widget", "parent-site-widget", "full_form_fallback"],
       placement: ["sitewide-floating", "homepage", "homepage-hero", "home-value-page", "buyer-page", "seller-page", "ask-page", "widget", "wordpress_home_value_page", "wordpress_listing_buyer", "wordpress_rental_to_homeownership"]
     };
     function code(key, value) {
