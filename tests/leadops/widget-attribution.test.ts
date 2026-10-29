@@ -148,7 +148,7 @@ describe("Widget attribution — readAttribution with overrides", () => {
     const attribution = readAttribution(overrides);
 
     expect(attribution.source).toBe("facebook");
-    expect(attribution.embed_host).toBe("example.com");
+    expect(attribution.embed_host).toBeUndefined(); // unregistered host is not retained
   });
 
   it("returns placement from overrides in final attribution", () => {

@@ -78,7 +78,7 @@ function fixture(entry: AddressValue | null = address()): Body {
     consent:true,consent_email:true,consent_call:false,consent_sms:false,
     consent_language_text:LEAD_CONSENT_LANGUAGE_TEXT,consent_language_version:LEAD_CONSENT_LANGUAGE_VERSION,
     consent_source:"home_value_page:home-value",idempotency_key:key,widget_session_id:key,
-    attribution:{source:"ourtownproperties",medium:"owned_media",campaign:"synthetic_structured_address",
+    attribution:{source:"ourtownproperties",medium:"owned_media",campaign:"amm_owned_demand_2026",
       content:"synthetic_home_value",landing_page:"https://www.askmagicmike.com/home-value"},
     page_url:"https://www.askmagicmike.com/home-value",
   };
@@ -177,7 +177,7 @@ function verifyEvidence(id: string, emailConsent = true) {
   expect(rows(`SELECT action FROM audit_logs WHERE resource_id=${literal(id)}::uuid AND action IN ('lead.created','lead.qa_suppressed') ORDER BY action`))
     .toEqual([{action:"lead.created"},{action:"lead.qa_suppressed"}]);
   expect(rows(`SELECT utm_source,utm_medium,utm_campaign FROM source_attribution WHERE lead_id=${literal(id)}::uuid`))
-    .toEqual([{utm_source:"ourtownproperties",utm_medium:"owned_media",utm_campaign:"synthetic_structured_address"}]);
+    .toEqual([{utm_source:"ourtownproperties",utm_medium:"owned_media",utm_campaign:"amm_owned_demand_2026"}]);
 }
 
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("structured address capture — isolated root HTTP to PostgreSQL, no sends", () => {

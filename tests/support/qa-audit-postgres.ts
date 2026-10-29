@@ -64,7 +64,10 @@ function topLevelRows(sql: string): Array<Record<string, unknown>> {
   const [columns, ...rows] = records;
   return rows.filter((row) => row.length === columns.length).map((row) => Object.fromEntries(columns.map((column, index) => {
     const value = row[index];
-    const typed = value === "t" ? true : value === "f" ? false : value === "" ? null
+    // SELECT ... FOR UPDATE CTEs use this top-level path too. Match pg/Neon's
+    // JSONB RPC result type instead of reporting a committed action as false.
+    const typed = column === "result" && value.startsWith("{") ? JSON.parse(value)
+      : value === "t" ? true : value === "f" ? false : value === "" ? null
       : /^-?\d+$/.test(value) ? Number(value) : value;
     return [column, typed];
   })));

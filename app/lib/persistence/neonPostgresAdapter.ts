@@ -70,6 +70,22 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
       const structuredAddress = input.lead.address_entry !== undefined && input.lead.address_entry !== null;
       const structuredInterest = input.lead.buyer_interest !== undefined && input.lead.buyer_interest !== null;
       const inquiryContext = input.internalNotification?.requestContext;
+      const legacyQuestion = !inquiryContext && input.lead.lead_type === "general_question" && input.legacyReplayLead;
+      if (legacyQuestion || (inquiryContext && input.legacyReplayContext && JSON.stringify(inquiryContext) !== JSON.stringify(input.legacyReplayContext))) {
+        // Exact old fingerprint only; an altered request still reaches v4's
+        // conflict check. Bound parameters, no historical mutation or new intent.
+        const replayRows = await this.sql.query(`SELECT id,session_id,widget_session_id,duplicate_of_lead_id,assigned_agent_id,assignment_status
+          FROM public.leads WHERE request_idempotency_key=$1 AND session_id=$2::uuid
+          AND address_entry IS NOT DISTINCT FROM NULLIF($4::jsonb,'null'::jsonb)
+          AND buyer_interest IS NOT DISTINCT FROM NULLIF($5::jsonb,'null'::jsonb)
+          AND ${legacyQuestion ? "request_fingerprint=public.amm_public_lead_request_fingerprint($3::jsonb,'{}'::jsonb)" : "inquiry_request_fingerprint=encode(sha256(convert_to($3::jsonb::text,'UTF8')),'hex')"} LIMIT 1`,
+        [input.lead.request_idempotency_key, input.session.id, JSON.stringify(legacyQuestion || input.legacyReplayContext), JSON.stringify(input.lead.address_entry ?? null), JSON.stringify(input.lead.buyer_interest ?? null)]) as Array<Record<string, unknown>>;
+        const replay = replayRows[0];
+        if (replay) return { ok: true, lead_id: String(replay.id), session_id: String(replay.session_id),
+          widget_session_id: String(replay.widget_session_id || replay.session_id), duplicate_of_lead_id: replay.duplicate_of_lead_id ? String(replay.duplicate_of_lead_id) : null,
+          assigned_agent_id: replay.assigned_agent_id ? String(replay.assigned_agent_id) : null,
+          assignment_status: replay.assignment_status === "assigned" ? "assigned" : replay.duplicate_of_lead_id ? "duplicate" : "unassigned", idempotent_replay: true };
+      }
       if (input.internalNotification || structuredAddress || structuredInterest) {
         const capture = inquiryContext || structuredInterest ? "capture_public_lead_v4"
           : structuredAddress ? "capture_public_lead_v3" : "capture_public_lead_v2";

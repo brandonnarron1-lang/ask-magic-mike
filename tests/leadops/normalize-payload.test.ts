@@ -191,26 +191,24 @@ describe("cleanAttribution — canonical fields", () => {
     device_category: "mobile",
   };
 
-  it("preserves every canonical attribution field", () => {
+  it("retains only registered codes and approved page projections", () => {
     const a = cleanAttribution(ALL_FIELDS);
-    for (const [key, value] of Object.entries(ALL_FIELDS)) {
-      expect(a[key as keyof typeof a]).toBe(value);
-    }
+    expect(a).toEqual({ source: "facebook", medium: "paid_social", landing_page: "/value", initial_path: "/value", parent_url: "https://ourtownproperties.com/", embed_host: "ourtownproperties.com", placement: "homepage-hero", placement_id: "homepage-hero", device_category: "mobile", first_touch: {}, last_touch: {} });
   });
 
-  it("preserves page title inside first-touch and last-touch snapshots", () => {
+  it("retains touch source but omits arbitrary titles from both snapshots", () => {
     const a = cleanAttribution({
       first_touch: { source: "ourtownproperties", page_title: "Home Value | Ask Magic Mike" },
       last_touch: { source: "facebook", page_title: "Buyer Plan | Ask Magic Mike" },
     });
     expect(a.first_touch).toMatchObject({
       source: "ourtownproperties",
-      page_title: "Home Value | Ask Magic Mike",
     });
     expect(a.last_touch).toMatchObject({
       source: "facebook",
-      page_title: "Buyer Plan | Ask Magic Mike",
     });
+    expect(a.first_touch?.page_title).toBeUndefined();
+    expect(a.last_touch?.page_title).toBeUndefined();
   });
 
   it("returns empty attribution for null input", () => {
@@ -226,12 +224,12 @@ describe("cleanAttribution — canonical fields", () => {
   });
 
   it("trims whitespace in attribution fields", () => {
-    const a = cleanAttribution({ source: "  google  ", medium: "  organic  " });
+    const a = cleanAttribution({ source: "  google  ", medium: "  organic_local  " });
     expect(a.source).toBe("google");
-    expect(a.medium).toBe("organic");
+    expect(a.medium).toBe("organic_local");
   });
 
-  it("normalizes WordPress bridge nested click IDs into canonical fields", () => {
+  it("drops untrusted nested click IDs rather than storing arbitrary identifiers", () => {
     const a = cleanAttribution({
       click_ids: {
         gclid: " wp-gclid ",
@@ -241,28 +239,22 @@ describe("cleanAttribution — canonical fields", () => {
         msclkid: "wp-msclkid",
       },
     });
-    expect(a).toMatchObject({
-      gclid: "wp-gclid",
-      gbraid: "wp-gbraid",
-      wbraid: "wp-wbraid",
-      fbclid: "wp-fbclid",
-      msclkid: "wp-msclkid",
-    });
+    expect(a).toEqual({ first_touch: {}, last_touch: {} });
   });
 
-  it("prefers canonical top-level click IDs over compatibility input", () => {
+  it("drops top-level click IDs as well as compatibility input", () => {
     const a = cleanAttribution({
       gclid: "canonical-gclid",
       click_ids: { gclid: "legacy-gclid" },
     });
-    expect(a.gclid).toBe("canonical-gclid");
+    expect(a.gclid).toBeUndefined();
   });
 
   it("converts empty string fields to undefined", () => {
     const a = cleanAttribution({ source: "", medium: "  ", campaign: "valid" });
     expect(a.source).toBeUndefined();
     expect(a.medium).toBeUndefined();
-    expect(a.campaign).toBe("valid");
+    expect(a.campaign).toBeUndefined(); // unregistered campaign
   });
 
   it("strips unknown extra fields — only canonical fields returned", () => {

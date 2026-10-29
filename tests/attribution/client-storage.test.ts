@@ -41,7 +41,7 @@ const setReferrer = (referrer: string) => {
 describe("client-storage attribution", () => {
   beforeEach(() => {
     window.sessionStorage.clear();
-    setHref("https://ask-magic-mike.vercel.app/value");
+    setHref("https://www.askmagicmike.com/value");
     setReferrer("");
   });
 
@@ -51,14 +51,14 @@ describe("client-storage attribution", () => {
 
   it("captures UTMs from URL into sessionStorage", () => {
     setHref(
-      "https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike"
+      "https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike"
     );
     const captured = captureAttribution();
     expect(captured?.utmSource).toBe("ourtown_wp");
     expect(captured?.utmMedium).toBe("homepage_cta");
     expect(captured?.utmCampaign).toBe("ask_magic_mike");
     expect(captured?.landingPath).toBe("/value");
-    expect(captured?.landingUrl).toContain("/value?utm_source=ourtown_wp");
+    expect(captured?.landingUrl).toBe("https://www.askmagicmike.com/value");
 
     const persisted = readAttribution();
     expect(persisted?.utmSource).toBe("ourtown_wp");
@@ -67,13 +67,13 @@ describe("client-storage attribution", () => {
 
   it("preserves first-touch attribution when no fresh UTMs are present", () => {
     setHref(
-      "https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike"
+      "https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=mike_profile&utm_campaign=ask_magic_mike"
     );
     const first = captureAttribution();
     expect(first?.utmMedium).toBe("mike_profile");
 
     // Simulate a navigation to /ask with no UTMs in the URL.
-    setHref("https://ask-magic-mike.vercel.app/ask?q=hello");
+    setHref("https://www.askmagicmike.com/ask?q=hello");
     const second = captureAttribution();
     expect(second?.utmSource).toBe("ourtown_wp");
     expect(second?.utmMedium).toBe("mike_profile");
@@ -82,18 +82,18 @@ describe("client-storage attribution", () => {
 
   it("replaces attribution when fresh UTMs are present", () => {
     setHref(
-      "https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike"
+      "https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=homepage_cta&utm_campaign=ask_magic_mike"
     );
     captureAttribution();
     setHref(
-      "https://ask-magic-mike.vercel.app/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike"
+      "https://www.askmagicmike.com/value?utm_source=ourtown_wp&utm_medium=seller_page_cta&utm_campaign=ask_magic_mike"
     );
     const next = captureAttribution();
     expect(next?.utmMedium).toBe("seller_page_cta");
   });
 
   it("returns null landing referrer for direct visits", () => {
-    setHref("https://ask-magic-mike.vercel.app/value");
+    setHref("https://www.askmagicmike.com/value");
     const captured = captureAttribution();
     expect(captured?.utmSource).toBeNull();
     expect(captured?.referrerType).toBe("direct");
@@ -101,7 +101,7 @@ describe("client-storage attribution", () => {
   });
 
   it("appends UTMs to URLSearchParams without clobbering existing values", () => {
-    const params = new URLSearchParams({ q: "hello", utm_source: "manual" });
+    const params = new URLSearchParams({ q: "hello", utm_source: "facebook" });
     appendUtmsToParams(params, {
       utmSource:   "ourtown_wp",
       utmMedium:   "homepage_cta",
@@ -109,7 +109,7 @@ describe("client-storage attribution", () => {
       utmContent:  null,
       utmTerm:     null,
     });
-    expect(params.get("utm_source")).toBe("manual");
+    expect(params.get("utm_source")).toBe("facebook");
     expect(params.get("utm_medium")).toBe("homepage_cta");
     expect(params.get("utm_campaign")).toBe("ask_magic_mike");
     expect(params.get("utm_content")).toBeNull();
@@ -119,5 +119,15 @@ describe("client-storage attribution", () => {
     const params = new URLSearchParams({ q: "hello" });
     appendUtmsToParams(params, null);
     expect(params.toString()).toBe("q=hello");
+  });
+  it("rejects a parseable date carrying identifying text rather than persisting it as a timestamp", () => {
+    window.sessionStorage.setItem("amm_attribution", JSON.stringify({ firstSeenAt: "1 (alice@example.com)", landingPath: "/value" }));
+    expect(readAttribution()).toBeNull();
+  });
+  it("minimizes an unregistered referrer without turning the visit into measured direct traffic", () => {
+    setReferrer("https://private.example.test/person?email=synthetic%40example.test");
+    const captured = captureAttribution();
+    expect(captured?.referrerUrl).toBeNull(); expect(captured?.referrerType).toBe("referral");
+    expect(JSON.stringify(captured)).not.toContain("synthetic@"); expect(JSON.stringify(captured)).not.toContain("private.example.test");
   });
 });

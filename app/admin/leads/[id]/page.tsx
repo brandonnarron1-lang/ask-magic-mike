@@ -30,6 +30,7 @@ import { isPreviewRuntime } from "../../../../src/lib/preview-security";
 import { ConversionMutationForm } from "../../../components/admin/ConversionMutationForm";
 import { presentLead, leadSubtype } from "../../../lib/leadPresentation";
 import { leadOwnership } from "../../../lib/leadOwnership";
+import { repeatInquiryReviewState } from "../../../lib/repeatInquiryReview";
 import { leadPageHeading, leadRequestLabel, leadSourceLabel, leadTimelineLabel } from "../../../lib/leadReadability";
 import { LeadEvidenceWorkspace } from "../../../components/admin/LeadEvidenceWorkspace";
 import { LeadQualificationPanel } from "../../../components/admin/LeadQualificationPanel";
@@ -45,6 +46,7 @@ import {
   transitionAppointmentAction,
   updateFollowupTaskAction,
   updateLeadStatusAction,
+  reviewRepeatInquiryAction,
 } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -693,6 +695,19 @@ export default async function AdminLeadDetailPage({
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <section className="min-w-0 space-y-5">
               {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && !isPreviewRuntime()} status={lead.status}/> : null}
+              {repeatInquiryReviewState(lead) !== "not_required" ? <section aria-label="Repeat inquiry review" className="mt-4 rounded-xl border border-[#cda24a55] bg-[#15120d] p-4 text-sm text-[#f4ead4]">
+                <h2 className="font-semibold text-[#e2c06f]">A separate request needs review</h2>
+                <p className="mt-2">This inquiry has its own request and consent evidence. The earlier contact relationship is not a direct assignment or permission to respond.</p>
+                {repeatInquiryReviewState(lead) === "held" ? <p className="mt-2">Test, suppression or lifecycle hold remains in place. No contact or review activation is available.</p> : principal && hasLeadCenterPermission(principal.role, "lead:assign") ? <>
+                  <Link className="mt-2 inline-flex min-h-11 items-center text-[#e2c06f] underline" href="/admin/allocation">Review and directly assign in the existing assignment queue</Link>
+                  {repeatInquiryReviewState(lead) === "supervisor_review" ? <ConversionMutationForm action={reviewRepeatInquiryAction} submitLabel="Review as separate inquiry" successMessage="Repeat inquiry reviewed. Direct assignment retained; contact permissions must still be checked.">
+                    <input type="hidden" name="lead_id" value={lead.id} />
+                    <input type="hidden" name="expected_agent_id" value={lead.assigned_agent_id || ""} />
+                    <input type="hidden" name="expected_assigned_at" value={lead.assigned_at || ""} />
+                    <label className="mt-2 flex min-h-11 items-center gap-3"><input type="checkbox" name="confirm" value="yes" required />I reviewed this as a separate genuine request and verified its direct assignment, relationship and representation constraints.</label>
+                  </ConversionMutationForm> : <p className="mt-2">Direct assignment is required before this supervisor review. Automatic allocation remains unchanged.</p>}
+                </> : <p className="mt-2">A supervisor must directly assign and review this inquiry before any response. Inherited access remains read-only.</p>}
+              </section> : null}
               {dossier ? <LeadQualificationPanel dossier={dossier} simulation={simulation}/> : null}
               {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <Panel title="Property evidence (optional)"><LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/></Panel> : null}
               <Panel title="Lead state">

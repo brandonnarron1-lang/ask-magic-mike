@@ -2,6 +2,31 @@
 
 <!-- amm-current-operations-v1 -->
 
+## Home Value lead-loop continuation — October 29, 2026
+
+Authenticated read-only resolver at 16:16:12Z confirms accepted PR #314:
+main `a429ba57a44f26db856f70841135bb512e4d797a`, tree
+`a94f78cf8336e27c7999ee467378af54d74aeec1`, Production
+`dpl_6wxESt3eM41bnx2BtjPtE9d9cURV`. This dated reconciliation is not a new
+release receipt. The resolver, not old deployment paragraphs, remains authority.
+
+The bounded continuation minimizes widget/client/server attribution and adds an
+explicit supervisor exception for a separately retained repeat inquiry. Direct
+assignment must occur in the existing queue; clearing the duplicate-stage hold
+compares the displayed assignment/time, lifecycle, QA/suppression and current
+administrator authority under a database lock. No inherited write grant, prior
+consent copy, schema change or automatic allocation is introduced. Historical
+fingerprints have an exact-match read-only recovery path; old evidence is not
+rewritten. Publication, protected acceptance and Production remain separate.
+
+Page 3952's tagged Home Value CTA remains the pilot. The October 27 owner-requested
+homepage AMM removal supersedes older hidden-homepage diagnoses; do not re-add
+that panel. Public custom `/home-value/` and `/ask-mike/` forms are a separate,
+unverified installed-plugin boundary, not proof of failed capture. New marketing
+publication, new allocation and consumer automation remain OFF/held. Traffic,
+current roster readiness, genuine demand and personal inbox acceptance have not
+been freshly measured by this code run. Native/S3 retired QA is not restored.
+
 Audited 2026-10-02. Stable release policy is
 `config/release-authority-policy.json`. Current accepted Production is derived
 from the latest deployment-generated receipt and authenticated with

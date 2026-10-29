@@ -41,8 +41,8 @@ function seedAttribution() {
     JSON.stringify({
       utmSource: "facebook",
       utmMedium: "paid_social",
-      utmCampaign: "seller_options_wilson_2026_q3",
-      utmContent: "feed_video_a",
+      utmCampaign: "seller_options_wilson_2026_q3_a",
+      utmContent: "seller_facebook",
       utmTerm: null,
       referrerUrl: "https://example.com/wp",
       referrerType: "paid",
@@ -104,18 +104,16 @@ describe("submitWidgetLead", () => {
     expect(body.phone).toBe("+12525551212");
     expect(body.property_address).toBe("123 Nash St NW, Wilson, NC");
     expect(body.timeline).toBe("0_30_days");
-    expect(body.page_url).toBe(
-      "https://example.com/value?utm_source=facebook"
-    );
+    expect(body.page_url).toBeNull(); // unapproved origin never forwarded
     expect(typeof body.widget_session_id).toBe("string");
     expect(String(body.widget_session_id).length).toBeGreaterThan(8);
 
     // Attribution forwarded.
     expect(body.utm_source).toBe("facebook");
     expect(body.utm_medium).toBe("paid_social");
-    expect(body.utm_campaign).toBe("seller_options_wilson_2026_q3");
-    expect(body.utm_content).toBe("feed_video_a");
-    expect(body.referrer).toBe("https://example.com/wp");
+    expect(body.utm_campaign).toBe("seller_options_wilson_2026_q3_a");
+    expect(body.utm_content).toBe("seller_facebook");
+    expect(body.referrer).toBeNull();
     expect(body.landing_page).toBe("/value");
 
     // Consent shape.

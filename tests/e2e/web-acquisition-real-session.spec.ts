@@ -1,4 +1,4 @@
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { Pool } from "pg";
 import { expect, test, type Page } from "@playwright/test";
@@ -35,6 +35,86 @@ async function assertEnvelope(email: string, qa: boolean) {
   expect(envelopes.map(row => row.recipient_reference)).toEqual(["operator:brandon", "operator:mike"]);
   expect(envelopes.every(row => row.provider_message_id === null && row.attempt_count === 0)).toBe(true);
 }
+test("Home Value form -> durable envelopes -> genuine staff session -> scoped next task; repeat requires supervisor resolution", async ({ page, browser }) => {
+  const fixtures = JSON.parse(readFileSync(process.env.AMM_E2E_FIXTURE_PATH!, "utf8"));
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await ordinaryAdvisory(page);
+  const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
+  const capture = async (target: Page, address: string) => {
+    await target.goto("/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page&private=synthetic-private#private");
+    await target.getByLabel("Property address", { exact: true }).fill(address);
+    await target.locator(".amm-home-value").getByRole("button", { name: "Continue", exact: true }).click();
+    await target.getByLabel("Your name", { exact: true }).fill("Synthetic lead loop rehearsal");
+    await target.getByLabel("Email for your valuation follow-up", { exact: true }).fill("home-loop@example.test");
+    const response = target.waitForResponse(r => new URL(r.url()).pathname === "/api/leads" && r.request().method() === "POST");
+    await target.getByRole("button", { name: "Request Valuation", exact: true }).click();
+    const result = await response; expect(result.status()).toBe(200);
+    const receipt = await result.json(); expect(receipt.lead_id).toMatch(/^[0-9a-f-]{36}$/);
+    return receipt.lead_id as string;
+  };
+  const first = await capture(page, "301 Synthetic Nominal Property Road, Wilson NC");
+  // A committed receipt intentionally survives same-tab navigation. A separate
+  // return visit gets a new request, without deleting a pending/accepted key.
+  const returnVisit = await browser.newContext({ baseURL: process.env.BETTER_AUTH_URL, viewport: { width: 390, height: 1000 } });
+  let repeat: string;
+  try { const secondPage = await returnVisit.newPage(); await ordinaryAdvisory(secondPage); repeat = await capture(secondPage, "302 Synthetic Repeat Property Road, Wilson NC"); }
+  finally { await returnVisit.close(); }
+  expect(repeat).not.toBe(first);
+  const retained = (await pool.query("SELECT id,contact_id,assigned_agent_id,duplicate_of_lead_id,page_url FROM leads WHERE id=ANY($1::uuid[]) ORDER BY duplicate_of_lead_id NULLS FIRST", [[first, repeat]])).rows;
+  expect(retained[0].contact_id).toBe(retained[1].contact_id);
+  expect(retained[1].duplicate_of_lead_id).toBe(first); expect(retained[1].assigned_agent_id).toBeNull();
+  expect(retained.every(r => !String(r.page_url).includes("synthetic-private"))).toBe(true);
+  for (const id of [first, repeat]) {
+    const envelopes = (await pool.query("SELECT recipient_reference,provider_message_id FROM lead_notifications WHERE lead_id=$1 AND template_version='lead_alert_email_v6' ORDER BY recipient_reference", [id])).rows;
+    expect(envelopes).toEqual([{ recipient_reference: "operator:brandon", provider_message_id: null }, { recipient_reference: "operator:mike", provider_message_id: null }]);
+  }
+  const login = async (role: string, id: string) => {
+    const context = await browser.newContext({ baseURL: process.env.BETTER_AUTH_URL, reducedMotion: "reduce", viewport: { width: 390, height: 1000 } });
+    const staff = await context.newPage(); await staff.goto(`/lead-center-login?returnTo=${encodeURIComponent(`/admin/leads/${id}`)}`);
+    await staff.getByLabel("Work email").fill(`${role}@example.test`); await staff.getByLabel("Password", { exact: true }).fill(process.env.AMM_E2E_FIXTURE_PASSWORD!);
+    await staff.getByRole("button", { name: "Open Lead Center", exact: true }).click(); await expect(staff).toHaveURL(new RegExp(`/admin/leads/${id}$`));
+    return { context, staff };
+  };
+  const owner = await login("owner", first);
+  try {
+    await expect(owner.staff.getByRole("region", { name: "Lead overview" })).toContainText("home-loop@example.test");
+    await owner.staff.getByRole("link", { name: "Log result / next task", exact: true }).click();
+    const form = owner.staff.getByRole("form", { name: "Save interaction and next task", exact: true });
+    await form.getByLabel("Actual channel").selectOption("other");
+    await form.getByLabel("Actual result").selectOption("attempted");
+    await form.getByLabel("Next task due", { exact: true }).fill("2030-02-15T10:00");
+    await form.getByLabel("Safe interaction note", { exact: true }).fill("SYNTHETIC REHEARSAL ONLY — NO REAL CONSUMER CONTACT");
+    await form.getByRole("checkbox", { name: /Confirm this manual interaction/ }).check();
+    await form.getByRole("button", { name: "Save interaction and next task", exact: true }).click();
+    await expect(form.getByRole("status")).toContainText("saved together");
+    expect((await pool.query("SELECT metadata->>'result' result FROM audit_logs WHERE resource_id=$1 AND action='lead.human_interaction_recorded'", [first])).rows).toEqual([{ result: "attempted" }]);
+    await owner.staff.goto(`/admin/leads/${repeat}`);
+    await expect(owner.staff.getByRole("region", { name: "Repeat inquiry review" })).toContainText("Inherited access remains read-only");
+    await expect(owner.staff.getByRole("button", { name: "Review as separate inquiry" })).toHaveCount(0);
+    const admin = await login("admin", repeat);
+    try {
+      await admin.staff.getByRole("link", { name: "Review and directly assign in the existing assignment queue", exact: true }).click();
+      const card = admin.staff.locator("article").filter({ hasText: "302 Synthetic Repeat Property Road" }).first();
+      await card.getByRole("combobox", { name: "Agent", exact: true }).selectOption(fixtures.agents.owner);
+      await card.getByRole("button", { name: "Assign", exact: true }).click(); await expect(admin.staff).toHaveURL(/assignment_action=assigned/);
+      await admin.staff.goto(`/admin/leads/${repeat}`);
+      const review = admin.staff.getByRole("region", { name: "Repeat inquiry review" });
+      await review.getByRole("checkbox").check(); await review.getByRole("button", { name: "Review as separate inquiry", exact: true }).click();
+      await expect.poll(async () => (await pool.query("SELECT conversion_stage FROM leads WHERE id=$1", [repeat])).rows[0]?.conversion_stage).toBe("assigned");
+    } finally { await admin.context.close(); }
+    for (const width of [320, 375, 390, 768]) {
+      await owner.staff.setViewportSize({ width, height: 1000 }); await owner.staff.goto(`/admin/leads/${repeat}`);
+      await expect(owner.staff.getByRole("region", { name: "Lead overview" })).toContainText("home-loop@example.test");
+      await expect(owner.staff.getByRole("button", { name: "Review & email", exact: true })).toBeDisabled(); // no inherited consent
+      await owner.staff.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+      expect(await owner.staff.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width + 1);
+      await owner.staff.screenshot({ path: path.join(output, `lead-loop-reviewed-${width}.png`), fullPage: false });
+    }
+    expect((await pool.query("SELECT consent_email,consent_call,consent_sms,conversion_stage FROM leads WHERE id=$1", [repeat])).rows).toEqual([{ consent_email: false, consent_call: false, consent_sms: false, conversion_stage: "assigned" }]);
+    expect((await counts()).provider_ids).toBe(0); expect(errors).toEqual([]);
+  } finally { await owner.context.close(); }
+});
+
 test("sentinel: ordinary seller review creates one inquiry and two unsent v6 operator intents", async ({ page }) => {
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   const before = await counts(); await ordinaryAdvisory(page);

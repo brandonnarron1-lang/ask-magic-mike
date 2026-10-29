@@ -1,5 +1,6 @@
 import { normalizeAddressValue, type AddressValue } from "./address/addressValue";
 import { normalizeBuyerInterest, type BuyerInterestV1 } from "./buyerInterest";
+import { publicAttributionSnapshot, publicAttributionUrl } from "./attributionPrivacy";
 
 export type FunnelType =
   | "home_value"
@@ -170,7 +171,7 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     condition: cleanOptional(input.condition || input.property_condition),
     notes: cleanOptional(input.notes),
     question: cleanOptional(input.question || input.intent),
-    page_url: cleanOptional(input.page_url),
+    page_url: publicAttributionUrl(input.page_url),
     widget_session_id: cleanOptional(input.widget_session_id),
     idempotency_key: cleanOptional(input.idempotency_key || input.request_fingerprint),
     experiment_key: cleanOptional(input.experiment_key),
@@ -199,37 +200,20 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
 }
 
 export function cleanAttribution(input: unknown): Attribution {
-  const raw = input && typeof input === "object" ? (input as Record<string, unknown>) : {};
-  const clickIds = raw.click_ids && typeof raw.click_ids === "object" && !Array.isArray(raw.click_ids)
-    ? raw.click_ids as Record<string, unknown>
-    : {};
+  const raw = input && typeof input === "object" && !Array.isArray(input) ? (input as Record<string, unknown>) : {};
+  const touch = (value: unknown) => {
+    const snapshot = publicAttributionSnapshot(value);
+    delete snapshot.initial_path; // retain the existing v4 touch shape
+    return snapshot;
+  };
   return {
-    source: cleanOptional(raw.source),
-    medium: cleanOptional(raw.medium),
-    campaign: cleanOptional(raw.campaign),
-    content: cleanOptional(raw.content),
-    term: cleanOptional(raw.term),
-    referrer: cleanOptional(raw.referrer),
-    landing_page: cleanOptional(raw.landing_page),
-    initial_path: cleanOptional(raw.initial_path),
-    current_path: cleanOptional(raw.current_path),
-    parent_url: cleanOptional(raw.parent_url),
-    embed_host: cleanOptional(raw.embed_host),
-    placement: cleanOptional(raw.placement),
-    gclid: cleanOptional(raw.gclid || clickIds.gclid),
-    gbraid: cleanOptional(raw.gbraid || clickIds.gbraid),
-    wbraid: cleanOptional(raw.wbraid || clickIds.wbraid),
-    fbclid: cleanOptional(raw.fbclid || clickIds.fbclid),
-    msclkid: cleanOptional(raw.msclkid || clickIds.msclkid),
-    page_title: cleanOptional(raw.page_title),
-    placement_id: cleanOptional(raw.placement_id || raw.placement),
-    listing_id: cleanOptional(raw.listing_id),
-    property_id: cleanOptional(raw.property_id),
-    agent_id: cleanOptional(raw.agent_id),
-    first_touch: cleanAttributionSnapshot(raw.first_touch),
-    last_touch: cleanAttributionSnapshot(raw.last_touch),
-    device_category: cleanOptional(raw.device_category),
-    created_at: cleanOptional(raw.created_at),
+    ...publicAttributionSnapshot({ ...raw, placement_id: raw.placement_id || raw.placement }),
+    // Empty means unknown, not a backfilled source. Keep the legacy JSON shape
+    // so a compatible app rollback can replay newly frozen v4 requests too.
+    first_touch: touch(raw.first_touch),
+    last_touch: touch(raw.last_touch),
+    ...(["mobile", "tablet", "desktop", "unknown"].includes(String(raw.device_category)) ? { device_category: String(raw.device_category) } : {}),
+    ...(typeof raw.created_at === "string" && /^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(raw.created_at) && raw.created_at.length <= 30 && Number.isFinite(Date.parse(raw.created_at)) ? { created_at: raw.created_at } : {}),
   };
 }
 
@@ -257,36 +241,4 @@ function normalizeSurface(input: unknown, funnelType: FunnelType): LeadSourceSur
   if (funnelType === "chat") return "ask_page";
   if (funnelType === "widget") return "widget";
   return "home_value_page";
-}
-
-function cleanAttributionSnapshot(input: unknown) {
-  const raw = input && typeof input === "object" ? (input as Record<string, unknown>) : {};
-  const fields = [
-    "source",
-    "medium",
-    "campaign",
-    "content",
-    "term",
-    "referrer",
-    "landing_page",
-    "current_path",
-    "parent_url",
-    "embed_host",
-    "placement",
-    "placement_id",
-    "listing_id",
-    "property_id",
-    "agent_id",
-    "page_title",
-    "gclid",
-    "gbraid",
-    "wbraid",
-    "fbclid",
-    "msclkid",
-  ];
-  return Object.fromEntries(
-    fields
-      .map((field) => [field, cleanOptional(raw[field])] as const)
-      .filter(([, value]) => Boolean(value)),
-  );
 }

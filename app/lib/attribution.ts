@@ -1,6 +1,6 @@
 "use client";
 
-import type { Attribution } from "./leadPayload";
+import { cleanAttribution, type Attribution } from "./leadPayload";
 
 const STORAGE_KEY = "amm_attribution";
 
@@ -66,7 +66,7 @@ export function getDeviceCategory() {
 }
 
 export function readAttribution(overrides: Partial<Attribution> = {}): Attribution {
-  if (typeof window === "undefined") return { ...initialAttribution, ...overrides };
+  if (typeof window === "undefined") return cleanAttribution({ ...initialAttribution, ...overrides });
 
   const params = new URLSearchParams(window.location.search);
   const currentPath = window.location.pathname + window.location.search;
@@ -76,7 +76,7 @@ export function readAttribution(overrides: Partial<Attribution> = {}): Attributi
 
   if (stored) {
     try {
-      const parsed = JSON.parse(stored) as Attribution;
+      const parsed = cleanAttribution(JSON.parse(stored));
       const attribution = {
         ...parsed,
         source: firstParam(params, "utm_source", "source") || parsed.source,
@@ -102,14 +102,15 @@ export function readAttribution(overrides: Partial<Attribution> = {}): Attributi
         page_title: currentPageTitle || parsed.page_title,
         ...overrides,
       };
-      attribution.first_touch = parsed.first_touch || touchSnapshot(parsed);
+      attribution.first_touch = parsed.first_touch;
       attribution.last_touch = touchSnapshot({
         ...attribution,
         landing_page: window.location.href,
         current_path: currentPath,
       });
-      persistAttribution(attribution);
-      return attribution;
+      const safe = cleanAttribution(attribution);
+      persistAttribution(safe);
+      return safe;
     } catch {
       try {
         window.sessionStorage.removeItem(STORAGE_KEY);
@@ -150,6 +151,7 @@ export function readAttribution(overrides: Partial<Attribution> = {}): Attributi
   attribution.first_touch = touchSnapshot(attribution);
   attribution.last_touch = touchSnapshot(attribution);
 
-  persistAttribution(attribution);
-  return attribution;
+  const safe = cleanAttribution(attribution);
+  persistAttribution(safe);
+  return safe;
 }

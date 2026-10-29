@@ -25,29 +25,47 @@
   }
 
   function buildWidgetUrl(config) {
-    var base = (config.baseUrl || originFromScript() || "").replace(/\/$/, "");
-    var params = new URLSearchParams({
-      source: config.source || defaultConfig.source,
-      medium: config.medium || defaultConfig.medium,
-      campaign: config.campaign || defaultConfig.campaign,
-      placement: config.placement || defaultConfig.placement,
-      placement_id: config.placement_id || config.placement || defaultConfig.placement_id,
-      listing_id: config.listing_id || defaultConfig.listing_id,
-      property_id: config.property_id || defaultConfig.property_id,
-      agent_id: config.agent_id || defaultConfig.agent_id,
-      parent_url: window.location.href,
-      embed_host: window.location.hostname,
-      referrer: document.referrer || "",
-      page_title: document.title || "",
-      utm_source: config.source || "",
-      utm_medium: config.medium || "",
-      utm_campaign: config.campaign || "",
-      gclid: pageParams.get("gclid") || "",
-      gbraid: pageParams.get("gbraid") || "",
-      wbraid: pageParams.get("wbraid") || "",
-      fbclid: pageParams.get("fbclid") || "",
-      msclkid: pageParams.get("msclkid") || ""
+    // This standalone loader cannot trust the host page's URL, title, query or
+    // config. Its small public projection is exercised against the server
+    // boundary in attribution-minimization.test.ts. No property/person IDs.
+    var allowed = {
+      source: ["ourtownproperties", "widget", "external", "facebook", "instagram", "google", "qr", "email"],
+      medium: ["owned_media", "embed", "website", "referral", "organic_social", "social_organic", "print"],
+      campaign: ["amm_owned_demand_2026", "amm_seller_buyer_launch_2026", "website_widget", "sitewide-widget", "full_form_fallback"],
+      placement: ["sitewide-floating", "homepage", "homepage-hero", "home-value-page", "buyer-page", "seller-page", "ask-page", "widget", "wordpress_home_value_page", "wordpress_listing_buyer", "wordpress_rental_to_homeownership"]
+    };
+    function code(key, value) {
+      if (typeof value !== "string" || value.length > 120) return "";
+      var normalized = value.trim().toLowerCase();
+      return allowed[key].indexOf(normalized) !== -1 ? normalized : "";
+    }
+    function publicPage(value) {
+      if (typeof value !== "string" || value.length > 4096 || value.indexOf("\\") !== -1 || Array.from(value).some(function (c) { return c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127; })) return "";
+      try {
+        var url = new URL(value);
+        if (["https://www.ourtownproperties.com", "https://ourtownproperties.com"].indexOf(url.origin) === -1) return "";
+        var paths = ["/", "/home-value/", "/how-much-is-your-home-worth/", "/ask-mike/", "/ask-magic-mike/", "/property-search/", "/we-buy-homes/", "/we-buy-houses/", "/rentals/"];
+        var path = paths.find(function (p) { return p.replace(/\/$/, "") === url.pathname.replace(/\/$/, ""); });
+        return path ? url.origin + path : "";
+      } catch { return ""; }
+    }
+    var base = originFromScript();
+    // Never send parent context to an arbitrary baseUrl supplied by the page.
+    try {
+      var destination = new URL(base);
+      if (destination.protocol !== "https:" && !(destination.protocol === "http:" && ["localhost", "127.0.0.1"].indexOf(destination.hostname) !== -1)) return "";
+    } catch { return ""; }
+    var params = new URLSearchParams();
+    ["source", "medium", "campaign", "placement"].forEach(function (key) {
+      var value = code(key, config[key] || defaultConfig[key]);
+      if (value) params.set(key, value);
     });
+    var placement = code("placement", config.placement_id || config.placement || defaultConfig.placement_id);
+    if (placement) params.set("placement_id", placement);
+    var parent = publicPage(window.location.href);
+    var referrer = publicPage(document.referrer);
+    if (parent) { params.set("parent_url", parent); params.set("embed_host", new URL(parent).hostname); }
+    if (referrer) params.set("referrer", referrer);
     return base + "/widget/v1?" + params.toString();
   }
 
@@ -116,6 +134,7 @@
 
     var frame = document.createElement("iframe");
     frame.title = "Ask Magic Mike widget";
+    frame.referrerPolicy = "no-referrer";
     frame.src = buildWidgetUrl(config);
     frame.style.width = "100%";
     frame.style.height = "100%";

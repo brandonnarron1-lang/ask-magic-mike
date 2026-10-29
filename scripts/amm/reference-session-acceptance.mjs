@@ -69,6 +69,9 @@ try {
   // Schema migrations include a historical brokerage directory seed. This
   // disposable acceptance venue must expose synthetic identities only.
   psql("UPDATE agents SET name='SYNTHETIC DIRECTORY ' || id::text,email=id::text || '@example.test',phone=NULL,notification_phone=NULL; ");
+  // The manual assignment UI requires a finite available capacity. Its zero
+  // fixture default is not an eligible human selection. No real roster data.
+  if (webAcquisition) psql("UPDATE agents SET max_daily_leads=100,current_load=0 WHERE id='00000000-0000-4000-8000-000000009901';");
   const identity = JSON.parse(psql("SELECT json_build_object('database',current_database(),'role',current_user,'dataDirectory',current_setting('data_directory'),'listenAddresses',current_setting('listen_addresses'),'port',current_setting('port'),'startedAt',pg_postmaster_start_time(),'leadsBeforeFixtures',(SELECT count(*) FROM leads),'nonSyntheticDirectory',(SELECT count(*) FROM agents WHERE email NOT LIKE '%@example.test'))"));
   const expectedListen = process.env.AMM_QA_NATIVE_POSTGRES_TEST === "1" ? "127.0.0.1" : "*";
   // Docker listens inside its owned container; startDatabase separately verifies
@@ -139,7 +142,7 @@ try {
     AMM_E2E_FIXTURE_PASSWORD: password, AMM_E2E_BUILT: process.env.AMM_E2E_BUILT === "0" ? "0" : "1", AMM_E2E_PORT: String(port),
     VERCEL_ENV: "development", DATABASE_URL: connection, BETTER_AUTH_URL: origin,
     BETTER_AUTH_SECRET: randomBytes(32).toString("hex"), LEAD_CENTER_RBAC_ENABLED: "true",
-    NEXT_PUBLIC_SITE_URL: origin, LEAD_ALLOCATION_ENABLED: "true", LEAD_ALLOCATION_SENDS_ENABLED: "false", LEAD_ALLOCATION_DUE_ENABLED: "false",
+    NEXT_PUBLIC_SITE_URL: origin, LEAD_ALLOCATION_ENABLED: webAcquisition ? "false" : "true", LEAD_ALLOCATION_SENDS_ENABLED: "false", LEAD_ALLOCATION_DUE_ENABLED: "false",
     LEAD_ALLOCATION_COMMAND_SECRET: commandSecret, EMAIL_ENABLED: "false", EMAIL_PROVIDER: "console",
     CUSTOMER_EMAIL_ENABLED: "false", CUSTOMER_SMS_ENABLED: "false", AGENT_SMS_NOTIFICATIONS_ENABLED: "false",
     AGENT_EMAIL_NOTIFICATIONS_ENABLED: "false", LEAD_NOTIFICATION_ENABLED: "false", WEB_PUSH_ENABLED: "false",

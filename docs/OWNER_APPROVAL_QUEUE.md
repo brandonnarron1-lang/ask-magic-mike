@@ -1,5 +1,23 @@
 # Owner Approval Queue
 
+## Home Value lead loop — October 29 review boundary
+
+One focused branch, `codex/home-value-lead-loop-20261029`, addresses attribution
+minimization and deliberate per-inquiry supervisor resolution. No schema,
+dependency, recipient/provider, live allocation or Production configuration change
+is intended. Vercel Git configuration changes only to disable this branch's
+automatic deployment; this is not a zero-configuration diff. Existing hosted
+checks remain mandatory. Review permission is not Production release permission.
+
+Use the final source seal and exact results under the private
+`.amm-run/home-value-lead-loop-20261029/` execution register. A single consolidated
+packet must include final head/tree/base/diff, hosted and immutable protected
+Preview results or named blockers, zero-cost/isolation facts, read-only historical
+replay compatibility, WordPress backup/source gap, and compatible recovery.
+Do not request Production approval before required protected evidence is valid.
+No new remote venue, WordPress write, send or consumer test is silently included.
+The approved cleaner-copy operation remains separate and is not executed here.
+
 ## Post-293 operational continuation — 2026-10-09
 
 Resolve current acceptance with `pnpm release:authority:resolve` under

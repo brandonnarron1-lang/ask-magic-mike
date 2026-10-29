@@ -1,5 +1,16 @@
 # Canonical Asset Manifest
 
+## October 29 reuse boundary
+
+No asset generation, public URL replacement, paid tool or deletion belongs to
+the Home Value lead-loop repair. Keep current approved portrait/logo, the three
+offer drafts, 20261013/20261021 share kit, canonical form/widget/legacy URLs and
+operational evidence. The five-file October 29 recovery ZIP is dated private
+handoff evidence, not public content or a new authority stack. Native, historical
+Supabase/WP-local-CRM/agent-install, MLS/AVM, nurture and recruiting expansions are
+out of active scope; their files, rollback readers and records are not deleted.
+Git-blob redundancy is not measured hosting savings and supplies no deletion gate.
+
 Refreshed 2026-09-01 from authenticated Production, GitHub, Vercel, Neon, and
 WordPress evidence. Working systems outrank historical packets.
 

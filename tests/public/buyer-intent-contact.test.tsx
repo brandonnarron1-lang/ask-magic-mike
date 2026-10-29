@@ -88,7 +88,7 @@ describe("buyer-family native review and durable receipt integrity (intercepted 
     } });
   });
 
-  it("retains caller-supplied parent identity/title instead of the iframe title with storage denied", async () => {
+  it("retains registered placement but neither arbitrary parent identity/title nor IDs with storage denied", async () => {
     window.history.replaceState({}, "", "/widget/v1"); document.title = "SYNTHETIC IFRAME TITLE";
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new DOMException("Blocked", "SecurityError"); });
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new DOMException("Blocked", "SecurityError"); });
@@ -96,16 +96,20 @@ describe("buyer-family native review and durable receipt integrity (intercepted 
     transport(); render(<BuyerIntentSection surface="widget" attributionOverrides={overrides} />);
     fillBuyer(); review(); send(); await screen.findByText("Your request is in.");
     const payload = JSON.parse(calls[0].body);
-    expect(payload.attribution).toMatchObject({ ...overrides, first_touch: overrides, last_touch: overrides });
-    expect(payload.attribution.page_title).not.toBe(document.title);
+    const safe = { source: "ourtownproperties", medium: "owned_media", placement: "owned-seller-buyer-launch" };
+    expect(payload.attribution).toMatchObject({ ...safe, first_touch: safe, last_touch: safe });
+    for (const key of ["parent_url", "embed_host", "page_title", "property_id"]) {
+      expect(payload.attribution[key]).toBeUndefined(); expect(payload.attribution.first_touch[key]).toBeUndefined(); expect(payload.attribution.last_touch[key]).toBeUndefined();
+    }
     expect(payload.buyer_interest).toMatchObject({ kind: "specific", properties: [{ address_text: "101 Synthetic Fixture Road, Wilson NC" }] });
     expect(payload).not.toHaveProperty("property_id"); // Attribution is not submitted property identity.
   });
 
   it("preserves standalone URL attribution when no override prop is supplied", async () => {
-    window.history.replaceState({}, "", "/buy?utm_source=facebook&utm_medium=organic_social&utm_campaign=launch&utm_content=buyer_feed&placement=buyer_sidebar&property_id=synthetic-source-property");
+    window.history.replaceState({}, "", "/buy?utm_source=facebook&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_facebook&placement=buyer-page&property_id=synthetic-source-property");
     transport(); render(<BuyerIntentSection />); fillBuyer(); review(); send(); await screen.findByText("Your request is in.");
-    expect(JSON.parse(calls[0].body).attribution).toMatchObject({ source: "facebook", medium: "organic_social", campaign: "launch", content: "buyer_feed", placement: "buyer_sidebar", property_id: "synthetic-source-property" });
+    expect(JSON.parse(calls[0].body).attribution).toMatchObject({ source: "facebook", medium: "organic_social", campaign: "amm_seller_buyer_launch_2026", content: "buyer_facebook", placement: "buyer-page" });
+    expect(JSON.parse(calls[0].body).attribution.property_id).toBeUndefined();
   });
 
   it("explains either-or contact and focuses a recoverable inline error", async () => {
@@ -147,7 +151,8 @@ describe("buyer-family native review and durable receipt integrity (intercepted 
     fireEvent.change(screen.getByLabelText("Email"), { target: { value: EMAIL } });
     review(); send("Register for Open House");
     await screen.findByRole("heading", { name: "Your request is in." });
-    expect(JSON.parse(calls[0].body)).toMatchObject({ funnel_type: "open_house", lead_type: "open_house", lead_source_surface: "open_house", target_geography: "Synthetic Open House", property_id: "synthetic-property-17", attribution: { placement: "open-house-registration", placement_id: "open-house:synthetic-property-17", property_id: "synthetic-property-17" } });
+    expect(JSON.parse(calls[0].body)).toMatchObject({ funnel_type: "open_house", lead_type: "open_house", lead_source_surface: "open_house", target_geography: "Synthetic Open House", property_id: "synthetic-property-17", attribution: { placement: "open-house-registration", placement_id: "open-house" } });
+    expect(JSON.parse(calls[0].body).attribution.property_id).toBeUndefined();
     expect(screen.getByRole("button", { name: "Request a conversation" })).toBeVisible();
   });
 

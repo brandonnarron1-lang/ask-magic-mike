@@ -2,6 +2,17 @@
 
 <!-- amm-current-operations-v1 -->
 
+### October 29 bounded Home Value pilot boundary
+
+Preserve the existing page-3952 tagged canonical link and installed `/embed/ask`;
+script-loader target remains `/widget/v1`. No new publication, paid traffic,
+allocation or consumer automation is activated by the current repair. Inspect
+the installed custom WordPress handler and capture a page/revision/builder backup
+before any separate overlap repair. Do not infer its server behavior from the
+repository's CTA Connector or signed Gravity Forms Bridge. App review, exact-source
+Production approval, reversible WordPress publication and genuine operator/device
+acceptance are distinct. No new live inquiry or internal send occurs by default.
+
 Updated 2026-09-01. Ask Magic Mike is already live. This runbook governs
 incremental application releases and controlled owned-traffic activation. It
 uses stable policy from `config/release-authority-policy.json` and resolves

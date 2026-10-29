@@ -524,7 +524,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
       timeline: "ASAP",
       widget_session_id: SESSION_ID,
       attribution: {
-        source: "synthetic",
+        source: "internal_qa",
         medium: "cpc",
         campaign: "infra-02",
         landing_page: "/home-value",
@@ -537,7 +537,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
     expect(calls[0].body).toMatchObject({
       p_session: {
         id: SESSION_ID,
-        utm_source: "synthetic",
+        utm_source: "internal_qa",
         utm_medium: "cpc",
       },
       p_lead: {
@@ -549,7 +549,7 @@ describe("POST /api/leads atomic lifecycle command", () => {
         lead_grade: "A",
       },
       p_attribution: {
-        utm_source: "synthetic",
+        utm_source: "internal_qa",
         utm_medium: "cpc",
         is_paid: true,
       },
