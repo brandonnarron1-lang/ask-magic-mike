@@ -116,8 +116,8 @@ test("Real Home Value synthetic-QA UI rejects unmarked contact without POST, the
     if (new URL(request.url()).pathname === "/api/leads" && request.method() === "POST") leadPosts += 1;
   });
   await isolatedPublicOrigin(owner);
-  const source="synthetic_conversion_qa_ui";
-  await owner.goto(`/home-value?utm_source=${source}&utm_medium=owned_media&utm_campaign=synthetic_conversion_only&utm_content=wordpress_home_value_page`);
+  const source="ourtownproperties";
+  await owner.goto(`/home-value?utm_source=${source}&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page`);
   await expect(owner.locator('.amm-home-value [data-intake-mode="synthetic_qa"]')).toBeVisible();
   const email=`${randomUUID()}@example.test`;
   await owner.getByLabel("Property address").fill("2 Synthetic Test Street, Wilson, NC");
@@ -164,7 +164,7 @@ test("Real Home Value synthetic-QA UI rejects unmarked contact without POST, the
 test("Ordinary synthetic Home Value root HTTP capture reaches Mike-first owner, genuine appointment HTTP, manual UI and scoped reporting (not consumer intake UI proof)",async()=>{
   test.setTimeout(120_000);
   const owner=await contexts.owner.newPage();
-  const source="synthetic_conversion_capture";
+  const source="ourtownproperties";
   const email=`${randomUUID()}@example.test`;
   const key=randomUUID();
   // Preserve ordinary lifecycle semantics without clearing a QA record or
@@ -181,7 +181,7 @@ test("Ordinary synthetic Home Value root HTTP capture reaches Mike-first owner, 
       consent:true,consent_email:true,consent_call:false,
       consent_language_version:LEAD_CONSENT_LANGUAGE_VERSION,consent_language_text:LEAD_CONSENT_LANGUAGE_TEXT,
       consent_source:"home_value_page:home-value",
-      attribution:{source,medium:"owned_media",campaign:"synthetic_conversion_only",content:"wordpress_home_value_page"},
+      attribution:{source,medium:"owned_media",campaign:"amm_owned_demand_2026",content:"wordpress_home_value_page"},
     },
   });
   const body=await intake.json();
@@ -191,7 +191,8 @@ test("Ordinary synthetic Home Value root HTTP capture reaches Mike-first owner, 
   expect((await sql("SELECT email,is_test,communication_suppressed FROM leads WHERE id=$1",[leadId]))[0])
     .toMatchObject({email,is_test:false,communication_suppressed:false});
   expect((await sql("SELECT assigned_agent_id FROM leads WHERE id=$1",[leadId]))[0].assigned_agent_id).toBe(fixture.agents.owner);
-  expect((await sql("SELECT utm_source,utm_medium FROM source_attribution WHERE lead_id=$1",[leadId]))[0]).toMatchObject({utm_source:source,utm_medium:"owned_media"});
+  expect((await sql("SELECT utm_source,utm_medium,utm_campaign,utm_content FROM source_attribution WHERE lead_id=$1",[leadId]))[0])
+    .toMatchObject({utm_source:source,utm_medium:"owned_media",utm_campaign:"amm_owned_demand_2026",utm_content:"wordpress_home_value_page"});
   expect((await sql("SELECT count(*)::int AS n FROM consents WHERE lead_id=$1",[leadId]))[0].n).toBe(3);
   const appointmentBody={lead_id:leadId,session_id:body.session_id,request_surface:"home_value_page"};
   const requested=await owner.request.post("/api/appointments/request",{headers:{Origin:"https://www.askmagicmike.com"},data:appointmentBody});
@@ -229,11 +230,11 @@ test("Marked seller UI persists without consumer CTA; distinct ordinary seller H
   test.setTimeout(120_000);
   const owner = await contexts.owner.newPage();
   await isolatedPublicOrigin(owner);
-  const source = "synthetic_conversion_seller_ui";
+  const source = "ourtownproperties";
   const qaEmail = `${randomUUID()}@example.test`;
   // Preserve the real synthetic-QA capability. Do not force LIVE, remove the
   // guard, clear a test flag, inject a component/receipt or fabricate delivery.
-  await owner.goto(`/sell?utm_source=${source}&utm_medium=owned_media&utm_campaign=synthetic_conversion_only&utm_content=synthetic_seller_appointment_ui`);
+  await owner.goto(`/sell?utm_source=${source}&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes`);
   await owner.getByLabel("Property address", { exact: true }).fill("3 Synthetic Test Street, Wilson, NC");
   await owner.getByLabel("Name optional", { exact: true }).fill("INTERNAL QA — DO NOT CONTACT — SYNTHETIC SELLER UI");
   await owner.getByLabel("Phone required", { exact: true }).fill("+12025550198");
@@ -262,14 +263,14 @@ test("Marked seller UI persists without consumer CTA; distinct ordinary seller H
     address:"4 Synthetic Test Street, Wilson, NC",timeline:timelineOptions[1],widget_session_id:key,idempotency_key:key,
     consent:true,consent_email:true,consent_call:true,consent_sms:false,
     consent_language_version:LEAD_CONSENT_LANGUAGE_VERSION,consent_language_text:LEAD_CONSENT_LANGUAGE_TEXT,consent_source:"seller_page:seller-intake",
-    attribution:{source,medium:"owned_media",campaign:"synthetic_conversion_only",content:"synthetic_seller_appointment_http"},
+    attribution:{source,medium:"owned_media",campaign:"amm_owned_demand_2026",content:"wordpress_we_buy_homes"},
   }});
   const body=await ordinary.json();expect(ordinary.status(),JSON.stringify(body)).toBe(200);expect(body.session_id).toBe(key);
   const leadId=body.lead_id;expect(leadId).toBeTruthy();
   expect((await sql("SELECT email,is_test,communication_suppressed,assigned_agent_id FROM leads WHERE id=$1", [leadId]))[0])
     .toMatchObject({ email, is_test: false, communication_suppressed: false, assigned_agent_id: fixture.agents.owner });
-  expect((await sql("SELECT utm_source,utm_medium FROM source_attribution WHERE lead_id=$1", [leadId]))[0])
-    .toMatchObject({ utm_source: source, utm_medium: "owned_media" });
+  expect((await sql("SELECT utm_source,utm_medium,utm_campaign,utm_content FROM source_attribution WHERE lead_id=$1", [leadId]))[0])
+    .toMatchObject({ utm_source: source, utm_medium: "owned_media", utm_campaign:"amm_owned_demand_2026",utm_content:"wordpress_we_buy_homes" });
   expect((await sql("SELECT count(*)::int AS n FROM consents WHERE lead_id=$1", [leadId]))[0].n).toBe(3);
   const appointmentPayload={lead_id:leadId,session_id:body.session_id,request_surface:"seller_page"};
   const requested=await owner.request.post("/api/appointments/request",{headers:{Origin:"https://www.askmagicmike.com"},data:appointmentPayload});
