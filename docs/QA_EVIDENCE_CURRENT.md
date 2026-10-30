@@ -1,5 +1,31 @@
 # Current QA Evidence
 
+## October 29 Home Value lead-loop candidate
+
+The exact command, UTC start/end, local head/tree/dirty state and isolated venue
+for each new run are private in `.amm-run/home-value-lead-loop-20261029/`.
+Initial attribution minimization tests reproduced four failures; the corrections
+pass those assertions. Broader contract fixtures now use registered codes and
+assert omitted arbitrary URLs/titles/click IDs rather than preserving unsafe
+input. No test is removed or skipped to manufacture a pass. Subsequent full
+gate, SQL and compiled-session verdicts must be read from their final-source
+producer records, not this paragraph or inherited PR #314 totals.
+
+SQL uses fresh owned PostgreSQL 17 initdb/container processes and synthetic-only
+directory/lead data, not an app DATABASE_URL. Provider transport is intercepted
+or disabled. Built acceptance uses real Better Auth and current owner/role
+queries; browser emulation is not iPhone/Safari/Mail acceptance. The retained
+pre-minimization v4/general-question readers are tested separately from new
+capture and may not write historical URLs back. Source-review findings and
+failed test setup/build attempts remain archived, never relabeled transient.
+
+The first new browser attempt correctly retained the already committed Home
+Value receipt when its test tried reusing the same tab. The repeat-visit test
+now uses a separate genuine browser visit without deleting the saved key. That
+test correction is not an application or hydration repair. Protected hosted
+acceptance, genuine traffic/delivery/mailbox/human outcomes and physical-device
+evidence remain separate requirements; skipped/not-run cases are not passes.
+
 Audit date: 2026-08-14. No live lead, email, SMS, push notification, database
 mutation, or customer contact was created during this audit.
 

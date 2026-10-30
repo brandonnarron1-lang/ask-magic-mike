@@ -7,7 +7,7 @@ vi.mock("../../app/lib/analytics", () => ({ trackEvent: vi.fn() }));
 vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeReadiness: () => ({ mode: "live", recheck: vi.fn() }), usePublicIntakeCapability: () => "live" }));
 
 beforeEach(() => {
-  window.history.replaceState({}, "", "/widget/v1?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=launch&utm_content=buyer_widget&parent_url=https%3A%2F%2Fwww.ourtownproperties.com%2Fsynthetic%2F");
+  window.history.replaceState({}, "", "/widget/v1?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_listing_buyer&parent_url=https%3A%2F%2Fwww.ourtownproperties.com%2Fsynthetic%2F");
   Object.defineProperty(window, "matchMedia", { configurable: true, value: () => ({ matches: false, addListener() {}, removeListener() {} }) });
   vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => { throw new DOMException("Blocked", "SecurityError"); });
   vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new DOMException("Blocked", "SecurityError"); });
@@ -65,7 +65,7 @@ describe("additive buyer path in the actual versioned widget", () => {
       expect(captures).toHaveLength(0);
       await user.click(screen.getByRole("button", { name: "Request Buyer Plan" }));
       await waitFor(() => expect(captures).toHaveLength(1));
-      expect(captures[0]).toMatchObject({ funnel_type: "buyer", lead_source_surface: "widget", buyer_interest: { version: 1, kind }, consent: false, attribution: { source: "ourtownproperties", medium: "owned_media", content: "buyer_widget" } });
+      expect(captures[0]).toMatchObject({ funnel_type: "buyer", lead_source_surface: "widget", buyer_interest: { version: 1, kind }, consent: false, attribution: { source: "ourtownproperties", medium: "owned_media", content: "wordpress_listing_buyer" } });
       expect(captures[0].target_geography).toBeUndefined();
       expect(await screen.findByText("Your request is in.")).toBeVisible();
       expect(screen.queryByRole("button", { name: /appointment/i })).not.toBeInTheDocument();

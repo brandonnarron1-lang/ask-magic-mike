@@ -104,7 +104,10 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("automatic QA evidence:
     await adapter.enrichLeadRecord({ leadId: qaId, leadPatch: serverLead, attributionPatch: {}, consents: ["email", "call", "sms"].map((type) => ({ lead_id: qaId, consent_type: type, granted: serverLead[`consent_${type}`], language_version: LEAD_CONSENT_LANGUAGE_VERSION, language_text: LEAD_CONSENT_LANGUAGE_TEXT })) });
     expect(psql(`SELECT count(*) FROM consents WHERE lead_id=${literal(qaId)};`)).toBe("3");
     const attr = (await localQuery.query("SELECT * FROM source_attribution WHERE lead_id=$1::uuid", [qaId]))[0];
-    expect(attr).toMatchObject({ ...owned, referrer_type: "direct" });
+    // A supplied header can retain its minimized page projection, but missing
+    // client classification is unknown evidence, never measured direct traffic.
+    expect(attr).toMatchObject({ ...owned, referrer_type: null,
+      referrer_url: "https://www.ourtownproperties.com/how-much-is-your-home-worth/" });
     expect(attr.placement_id).toBeNull();
     expect((await localQuery.query("SELECT score,source_detail FROM leads WHERE id=$1::uuid", [qaId]))[0]).toMatchObject({ score: serverLead.score, source_detail: serverLead.source_detail });
     expect(provider.send).not.toHaveBeenCalled();

@@ -1,5 +1,7 @@
 import type { Attribution } from "@/types/domain.types";
 import { parseAttribution } from "./utm-parser";
+import { classifyReferrer } from "./referrer-classifier";
+import { publicAttributionCode, publicAttributionUrl } from "../../../app/lib/attributionPrivacy";
 
 const STORAGE_KEY = "amm_attribution";
 
@@ -42,11 +44,9 @@ export function captureAttribution(): StoredAttribution | null {
   const existing = readAttribution();
   if (existing && !hasFreshUtm) return existing;
 
-  const parsed = parseAttribution(
-    url.searchParams,
-    document.referrer || "",
-    url.pathname + url.search
-  );
+  const params = new URLSearchParams();
+  for (const key of UTM_KEYS) { const value = publicAttributionCode(key.slice(4), url.searchParams.get(key)); if (value) params.set(key, value); }
+  const parsed = parseAttribution(params, publicAttributionUrl(document.referrer) || "", publicAttributionUrl(url.pathname, true) || "");
 
   const stored: StoredAttribution = {
     utmSource:    parsed.utmSource,
@@ -55,9 +55,11 @@ export function captureAttribution(): StoredAttribution | null {
     utmContent:   parsed.utmContent,
     utmTerm:      parsed.utmTerm,
     referrerUrl:  parsed.referrerUrl,
-    referrerType: parsed.referrerType,
-    landingPath:  url.pathname,
-    landingUrl:   url.href,
+    // Coarse client-reported class can survive removal of a private URL. Its
+    // absence from the URL projection is not evidence of a direct visit.
+    referrerType: classifyReferrer(document.referrer || "", parsed.utmMedium),
+    landingPath:  publicAttributionUrl(url.pathname, true) || "",
+    landingUrl:   publicAttributionUrl(url.href) || "",
     firstSeenAt:  existing?.firstSeenAt ?? new Date().toISOString(),
   };
 
@@ -75,7 +77,23 @@ export function readAttribution(): StoredAttribution | null {
   try {
     const raw = window.sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as StoredAttribution;
+    const value = JSON.parse(raw) as StoredAttribution;
+    if (!value || typeof value !== "object" || typeof value.firstSeenAt !== "string" || !/^\d{4}-\d{2}-\d{2}T[\d:.]+Z$/.test(value.firstSeenAt) || !Number.isFinite(Date.parse(value.firstSeenAt)) || value.firstSeenAt.length > 30) return null;
+    if (!["direct", "organic", "paid", "referral", "social", "email"].includes(value.referrerType)) return null;
+    const safe: StoredAttribution = {
+      utmSource: publicAttributionCode("source", value.utmSource) ?? null,
+      utmMedium: publicAttributionCode("medium", value.utmMedium) ?? null,
+      utmCampaign: publicAttributionCode("campaign", value.utmCampaign) ?? null,
+      utmContent: publicAttributionCode("content", value.utmContent) ?? null,
+      utmTerm: null,
+      referrerUrl: publicAttributionUrl(value.referrerUrl) ?? null,
+      referrerType: value.referrerType,
+      landingPath: publicAttributionUrl(value.landingPath, true) || "",
+      landingUrl: publicAttributionUrl(value.landingUrl) || "",
+      firstSeenAt: new Date(value.firstSeenAt).toISOString(),
+    };
+    try { window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(safe)); } catch { /* still use the minimized in-memory record */ }
+    return safe;
   } catch {
     return null;
   }
@@ -111,8 +129,9 @@ export function appendUtmsToParams(
     utm_term:     attribution.utmTerm,
   };
   for (const key of UTM_KEYS) {
-    const value = map[key];
-    if (value && !params.has(key)) params.set(key, value);
+    const value = publicAttributionCode(key.slice(4), params.get(key) || map[key]);
+    params.delete(key);
+    if (value) params.set(key, value);
   }
   return params;
 }

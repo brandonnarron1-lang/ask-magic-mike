@@ -57,7 +57,7 @@ afterEach(() => {
 describe("Black Diamond first-touch and last-touch attribution", () => {
   it("keeps the first touch immutable while a fresh tagged visit becomes the last touch", () => {
     setPage(
-      "/home-value?utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=owned_site&utm_content=home_value",
+      "/home-value?utm_source=ourtownproperties&utm_medium=homepage_cta&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page",
       "Home Value | Ask Magic Mike",
       "https://www.ourtownproperties.com/",
     );
@@ -66,14 +66,13 @@ describe("Black Diamond first-touch and last-touch attribution", () => {
     expect(first.first_touch).toMatchObject({
       source: "ourtownproperties",
       medium: "homepage_cta",
-      campaign: "owned_site",
-      content: "home_value",
-      current_path: expect.stringContaining("/home-value?"),
-      page_title: "Home Value | Ask Magic Mike",
+      campaign: "amm_owned_demand_2026",
+      content: "wordpress_home_value_page",
+      current_path: "/home-value",
     });
 
     setPage(
-      "/buy?utm_source=facebook&utm_medium=social_organic&utm_campaign=buyer_plan&utm_content=buyer_post",
+      "/buy?utm_source=facebook&utm_medium=social_organic&utm_campaign=amm_seller_buyer_launch_2026&utm_content=buyer_facebook",
       "Buyer Plan | Ask Magic Mike",
       "https://www.askmagicmike.com/home-value",
     );
@@ -82,26 +81,24 @@ describe("Black Diamond first-touch and last-touch attribution", () => {
     expect(last).toMatchObject({
       source: "facebook",
       medium: "social_organic",
-      campaign: "buyer_plan",
-      content: "buyer_post",
-      current_path: expect.stringContaining("/buy?"),
-      page_title: "Buyer Plan | Ask Magic Mike",
+      campaign: "amm_seller_buyer_launch_2026",
+      content: "buyer_facebook",
+      current_path: expect.stringContaining("/buy"),
     });
     expect(last.first_touch).toEqual(first.first_touch);
     expect(last.last_touch).toMatchObject({
       source: "facebook",
       medium: "social_organic",
-      campaign: "buyer_plan",
-      content: "buyer_post",
-      landing_page: expect.stringContaining("/buy?"),
-      current_path: expect.stringContaining("/buy?"),
-      page_title: "Buyer Plan | Ask Magic Mike",
+      campaign: "amm_seller_buyer_launch_2026",
+      content: "buyer_facebook",
+      landing_page: expect.stringContaining("/buy"),
+      current_path: expect.stringContaining("/buy"),
     });
   });
 
   it("retains the acquired campaign on an untagged internal step while updating submission context", () => {
     setPage(
-      "/rent?utm_source=google_business_profile&utm_medium=organic&utm_campaign=renter_plan",
+      "/rent?utm_source=google_business_profile&utm_medium=organic_local&utm_campaign=amm_owned_demand_2026",
       "Renter Plan | Ask Magic Mike",
     );
     const first = readAttribution();
@@ -110,20 +107,19 @@ describe("Black Diamond first-touch and last-touch attribution", () => {
     const next = readAttribution();
 
     expect(next.source).toBe("google_business_profile");
-    expect(next.medium).toBe("organic");
-    expect(next.campaign).toBe("renter_plan");
+    expect(next.medium).toBe("organic_local");
+    expect(next.campaign).toBe("amm_owned_demand_2026");
     expect(next.first_touch).toEqual(first.first_touch);
     expect(next.last_touch).toMatchObject({
       source: "google_business_profile",
       current_path: "/ask",
       landing_page: "https://www.askmagicmike.com/ask",
-      page_title: "Ask Mike | Ask Magic Mike",
     });
   });
 
   it("fails open when session storage is unavailable", () => {
     setPage(
-      "/sell?utm_source=direct_mail&utm_medium=qr&utm_campaign=seller_review",
+      "/sell?utm_source=qr&utm_medium=print&utm_campaign=local_review",
       "Seller Review | Ask Magic Mike",
     );
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
@@ -135,9 +131,9 @@ describe("Black Diamond first-touch and last-touch attribution", () => {
 
     expect(() => readAttribution()).not.toThrow();
     expect(readAttribution()).toMatchObject({
-      source: "direct_mail",
-      medium: "qr",
-      campaign: "seller_review",
+      source: "qr",
+      medium: "print",
+      campaign: "local_review",
     });
   });
 });

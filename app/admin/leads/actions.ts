@@ -14,7 +14,8 @@ import {
   transitionAppointment,
   updateFollowupTask,
 } from "../../lib/adminAppointmentFollowupOps";
-import { requireLeadCenterLeadPermission } from "../../../src/lib/admin/rbac-session";
+import { requireLeadCenterLeadPermission, requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
+import { reviewRepeatInquiry } from "../../lib/repeatInquiryReview";
 import { hasLeadCenterPermission } from "../../../src/lib/admin/rbac-policy";
 import type { ConversionMutationResult } from "../../components/admin/ConversionMutationForm";
 import { resolveConversionDateTime } from "../../lib/conversionTime";
@@ -70,6 +71,15 @@ function resolveFormTimes(formData: FormData, names: string[]):
     const code = error instanceof Error ? error.message : "invalid_conversion_time";
     return { ok: false, error: ["invalid_appointment_timezone", "invalid_conversion_time", "ambiguous_conversion_time", "nonexistent_conversion_time"].includes(code) ? code : "invalid_conversion_time" };
   }
+}
+
+export async function reviewRepeatInquiryAction(formData: FormData): Promise<ConversionMutationResult> {
+  const leadId = String(formData.get("lead_id") || "");
+  const principal = await requireLeadCenterPermission("lead:assign", `/admin/leads/${leadId}`);
+  if (!principal) return { ok: false, error: "rbac_not_enabled" };
+  const result = await reviewRepeatInquiry(leadId, principal, formData.get("confirm") === "yes", { agentId: String(formData.get("expected_agent_id") || ""), assignedAt: String(formData.get("expected_assigned_at") || "") });
+  refreshConversionViews(leadId, result);
+  return result;
 }
 
 export async function updateLeadStatusAction(formData: FormData, responseMode: "inline"): Promise<ConversionMutationResult>;

@@ -6,6 +6,34 @@ the release authority, not this guide.
 
 This guide covers daily operation of the Ask Magic Mike platform for brokers and administrators.
 
+## Home Value repeat-inquiry review — October 29 candidate, not yet deployed
+
+The protected detail identifies a separately captured request held at the legacy
+duplicate stage. Earlier ownership allows reading, not assignment, contact or
+mutation. A supervisor first uses the existing **Allocation** queue to make a
+deliberate direct assignment to a genuinely eligible existing human. Return to
+the inquiry, verify its facts/relationship/representation constraints, and use
+**Review as separate inquiry**. The action compares the displayed assignment and
+time plus current administrator role, QA/suppression and lifecycle under a lock.
+A changed assignment or revoked authority stays held. Historical contact links,
+original inquiry, source, consent, prior alerts and audits remain intact.
+
+This review is not contact permission, a first response, an appointment, a broker
+policy activation or proof of roster readiness. Consent is inquiry-specific.
+Phone/email remain selectable for authorized readers while actions can be held.
+Refresh after a conflict; do not infer success from an opened composer or a
+checkbox. Only an actual later result belongs in interaction/outcome records.
+
+Proposed pilot operating targets, **not activated**: first attempt within 15
+staffed minutes, acknowledgment escalation to Brandon after 15 staffed minutes,
+named authorized backup if no attempt by 30, and opening/closing queue review.
+Actual hours, capacity, backup and broker approval must be established first;
+reconcile existing two/five-minute SQL deadlines before any policy change. No
+consumer response-time promise is made. Use existing Today/lead/report views;
+distinguish inquiries/contacts/envelopes, per-operator queued/accepted/delivered
+states, actual attempts/two-way response, requested/confirmed appointments and
+outcomes. Unknown traffic/attribution stays unknown; exclude tests/bots/retries.
+
 ## Three-offer review queue — October 28 source candidate
 
 This section describes a review candidate, not a deployment or publication

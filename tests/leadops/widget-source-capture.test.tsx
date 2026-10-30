@@ -14,11 +14,11 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); window.history.replaceState({}, "", "/"); });
 
 describe("actual widget components retain explicit URL claims without third-party storage", () => {
-  for (const placement of ["synthetic-home", "synthetic-rentals"]) {
+  for (const placement of ["wordpress_home_value_page", "wordpress_rental_to_homeownership"]) {
     for (const tab of ["value", "ask", "sell"] as const) {
       it(`${placement}: ${tab} submission preserves independent surface/source/medium/parent/placement`, async () => {
-        const parent = `https://parent.example.test/${placement}/`;
-        const params = new URLSearchParams({ utm_source: "synthetic-parent", utm_medium: "owned_media", utm_campaign: "website_widget", utm_content: placement, placement, parent_url: parent });
+        const parent = placement === "wordpress_home_value_page" ? "https://www.ourtownproperties.com/home-value/" : "https://www.ourtownproperties.com/rentals/";
+        const params = new URLSearchParams({ utm_source: "ourtownproperties", utm_medium: "owned_media", utm_campaign: "website_widget", utm_content: placement, placement, parent_url: parent });
         window.history.replaceState({}, "", `/widget/v1?${params}`);
         const captures: Record<string, unknown>[] = [];
         vi.stubGlobal("fetch", vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -59,7 +59,7 @@ describe("actual widget components retain explicit URL claims without third-part
         // HomeValueFunnel intentionally sends widget; the canonical handler
         // normalizes widget -> home_value. A tab is not a retained tab field.
         expect(captures[0].funnel_type).toBe(tab === "value" ? "widget" : tab === "ask" ? "chat" : "seller");
-        expect(captures[0].attribution).toMatchObject({ source: "synthetic-parent", medium: "owned_media", campaign: "website_widget", content: placement, placement, parent_url: parent, first_touch: { source: "synthetic-parent" }, last_touch: { source: "synthetic-parent" } });
+        expect(captures[0].attribution).toMatchObject({ source: "ourtownproperties", medium: "owned_media", campaign: "website_widget", content: placement, placement, parent_url: parent, first_touch: { source: "ourtownproperties" }, last_touch: { source: "ourtownproperties" } });
       });
     }
   }

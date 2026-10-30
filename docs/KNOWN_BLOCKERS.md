@@ -1,5 +1,26 @@
 # Known Operating Constraints
 
+## October 29 bounded continuation (supersedes stale current-state claims below)
+
+PR #314 acceptance was freshly resolved; its historical gates are consumed.
+The Home Value lead-loop candidate is local/review work, not Production approval.
+Its exact source, commands and failures are recorded privately under
+`.amm-run/home-value-lead-loop-20261029/`. Required hosted/protected acceptance
+must be source-bound; deleted QA databases need not be restored to retain their
+archived evidence. No new remote venue or paid allowance is inferred.
+
+The owner-requested October 27 homepage removal is preserved. Page 3952's direct
+CTA and `/embed/ask` remain separate working paths to preserve. The installed
+custom WordPress `/v1/lead` PHP, forwarding configuration and current builder
+backups are not established by repository Connector/Bridge code or a public
+form. No WordPress publication occurs until its own exact backup/diff gate.
+
+Actual broker-approved roster/coverage/staffed hours and genuine human acceptance
+remain business evidence, not facts manufactured by simulation or a checkbox.
+Intake and existing Mike/Brandon alerts continue independently; new live
+allocation remains OFF. Dated demand/activation assertions below must not be
+carried forward as current measurements.
+
 Current release identity is resolved from authenticated external evidence using
 `pnpm release:authority:resolve`; tracked policy is
 `config/release-authority-policy.json`. Any PR/deployment identifiers below are

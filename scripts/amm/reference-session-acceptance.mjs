@@ -69,6 +69,9 @@ try {
   // Schema migrations include a historical brokerage directory seed. This
   // disposable acceptance venue must expose synthetic identities only.
   psql("UPDATE agents SET name='SYNTHETIC DIRECTORY ' || id::text,email=id::text || '@example.test',phone=NULL,notification_phone=NULL; ");
+  // The manual assignment UI requires a finite available capacity. Its zero
+  // fixture default is not an eligible human selection. No real roster data.
+  if (webAcquisition) psql("UPDATE agents SET max_daily_leads=100,current_load=0 WHERE id='00000000-0000-4000-8000-000000009901';");
   const identity = JSON.parse(psql("SELECT json_build_object('database',current_database(),'role',current_user,'dataDirectory',current_setting('data_directory'),'listenAddresses',current_setting('listen_addresses'),'port',current_setting('port'),'startedAt',pg_postmaster_start_time(),'leadsBeforeFixtures',(SELECT count(*) FROM leads),'nonSyntheticDirectory',(SELECT count(*) FROM agents WHERE email NOT LIKE '%@example.test'))"));
   const expectedListen = process.env.AMM_QA_NATIVE_POSTGRES_TEST === "1" ? "127.0.0.1" : "*";
   // Docker listens inside its owned container; startDatabase separately verifies
@@ -139,7 +142,7 @@ try {
     AMM_E2E_FIXTURE_PASSWORD: password, AMM_E2E_BUILT: process.env.AMM_E2E_BUILT === "0" ? "0" : "1", AMM_E2E_PORT: String(port),
     VERCEL_ENV: "development", DATABASE_URL: connection, BETTER_AUTH_URL: origin,
     BETTER_AUTH_SECRET: randomBytes(32).toString("hex"), LEAD_CENTER_RBAC_ENABLED: "true",
-    NEXT_PUBLIC_SITE_URL: origin, LEAD_ALLOCATION_ENABLED: "true", LEAD_ALLOCATION_SENDS_ENABLED: "false", LEAD_ALLOCATION_DUE_ENABLED: "false",
+    NEXT_PUBLIC_SITE_URL: origin, LEAD_ALLOCATION_ENABLED: webAcquisition ? "false" : "true", LEAD_ALLOCATION_SENDS_ENABLED: "false", LEAD_ALLOCATION_DUE_ENABLED: "false",
     LEAD_ALLOCATION_COMMAND_SECRET: commandSecret, EMAIL_ENABLED: "false", EMAIL_PROVIDER: "console",
     CUSTOMER_EMAIL_ENABLED: "false", CUSTOMER_SMS_ENABLED: "false", AGENT_SMS_NOTIFICATIONS_ENABLED: "false",
     AGENT_EMAIL_NOTIFICATIONS_ENABLED: "false", LEAD_NOTIFICATION_ENABLED: "false", WEB_PUSH_ENABLED: "false",
@@ -150,7 +153,7 @@ try {
   };
   const suite = ncRouting ? "tests/e2e/nc-routing-real-session.spec.ts" : webAcquisition ? "tests/e2e/web-acquisition-real-session.spec.ts" : nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
-  const additionalSuites = webAcquisition ? ["tests/e2e/today-reliability-real-session.spec.ts", "tests/e2e/conversion-readiness-sharing.spec.ts"] : [];
+  const additionalSuites = webAcquisition ? ["tests/e2e/today-reliability-real-session.spec.ts", "tests/e2e/conversion-readiness-sharing.spec.ts", "tests/e2e/widget-preview-flow.spec.ts"] : [];
   child = spawn("pnpm", ["exec", "playwright", "test", suite, ...additionalSuites, ...(artifactOverride ? ["--output",path.join(runDir,"test-results")] : []), ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });
   const counts = JSON.parse(psql(`SELECT json_build_object('leads',count(*),'notifications',(SELECT count(*) FROM lead_notifications),'provider_ids',(SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL),'reservations',(SELECT count(*) FROM lead_allocation_send_reservations)) FROM leads;`));

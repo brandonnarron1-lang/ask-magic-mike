@@ -35,10 +35,10 @@ function fixture(extra: Row = {}): Row {
     idempotency_key: key, widget_session_id: key, attribution: { source: "ourtownproperties", medium: "owned_media", campaign: "synthetic_launch" },
     page_url: "https://www.askmagicmike.com/buy", ...extra };
 }
-async function submit(body: Row) {
+async function submit(body: Row, extraHeaders: Record<string, string> = {}) {
   const { POST } = await import("../../app/api/leads/route"); const start = statements.length;
   const response = await POST(new Request("https://www.askmagicmike.com/api/leads", { method: "POST", headers: {
-    "Content-Type": "application/json", Origin: "https://www.askmagicmike.com", "Idempotency-Key": String(body.idempotency_key) }, body: JSON.stringify(body) }));
+    "Content-Type": "application/json", Origin: "https://www.askmagicmike.com", "Idempotency-Key": String(body.idempotency_key), ...extraHeaders }, body: JSON.stringify(body) }));
   return { response, result: await response.json() as Row, capture: statements.slice(start).find(value => value.sql.includes("capture_public_lead_v4(")) };
 }
 function rows(sql: string): Row[] { return JSON.parse(psql(`SELECT coalesce(jsonb_agg(q),'[]') FROM (${sql}) q;`)); }
@@ -118,6 +118,39 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolat
     }
     expect(rows(`SELECT * FROM consents WHERE lead_id=${literal(saved.result.lead_id)}::uuid`)).toHaveLength(3);
     expect(rows(`SELECT * FROM source_attribution WHERE lead_id=${literal(saved.result.lead_id)}::uuid`)[0].utm_source).toBe("ourtownproperties");
+    expect(provider.send).not.toHaveBeenCalled();
+  });
+  it("recovers an exact pre-minimization frozen v4 request without rewriting old evidence or duplicating intents", async () => {
+    const { legacyAttributionReplayContext } = await import("../../app/lib/persistence/legacyAttributionReplay");
+    const body = fixture({ attribution: { source: "ourtownproperties", campaign: "legacy_unregistered", parent_url: "https://www.ourtownproperties.com/home-value/?private=synthetic-only#old" }, page_url: "https://www.askmagicmike.com/buy?private=synthetic-only#old" });
+    const donor = await submit(body); expect(donor.response.status).toBe(200);
+    const [session, captured, attribution, mode, metadata] = donor.capture!.params.map((value, index) => index === 3 ? value : JSON.parse(String(value))) as [Row, Row, Row, string, Row];
+    // Produce a historical fixture through real retained v4, using the exact
+    // old normalization shape, a fresh request/session and synthetic facts.
+    const key = randomUUID(); const context = legacyAttributionReplayContext((metadata.request_context as import("../../app/lib/leadPayload").LeadPayload), body);
+    session.id = key; captured.session_id = key; captured.widget_session_id = key; captured.request_idempotency_key = key; attribution.session_id = key;
+    metadata.request_context = context; (metadata.launch_draft as Row).submitted = context;
+    const historical = JSON.parse(psql(`SELECT public.capture_public_lead_v4(${literal(JSON.stringify(session))}::jsonb,${literal(JSON.stringify(captured))}::jsonb,${literal(JSON.stringify(attribution))}::jsonb,${literal(mode)},${literal(JSON.stringify(metadata))}::jsonb);`));
+    expect(historical.ok).toBe(true);
+    const before = JSON.stringify({ lead: lead(historical.lead_id), notifications: allNotifications(historical.lead_id), counts: counts() });
+    const replay = await submit({ ...body, idempotency_key: key, widget_session_id: key });
+    expect(replay.response.status).toBe(200); expect(replay.result.lead_id).toBe(historical.lead_id); expect(replay.response.headers.get("X-AMM-Idempotent-Replay")).toBe("1");
+    expect(JSON.stringify({ lead: lead(historical.lead_id), notifications: allNotifications(historical.lead_id), counts: counts() })).toBe(before);
+    expect((await submit({ ...body, idempotency_key: key, widget_session_id: key, question: "Changed actual inquiry" })).response.status).toBe(409);
+    expect(provider.send).not.toHaveBeenCalled();
+  });
+  it("minimizes public URLs/headers/snapshots before real SQL and both v6 outbox snapshots", async () => {
+    const saved = await submit(fixture({ page_url: "https://www.askmagicmike.com/buy?email=private-synthetic%40example.test#private-synthetic",
+      attribution: { source: "ourtownproperties", medium: "owned_media", campaign: "amm_owned_demand_2026", content: "wordpress_home_value_page",
+        parent_url: "https://user:private-synthetic@www.ourtownproperties.com/home-value/?next=https%253A%252F%252Fprivate-synthetic.test",
+        first_touch: { source: "private-synthetic", landing_page: "https://private-synthetic.test/private-address" },
+        last_touch: { page_title: "private-synthetic", gclid: "private-synthetic", placement: "private-synthetic" } } }),
+    { Referer: "https://www.ourtownproperties.com/home-value/?private=private-synthetic#private-synthetic" });
+    expect(saved.response.status).toBe(200); const id = saved.result.lead_id;
+    expect(lead(id).page_url).toBe("https://www.askmagicmike.com/buy");
+    const retained = { lead: lead(id), session: rows(`SELECT * FROM sessions WHERE id=${literal(saved.result.session_id)}::uuid`), attribution: rows(`SELECT * FROM source_attribution WHERE lead_id=${literal(id)}::uuid`), outbox: notifications(id) };
+    expect(JSON.stringify(retained)).not.toContain("private-synthetic");
+    expect(retained.attribution[0]).toMatchObject({ utm_source: "ourtownproperties", utm_campaign: "amm_owned_demand_2026", utm_content: "wordpress_home_value_page", referrer_url: "https://www.ourtownproperties.com/home-value/" });
     expect(provider.send).not.toHaveBeenCalled();
   });
   it("rejects a missing name on the new structured request before any durable write", async () => {
@@ -208,6 +241,57 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolat
     expect(JSON.stringify(lead(first.result.lead_id))).toBe(original);
     const third = await submit(fixture()); expect(lead(third.result.lead_id).contact_id).not.toBe(lead(first.result.lead_id).contact_id);
     expect(String((notifications(second.result.lead_id)[0].private_intake_snapshot as Row).text)).toContain("Existing contact; this is a separate new inquiry.");
+  });
+  it("email-to-one / phone-to-another refuses ambiguous identity atomically without a false receipt", async () => {
+    const first = fixture({ phone: "+12525550181" });
+    const second = fixture({ phone: "+12525550182" });
+    const a = await submit(first); const b = await submit(second);
+    expect(a.response.status).toBe(200); expect(b.response.status).toBe(200);
+    expect(lead(a.result.lead_id).contact_id).not.toBe(lead(b.result.lead_id).contact_id);
+    const before = counts();
+    const conflict = await submit(fixture({ email: first.email, phone: second.phone }));
+    expect(conflict.response.status).toBe(409);
+    expect(conflict.result.code).toBe("identity_conflict");
+    expect(conflict.result.lead_id).toBeUndefined();
+    expect(counts()).toBe(before);
+    expect(provider.send).not.toHaveBeenCalled();
+  });
+  it("another property/intent remains a separate inquiry requiring direct assignment and supervisor review", async () => {
+    const { reviewRepeatInquiry, repeatInquiryReviewState } = await import("../../app/lib/repeatInquiryReview");
+    const { assignCanonicalAdminLead } = await import("../../src/lib/admin/lead-operations");
+    const { normalizeAdminLeadRow } = await import("../../app/lib/adminLeadView");
+    const { isTerminalContactRecord } = await import("../../app/lib/manualContactReview");
+    const original = fixture(); const first = await submit(original); expect(first.response.status).toBe(200);
+    const old = JSON.stringify(lead(first.result.lead_id));
+    const repeat = fixture({ email: original.email, funnel_type: "home_value", lead_source_surface: "home_value_page", buyer_interest: undefined,
+      address: "202 Synthetic Other Property Road", consent: false, consent_email: false, consent_call: false,
+      attribution: { source: "facebook", medium: "social_organic", campaign: "amm_owned_demand_2026", content: "facebook_local_question_seller_review" } });
+    const next = await submit(repeat); expect(next.response.status).toBe(200);
+    expect(next.result.lead_id).not.toBe(first.result.lead_id); const id = String(next.result.lead_id);
+    expect(lead(id)).toMatchObject({ contact_id: lead(first.result.lead_id).contact_id, duplicate_of_lead_id: first.result.lead_id, assigned_agent_id: null, conversion_stage: "duplicate" });
+    expect(repeatInquiryReviewState(normalizeAdminLeadRow(lead(id)))).toBe("direct_assignment_required");
+    const admin = { userId: "00000000-0000-4000-8000-000000000123", agentId: null, role: "administrator" as const, name: "SYNTHETIC", email: "admin@example.test" };
+    psql(`INSERT INTO lead_center_users(id,name,email,role,"emailVerified") VALUES(${literal(admin.userId)},'SYNTHETIC ADMIN','repeat-review-admin@example.test','administrator',true);`);
+    expect(await reviewRepeatInquiry(id, admin, true)).toMatchObject({ ok: false, error: "repeat_review_held" });
+    const intentsBefore = JSON.stringify(notifications(id)); vi.stubEnv("AGENT_NOTIFICATIONS_ENABLED", "false");
+    expect(await assignCanonicalAdminLead({ leadId: id, agentId: "00000000-0000-4000-8000-000000009901", reason: "Reviewed synthetic separate inquiry", actor: `lead_center:${admin.userId}` })).toMatchObject({ ok: true });
+    const expected = { agentId: String(lead(id).assigned_agent_id), assignedAt: String(lead(id).assigned_at) };
+    expect(isTerminalContactRecord(String(lead(id).status), String(lead(id).conversion_stage))).toBe(true);
+    expect(await reviewRepeatInquiry(id, admin, false, expected)).toMatchObject({ ok: false, error: "confirmation_required" });
+    expect(await reviewRepeatInquiry(id, admin, true, { ...expected, assignedAt: "2000-01-01T00:00:00Z" })).toMatchObject({ ok: false });
+    expect(await reviewRepeatInquiry(id, admin, true, { ...expected, agentId: randomUUID() })).toMatchObject({ ok: false });
+    psql(`UPDATE lead_center_users SET role='approved_agent' WHERE id=${literal(admin.userId)};`);
+    expect(await reviewRepeatInquiry(id, admin, true, expected)).toMatchObject({ ok: false }); // cached principal is not authority
+    psql(`UPDATE lead_center_users SET role='administrator' WHERE id=${literal(admin.userId)}; UPDATE leads SET communication_suppressed=true WHERE id=${literal(id)}::uuid;`);
+    expect(await reviewRepeatInquiry(id, admin, true, expected)).toMatchObject({ ok: false });
+    psql(`UPDATE leads SET communication_suppressed=false WHERE id=${literal(id)}::uuid;`);
+    expect(await reviewRepeatInquiry(id, admin, true, expected)).toMatchObject({ ok: true });
+    expect(lead(id)).toMatchObject({ status: "assigned", conversion_stage: "assigned", duplicate_of_lead_id: first.result.lead_id, consent_email: false, consent_call: false, consent_sms: false });
+    expect(isTerminalContactRecord(String(lead(id).status), String(lead(id).conversion_stage))).toBe(false);
+    expect(JSON.stringify(lead(first.result.lead_id))).toBe(old); expect(JSON.stringify(notifications(id))).toBe(intentsBefore);
+    expect(allNotifications(id).filter(row => row.notification_type === "agent_assignment").every(row => row.status === "skipped" && row.provider_message_id === null)).toBe(true);
+    expect(rows(`SELECT * FROM audit_logs WHERE resource_id=${literal(id)}::uuid AND actor=${literal(`lead_center:${admin.userId}`)} AND action='lead.lifecycle_changed'`).length).toBeGreaterThan(0);
+    expect(provider.send).not.toHaveBeenCalled();
   });
   it("a second-envelope fault rolls back capture/contact/consent/assignment/audit and both intents", async () => {
     const before = counts(); psql("CREATE FUNCTION public.amm_test_fail_brandon() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.recipient_reference='operator:brandon' THEN RAISE EXCEPTION 'synthetic_second_envelope_failure'; END IF; RETURN NEW; END; $$; CREATE TRIGGER amm_test_fail_brandon BEFORE INSERT ON lead_notifications FOR EACH ROW EXECUTE FUNCTION public.amm_test_fail_brandon();");

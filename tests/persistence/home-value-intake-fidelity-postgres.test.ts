@@ -88,18 +88,18 @@ function fixture() {
     page_url: "https://www.askmagicmike.com/home-value",
     attribution: {
       source: "ourtownproperties", medium: "owned_media",
-      campaign: "synthetic_home_value_fidelity", content: "home_value_first_inquiry",
+      campaign: "amm_owned_demand_2026", content: "wordpress_home_value_page",
       landing_page: "https://www.askmagicmike.com/home-value",
       first_touch: { source: "ourtownproperties", medium: "owned_media" },
       last_touch: { source: "ourtownproperties", medium: "owned_media" },
-      placement_id: "synthetic_home_value", page_title: "Synthetic Home Value QA",
+      placement_id: "home-value-page", page_title: "Synthetic Home Value QA",
       device_category: "mobile", gclid: "SYNTHETIC_ONLY",
     },
   };
 }
 type Fixture = ReturnType<typeof fixture>;
 
-async function submit(input: Fixture) {
+async function submit(input: Fixture, expectedCaptures: 0 | 1 = 1) {
   const { POST } = await import("../../app/api/leads/route");
   const queryStart = statements.length;
   const startedAt = Date.now();
@@ -116,8 +116,8 @@ async function submit(input: Fixture) {
   const outcome = await publicLeadOutcomeFromResponse(response.clone());
   const result = await response.json() as Row;
   // No direct RPC substitute, mocked success object or adapter early replay.
-  const captures = statements.slice(queryStart).filter((entry) => entry.sql.includes("capture_public_lead_v2("));
-  expect(captures).toHaveLength(1);
+  const captures = statements.slice(queryStart).filter((entry) => /capture_public_lead_v[234]\(/.test(entry.sql));
+  expect(captures, JSON.stringify(result)).toHaveLength(expectedCaptures);
   return { response, outcome, result, startedAt, finishedAt, capture: captures[0] };
 }
 
@@ -264,7 +264,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("Home Value intake fide
       address_raw: input.address, normalized_property_address: "123 synthetic qa avenue wilson nc",
       timeline_months: 3, city: input.city, state: "NC", lead_type: "home_value", primary_intent: "sell",
       source: input.attribution.source,
-      source_detail: "home_value_page / owned_media / synthetic_home_value_fidelity / synthetic_home_value",
+      source_detail: "home_value_page / owned_media / amm_owned_demand_2026 / home-value-page",
       page_url: input.page_url, consent_email: true, consent_call: true, consent_sms: false,
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION, consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
       consent_source: input.consent_source, consent_user_agent: USER_AGENT, consent_ip_hash: null,
@@ -302,8 +302,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("Home Value intake fide
       session_id: input.idempotency_key, utm_source: input.attribution.source, utm_medium: input.attribution.medium,
       utm_campaign: input.attribution.campaign, utm_content: input.attribution.content, is_paid: false,
       first_touch: input.attribution.first_touch, last_touch: input.attribution.last_touch,
-      placement_id: input.attribution.placement_id, page_title: input.attribution.page_title,
-      click_ids: { gclid: "SYNTHETIC_ONLY" },
+      placement_id: input.attribution.placement_id, page_title: null,
+      click_ids: { gclid: null },
     }]);
     expect(rows(`SELECT * FROM sessions WHERE id=${literal(receipt.session_id)}::uuid`)).toMatchObject([{
       initial_address: input.address, utm_source: input.attribution.source, utm_campaign: input.attribution.campaign,
@@ -377,10 +377,10 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("Home Value intake fide
       consent_email: false, consent_call: false,
       consent_source: "home_value_page:repeat-inquiry",
       attribution: {
-        ...original.attribution, source: "synthetic_repeat_source", medium: "email",
-        campaign: "synthetic_repeat_inquiry", content: "home_value_repeat_inquiry",
-        last_touch: { source: "synthetic_repeat_source", medium: "email" },
-        placement_id: "synthetic_repeat_home_value",
+        ...original.attribution, source: "facebook", medium: "email",
+        campaign: "amm_seller_buyer_launch_2026", content: "seller_facebook",
+        last_touch: { source: "facebook", medium: "email" },
+        placement_id: "seller-page",
       },
     };
     const inquiry = saved(await submit(repeat), repeat);
@@ -393,8 +393,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("Home Value intake fide
       normalized_phone: repeat.phone.replace(/\D/g, "").slice(1), address_raw: repeat.address,
       timeline_months: 6, consent_email: false, consent_call: false, consent_sms: false, consent_timestamp: null,
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION, consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
-      consent_source: repeat.consent_source, source: "synthetic_repeat_source",
-      source_detail: "home_value_page / email / synthetic_repeat_inquiry / synthetic_repeat_home_value",
+      consent_source: repeat.consent_source, source: "facebook",
+      source_detail: "home_value_page / email / amm_seller_buyer_launch_2026 / seller-page",
       is_duplicate: true, duplicate_of_lead_id: canonical.lead_id,
       is_test: true, communication_suppressed: true, email_suppressed: true, sms_suppressed: true,
       // v1 returns assignment_status='duplicate' in its RPC result, but does
@@ -432,6 +432,32 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("Home Value intake fide
     expect(transport.network).not.toHaveBeenCalled();
   }, 30_000);
 
+  it.each([false, true])("recovers a retained pre-minimization general-question fingerprint; structured=%s", async structured => {
+    const input = fixture();
+    const address = structured ? "123 Synthetic QA Avenue, Wilson, NC 27893" : input.address;
+    const body = { ...input, funnel_type: "chat", lead_type: "general_question", lead_source_surface: "ask_page", question: "Synthetic explicit follow-up request",
+      address,
+      attribution: { ...input.attribution, initial_path: "/home-value?private=synthetic-only", current_path: "/ask?private=synthetic-only" },
+      ...(structured ? { address_entry: { version: 1, enteredText: address, acceptedText: address, components: { line1: "123 Synthetic QA Avenue", line2: "", locality: "Wilson", region: "NC", postalCode: "27893", country: "US" }, confirmation: "manual", validation: "not_performed" } } : {}) };
+    const first = await submit(body as unknown as Fixture); expect(first.response.status).toBe(200);
+    const mockAttemptsBeforeReplay = transport.send.mock.calls.length;
+    const { legacyAttributionReplayPayload } = await import("../../app/lib/persistence/legacyAttributionReplay");
+    const { normalizeLeadPayload } = await import("../../app/lib/leadPayload");
+    const legacy = legacyAttributionReplayPayload(normalizeLeadPayload(body), body);
+    const [session, captured, attribution, mode, metadata] = first.capture.params.map((value, index) => index === 3 ? value : JSON.parse(String(value))) as [Row, Row, Row, string, Row];
+    const key = randomUUID(); session.id = key; captured.session_id = key; captured.widget_session_id = key; captured.request_idempotency_key = key; attribution.session_id = key;
+    captured.question_raw = String(captured.question_raw).replace(/Attribution: [^\n]+/, `Attribution: ${JSON.stringify(legacy.attribution)}`);
+    const old = JSON.parse(psql(`SELECT public.${structured ? "capture_public_lead_v3" : "capture_public_lead_v2"}(${literal(JSON.stringify(session))}::jsonb,${literal(JSON.stringify(captured))}::jsonb,${literal(JSON.stringify(attribution))}::jsonb,${literal(mode)},${literal(JSON.stringify(metadata))}::jsonb);`));
+    expect(old.ok).toBe(true); const before = snapshot();
+    const replay = await submit({ ...body, idempotency_key: key, widget_session_id: key } as unknown as Fixture, 0);
+    expect(replay.response.status).toBe(200); expect(replay.result.lead_id).toBe(old.lead_id);
+    expect(replay.response.headers.get("X-AMM-Idempotent-Replay")).toBe("1"); expect(snapshot()).toBe(before);
+    if (structured) {
+      const changed = await submit({ ...body, idempotency_key: key, widget_session_id: key, address_entry: { ...body.address_entry, enteredText: "Changed synthetic entered text only" } } as unknown as Fixture);
+      expect(changed.response.status).toBe(409); expect(snapshot()).toBe(before);
+    }
+    expect(transport.send.mock.calls.length).toBe(mockAttemptsBeforeReplay);
+  });
   it("an actual terminal-outbox SQL exception rolls back all capture effects and can never become SAVED", async () => {
     const input = fixture();
     const before = snapshot();

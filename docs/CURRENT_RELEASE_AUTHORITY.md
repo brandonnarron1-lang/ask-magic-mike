@@ -1,5 +1,16 @@
 # Current Release Authority
 
+## October 29 review-only continuation
+
+`codex/home-value-lead-loop-20261029` starts from the freshly resolved PR #314
+main/tree. Source-local `candidate` remains null; no consumed Production approval
+is replayed. Review publication does not authorize merge, Production deployment,
+WordPress publication, remote data/migrations, messages, live allocation or spend.
+Automatic Vercel builds for this new branch are disabled in its source until a
+safe exact-source Preview review is established. Existing CI remains enabled.
+The final head/tree and required review evidence belong in the one private
+owner packet referenced by `OWNER_APPROVAL_QUEUE.md`, not an invented deployment.
+
 Updated 2026-10-02. This document describes how to resolve current authority;
 it is not itself a Production acceptance receipt.
 

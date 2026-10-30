@@ -9,6 +9,7 @@
  * embeddable widget script.
  */
 import { readAttribution } from "@/lib/attribution/client-storage";
+import { publicAttributionUrl } from "../../../app/lib/attributionPrivacy";
 import type { LeadType } from "@/lib/leads/lead-types";
 import { publicWidgetLeadError } from "@/lib/widget/public-errors";
 
@@ -71,7 +72,7 @@ export async function submitWidgetLead(
     timeline: input.timeline ?? null,
     preferred_contact_method: input.preferredContactMethod ?? null,
     notes: input.notes ?? null,
-    page_url: window.location.href,
+    page_url: publicAttributionUrl(window.location.href) ?? null,
     widget_session_id: sessionStorageGetOrSet(
       "amm_widget_session_id",
       () => crypto.randomUUID()
@@ -81,7 +82,7 @@ export async function submitWidgetLead(
     utm_campaign: attribution?.utmCampaign ?? null,
     utm_term: attribution?.utmTerm ?? null,
     utm_content: attribution?.utmContent ?? null,
-    referrer: attribution?.referrerUrl ?? document.referrer ?? null,
+    referrer: attribution?.referrerUrl ?? publicAttributionUrl(document.referrer) ?? null,
     landing_page: attribution?.landingPath ?? null,
     consent: input.consent
       ? {

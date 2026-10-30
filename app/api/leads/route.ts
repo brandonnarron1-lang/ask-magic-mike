@@ -1,6 +1,8 @@
 import { after, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
+import { publicAttributionUrl } from "../../lib/attributionPrivacy";
+import { legacyAttributionReplayPayload } from "../../lib/persistence/legacyAttributionReplay";
 import { isValidLeadEmail, isValidLeadPhone } from "../../lib/leadContactValidation";
 import { PUBLIC_LEAD_SAVE_ERROR } from "../../lib/publicLeadErrors";
 import {
@@ -226,7 +228,7 @@ function sourceDetailFor(payload: LeadPayload) {
 
 function pageUrlFor(payload: LeadPayload, req: Request) {
   const attribution = payload.attribution || {};
-  const referrer = req.headers.get("referer") || undefined;
+  const referrer = publicAttributionUrl(req.headers.get("referer"));
   return (
     payload.page_url ||
     attribution.parent_url ||
@@ -244,7 +246,7 @@ function sessionLandingPageFor(payload: LeadPayload, req: Request) {
     payload.page_url ||
     attribution.landing_page ||
     attribution.current_path ||
-    req.headers.get("referer") ||
+    publicAttributionUrl(req.headers.get("referer")) ||
     null
   );
 }
@@ -256,7 +258,7 @@ function referrerTypeFor(payload: LeadPayload) {
   if (["facebook", "instagram", "meta", "tiktok", "youtube"].includes(source)) return "social";
   if (medium === "email") return "email";
   if (payload.attribution?.referrer || payload.attribution?.parent_url) return "referral";
-  return "direct";
+  return source === "direct" ? "direct" : null;
 }
 
 function buildNotes(payload: LeadPayload) {
@@ -309,7 +311,7 @@ function buildSessionRow(payload: LeadPayload, req: Request, sessionId: string) 
     utm_campaign: attribution.campaign || null,
     utm_content: attribution.content || null,
     utm_term: attribution.term || null,
-    referrer_url: attribution.parent_url || attribution.referrer || req.headers.get("referer") || null,
+    referrer_url: attribution.parent_url || attribution.referrer || publicAttributionUrl(req.headers.get("referer")) || null,
     referrer_type: referrerTypeFor(payload),
     landing_page: sessionLandingPageFor(payload, req),
     user_agent: req.headers.get("user-agent") || null,
@@ -409,7 +411,7 @@ function buildSourceAttributionRow(payload: LeadPayload, req: Request) {
     utm_campaign: attribution.campaign || null,
     utm_content: attribution.content || null,
     utm_term: attribution.term || null,
-    referrer_url: attribution.parent_url || attribution.referrer || req.headers.get("referer") || null,
+    referrer_url: attribution.parent_url || attribution.referrer || publicAttributionUrl(req.headers.get("referer")) || null,
     referrer_type: referrerTypeFor(payload),
     landing_page: sessionLandingPageFor(payload, req),
     is_paid: ["cpc", "paid", "paid_social", "ppc"].includes(String(medium || "").toLowerCase()),
@@ -437,6 +439,7 @@ async function insertLead(
   routing: ReturnType<typeof routeLead>,
   correlationId: string,
   receivedAt: string,
+  legacyPayload: LeadPayload,
 ) {
   const mutation = assertDatabaseMutationAllowed();
   if (!mutation.ok) throw new Error(mutation.error);
@@ -461,6 +464,8 @@ async function insertLead(
     session: buildSessionRow(payload, req, sessionId),
     lead: buildLeadRow(payload, req, sessionId, score, routing),
     attribution: buildSourceAttributionRow(payload, req),
+    legacyReplayContext: inquiryRequestContext(legacyPayload),
+    ...(payload.funnel_type === "chat" ? { legacyReplayLead: buildLeadRow(legacyPayload, req, sessionId, score, routing) } : {}),
     // Capture wrappers retain legacy assignment policy and commit required
     // internal intents before any provider I/O.
     notificationMode: process.env.NODE_ENV === "test" ? "disabled" : notificationMode(),
@@ -687,6 +692,10 @@ export async function POST(req: Request) {
     ...input,
     idempotency_key: idempotency.value,
   });
+  // Minimize only after enforcing the existing raw bounds. Dropping an
+  // unregistered value must not turn an oversized request into a valid one.
+  const rawBounds = validatePublicLeadFieldBounds({ ...normalizedPayload, ...input, attribution: input.attribution || {} } as LeadPayload);
+  if (rawBounds) return leadResponse(correlationId, { error: rawBounds, code: "invalid_field_length" }, 400);
   if (trustedWordPressBridge && trustedWordPressEntryId) {
     const identity = verifyWordPressBridgePayloadIdentity(
       normalizedPayload,
@@ -777,7 +786,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    persistedLead = await insertLead(payload, req, score, routing, correlationId, receivedAt);
+    persistedLead = await insertLead(payload, req, score, routing, correlationId, receivedAt, legacyAttributionReplayPayload(payload, input));
   } catch (error) {
     if (error instanceof Error && error.message === "preview_data_disabled") {
       return leadResponse(

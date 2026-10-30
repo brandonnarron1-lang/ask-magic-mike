@@ -8,6 +8,10 @@ export type LeadLifecycleCapture = {
   lead: Record<string, unknown>;
   attribution: Record<string, unknown>;
   notificationMode: "disabled" | "console" | "sandbox" | "production";
+  /** Read-only compatibility check against a retained pre-minimization v4
+   * fingerprint. Never pass this to capture, metadata, outbox or enrichment. */
+  legacyReplayContext?: Record<string, unknown>;
+  legacyReplayLead?: Record<string, unknown>;
   /** Present only for canonical public v2; omitted compatibility callers keep v1. */
   internalNotification?: {
     templateVersion: string; metadata: Record<string, unknown>;

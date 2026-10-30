@@ -88,7 +88,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("PR279 successor: real 
     expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(qaId)} AND action='lead.qa_suppressed' AND actor='system/public_lead_capture';`)).toBe("1");
     expect(psql(`SELECT utm_source,utm_medium,utm_campaign,utm_content FROM source_attribution WHERE lead_id=${literal(qaId)};`)).toBe("ourtownproperties|owned_media|amm_owned_demand_2026|wordpress_home_value_page");
     expect(psql(`SELECT count(*) FROM consents WHERE lead_id=${literal(qaId)} AND language_text IS NOT NULL;`)).toBe("3");
-    expect(psql(`SELECT first_touch IS NOT NULL,last_touch IS NOT NULL,click_ids->>'gclid' FROM source_attribution WHERE lead_id=${literal(qaId)};`)).toBe("t|t|SYNTHETIC_ONLY");
+    expect(psql(`SELECT first_touch IS NOT NULL,last_touch IS NOT NULL,(click_ids->>'gclid') IS NULL FROM source_attribution WHERE lead_id=${literal(qaId)};`)).toBe("t|t|t"); // unregistered click IDs are not retained
     expect(psql(`SELECT assignment_status, score=(${literal(String(templateInput.lead.score))})::int FROM leads WHERE id=${literal(qaId)};`)).toBe("assigned|t");
     expect(provider.send).toHaveBeenCalledTimes(1);
     expect(provider.send.mock.calls[0][0].subject).toMatch(/^\[TEST\]/);
