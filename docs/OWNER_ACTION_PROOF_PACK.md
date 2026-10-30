@@ -129,11 +129,12 @@ Complete only after the exact QA mutation/send approval:
 
 ```text
 Public source route: ____________________
-is_test=true: [ ]
-INTERNAL QA — DO NOT CONTACT present: [ ]
+Deployed server-recognized QA classification contract verified: [ ]
+INTERNAL QA and DO NOT CONTACT markers recognized before durable capture: [ ]
+is_test and communication suppression present at initial persistence: [ ]
 Synthetic identity only: [ ]
 Consent text/version captured: [ ]
-First/last attribution and click IDs captured: [ ]
+Permitted minimized source evidence captured; unknowns stay unknown: [ ]
 One canonical Neon lead ID: ____________________
 Replay produced no duplicate: [ ]
 Score/grade/explanation present: [ ]
@@ -146,11 +147,21 @@ Hidden audit BCC confirmed without recording its value: [ ]
 Provider message ID: ____________________
 Final delivery/failure status: ____________________
 Retry/idempotency evidence: ____________________
-Test record suppressed after acceptance: [ ]
+Test suppression/KPI exclusion remained intact throughout: [ ]
 ```
 
 A queued state alone is not delivery proof. A synthetic record is never a live
 prospect.
+
+Maximum effects and actual effects must be recorded separately: session creation,
+public submissions, distinct inquiry intents, same-key retries, each operator's
+provider attempts and any permitted staff mutation. Do not reuse a retired
+session/allowlist slot. A supported suppressed QA capture may intentionally
+produce no deliverable v6 alert; never relax that guard to fill a proof field.
+Fresh capture, approved legacy v4 review copy and ordinary customer follow-up are
+different operations. The legacy copy retains its original source/key, configured
+primary/BCC and max_attempts=1; existing processing/failed/unknown state is not a
+new send opportunity. Human acceptance requires the actual operator's account.
 
 ## 7. WordPress plugin or placement evidence
 

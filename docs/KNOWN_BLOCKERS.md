@@ -1,5 +1,29 @@
 # Known Operating Constraints
 
+## Post-PR315 operating evidence — October30, 2026
+
+The authenticated resolver at23:23UTC returned accepted25/25 for PR315's deployed
+source; the app-only release gate is closed and consumed. A current technical
+release is not proof of fresh demand, personal mailbox or human workflow acceptance.
+This continuation verified the visible page3952 tagged handoff and hydrated
+canonical form without a submission; `/embed/ask` and widget tabs remain intact.
+
+Current protected aggregates and operator readiness require a legitimate current
+own-account staff session. Expired login, denied permission or unavailable
+aggregate must remain BLOCKED/UNKNOWN, not zero inquiries or a source-code defect.
+The source provides one read-only RepeatableRead snapshot for historic WordPress
+and all-source counts; report intervals must be explicit and not summed. Missing
+eligible-visit/first-interaction coverage cannot support a conversion rate.
+
+The approved legacy cleaner copy remains separately held at secure private
+execution plus a fresh exact-source/key/recipient check; staff sign-in alone is
+not runtime send access. Preserve its v4 key/max_attempts1 and historical failures.
+No new Production test, alert, policy, publication, QA venue or spend is performed
+to fill a reporting or human-evidence gap. Live allocation stays OFF; existing
+intake and Mike/Brandon alerts continue. Older Preview/account/placement assertions
+below are dated history, not universal current facts or instructions to restore
+the removed homepage panel.
+
 ## October 29 bounded continuation (supersedes stale current-state claims below)
 
 PR #314 acceptance was freshly resolved; its historical gates are consumed.

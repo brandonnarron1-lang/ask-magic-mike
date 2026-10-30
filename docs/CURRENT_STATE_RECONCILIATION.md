@@ -2,6 +2,24 @@
 
 <!-- amm-current-operations-v1 -->
 
+## Post-PR315 operational continuation — October30, 2026
+
+At23:23UTC the existing authenticated resolver again returned accepted25/25 for
+PR315, merge117f3811ce21cd8cce40cf6f695f36a9b7641da4,
+treefa76f6c8f0c6ef7300ac97c56866941dea8bcec5 and canonical Production
+dpl_56JSYryUtcEuKPWD3Gq8YoUGPYjQ. This is a dated observation, not a replacement
+authority register. PR315 is merged/deployed/accepted and its app-only approval
+is consumed. No pending promotion, retired QA restoration or documentation-only
+deployment is required. Current local operating-document corrections do not
+alter the accepted application or establish a new released tree.
+
+Use existing report:view Acquisition operations and Today through each operator's
+own current session. Report access, current aggregates, personal mailbox/device
+acceptance, staffing/coverage/backup and the approved-but-unsent cleaner copy are
+separate checks, not facts inherited from the release. No new Production inquiry,
+email, publication, live allocation or spending is authorized by PR315's receipt.
+Current private operational evidence stays under the existing lead-loop register.
+
 ## Home Value lead-loop continuation — October 29, 2026
 
 Authenticated read-only resolver at 16:16:12Z confirms accepted PR #314:

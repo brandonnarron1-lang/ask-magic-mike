@@ -1,5 +1,30 @@
 # Owner Approval Queue
 
+## Post-PR315 operational acceptance — October30, 2026
+
+PR315 is merged/deployed/accepted, not awaiting promotion. The exact app-only
+approval is consumed; current identity comes from `pnpm release:authority:resolve`
+under `config/release-authority-policy.json`. No documentation-only release is
+needed to record that result. Preserve the archived protected QA evidence and
+deleted venue; do not repeat its tests or restore its database.
+
+Current continuation permits bounded read-only reporting/placement/operator
+checks and operating-document corrections, not a fresh Production inquiry,
+send/replay/queue drain, WordPress publication, allocation activation or spending.
+The ONE approved legacy v4 cleaner review copy keeps its original source/key and
+approval. A fresh exact-source/key/recipient-scope check and supported private
+execution venue are prerequisites, not another request for the same send approval.
+Do not merge the separate held disabled-invoker candidate, expose a new sender,
+export Production secrets or substitute a provider-console send.
+
+Prefer an existing genuine inquiry and actual authorized operator action. A fresh
+controlled capture/send decision is requestable only if that evidence cannot
+close a demonstrated gap and its complete bounded packet is ready. QA must be
+classified/suppressed before persistence, and initial v6 test delivery needs its
+own exact supported session scope. No retired engineering identity is reused.
+Business staffing/coverage/backup and Mike's own-account acceptance remain genuine
+inputs; no timer, readiness, mailbox acceptance or human action is invented.
+
 ## Home Value lead loop — October 29 review boundary
 
 One focused branch, `codex/home-value-lead-loop-20261029`, addresses attribution
