@@ -119,7 +119,7 @@ export function Phase7MessagingControlPanel({ leadId }: { leadId: string }) {
                       {row.decision.allowed ? "allowed" : row.decision.requiresHumanApproval ? "review" : "blocked"}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs leading-5 text-[#bdb4a4]">{row.decision.explanation}</p>
+                  <p className="mt-2 text-xs leading-5 text-[#bdb4a4]">{row.decision.code === "legal_hold" || row.decision.code === "bic_hold" ? "A contact hold is recorded. Resolve its actual source and reason; the code alone does not establish a legal finding or new broker-review requirement." : row.decision.explanation}</p>
                   <button
                     type="button"
                     disabled={Boolean(busy)}
@@ -128,8 +128,9 @@ export function Phase7MessagingControlPanel({ leadId }: { leadId: string }) {
                     }, `permission:${row.channel}:${row.purpose}`)}
                     className="mt-3 min-h-10 rounded-md border border-white/10 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-[#d9ceb8] hover:border-[#cda24a66] disabled:opacity-50"
                   >
-                    {busy === `permission:${row.channel}:${row.purpose}` ? "Recording…" : "Record decision"}
+                    {busy === `permission:${row.channel}:${row.purpose}` ? "Saving evaluation…" : "Save evaluation to audit"}
                   </button>
+                  <p className="mt-2 text-xs leading-5 text-[#bdb4a4]">Records the current result only. It does not grant consent or amend permission.</p>
                 </article>
               ))}
             </div>

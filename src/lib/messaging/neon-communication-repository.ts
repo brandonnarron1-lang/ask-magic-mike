@@ -3,6 +3,7 @@ import { isTerminalContactRecord } from "../../../app/lib/manualContactReview";
 import type { LeadCenterPrincipal } from "@/lib/admin/rbac-policy";
 import { hasLeadCenterPermission } from "@/lib/admin/rbac-policy";
 import type { MessageChannel, MessagePurpose } from "./permission-engine";
+import { assessRequestContactEvidence, projectManualRequestPermissions, type RequestConsentRecord } from "./request-contact-permission";
 import {
   evaluateLeadCommunicationPermission,
   permissionDecisionIdempotencyKey,
@@ -20,6 +21,7 @@ function bool(value: unknown) {
 }
 
 function text(value: unknown) {
+  if (value instanceof Date && Number.isFinite(value.getTime())) return value.toISOString();
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
@@ -31,6 +33,7 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
   const leads = await sql.query(
     `SELECT id, is_test, communication_suppressed, email_suppressed, sms_suppressed,
             consent_email, consent_sms, consent_call, consent_timestamp,
+            consent_language_version, consent_language_text,
             source, source_detail, page_url, assigned_agent_id, phone, email, status, conversion_stage
        FROM public.leads
       WHERE id = $1::uuid${scoped ? " AND assigned_agent_id = $2::uuid" : ""}
@@ -47,20 +50,20 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
     [leadId],
   ) as Array<Record<string, unknown>>;
   const lead: LeadPermissionFacts = {
-    leadId,
+    leadId: text(row.id) || leadId,
     isTest: bool(row.is_test),
     suppressed: bool(row.communication_suppressed),
     consentEmail: bool(row.consent_email),
     consentSms: bool(row.consent_sms),
     consentCall: bool(row.consent_call),
-    consentText: null,
-    consentVersion: null,
+    consentText: text(row.consent_language_text),
+    consentVersion: text(row.consent_language_version),
     source: text(row.source) || text(row.source_detail),
     formOrRoute: text(row.page_url) || text(row.source_detail),
     optedOutEmail: bool(row.email_suppressed),
     optedOutSms: bool(row.sms_suppressed),
   };
-  const permissions = permissionRows.map((permission) => ({
+  const storedPermissions = permissionRows.map((permission) => ({
     channel: permission.channel as MessageChannel,
     purpose: permission.purpose as MessagePurpose,
     state: permission.state as StoredPermission["state"],
@@ -68,10 +71,25 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
     source: text(permission.source),
     evidenceAt: text(permission.evidence_at),
   }));
-  return { ok: true as const, sql, lead, permissions, contact: {
+  let consentRecords: RequestConsentRecord[] = [];
+  let consentEvidenceAvailable = true;
+  try {
+    consentRecords = await sql.query(
+      `SELECT lead_id, consent_type, granted, language_version, language_text, collected_at
+         FROM public.consents WHERE lead_id = $1::uuid AND consent_type IN ('email','call')`,
+      [leadId],
+    ) as RequestConsentRecord[];
+  } catch {
+    // No inferred permission on evidence failure. A separately stored, current
+    // permission still stands on its own; one channel need not block another.
+    consentEvidenceAvailable = false;
+  }
+  const permissions = projectManualRequestPermissions(lead, storedPermissions, consentRecords, row.consent_timestamp);
+  return { ok: true as const, sql, lead, permissions, storedPermissions, contact: {
     phone: text(row.phone), email: text(row.email),
     terminal: isTerminalContactRecord(text(row.status), text(row.conversion_stage)),
-  } };
+    evidence: Object.fromEntries((["email", "phone"] as const).map(channel => [channel, consentEvidenceAvailable ? assessRequestContactEvidence(lead, consentRecords, row.consent_timestamp, channel) : { eligible: false, reason: "Retained request-consent evidence could not be read. No permission is inferred from unavailable evidence." }])),
+  }, consentEvidence: { version: lead.consentVersion, text: lead.consentText, recordedAt: text(row.consent_timestamp), available: consentEvidenceAvailable } };
 }
 
 export async function evaluateAndRecordPermission(input: {

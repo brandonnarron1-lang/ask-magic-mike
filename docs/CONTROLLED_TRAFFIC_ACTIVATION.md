@@ -19,11 +19,15 @@ provider purchase, or paid campaign.
 
 - Durable storage must succeed before a success state or notification attempt.
 - A genuine public submission is a live prospect. Never fabricate one.
-- Controlled QA uses `is_test=true` and `INTERNAL QA — DO NOT CONTACT`, and is
-  excluded from production KPIs.
-- Expand one attributable placement at a time. Preserve first touch, last
-  touch, source URL, referrer, placement, UTMs, click IDs, consent, and session
-  identity.
+- Controlled Production QA needs a fresh scoped decision; a release approval
+  alone is insufficient. The deployed server must recognize the supported
+  `INTERNAL QA` and `DO NOT CONTACT` markers, classify/suppress at initial durable
+  capture and exclude the inquiry from KPIs. A submitted `is_test` boolean alone
+  is not a safe test mechanism. Never suppress only after accepting a live lead.
+- Preserve separately retained inquiry/source/consent evidence and the approved
+  minimal origin/path/campaign/placement projection. PR315 minimizes unknown or
+  sensitive query data, fragments, URL credentials, nested URLs and arbitrary
+  click IDs. Do not restore raw URLs, fabricate earlier touches or backfill tags.
 - Do not place contact data or other PII in analytics events or URLs.
 - A launch application gate and an external publication gate are different
   approvals.
@@ -89,13 +93,14 @@ the CTA without submitting a fabricated lead, verify the canonical destination
 and attribution parameters, and record the visible result. Do not enable a
 site-wide widget during this stage.
 
-Recommended order after separate approvals:
-
-1. homepage Ask Magic Mike placement;
-2. home-value placement;
-3. We Buy Houses/seller placement;
-4. Mike agent page;
-5. selected listing, rental, and open-house placements.
+Current default pilot is the existing page3952 placement at
+`https://www.ourtownproperties.com/how-much-is-your-home-worth/`, linking to
+`https://www.askmagicmike.com/home-value?utm_source=ourtownproperties&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_home_value_page`.
+Preserve the owner's October27 removal of the homepage AMM panel; the older
+homepage-first recommendation is retired, not a restoration instruction.
+Preserve `/embed/ask` on the Ask Mike page and standalone `/widget/v1`.
+Any further seller, agent, listing, rental or open-house placement requires its
+own current artifact, backup, exact approval and rollback; none is activated here.
 
 Advance one placement at a time only after the previous placement remains
 healthy.
@@ -146,6 +151,16 @@ add the next placement.
 
 Record exact timestamps and immutable evidence in `OWNER_ACTION_PROOF_PACK.md`.
 Do not label queued notification state as delivered.
+
+For this pilot use a bounded, explicitly dated 14-day observation window in the
+existing report (ranges allow at most31 elapsed days). Record UTC bounds and
+America/New_York offsets, including daylight-saving changes. Starting observation
+is not new publication, a promised future check or a recurring automation.
+Read seven-day and post-cutover inquiry windows separately; use verified deployed
+source/alias timing, not merge time. Each report's generatedAt is the current
+delivery-state snapshot, not a historical delivery-as-of guarantee.
+Keep the historic three-tag WordPress cohort separate from all eligible sources;
+never sum the cohorts or grouped contact counts. Unavailable traffic stays unknown.
 
 ## Channels not activated by this runbook
 
