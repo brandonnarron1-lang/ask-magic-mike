@@ -1,5 +1,28 @@
 # Current Release Authority
 
+## October31 accepted application and bounded continuation
+
+The authenticated resolver returned accepted25/25 at2026-10-31T13:32:01.352Z:
+PR315 merge `117f3811ce21cd8cce40cf6f695f36a9b7641da4`, tree
+`fa76f6c8f0c6ef7300ac97c56866941dea8bcec5`, canonical deployment
+`dpl_56JSYryUtcEuKPWD3Gq8YoUGPYjQ`. This is a fresh resolver result, not a new
+release or reuse of its consumed app-only approval. Earlier review-only prose
+below is dated history, not current Production state.
+
+The owner's October31 instruction supplies conditional technical authority for
+a necessary bounded app-only continuation, with exact final head/tree, scope,
+review, immutable Preview, hosted/protected gates and rollback recorded before
+effects. It does not waive those gates, claim personal inspection of unseen
+source, authorize migrations/env/provider changes or require a new release.
+No application source correction or release was needed for the internal task
+and cleanup actually completed. Current private execution evidence is under
+`.amm-run/home-value-lead-loop-20261029/owner-execution-20261031/`.
+
+Permanent QA cleanup and bounded audited task administration have their own
+explicit authority in `OWNER_APPROVAL_QUEUE.md`; neither grants consumer consent
+or activates allocation. Current app recovery retains R2privacy/revocation,
+S2guards and v6readers/data; no recovery deployment was invoked.
+
 ## October 29 review-only continuation
 
 `codex/home-value-lead-loop-20261029` starts from the freshly resolved PR #314

@@ -24,6 +24,8 @@ export type StoredPermission = {
   consentVersion: string | null;
   source: string | null;
   evidenceAt: string | null;
+  /** An evaluated read-only basis, not a newly written permission row. */
+  evidenceKind?: "canonical_request_consent";
 };
 
 export type PermissionEvaluationInput = {
@@ -78,11 +80,13 @@ export function evaluateLeadCommunicationPermission(
     humanApproved: input.humanApproved,
     consentVersion: explicit?.consentVersion || lead.consentVersion,
     formOrRoute: lead.formOrRoute,
-    decisionSource: explicit ? "stored_permission" : "lead_consent_fallback",
+    decisionSource: explicit?.evidenceKind === "canonical_request_consent"
+      ? "canonical_request_consent" : explicit ? "stored_permission" : "lead_consent_fallback",
     evidence: {
       permission_state: explicit?.state || "not_recorded",
       permission_source: explicit?.source || lead.source || "unknown",
       permission_evidence_at: explicit?.evidenceAt || null,
+      ...(explicit?.evidenceKind ? { permission_basis: explicit.evidenceKind } : {}),
       is_test: lead.isTest,
       communication_suppressed: lead.suppressed,
     },

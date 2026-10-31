@@ -1,5 +1,86 @@
 # Known Operating Constraints
 
+## October31 solo-operator correction — candidate, not deployed
+
+Resolve accepted Production with `pnpm release:authority:resolve` using
+`config/release-authority-policy.json`; this candidate is not that receipt.
+
+One scoped own-account read verified administrator access and a direct-owned
+inquiry with recorded email/call consent version `amm_contact_v2`, declined SMS,
+and no purpose-specific permission rows. The old reader discarded the retained
+wording/version and never loaded immutable inquiry consent. This reproduced
+mapping defect—not a proved BIC/legal hold—explains that missing-purpose result.
+The exact full Production wording/time match still requires the corrected reader;
+the timeline alone does not establish it. Earlier blanket reviewer claims below
+are superseded for this diagnosis, not rewritten as historical facts.
+
+The bounded candidate reads matching evidence without amending permission.
+Explicit denial/hold/opt-out, QA/suppression, lifecycle and action authority stay
+intact. Brandon's verified role can operate without Mike joining testing or a
+new per-inquiry ceremony. Existing internal review task/due time is unchanged.
+No consumer attempt, outcome, task completion or consent grant is inferred.
+
+New-source gates remain mandatory. No new hosted resources or spend are allowed;
+deleted venues are not restored and old acceptance is not new-source QA. Reusable
+procedure: `.agents/skills/amm-permission-review/SKILL.md`; private source-bound
+evidence: `.amm-run/home-value-lead-loop-20261029/solo-operator-readiness-20261031/`.
+
+## October31 execution update — specific holds, not missing owner approval
+
+The two retired QA cleanup boundaries are closed: S2deleted/verified and S3already
+absent/verified. Source/test/release evidence and the Free organization remain;
+no retired venue or one-time automation was restored. Accepted PR315 is freshly
+resolved25/25, not awaiting promotion.
+
+Current owner authority covers justified internal task administration. One new
+internal review task is durably saved and audited; current Today is40actions on
+9inquiries, with26overdue/needs-scheduling actions still open. No evidence
+supported closing/cancelling/rescheduling the old obligations. Mike's staffing
+reply and deferred prior-contact facts are not independent-work blockers.
+
+Current manual phone/email purpose checks for the bounded cohort are still
+`ambiguous_consent`; broad intake flags cannot manufacture the missing purpose
+record. An actually authorized brokerage reviewer must resolve applicable
+channel/purpose evidence through supported policy/authority; internal task
+approval is not a consent grant. The repeat/inherited case retains its separate
+relationship/direct-action hold. No consumer action or fabricated first response.
+
+The existing task card/timeline confirms task and audit but does not display the
+submitted task-note body. Exact submitted content is retained privately; no
+direct Production SQL/body readback or new feature/release was performed. Do not
+mislabel that visibility limit or private-reader assertion failures as a failed
+task save. Existing task/permission/history screens support the completed actions.
+
+Cleaner legacy QA copy remains approved NOT SENT: current secure private
+execution/eligible-ledger access is not established and no deployed invoker is
+present. Do not request approval again or create a public send workaround. Keep
+allocation OFF, public intake and Mike/Brandon alerts unchanged. Fresh evidence:
+`.amm-run/home-value-lead-loop-20261029/owner-execution-20261031/`.
+
+## Post-PR315 operating evidence — October30, 2026
+
+The authenticated resolver at23:23UTC returned accepted25/25 for PR315's deployed
+source; the app-only release gate is closed and consumed. A current technical
+release is not proof of fresh demand, personal mailbox or human workflow acceptance.
+This continuation verified the visible page3952 tagged handoff and hydrated
+canonical form without a submission; `/embed/ask` and widget tabs remain intact.
+
+Current protected aggregates and operator readiness require a legitimate current
+own-account staff session. Expired login, denied permission or unavailable
+aggregate must remain BLOCKED/UNKNOWN, not zero inquiries or a source-code defect.
+The source provides one read-only RepeatableRead snapshot for historic WordPress
+and all-source counts; report intervals must be explicit and not summed. Missing
+eligible-visit/first-interaction coverage cannot support a conversion rate.
+
+The approved legacy cleaner copy remains separately held at secure private
+execution plus a fresh exact-source/key/recipient check; staff sign-in alone is
+not runtime send access. Preserve its v4 key/max_attempts1 and historical failures.
+No new Production test, alert, policy, publication, QA venue or spend is performed
+to fill a reporting or human-evidence gap. Live allocation stays OFF; existing
+intake and Mike/Brandon alerts continue. Older Preview/account/placement assertions
+below are dated history, not universal current facts or instructions to restore
+the removed homepage panel.
+
 ## October 29 bounded continuation (supersedes stale current-state claims below)
 
 PR #314 acceptance was freshly resolved; its historical gates are consumed.

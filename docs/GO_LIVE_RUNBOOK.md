@@ -109,13 +109,19 @@ the PR seal and production change log.
 When a release changes capture, routing, email, push, messaging, or sequences:
 
 1. keep all write/send checks disabled until their separate exact approval;
-2. use only `is_test=true` and `INTERNAL QA — DO NOT CONTACT` for controlled QA;
+2. use only the deployed, server-recognized QA marker contract with initial
+   test classification, communication suppression and KPI exclusion; a forged
+   `is_test` flag alone is not QA authority;
 3. submit through the public form rather than inserting a row directly;
 4. prove one canonical record, consent/attribution, deterministic score/route,
    Lead Center visibility, KPI exclusion, and idempotent outbox entries;
 5. prove provider message ID and final delivery/failure state when a real test
    send is authorized; and
-6. suppress the QA record after acceptance. Deletion is a separate data action.
+6. verify QA suppression was present at initial persistence and remains intact.
+   Never unsuppress a QA record or add classification after acceptance. Deletion
+   is a separate data action. A session-scoped initial internal-email allowlist,
+   when required by v6, is a separate exact configuration/send boundary; never
+   rearm an old engineering session or infer it from a successful capture.
 
 A 200 response or queued state is not delivery proof. Never label a synthetic
 record as a genuine prospect.

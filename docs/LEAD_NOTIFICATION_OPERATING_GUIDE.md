@@ -1,5 +1,21 @@
 # Lead Notification Operating Guide
 
+## Current use and historical scope
+
+The V1 sections below describe assignment-notification lineage, not the current
+normal v6 public-intake delivery contract. Resolve current Production with
+`pnpm release:authority:resolve`; use protected Acquisition operations for current
+per-operator envelope evidence. Keep existing Mike/Brandon recipients, frozen v6
+snapshots, cutover, retries and callbacks intact. Do not reenact an old activation,
+migration or retry procedure merely to verify operation.
+
+Provider acceptance, recipient-server delivery and the operator's own mailbox
+receipt are separate. Normal QA stays suppressed/KPI-excluded; a separately
+approved one-copy v4 review operation is not a resend of the original and does
+not prove a fresh v6 transaction. Never use first-live/retry/process endpoints or
+“Record observed proof” as read-only health checks. The current operational
+continuation authorizes no new Production submissions, queues, sends or activation.
+
 ## What V1 Does
 
 - Creates an assignment notification event after successful AdminOps assignment and audit.

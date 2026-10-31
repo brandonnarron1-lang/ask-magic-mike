@@ -50,7 +50,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     ok: true,
     lead: { isTest: context.lead.isTest, suppressed: context.lead.suppressed },
     manualContact: { ...context.contact, canReview: !isPreviewRuntime() && hasLeadCenterPermission(auth.principal.role, "lead:update_assigned") },
-    permissions: context.permissions,
+    permissions: context.storedPermissions,
+    operator: { name: auth.principal.name, role: auth.principal.role, canRecordEvaluation: hasLeadCenterPermission(auth.principal.role, "notification:manage") && !isPreviewRuntime() },
+    consentEvidence: context.consentEvidence,
     reviewMatrix,
     release: { consumerEmail: flags.consumerAcknowledgment, consumerSms: flags.consumerSms, autoSend: flags.autoSend },
   }, { headers: NO_STORE });
@@ -73,7 +75,7 @@ function evaluateAndRecordPermissionPreview(
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!sameOrigin(request)) return NextResponse.json({ ok: false, error: "invalid_origin" }, { status: 403, headers: NO_STORE });
   const auth = await requireLeadCenterApiPermission(request, "notification:manage");
-  if (!auth.ok) return auth.response;
+  if (!auth.ok) { auth.response.headers.set("Cache-Control", NO_STORE["Cache-Control"]); return auth.response; }
   const { id } = await params;
   if (!z.string().uuid().safeParse(id).success) {
     return NextResponse.json({ ok: false, error: "invalid_lead_id" }, { status: 400, headers: NO_STORE });

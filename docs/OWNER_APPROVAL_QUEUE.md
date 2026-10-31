@@ -1,5 +1,128 @@
 # Owner Approval Queue
 
+## October31 solo-operator contact-readiness continuation
+
+Resolve accepted Production with `pnpm release:authority:resolve` using
+`config/release-authority-policy.json`; source-local prose is not acceptance.
+
+Use the current October31 conditional bounded app-only authority and the owner's
+solo-operator instruction for the focused evidence-reader/UI correction. No new
+generic technical-choice approval is needed. It does not attest personal owner
+inspection of unseen source or waive exact head/tree, immutable protected review,
+hosted gates and acceptance. Record the final seal/effects before publication.
+
+The candidate maps only exact retained v2 request consent into deliberate manual
+email/call evaluation; it writes no permission records. No migration, dependency,
+runtime environment, provider/recipient, assignment, timer or allocation change.
+Workflow selection explicitly adds the new isolated SQL regression. Branch-scoped
+`vercel.json` disables automatic builds for the candidate branch; this is a real
+configuration change, not an environment change. No new resource/spend is allowed.
+
+Do not invent a broker/Mike review from `ambiguous_consent`. The scoped source
+defect and the current administrator role are documented in `KNOWN_BLOCKERS.md`.
+Actual missing/conflicting evidence or explicit restrictions still fail closed.
+The original review task and historical evidence remain; no additional reminder,
+consumer contact, completed outcome, reassignment or evaluation write is executed
+merely by preparing this correction. Cleaner QA copy remains separately unsent.
+
+Private implementation/gate/release packet location:
+`.amm-run/home-value-lead-loop-20261029/solo-operator-readiness-20261031/`.
+
+## October31 owner execution authority — completed bounded effects
+
+Brandon's direct October31 instruction explicitly authorized the two exact
+retired QA deletions, justified internal administration of the existing inquiry
+cohort, and conditional bounded app-only correction/release after all genuine
+source-bound gates. It did not establish consumer consent, agent readiness,
+staffed hours or permission to impersonate Mike. Do not ask again for these
+covered actions. No unseen diff was personally reviewed by the owner.
+
+NC S2 `plain-water-36097919` was permanently deleted once and absence verified
+at13:35:45Z. NC S3 `damp-wave-13755234` was already deleted; its original receipt
+and current unfiltered absence were verified, with zero repeated deletion.
+Organization `org-weathered-base-51260261` remains. Both exact one-time cleanup
+tasks were already removed and left removed; no restoration or new polling.
+
+The fresh fixed cohorts remain3inquiries/3contacts, post315subset1/1. Current
+manual-purpose call/email permissions remain held. One necessary internal
+qualification-review task was saved through the ordinary protected form,
+retaining the existing direct owner, with a5PM Eastern October31 internal target.
+That target is not a consumer promise, confirmed staffed availability or an
+appointment. One task plus one audited create were independently read back.
+Today moved39to40actions,9inquiries;26overdue actions remain open. No old task was
+completed/cancelled/rescheduled; no response, assignment or appointment invented.
+
+Actual prior-contact facts remain deferred by the owner; Mike's availability is
+not an independent-work gate. The old optional-reminder approval question below
+is superseded by current authority and the executed necessary task. Remaining
+contact/repeat-review business safeguards are not replaced by task approval.
+The separately approved cleaner copy remains NOT SENT: no deployed private
+invoker/current eligible private execution access, not another approval request.
+
+Exact private authorization, pre-network native request/key, record versions,
+current queue dispositions, cleanup and execution receipts are in
+`.amm-run/home-value-lead-loop-20261029/owner-execution-20261031/`.
+No new app correction, PR, Preview, deployment, migration, provider/recipient/env,
+WordPress/social/DNS change or spend was needed. Allocation remains OFF.
+
+## Historical preparation before October31 authority — October30, 2026
+
+Accepted PR315 remains the application baseline; its release approval is consumed.
+The current follow-up sprint refreshed Today once and prepared private briefs,
+conditional drafts, exact record/version references and individual dispositions
+for the displayed actions. The source-bound private packet is
+`.amm-run/home-value-lead-loop-20261029/followup-sprint-20261030/live-action-manifest-private.json`.
+Customer identities, recipients, source snapshots and task tokens stay private;
+they are not approval text to publish or replay in a PR.
+
+Current manual phone/email reads fail closed with `ambiguous_consent` because
+the required purpose-specific permission records are absent. Retained intake
+consent is evidence for actual broker review, not permission to fabricate a
+purpose grant or bypass the existing engine. No channel is currently cleared for
+assistant outreach. A duplicate-stage/inherited-ownership exception requires its
+own supervisor decision; never copy canonical consent or silently reassign.
+
+Owner clarification received October31: prior-contact facts will be supplied
+privately later and are not the current priority. Mike's availability must not
+block independent preparation, engineering or other authorized work. The date
+question concerned only an optional internal reminder, not an appointment or
+release prerequisite; do not repeat it. That unsaved reminder is now deferred,
+not a pending decision required for this sprint. Any later actual task write
+still needs its own authority and a valid due instant under the existing contract.
+Existing confirmation tasks remain open; no blanket reschedule, completion or
+cancellation is proposed. Prior-contact facts remain unknown until supplied;
+reconcile them before outreach where necessary to avoid duplicate contact.
+Historical recollection cannot become a server-now human-response milestone.
+No task approval authorizes a message, assignment, appointment or consent change.
+The manifest separates these boundaries and permits zero live effects until
+their exact prerequisites and scopes are genuinely satisfied. This is not a new
+application release, traffic experiment, sender activation or spending request.
+
+## Post-PR315 operational acceptance — October30, 2026
+
+PR315 is merged/deployed/accepted, not awaiting promotion. The exact app-only
+approval is consumed; current identity comes from `pnpm release:authority:resolve`
+under `config/release-authority-policy.json`. No documentation-only release is
+needed to record that result. Preserve the archived protected QA evidence and
+deleted venue; do not repeat its tests or restore its database.
+
+Current continuation permits bounded read-only reporting/placement/operator
+checks and operating-document corrections, not a fresh Production inquiry,
+send/replay/queue drain, WordPress publication, allocation activation or spending.
+The ONE approved legacy v4 cleaner review copy keeps its original source/key and
+approval. A fresh exact-source/key/recipient-scope check and supported private
+execution venue are prerequisites, not another request for the same send approval.
+Do not merge the separate held disabled-invoker candidate, expose a new sender,
+export Production secrets or substitute a provider-console send.
+
+Prefer an existing genuine inquiry and actual authorized operator action. A fresh
+controlled capture/send decision is requestable only if that evidence cannot
+close a demonstrated gap and its complete bounded packet is ready. QA must be
+classified/suppressed before persistence, and initial v6 test delivery needs its
+own exact supported session scope. No retired engineering identity is reused.
+Business staffing/coverage/backup and Mike's own-account acceptance remain genuine
+inputs; no timer, readiness, mailbox acceptance or human action is invented.
+
 ## Home Value lead loop — October 29 review boundary
 
 One focused branch, `codex/home-value-lead-loop-20261029`, addresses attribution

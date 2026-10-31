@@ -1,5 +1,20 @@
 # Lead Notification Activation Runbook
 
+## Historical pre-activation reference — not current Production instructions
+
+The older disabled-state/sandbox procedure below predates the working v6 intake
+and Mike/Brandon alert path. It does not establish current flag values and must
+not be replayed on Production. Current identity is resolved with
+`pnpm release:authority:resolve` under `config/release-authority-policy.json`;
+Neon is canonical and Better Auth/RBAC protects operator access. Preserve normal
+delivery and consult the existing protected report for current evidence.
+No migration, environment edit, new sandbox/QA venue, send, recipient change,
+provider purchase or activation is authorized by an operational read. Any future
+configuration/send action needs its own exact scoped boundary. Keep the old
+procedure as chronology, not an instruction to disable or re-enable working alerts.
+
+## Original sandbox procedure (historical)
+
 Production delivery remains disabled. This runbook describes the controlled path to a later non-production provider-sandbox activation and the prerequisites before any production activation.
 
 ## Pre-Activation Checks
