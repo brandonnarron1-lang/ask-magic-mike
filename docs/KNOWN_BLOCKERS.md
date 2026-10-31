@@ -1,5 +1,37 @@
 # Known Operating Constraints
 
+## October31 execution update — specific holds, not missing owner approval
+
+The two retired QA cleanup boundaries are closed: S2deleted/verified and S3already
+absent/verified. Source/test/release evidence and the Free organization remain;
+no retired venue or one-time automation was restored. Accepted PR315 is freshly
+resolved25/25, not awaiting promotion.
+
+Current owner authority covers justified internal task administration. One new
+internal review task is durably saved and audited; current Today is40actions on
+9inquiries, with26overdue/needs-scheduling actions still open. No evidence
+supported closing/cancelling/rescheduling the old obligations. Mike's staffing
+reply and deferred prior-contact facts are not independent-work blockers.
+
+Current manual phone/email purpose checks for the bounded cohort are still
+`ambiguous_consent`; broad intake flags cannot manufacture the missing purpose
+record. An actually authorized brokerage reviewer must resolve applicable
+channel/purpose evidence through supported policy/authority; internal task
+approval is not a consent grant. The repeat/inherited case retains its separate
+relationship/direct-action hold. No consumer action or fabricated first response.
+
+The existing task card/timeline confirms task and audit but does not display the
+submitted task-note body. Exact submitted content is retained privately; no
+direct Production SQL/body readback or new feature/release was performed. Do not
+mislabel that visibility limit or private-reader assertion failures as a failed
+task save. Existing task/permission/history screens support the completed actions.
+
+Cleaner legacy QA copy remains approved NOT SENT: current secure private
+execution/eligible-ledger access is not established and no deployed invoker is
+present. Do not request approval again or create a public send workaround. Keep
+allocation OFF, public intake and Mike/Brandon alerts unchanged. Fresh evidence:
+`.amm-run/home-value-lead-loop-20261029/owner-execution-20261031/`.
+
 ## Post-PR315 operating evidence — October30, 2026
 
 The authenticated resolver at23:23UTC returned accepted25/25 for PR315's deployed
