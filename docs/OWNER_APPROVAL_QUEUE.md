@@ -1,5 +1,32 @@
 # Owner Approval Queue
 
+## Lead follow-up operating packet — October30, 2026
+
+Accepted PR315 remains the application baseline; its release approval is consumed.
+The current follow-up sprint refreshed Today once and prepared private briefs,
+conditional drafts, exact record/version references and individual dispositions
+for the displayed actions. The source-bound private packet is
+`.amm-run/home-value-lead-loop-20261029/followup-sprint-20261030/live-action-manifest-private.json`.
+Customer identities, recipients, source snapshots and task tokens stay private;
+they are not approval text to publish or replay in a PR.
+
+Current manual phone/email reads fail closed with `ambiguous_consent` because
+the required purpose-specific permission records are absent. Retained intake
+consent is evidence for actual broker review, not permission to fabricate a
+purpose grant or bypass the existing engine. No channel is currently cleared for
+assistant outreach. A duplicate-stage/inherited-ownership exception requires its
+own supervisor decision; never copy canonical consent or silently reassign.
+
+One proposed internal review task has exact inquiry/current owner/key/note scope,
+but needs separate task authorization and the owner's actual staffed due time.
+Existing confirmation tasks remain open; no blanket reschedule, completion or
+cancellation is proposed. Actual prior-contact knowledge must be reconciled;
+historical recollection cannot become a server-now human-response milestone.
+No task approval authorizes a message, assignment, appointment or consent change.
+The manifest separates these boundaries and permits zero live effects until
+their exact prerequisites and scopes are genuinely satisfied. This is not a new
+application release, traffic experiment, sender activation or spending request.
+
 ## Post-PR315 operational acceptance — October30, 2026
 
 PR315 is merged/deployed/accepted, not awaiting promotion. The exact app-only
