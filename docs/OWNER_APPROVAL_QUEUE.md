@@ -1,5 +1,33 @@
 # Owner Approval Queue
 
+## October31 solo-operator contact-readiness continuation
+
+Resolve accepted Production with `pnpm release:authority:resolve` using
+`config/release-authority-policy.json`; source-local prose is not acceptance.
+
+Use the current October31 conditional bounded app-only authority and the owner's
+solo-operator instruction for the focused evidence-reader/UI correction. No new
+generic technical-choice approval is needed. It does not attest personal owner
+inspection of unseen source or waive exact head/tree, immutable protected review,
+hosted gates and acceptance. Record the final seal/effects before publication.
+
+The candidate maps only exact retained v2 request consent into deliberate manual
+email/call evaluation; it writes no permission records. No migration, dependency,
+runtime environment, provider/recipient, assignment, timer or allocation change.
+Workflow selection explicitly adds the new isolated SQL regression. Branch-scoped
+`vercel.json` disables automatic builds for the candidate branch; this is a real
+configuration change, not an environment change. No new resource/spend is allowed.
+
+Do not invent a broker/Mike review from `ambiguous_consent`. The scoped source
+defect and the current administrator role are documented in `KNOWN_BLOCKERS.md`.
+Actual missing/conflicting evidence or explicit restrictions still fail closed.
+The original review task and historical evidence remain; no additional reminder,
+consumer contact, completed outcome, reassignment or evaluation write is executed
+merely by preparing this correction. Cleaner QA copy remains separately unsent.
+
+Private implementation/gate/release packet location:
+`.amm-run/home-value-lead-loop-20261029/solo-operator-readiness-20261031/`.
+
 ## October31 owner execution authority — completed bounded effects
 
 Brandon's direct October31 instruction explicitly authorized the two exact

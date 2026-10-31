@@ -93,6 +93,9 @@ jobs:
       - name: Isolated PostgreSQL conversion atomicity and complete reporting
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/conversion-transaction-postgres.test.ts tests/persistence/conversion-reporting-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
+      - name: Isolated request-contact evidence, fresh restrictions and evaluation-only audit
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/manual-contact-readiness-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+
       - name: Exact acquisition totals, canonical contacts and operator evidence above old reporting cap
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/acquisition-report-postgres.test.ts tests/persistence/acquisition-sources-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 

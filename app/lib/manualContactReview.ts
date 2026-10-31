@@ -3,8 +3,10 @@ import type { CommunicationPermissionDecision } from "../../src/lib/messaging/pe
 export type ManualContactReview = {
   ok?: boolean;
   lead?: { isTest: boolean; suppressed: boolean };
-  manualContact?: { canReview: boolean; terminal: boolean; phone: string | null; email: string | null };
-  reviewMatrix?: Array<{ channel: string; purpose: string; decision: Pick<CommunicationPermissionDecision, "allowed" | "code" | "requiresHumanApproval"> }>;
+  manualContact?: { canReview: boolean; terminal: boolean; phone: string | null; email: string | null; evidence?: Partial<Record<"email" | "phone", { eligible: boolean; reason: string }>> };
+  operator?: { name: string; role: string; canRecordEvaluation: boolean };
+  consentEvidence?: { version: string | null; text: string | null; recordedAt: string | null };
+  reviewMatrix?: Array<{ channel: string; purpose: string; decision: Pick<CommunicationPermissionDecision, "allowed" | "code" | "requiresHumanApproval"> & Partial<Pick<CommunicationPermissionDecision, "explanation" | "decisionSource" | "evidence" | "consentVersion" | "decidedAt">> }>;
 };
 
 export function isTerminalContactRecord(status?: string | null, stage?: string | null) {

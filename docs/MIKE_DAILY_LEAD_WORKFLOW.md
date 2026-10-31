@@ -1,5 +1,24 @@
 # Mike Daily Lead Workflow
 
+## Solo-operator handling
+
+Brandon is the product operator/tester; Mike remains the assigned lead owner and
+alert recipient. Use the actual operator's own authorized account, never Mike's
+credentials or signature. Ownership does not require Mike to join development,
+inbox/device QA or a technical approval. An administrator's existing scope can
+support handling a Mike-owned request without reassignment; a scoped agent still
+needs direct action authority. Unknown previous contact stays unknown.
+
+On a source that includes the contact-readiness correction, open the protected
+lead overview → **Contact readiness**. It shows supplied methods, the specific
+permission reason and expandable wording/version/time. If eligible, choose
+**Review & email**, read the unsent prepared reply, confirm the review and open
+your email app. Nothing sends or records a response automatically; fresh access
+and permission are checked again. **Save evaluation to audit** is not consent
+approval. An explicit hold/denial/opt-out remains restricted. Record an actual
+result and next task only after it happened. Keep the existing review task's real
+due/overdue state; do not replace it with another reminder.
+
 ## Current operating check — October 30, 2026
 
 Use your own Better Auth account: `/lead-center-login?returnTo=/admin/today`.

@@ -1,5 +1,30 @@
 # Known Operating Constraints
 
+## October31 solo-operator correction — candidate, not deployed
+
+Resolve accepted Production with `pnpm release:authority:resolve` using
+`config/release-authority-policy.json`; this candidate is not that receipt.
+
+One scoped own-account read verified administrator access and a direct-owned
+inquiry with recorded email/call consent version `amm_contact_v2`, declined SMS,
+and no purpose-specific permission rows. The old reader discarded the retained
+wording/version and never loaded immutable inquiry consent. This reproduced
+mapping defect—not a proved BIC/legal hold—explains that missing-purpose result.
+The exact full Production wording/time match still requires the corrected reader;
+the timeline alone does not establish it. Earlier blanket reviewer claims below
+are superseded for this diagnosis, not rewritten as historical facts.
+
+The bounded candidate reads matching evidence without amending permission.
+Explicit denial/hold/opt-out, QA/suppression, lifecycle and action authority stay
+intact. Brandon's verified role can operate without Mike joining testing or a
+new per-inquiry ceremony. Existing internal review task/due time is unchanged.
+No consumer attempt, outcome, task completion or consent grant is inferred.
+
+New-source gates remain mandatory. No new hosted resources or spend are allowed;
+deleted venues are not restored and old acceptance is not new-source QA. Reusable
+procedure: `.agents/skills/amm-permission-review/SKILL.md`; private source-bound
+evidence: `.amm-run/home-value-lead-loop-20261029/solo-operator-readiness-20261031/`.
+
 ## October31 execution update — specific holds, not missing owner approval
 
 The two retired QA cleanup boundaries are closed: S2deleted/verified and S3already

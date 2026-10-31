@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import { expect, test, type BrowserContext } from "@playwright/test";
 import { renderLeadAlertForTemplateVersion } from "../../app/lib/leadAlertTemplates";
 import type { LeadAlertRenderInput } from "../../app/lib/leadAlertTemplates";
+import { LEAD_CONSENT_LANGUAGE_TEXT } from "../../app/lib/leadConsent";
 
 // Render current compiled source from explicit synthetic data. A clean hosted
 // checkout must not depend on an ignored artifact from an operator's machine.
@@ -28,7 +29,7 @@ const emailFixture: LeadAlertRenderInput = {
 
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.AMM_LEAD_READABILITY_ACCEPTANCE !== "1", "Disposable local real-session venue only");
 test.describe.configure({mode:"serial"});
-let fixture: {ids:Record<string,string>;leads:Record<string,string>};
+let fixture: {ids:Record<string,string>;agents:Record<string,string>;leads:Record<string,string>};
 let pool:Pool;
 let context:BrowserContext;
 const query=async(statement:string,values:unknown[]=[]) => (await pool.query(statement,values)).rows;
@@ -284,6 +285,71 @@ for(const version of ["lead_alert_email_v4", "lead_alert_email_v5"]) for(const w
     await ctx.close();
   });
 }
+
+test("solo administrator uses retained request consent without assignment changes or a new consent grant",async({browser})=>{
+  const id=randomUUID(),session=randomUUID(),at=new Date(Date.now()-60000).toISOString();
+  await query("INSERT INTO sessions(id) VALUES($1)",[session]);
+  await query(`INSERT INTO leads(id,session_id,first_name,last_name,email,phone,lead_type,primary_intent,status,conversion_stage,
+    assigned_agent_id,assigned_at,is_test,communication_suppressed,consent_email,consent_call,consent_sms,
+    consent_timestamp,consent_language_version,consent_language_text)
+    VALUES($1,$2,'SYNTHETIC','REQUEST ONLY','request@example.test','+12025550199','home_value','sell','assigned','assigned',
+    $3,now(),false,false,true,true,false,$4,'amm_contact_v2',$5)`,[id,session,fixture.agents.owner,at,LEAD_CONSENT_LANGUAGE_TEXT]);
+  await query(`INSERT INTO consents(lead_id,consent_type,granted,language_version,language_text,collected_at)
+    VALUES($1,'email',true,'amm_contact_v2',$3,$2),($1,'call',true,'amm_contact_v2',$3,$2),($1,'sms',false,'amm_contact_v2',$3,$2)`,[id,at,LEAD_CONSENT_LANGUAGE_TEXT]);
+  const counts=async()=>(await query(`SELECT (SELECT count(*)::int FROM tasks) tasks,
+    (SELECT count(*)::int FROM lead_notifications) notifications,(SELECT count(*)::int FROM agent_assignments) assignments,
+    (SELECT count(*)::int FROM lead_response_milestones) responses,(SELECT count(*)::int FROM lead_appointments) appointments`))[0];
+  const before=await counts();
+  const ctx=await browser.newContext({baseURL:test.info().project.use.baseURL,reducedMotion:'reduce'});
+  const page=await ctx.newPage();const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+  const api=async(method='GET')=>page.evaluate(async({id,method})=>{
+    const r=await fetch(`/api/admin/leads/${id}/communication-permissions`,{method,cache:'no-store',
+      ...(method==='POST'?{headers:{'Content-Type':'application/json'},body:JSON.stringify({channel:'email',purpose:'manual_one_to_one',humanApproved:false})}:{})});
+    return {status:r.status,cache:r.headers.get('cache-control'),body:await r.json()};
+  },{id,method});
+  try {
+    await page.goto(`/lead-center-login?returnTo=/admin/leads/${id}`);
+    await page.getByLabel('Work email').fill('admin@example.test');await page.getByLabel('Password',{exact:true}).fill(process.env.AMM_E2E_FIXTURE_PASSWORD!);
+    await page.getByRole('button',{name:'Open Lead Center'}).click();
+    await expect(page).toHaveURL(`${test.info().project.use.baseURL}/admin/leads/${id}`);
+    const first=await api();expect(first.status).toBe(200);expect(first.cache).toContain('private');
+    expect(first.body.operator.role).toBe('administrator');expect(first.body.permissions).toEqual([]);
+    expect(first.body.reviewMatrix.filter((r:{purpose:string;decision:{decisionSource:string}})=>r.purpose==='manual_one_to_one').every((r:{decision:{decisionSource:string;requiresHumanApproval:boolean}})=>r.decision.decisionSource==='canonical_request_consent'&&r.decision.requiresHumanApproval)).toBe(true);
+    expect(first.body.reviewMatrix.filter((r:{purpose:string})=>r.purpose==='marketing_nurture').every((r:{decision:{allowed:boolean}})=>!r.decision.allowed)).toBe(true);
+    for(const width of [320,390,768,1440]) {
+      await page.setViewportSize({width,height:1000});await page.reload();
+      const email=page.getByRole('button',{name:'Review & email'});await expect(email).toBeEnabled();
+      await expect(page.getByText('Operating as SYNTHETIC ADMIN — DO NOT CONTACT. Reply about this request only.')).toBeVisible();
+      expect((await email.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+      await email.focus();await page.keyboard.press('Enter');
+      await expect(page.getByLabel('Prepared reply — unsent')).toContainText('SYNTHETIC ADMIN — DO NOT CONTACT');
+      await expect(page.getByLabel('Prepared reply — unsent')).not.toContainText('SYNTHETIC OWNER');
+      await expect(page.getByRole('button',{name:'Open email app'})).toBeDisabled();
+      await page.getByRole('button',{name:'Cancel',exact:true}).click();
+      await page.evaluate(()=>window.scrollTo(0,0));await page.screenshot({path:path.join(output,`contact-readiness-${width}.png`),fullPage:false});
+      await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
+      await page.screenshot({path:path.join(output,`contact-readiness-200-${width}.png`),fullPage:false});
+    }
+    const a=await api('POST'),b=await api('POST');expect(a.status).toBe(200);expect(a.body.decisionId).toBe(b.body.decisionId);
+    expect((await query('SELECT count(*)::int n FROM communication_decisions WHERE lead_id=$1',[id]))[0].n).toBe(1);
+    expect((await query('SELECT count(*)::int n FROM communication_permissions WHERE lead_id=$1',[id]))[0].n).toBe(0);
+    await page.reload();await page.getByRole('button',{name:'Review & email'}).click();await page.getByRole('checkbox',{name:/I reviewed the request/}).check();
+    await query("INSERT INTO communication_permissions(lead_id,channel,purpose,state,source,evidence_at) VALUES($1,'email','manual_one_to_one','opted_out','isolated_revocation',now())",[id]);
+    await page.getByRole('button',{name:'Open email app'}).click();
+    await expect(page.getByRole('status').filter({hasText:'Permission changed'})).toBeVisible();
+    await expect(page.getByRole('button',{name:'Review & email'})).toBeDisabled();await expect(page.getByRole('button',{name:'Review & call'})).toBeEnabled();
+    await expect(page.getByRole('button',{name:'Open email app'})).toHaveCount(0);
+    await page.getByRole('button',{name:'Review & call'}).click();await page.getByRole('checkbox',{name:/I reviewed the request/}).check();
+    await query("UPDATE lead_center_users SET role='read_only_analyst' WHERE id=$1",[fixture.ids.admin]);
+    await page.getByRole('button',{name:'Open dialer'}).click();
+    await expect(page.getByRole('status',{name:'Lead access unavailable'})).toBeVisible();
+    await expect(page.locator('[aria-label="Saved contact details"]')).toHaveCount(0);
+    const denied=await api();expect(denied.status).toBe(403);expect(JSON.stringify(denied.body)).not.toContain('request@example.test');
+    expect((await query('SELECT assigned_agent_id FROM leads WHERE id=$1',[id]))[0].assigned_agent_id).toBe(fixture.agents.owner);
+    expect(await counts()).toEqual(before);expect(errors).toEqual([]);
+  }finally{await query("UPDATE lead_center_users SET role='administrator' WHERE id=$1",[fixture.ids.admin]);await ctx.close();}
+});
 
 test("fresh ownership, role and expired-session reads remove stale contact details; server denies disclosure", async()=>{
   await query("UPDATE leads SET lead_type='buyer',status='assigned',is_test=false,communication_suppressed=false WHERE id=$1",[fixture.leads.agent]);
