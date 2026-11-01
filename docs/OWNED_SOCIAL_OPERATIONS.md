@@ -1,8 +1,18 @@
 # Owned social operation — November 1, 2026
 
-Current state: **BLOCKED / NOT PUBLISHED / NOT SCHEDULED**. This is a separate
-publisher, not activation of the R2 draft-only workers. PR316 remains the accepted
-application baseline; this candidate is not deployed or an active runtime.
+Current state: **FACEBOOK INITIAL POST PUBLISHED / QUEUE NOT SCHEDULED /
+AUTOMATION BLOCKED**. This is separate from the R2 draft-only workers. PR316
+remains accepted Production; PR317 is a Draft candidate, not deployed or active.
+
+Owner-requested visual refresh: `public/social/owned-launch-v2/`, seven concepts,
+four encoded vertical videos, three carousels and modern photographic feed/Story
+layouts. Supplied lakeside/interior/portrait concepts are not represented as real
+listings or documentary locations. No generated replacement likeness or paid API.
+The v1 asset and its actual Facebook publication are retained, not overwritten.
+`config/owned-social-visuals.v2.json` is the reusable visual contract;
+`scripts/social/render-cinematic.mjs` extends the existing editable SVG system.
+Private source paths stay private; exported images omit EXIF/GPS. Source/output
+hashes, 390px pixel checks and actual encoded video evidence remain distinct.
 
 ## Prepared implementation
 
@@ -26,10 +36,16 @@ application baseline; this candidate is not deployed or an active runtime.
 
 | Channel | Current evidence | Publication capability |
 |---|---|---|
-| Facebook | Brandon's legitimate identity; managed list has no Ask Magic Mike Page. Separate public Page setup reached the Page Terms agreement. | NOT ESTABLISHED; owner action at exact Terms step. No personal-profile substitution. |
-| Instagram | Signed out; supported Facebook login returned to sign-in. Brand name/proposed handle prepared in signup. | NOT ESTABLISHED; owner recovery/birth-date/password/verification. Handle validity is not availability or ownership. |
-| TikTok | Signed out; email signup requires real owner details/password/code. | NOT ESTABLISHED; clickable website eligibility and automatic commercial disclosure still require account evidence. |
-| Buffer | Signed out; no workspace entitlement/API binding read. No matching publishing connector installed. | Public Free documentation is not this owner's verified workspace. No paid trial/card. |
+| Facebook | Owner-created Ask Magic Mike Page [61595981377188](https://www.facebook.com/profile.php?id=61595981377188); Manage Page and ordinary Page actor verified. | One initial Public announcement verified; tracked Home Value website/CTA saved. Buffer's broad default request included unrelated assets/ads and was cancelled without grant. |
+| Instagram | [@askmagicmikenc](https://www.instagram.com/askmagicmikenc/), Business / Real Estate Service. Bio/photo saved, private contact info excluded. | Buffer connected after one preserved generic failure and one same-scope retry. Comments OFF. Web explicitly requires the mobile app to set a clickable Website; no post yet. |
+| TikTok | [@askmagicmike](https://www.tiktok.com/@askmagicmike), own Edit profile verified; factual bio saved and reloaded. | Buffer connected, both comment scopes OFF. Native web photo upload did not save after two bounded attempts. Website-link eligibility and commercial disclosure not yet verified; no post. |
+| Buffer | Actual signed-in Free billing: $0 forever, 3 channels, 10 scheduled posts/channel, one API key/client. | 2/3 channels connected; empty queues. No trial/card/upgrade, API credential or active replenishment workflow. |
+
+Verified Public initial announcement:
+[Facebook launch](https://www.facebook.com/permalink.php?story_fbid=pfbid0UnvxUjGxLBg3Qac5d2r1fNvpCThWqMp4aRmMFLi7bwwQ1T57x1pixBYepH82opAkl&id=61595981377188).
+One Post click; exact image/caption/custom alt text/link read back. Boost and Story
+OFF; no personal-profile post or consumer contact. Facebook's automatic profile
+picture update is a separate setup effect, not another launch announcement.
 
 Only the genuine Our Town Facebook Page was identified; that does not establish
 new account publisher rights. Mike's Instagram/TikTok handles were not established
@@ -48,12 +64,13 @@ unverified towns, phone/recovery information, staffing or opening hours.
 2. Record actual Free entitlement, queue/API limits, automatic image/video
    formats, public profile destinations, required commercial/AI disclosure
    controls, and an expiry/recheck time in the policy. No billing enablement.
-3. Reuse a genuine BIC advertising approval if available. No applicable standing
-   approval for these new accounts was found in the focused canonical records.
-   Prepared scope: owned evergreen education, existing offers/intake explanations,
-   these seven examples, firm identification in every asset/caption; exclude
-   listings, stats, testimonials, guarantees and consumer messaging. Owner
-   technical authorization is not represented as BIC consent. See
+3. The owner expressly represented full delegated brokerage power and consent
+   for the prepared standing scope on November1. Retain that owner statement,
+   not a fabricated claim that Mike personally reviewed each post. Scope remains
+   owned evergreen education, existing offers/intake explanations and firm
+   identification in every asset/caption; exclude listings, stats, testimonials,
+   guarantees and consumer messaging. Record policy binding/recheck before the
+   separate runtime activation. See
    [NCREC guidance](https://bulletins.ncrec.gov/tech-corner-2/).
 4. The new runtime's versioned media URLs need exact-source review/release and
    byte/hash verification. TikTok and compare UTM codes are registered narrowly
@@ -71,6 +88,13 @@ unverified towns, phone/recovery information, staffing or opening hours.
 7. Real launch per account: verify public post, then queue six future days and
    verify provider IDs. The current CLI creates scheduled intents only; the
    initial native launch is separate and must be reconciled before scheduling.
+
+Media disclosure is separate from AI writing assistance. Concept imagery cannot
+be silently sent with `isAiGenerated:false`. The current API supports the native
+flag for Instagram and TikTok video; Facebook and TikTok photo formats requiring
+that flag stay held for the supported native method. Do not invent unsupported
+GraphQL fields or call a caption disclaimer proof of native disclosure.
+See [Buffer reference](https://developers.buffer.com/reference.html).
 
 Free API evidence: [Buffer current API](https://developers.buffer.com/guides/getting-started.html),
 [Free availability](https://support.buffer.com/articles/using-buffers-api-GtIYIQilz5).

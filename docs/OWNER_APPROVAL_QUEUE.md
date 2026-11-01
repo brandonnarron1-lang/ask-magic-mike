@@ -39,17 +39,19 @@ replenisher. It does not authorize personal-profile substitution, consumer sends
 paid creative/ads, new model usage, fabricated BIC approval or bypassed platform
 security/Terms. PR316 is accepted; its consumed release/QA approval is not reused.
 
-`config/owned-social-policy.json` remains master-paused, without account IDs,
-publisher entitlement or standing brokerage evidence. The workflow is an inactive
-review template outside `.github/workflows`. No scheduler, secret, state ref,
-account, post, hosted Preview or application release is claimed. The exact
+`config/owned-social-policy.json` remains master-paused; runtime bindings are not
+activated. Owner setup and explicit platform confirmations produced the new
+Facebook Page, two actual Buffer channel connections and one verified Public
+Facebook launch. Actual Free entitlement and the owner's express representation
+of brokerage power/consent are recorded. No scheduler, secret, state ref,
+hosted Preview or application release is claimed. The exact
 source/activation packet is retained privately under
 `.amm-run/home-value-lead-loop-20261029/owned-social-launch-20261101/`.
 
-Actual next gates: owner account credential/Terms steps; genuine brokerage
-standing advertising scope; verified Free publisher/runtime capacity; then the
-normal exact-source hosted/protected release and separate secret/runtime
-installation controls. See `OWNED_SOCIAL_OPERATIONS.md` for the prepared scope,
+Actual next gates: supported profile destinations/disclosures, Page-only Buffer
+scope without unrelated account/ads access, exact-source hosted/protected release
+and separate secure secret/runtime installation. Do not repeat completed account
+setup or advertising-authority questions. See `OWNED_SOCIAL_OPERATIONS.md` for scope,
 caps, pause/recovery, actual account boundaries and deliberately paused paid test.
 
 ## October31 owner execution authority — completed bounded effects

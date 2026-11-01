@@ -8,7 +8,9 @@ import { BufferProvider } from '../../src/lib/social/buffer.ts';
 import { GitHubLedgerStore } from '../../src/lib/social/github-store.ts';
 const policy=JSON.parse(await fs.readFile('config/owned-social-policy.json','utf8'));
 const content=JSON.parse(await fs.readFile('config/owned-social-content.json','utf8'));
-const manifest=JSON.parse(await fs.readFile('public/social/owned-launch-v1/asset-manifest.json','utf8'));
+const edition=policy.mediaEdition||'owned-launch-v1';
+if(!['owned-launch-v1','owned-launch-v2'].includes(edition))throw Error('unreviewed_asset_edition');
+const manifest=JSON.parse(await fs.readFile(`public/social/${edition}/asset-manifest.json`,'utf8'));
 const args=process.argv.slice(2), execute=args.includes('--execute');
 const now=new Date();
 const today=new Intl.DateTimeFormat('en-CA',{timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
@@ -23,9 +25,9 @@ for(let i=0;i<content.concepts.length;i++) {
     const destination=new URL(c.offer==='buyer'?'/buy':c.offer==='compare'?'/sell?seller_option=compare':'/home-value','https://www.askmagicmike.com');
     for(const [k,v] of Object.entries({utm_source:platform,utm_medium:'organic_social',utm_campaign:'amm_seller_buyer_launch_2026',utm_content:`${c.offer}_${platform}`})) destination.searchParams.set(k,v);
     const action=platform==='facebook'?`\n\n${destination.href}`:`\n\n${c.cta} through the website link in our profile.`;
-    items.push({id:c.id,platform,category:c.category,text:c.caption+action,destination:destination.href,policyVersion:policy.version,rights:content.rights,sourceReferences:content.sourceReferences,aiAssisted:true,dueAt:easternNoon(date.toISOString().slice(0,10)),assets:names.map(name=>{
+    items.push({id:c.id,platform,category:c.category,text:c.caption+(edition==='owned-launch-v2'?'\n\nIllustrative brand imagery—not a listing.':'')+action,destination:destination.href,policyVersion:policy.version,rights:content.rights,sourceReferences:content.sourceReferences,aiAssisted:true,requiresAiDisclosure:edition==='owned-launch-v2',dueAt:easternNoon(date.toISOString().slice(0,10)),assets:names.map(name=>{
       const file=manifest.files.find(f=>f.name===name); if(!file) throw Error('rendered_asset_missing');
-      return {url:`https://www.askmagicmike.com/social/owned-launch-v1/${name}`,sha256:file.sha256,type:video?'video':'image',alt:`${c.title.join(' ')} ${c.points.join(' ')} Our Town Properties, Inc.`};
+      return {url:`https://www.askmagicmike.com/social/${edition}/${name}`,sha256:file.sha256,type:video?'video':'image',alt:`${c.title.join(' ')} ${c.points.join(' ')} Our Town Properties, Inc.${edition==='owned-launch-v2'?' Illustrative brand imagery, not a listing.':''}`};
     })});
   }
 }

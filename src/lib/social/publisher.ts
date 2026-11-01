@@ -9,6 +9,8 @@ export interface SocialItem {
   sourceReferences: string[]; rights: "approved_owned"; policyVersion: string;
   assets: { url: string; sha256: string; type: "image" | "video"; alt: string }[];
   dueAt: string; aiAssisted: boolean;
+  // Writing assistance is distinct from realistic synthetic/concept visual media.
+  requiresAiDisclosure?: boolean;
 }
 export interface Channel {
   platform: Platform; id: string; accountId: string; ownerVerifiedAt: string;
@@ -47,7 +49,7 @@ function validPublicUrl(raw: string, media = false) {
   try {
     const u = new URL(raw);
     if (u.origin !== "https://www.askmagicmike.com" || u.hash || u.username || u.password) return false;
-    if (media) return /^\/social\/owned-launch-v1\/[a-z0-9-]+\.(jpg|mp4)$/.test(u.pathname) && !u.search;
+    if (media) return /^\/social\/owned-launch-v[12]\/[a-z0-9-]+\.(jpg|mp4)$/.test(u.pathname) && !u.search;
     if (!["/home-value", "/buy", "/sell"].includes(u.pathname)) return false;
     const allowed = new Set(["seller_option", "utm_source", "utm_medium", "utm_campaign", "utm_content"]);
     const keys = [...u.searchParams.keys()];
@@ -75,6 +77,8 @@ export function holdReason(policy: Policy, item: SocialItem, now: Date): string 
   if (new URL(item.destination).searchParams.get("utm_source") !== item.platform) return "attribution_platform_mismatch";
   if (item.platform !== "facebook" && !channel.profileLinkVerified) return "clickable_profile_destination_unverified";
   if (!channel.disclosureVerified) return "required_disclosure_unverified";
+  const unsupportedLabel = item.platform === "facebook" || (item.platform === "tiktok" && item.assets.some(a => a.type !== "video"));
+  if (item.requiresAiDisclosure && unsupportedLabel) return "native_ai_disclosure_required_for_this_format";
   if (!Number.isFinite(Date.parse(item.dueAt)) || Date.parse(item.dueAt) < +now + 60_000 || Date.parse(item.dueAt) > +now + 8 * 86400_000) return "schedule_outside_window";
   return null;
 }

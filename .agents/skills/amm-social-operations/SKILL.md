@@ -28,6 +28,15 @@ Check current scope and entitlement, not historical Free labels or login success
 - Native tags, clickable profile links, commercial disclosures and automatic
   format support require actual capability evidence. Plain text is not a native
   tag, and reminder publishing is not automatic publishing.
+- A direct Instagram connection can work without comment access; one observed
+  generic failure resolved with a single same-scope retry. Do not silently widen
+  grants or claim a proven cause. Facebook defaults can include unrelated Pages,
+  businesses and ad permissions: never accept those wholesale for this task.
+- Keep realistic concept-media disclosure separate from AI-assisted writing.
+  Verify the actual provider's native flag per platform/format. Unsupported
+  disclosure formats remain held, not falsely labeled non-AI. Retain old public
+  asset URLs when a new photographic edition is created; preserve the likeness,
+  label illustrative scenes and strip source EXIF/GPS/private paths.
 
 ## Execute only the verified path
 

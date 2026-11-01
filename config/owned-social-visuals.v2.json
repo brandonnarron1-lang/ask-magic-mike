@@ -1,0 +1,22 @@
+{
+  "version": "amm.owned-social.visuals.v2",
+  "edition": "owned-launch-v2",
+  "direction": "Photographic, cinematic, modern sans-serif; no ornamental boxes or faux luxury borders",
+  "palette": { "ink": "#080b0d", "cream": "#f8f3e9", "gold": "#d9af52", "ruby": "#94334a", "cyan": "#24bed8" },
+  "font": "Avenir Next",
+  "logo": "public/images/ask-magic-mike/brand-pack-v2/our-town-logo-clean.png",
+  "sourceProvenance": "Owner-supplied brand/concept imagery. Locations, properties and documentary scene authenticity not established. No listing/availability/transaction claim.",
+  "conceptLabel": "Brand concept imagery · Not a listing",
+  "identityRule": "Use the supplied image pixels; no face/body reconstruction, retouch, animation, voice or synthetic action",
+  "currentConsumerPaths": { "seller": "/home-value", "buyer": "/buy", "compare": "/sell?seller_option=compare", "other_questions": "/ask" },
+  "widerNeeds": "Rental, investment, land/build and other questions remain factual inquiries through existing supported paths. Do not invent listings, inventory, eligibility, coverage or a new specialist service.",
+  "headlines": {
+    "01-your-next-move": ["Your next move.", "Start here."],
+    "02-value-conversation": ["More clarity.", "Less guessing."],
+    "03-seller-preparation": ["Before the sign.", "Get perspective."],
+    "04-selling-options": ["Different paths.", "Your priorities."],
+    "05-buyer-readiness": ["Find your place.", "Start your plan."],
+    "06-after-your-request": ["Your question.", "A human next step."],
+    "07-not-an-appraisal": ["Start with facts.", "Keep perspective."]
+  }
+}

@@ -1,0 +1,370 @@
+{
+  "version": "amm.owned-social.visuals.v2",
+  "generatedAt": "2026-11-01T23:12:49.038Z",
+  "renderer": "Existing SVG + Sharp and FFmpeg, owner-supplied source pixels; no generation/retouch/audio",
+  "stillsOnly": false,
+  "identity": "Use the supplied image pixels; no face/body reconstruction, retouch, animation, voice or synthetic action",
+  "provenance": "Owner-supplied brand/concept imagery. Locations, properties and documentary scene authenticity not established. No listing/availability/transaction claim.",
+  "fonts": "Installed Avenir Next rasterized; no font binaries redistributed",
+  "sourceImages": [
+    {
+      "role": "wide",
+      "originalSha256": "1b39ca6e383f0e513f0ccb022d0d88bdfb086982b7887dbfb88fe930f0a48865",
+      "file": "source-wide.jpg",
+      "width": 1182,
+      "height": 665,
+      "rights": "owner_supplied_brand_use",
+      "provenance": "Owner-supplied brand/concept imagery. Locations, properties and documentary scene authenticity not established. No listing/availability/transaction claim."
+    },
+    {
+      "role": "portrait",
+      "originalSha256": "7086dd879ba181856a5fccd76ee7986a7fd29f74f96f6f6233c036f584247d0f",
+      "file": "source-portrait.jpg",
+      "width": 665,
+      "height": 1182,
+      "rights": "owner_supplied_brand_use",
+      "provenance": "Owner-supplied brand/concept imagery. Locations, properties and documentary scene authenticity not established. No listing/availability/transaction claim."
+    },
+    {
+      "role": "avatar",
+      "originalSha256": "62817350a3f34f87b1253299a2949309ec76c4f3727ae235fa7205169c2fbd2f",
+      "file": "source-avatar.jpg",
+      "width": 886,
+      "height": 886,
+      "rights": "owner_supplied_brand_use",
+      "provenance": "Owner-supplied brand/concept imagery. Locations, properties and documentary scene authenticity not established. No listing/availability/transaction claim."
+    },
+    {
+      "role": "interior",
+      "originalSha256": "4b32468f7aec47b20306182a01eb5c67a3c2125e48b5b9cf4d00c1b1688343e9",
+      "file": "source-interior.jpg",
+      "width": 1182,
+      "height": 665,
+      "rights": "owner_supplied_brand_use",
+      "provenance": "Owner-supplied brand/concept imagery. Locations, properties and documentary scene authenticity not established. No listing/availability/transaction claim."
+    }
+  ],
+  "sources": [
+    {
+      "file": "config/owned-social-content.json",
+      "sha256": "73f68ed48564497f66473146ba4fcb24edbc4a9d204821c5782ae2eece2a3242"
+    },
+    {
+      "file": "config/owned-social-visuals.v2.json",
+      "sha256": "8cbc10b0287211d9e1e636096faf065f964529e05c8a1ea33d479af181b0e92e"
+    },
+    {
+      "file": "public/images/ask-magic-mike/brand-pack-v2/our-town-logo-clean.png",
+      "sha256": "294e5ed44a2a4917a49083978f8493a2770369638c5c3da98634c9faa7d72c8a"
+    }
+  ],
+  "files": [
+    {
+      "name": "source-wide.jpg",
+      "sha256": "184a340c4d0b9fe685b59b95802a9b34eccbb60fc85981ff37217281989d15f8",
+      "bytes": 248101,
+      "width": 1182,
+      "height": 665
+    },
+    {
+      "name": "source-portrait.jpg",
+      "sha256": "32cc05e5dfc9661b03c389f9ddeb0e57860a566049e5b12c85c1493ad3e550a3",
+      "bytes": 218546,
+      "width": 665,
+      "height": 1182
+    },
+    {
+      "name": "source-avatar.jpg",
+      "sha256": "e2ab048be2980d148adcfcb2d53af8dcf9b8284fe0d72cd8d5fad96e9e81fb42",
+      "bytes": 183543,
+      "width": 886,
+      "height": 886
+    },
+    {
+      "name": "source-interior.jpg",
+      "sha256": "b503e2f9fbdb5ee82fd4c6b8964f23e1e40b18291d52a8d3dde828cbf1a7fb82",
+      "bytes": 155875,
+      "width": 1182,
+      "height": 665
+    },
+    {
+      "name": "01-your-next-move-feed.jpg",
+      "sha256": "061a3acbab138f99143239c8584e98a6891fb999aa7116f8b1ec8c5c94876982",
+      "bytes": 206998,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "01-your-next-move-story.jpg",
+      "sha256": "08b6bb8ca54b2b130bebc06aaebf43bfd2e7e8103d343e678d2220a6508607d0",
+      "bytes": 238915,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move-frame-1.jpg",
+      "sha256": "a745d29c157f2c212b5c0c1186d632b6882d8c01ff5ce59e731f59ab7da4dff8",
+      "bytes": 226767,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move-frame-2.jpg",
+      "sha256": "40c0aa2f661d464fb8d1997430045bf2588acdcfdaaaecb59a06440c33ad9371",
+      "bytes": 227593,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move-frame-3.jpg",
+      "sha256": "19256b8c6a685a495a7690e5fa5fdc0ab656e6ba9a80c0215077067ede40dc52",
+      "bytes": 227207,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move.mp4",
+      "sha256": "90c87b448df185327926b024cd84ddf106952238f7b8340fc4aa5bd775ec7b01",
+      "bytes": 1240967
+    },
+    {
+      "name": "02-value-conversation-feed.jpg",
+      "sha256": "a84e6fb520dc39a1850145d828cb563ec6625fb02cb404b123038113bbfa0ad2",
+      "bytes": 210387,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "02-value-conversation-story.jpg",
+      "sha256": "ddba1a53fdede8b09e8e1bf8744817fe637d997a6679ebe44a40f3e7e0861e5f",
+      "bytes": 242823,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "02-value-conversation-slide-1.jpg",
+      "sha256": "56b1316309a2af76df716a6abb2c48d1a897db6d321ec3feaf09600fc0305634",
+      "bytes": 195618,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "02-value-conversation-slide-2.jpg",
+      "sha256": "87567d08ee834a423587041653be728ef1be4dab03a8bebdfb774a57550a09e9",
+      "bytes": 196284,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "02-value-conversation-slide-3.jpg",
+      "sha256": "278bf45f17bd3c2ca34716940a449ce74575361a9cbc38899ff72532e6ce0066",
+      "bytes": 194987,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-feed.jpg",
+      "sha256": "c130f4651a374a055158c4b1e3b0069ae8463398b5fb24af471e7145afc5732e",
+      "bytes": 212276,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-story.jpg",
+      "sha256": "5ca3c0844f8ff5ee462500f276d35bfa315f6ae78e17a9ec928ea6d8b12e20ad",
+      "bytes": 245170,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "03-seller-preparation-slide-1.jpg",
+      "sha256": "29d9415fe2467c96024368f43ef59a174abecfaffdb002f25a5775d55b5b9194",
+      "bytes": 197855,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-slide-2.jpg",
+      "sha256": "9398472470542e247dcd7da567528f08e6fe8cd9af9eb8668305c740527a0cff",
+      "bytes": 197803,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-slide-3.jpg",
+      "sha256": "b84899c2fd35327aceb8925516f425a67ad2cbcb52520433a4ba82e761d611cf",
+      "bytes": 198689,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "04-selling-options-feed.jpg",
+      "sha256": "ec3014e58e73c6f86ab576217a6d4d6054711958565fbed0953f013ef1cdf96e",
+      "bytes": 211685,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "04-selling-options-story.jpg",
+      "sha256": "a3972143dc119757a868ba897e5c03dcb0ef46b073d5f6ea9833f8c509938ad4",
+      "bytes": 243746,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options-frame-1.jpg",
+      "sha256": "34763a88e08dc103433e4934c4c42282a49992a6311c1d89b2c7ad5b7744ac43",
+      "bytes": 228340,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options-frame-2.jpg",
+      "sha256": "4872ce84e2e9bf45dbfeebe0a3623ca7bb938b2f4dbce7dd59783c323662c037",
+      "bytes": 230500,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options-frame-3.jpg",
+      "sha256": "21bb571d14592e0261ca2e1f27475e3f563b60e231f2b192e5d08361d310b406",
+      "bytes": 230532,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options.mp4",
+      "sha256": "b319e29994ea13f810816742fe6cc84b69ff5241a9dd99d1255929f7d30eb351",
+      "bytes": 1250054
+    },
+    {
+      "name": "05-buyer-readiness-feed.jpg",
+      "sha256": "f943c82e961197ab5cee5026d11ff55bc8c856479179ed3656058e600f7f567c",
+      "bytes": 206985,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "05-buyer-readiness-story.jpg",
+      "sha256": "ba4047b5de41ce941ba19b3778a42956eb745a8dfe39f7e7745e3c36df182a4a",
+      "bytes": 238990,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "05-buyer-readiness-slide-1.jpg",
+      "sha256": "ce6dbc4c91bdf464608867d9d634f93c316bc3c73f50f4883b2f1fc53c58b9cf",
+      "bytes": 194201,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "05-buyer-readiness-slide-2.jpg",
+      "sha256": "8c4847444f14242e022c2d961d5f9d3b8e2d405ef0bcbf3e58501a919ef917fb",
+      "bytes": 193776,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "05-buyer-readiness-slide-3.jpg",
+      "sha256": "3d5fcf7b49bcf476f4b795474bc99a888cbd5ca295504579edbebc8e7aa3b01f",
+      "bytes": 193038,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "06-after-your-request-feed.jpg",
+      "sha256": "5d3b633bbec722229c6a0bcec778e7861eaf49da30cd9dfae183ca913e28f6f4",
+      "bytes": 214321,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "06-after-your-request-story.jpg",
+      "sha256": "3be6bff3f69c31007658df020f6e62b12c2c6326230f960956b28fc6e11eed41",
+      "bytes": 247757,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request-frame-1.jpg",
+      "sha256": "98b54d6a05f19442e808b18129367c0951dfbc06784826514ae189166112f684",
+      "bytes": 233358,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request-frame-2.jpg",
+      "sha256": "2df49561b93a15ea36655a2c51d5c41daa807d1bbb4b2fa7898355fe1056451d",
+      "bytes": 233417,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request-frame-3.jpg",
+      "sha256": "491733b359d3d53eac9da31a94cdadb6f860ac5d5c3066be14fbe0b6a9fde4f6",
+      "bytes": 232992,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request.mp4",
+      "sha256": "09eb65f2a688c8d246fd99a0bc2965366426549f0ce6672ea1fe8586741ac36d",
+      "bytes": 1269118
+    },
+    {
+      "name": "07-not-an-appraisal-feed.jpg",
+      "sha256": "42bd7f9dd81e63186120417864eafadd98c3cac182f0191ca06f2229598472d6",
+      "bytes": 215447,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "07-not-an-appraisal-story.jpg",
+      "sha256": "1bb5d0bdce3395a2693e75036f7d4a2331dc718a087ef0cf53543a5cc906f94f",
+      "bytes": 248143,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal-frame-1.jpg",
+      "sha256": "3eca1b7aeed1c95e9ab336e982815bc905f5ade9082e2735c9abfb4eb5eb02ea",
+      "bytes": 233762,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal-frame-2.jpg",
+      "sha256": "695b66440466a7a21ce9832f4f35fde0f9f3830c2f305619c3e51bc3ffd9954a",
+      "bytes": 234512,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal-frame-3.jpg",
+      "sha256": "0b933f2df39fe92d1a1de4fb17be118bcd60269d2d7974b5cc72f2903950d17e",
+      "bytes": 235114,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal.mp4",
+      "sha256": "b0f7b754e3fb659a814136cbb5f0140623fa8ad736000e87b3900ea7233ddd13",
+      "bytes": 1263649
+    },
+    {
+      "name": "profile.jpg",
+      "sha256": "532974ff11bed27a426dc7ccaf4cb5e2c411ddf84f9fb7ace6b41ac427a2f84f",
+      "bytes": 204665,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "name": "facebook-cover.jpg",
+      "sha256": "f5f9872bce2b488f992ddae74fd499a53f65a13a48517440bdb3e5dac4a6e608",
+      "bytes": 185150,
+      "width": 1640,
+      "height": 624
+    }
+  ]
+}
