@@ -30,6 +30,9 @@ Private implementation/gate/release packet location:
 
 ## November1 owned-social continuation — source review, activation held
 
+Current release authority remains `config/release-authority-policy.json` plus
+authenticated `pnpm release:authority:resolve`, not an approval below by itself.
+
 The submitted owned-social mandate authorizes three new owner-controlled brand
 accounts, $0 organic content, one verified Free publisher and a bounded durable
 replenisher. It does not authorize personal-profile substitution, consumer sends,

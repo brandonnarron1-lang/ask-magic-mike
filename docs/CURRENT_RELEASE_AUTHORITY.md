@@ -1,5 +1,9 @@
 # Current Release Authority
 
+Use `config/release-authority-policy.json` and authenticated
+`pnpm release:authority:resolve` for current decisions. Dated snapshots below
+do not replace that resolver or authorize replaying a consumed approval.
+
 ## November1 observed accepted baseline and held social candidate
 
 The latest focused authenticated receipt resolved PR316 accepted25/25 at
