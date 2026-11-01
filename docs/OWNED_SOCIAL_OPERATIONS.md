@@ -106,6 +106,9 @@ are proposals, not booked slots. The initial seven concepts are a finite library
 the seven backlog ideas require completed, eligible media/copy before refill.
 No infinite duplicate recycling or paid model fallback. Exhaustion must hold and
 notify the operator; it is not evidence of a replenishing autonomous operation.
+R2's source registry and its marketing=false grant remain unchanged. The social
+offers use the existing owner-approved kit under a separate advertising gate,
+not a promotion or rights expansion of an intelligence source.
 Weekly review is marked in the same run (Monday); future evidence is not claimed.
 The existing owner GitHub workflow-failure notification is the proposed alert
 path, not a new email transport. Its delivery has NOT been tested.
@@ -136,6 +139,11 @@ Recovery: pause and reconcile/cancel remote queued posts first. App rollback
 retains PR316 privacy, permission reader, S2 guards and v6 readers/data. No DB
 rollback/migration. App rollback cannot retract a real public post or cancel a
 provider queue; these are separate operations with retained evidence.
+
+Hosted review exposed a dated positive SQL fixture: its October17 observation
+with a360-hour window expired November1at21:05:48.635UTC. Only the new synthetic
+observation constructor is corrected; old-date denial remains explicitly tested.
+No runtime source timestamp, grant, freshness rule or assertion was relaxed.
 
 ## Paid test — prepared, not activated
 

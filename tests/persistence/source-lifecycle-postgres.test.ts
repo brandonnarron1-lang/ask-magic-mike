@@ -5,10 +5,14 @@ import {startDatabase,stopDatabase,install,psql,bind,localQuery,dumpAndRestoreSy
 import {approvedPublicSources,approvedPublicPassages} from "../../src/lib/intelligence/public-knowledge";
 import {stageSource,validateCandidate,sourceTransition,readSourceSet,governedReply,sourceRefsValid,refreshSource} from "../../src/lib/intelligence/source-lifecycle";
 import {experienceContract} from "../../app/lib/experienceContract";
+import {freshSyntheticSourceSnapshot} from "../support/fresh-owned-source";
 import {WORKER_VERSION,currentWorkerSourceVersions,enqueueWorker,runOneWorker,workerRoles,type WorkerJob,type WorkerPrincipal} from "../../src/lib/intelligence/bounded-workers";
 let actor="synthetic-source-admin";
 const id="ourtown-experience";
-const snapshot=()=>({source:{...approvedPublicSources[0]},passages:approvedPublicPassages});
+// New isolated observations must not inherit the dated bundled fetchedAt.
+// In particular, the 360h positive case expired on Nov1; expiry/denial tests
+// below still construct explicit old dates and all assertions remain intact.
+const snapshot=()=>freshSyntheticSourceSnapshot();
 const revision=()=>Number(psql("SELECT revision FROM intelligence_sources WHERE id='ourtown-experience'"));
 const action=(name:string,input:Record<string,unknown>={},rev=revision(),request=randomUUID())=>sourceTransition(localQuery,actor,request,id,rev,name,input);
 const counts=()=>psql("SELECT jsonb_build_object('leads',(SELECT count(*) FROM leads),'tasks',(SELECT count(*) FROM tasks),'appointments',(SELECT count(*) FROM lead_appointments),'outbox',(SELECT count(*) FROM lead_notifications))");
