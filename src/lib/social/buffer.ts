@@ -1,4 +1,5 @@
 import type { Channel, Intent, Provider, RemotePost, PublicationState } from "./publisher";
+import { requiresNativeAiDisclosure } from "./publisher";
 
 // Current GraphQL API, verified against https://developers.buffer.com/reference.html.
 // No legacy REST calls, experimental analytics, customer data, automatic retries,
@@ -55,8 +56,9 @@ export class BufferProvider implements Provider {
     // The current API exposes this label for Instagram and TikTok video, not
     // Facebook or TikTok photos. Never silently mark concept imagery as false.
     const unsupportedLabel = item.platform === "facebook" || (item.platform === "tiktok" && item.assets.some(a => a.type !== "video"));
-    if (item.requiresAiDisclosure && unsupportedLabel) throw new Error("native_ai_disclosure_required_for_this_format");
-    const metadata = item.platform === "instagram" ? { instagram: { type: item.assets.some(a => a.type === "video") ? "reel" : "post", shouldShareToFeed: true, isAiGenerated: item.requiresAiDisclosure === true } } : item.platform === "facebook" ? { facebook: { type: item.assets.some(a => a.type === "video") ? "reel" : "post" } } : { tiktok: { isAiGenerated: item.requiresAiDisclosure === true } };
+    const disclose = requiresNativeAiDisclosure(item);
+    if (disclose && unsupportedLabel) throw new Error("native_ai_disclosure_required_for_this_format");
+    const metadata = item.platform === "instagram" ? { instagram: { type: item.assets.some(a => a.type === "video") ? "reel" : "post", shouldShareToFeed: true, isAiGenerated: disclose } } : item.platform === "facebook" ? { facebook: { type: item.assets.some(a => a.type === "video") ? "reel" : "post" } } : { tiktok: { isAiGenerated: disclose } };
     const input = { channelId: intent.channelId, text: item.text, assets: item.assets.map(a => a.type === "image" ? { image: { url: a.url, metadata: { altText: a.alt } } } : { video: { url: a.url, metadata: { thumbnailOffset: 1000 } } }), dueAt: item.dueAt, mode: "customScheduled", schedulingType: "automatic", needsApproval: false, saveToDraft: false, aiAssisted: item.aiAssisted, source: "amm-owned-social-v1", metadata };
     const d = await this.request(`mutation($input:CreatePostInput!){createPost(input:$input){__typename ... on PostActionSuccess{post{${fields}}}}}`, { input });
     const n = d.createPost?.post;

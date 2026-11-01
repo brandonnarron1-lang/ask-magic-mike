@@ -63,6 +63,12 @@ function validPublicUrl(raw: string, media = false) {
       (u.pathname !== "/sell" || u.searchParams.get("seller_option") === "compare");
   } catch { return false; }
 }
+export function requiresNativeAiDisclosure(item: Pick<SocialItem, "requiresAiDisclosure" | "assets">) {
+  // The reviewed concept edition cannot be relabeled by omitting/clearing a
+  // caller flag. Use the same decision in the policy gate and provider adapter.
+  return item.requiresAiDisclosure === true || item.assets.some(asset =>
+    validPublicUrl(asset.url, true) && new URL(asset.url).pathname.startsWith("/social/owned-launch-v2/"));
+}
 export function holdReason(policy: Policy, item: SocialItem, now: Date): string | null {
   const channel = policy.channels.find(c => c.platform === item.platform);
   if (policy.masterPaused) return "master_paused";
@@ -78,7 +84,7 @@ export function holdReason(policy: Policy, item: SocialItem, now: Date): string 
   if (item.platform !== "facebook" && !channel.profileLinkVerified) return "clickable_profile_destination_unverified";
   if (!channel.disclosureVerified) return "required_disclosure_unverified";
   const unsupportedLabel = item.platform === "facebook" || (item.platform === "tiktok" && item.assets.some(a => a.type !== "video"));
-  if (item.requiresAiDisclosure && unsupportedLabel) return "native_ai_disclosure_required_for_this_format";
+  if (requiresNativeAiDisclosure(item) && unsupportedLabel) return "native_ai_disclosure_required_for_this_format";
   if (!Number.isFinite(Date.parse(item.dueAt)) || Date.parse(item.dueAt) < +now + 60_000 || Date.parse(item.dueAt) > +now + 8 * 86400_000) return "schedule_outside_window";
   return null;
 }
