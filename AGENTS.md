@@ -6,6 +6,9 @@ canonical Neon runtime.
 
 - For contact-readiness, consent evidence or permission-review work, use
   [amm-permission-review](.agents/skills/amm-permission-review/SKILL.md).
+- For owned organic social setup/publication, use
+  [amm-social-operations](.agents/skills/amm-social-operations/SKILL.md) and
+  `docs/OWNED_SOCIAL_OPERATIONS.md`; existing intelligence workers stay draft-only.
 - Brandon operates and tests the product. Lead ownership does not require Mike
   or another agent to join development, QA or an approval ceremony. Verify the
   actual current account's scope; never impersonate the owner of a lead.

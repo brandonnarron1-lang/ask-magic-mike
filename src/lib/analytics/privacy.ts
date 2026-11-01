@@ -141,6 +141,7 @@ const PUBLIC_ATTRIBUTION_VALUE_REGISTRY: Record<PublicAttributionKey, ReadonlySe
     "staff_share",
     "test",
     "threads",
+    "tiktok",
     "video",
     "x",
     "youtube",

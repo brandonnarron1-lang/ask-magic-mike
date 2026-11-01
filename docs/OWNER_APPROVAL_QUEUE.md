@@ -28,6 +28,27 @@ merely by preparing this correction. Cleaner QA copy remains separately unsent.
 Private implementation/gate/release packet location:
 `.amm-run/home-value-lead-loop-20261029/solo-operator-readiness-20261031/`.
 
+## November1 owned-social continuation — source review, activation held
+
+The submitted owned-social mandate authorizes three new owner-controlled brand
+accounts, $0 organic content, one verified Free publisher and a bounded durable
+replenisher. It does not authorize personal-profile substitution, consumer sends,
+paid creative/ads, new model usage, fabricated BIC approval or bypassed platform
+security/Terms. PR316 is accepted; its consumed release/QA approval is not reused.
+
+`config/owned-social-policy.json` remains master-paused, without account IDs,
+publisher entitlement or standing brokerage evidence. The workflow is an inactive
+review template outside `.github/workflows`. No scheduler, secret, state ref,
+account, post, hosted Preview or application release is claimed. The exact
+source/activation packet is retained privately under
+`.amm-run/home-value-lead-loop-20261029/owned-social-launch-20261101/`.
+
+Actual next gates: owner account credential/Terms steps; genuine brokerage
+standing advertising scope; verified Free publisher/runtime capacity; then the
+normal exact-source hosted/protected release and separate secret/runtime
+installation controls. See `OWNED_SOCIAL_OPERATIONS.md` for the prepared scope,
+caps, pause/recovery, actual account boundaries and deliberately paused paid test.
+
 ## October31 owner execution authority — completed bounded effects
 
 Brandon's direct October31 instruction explicitly authorized the two exact
