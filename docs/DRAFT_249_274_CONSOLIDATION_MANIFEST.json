@@ -1,0 +1,2516 @@
+{
+  "schema_version": "amm.draft_consolidation.v1",
+  "generated_at": "2026-09-29T18:34:00Z",
+  "status": "DRAFT_REPLACEMENTS_BUILT_AND_VERIFIED",
+  "repository": "https://github.com/brandonnarron1-lang/ask-magic-mike.git",
+  "current_main": {
+    "commit": "a2f3de834830f600df106dbf5836ae4bbde4eb4a",
+    "tree": "0065f829fc94f87ab5e0faf596c8e56733be3972"
+  },
+  "accepted_production": {
+    "pr": 247,
+    "deployment": "dpl_7csaKS8Nnzci282Ru4L6hJvhGp3U",
+    "rollback_deployment": "dpl_61ZVKAYFKZdMYvcVprU1UrL1EvGe"
+  },
+  "execution_status": {
+    "merge_order": ["A", "D", "B", "C"],
+    "next_application_decision": {
+      "batch": "A",
+      "pr": 278,
+      "head": "65a09dc0137b97bda407ee24b0914e8f9bffd9c0",
+      "tree": "5775ba6a315abde9bbe55f770ccda2a64f897362"
+    },
+    "connector_pr": 248,
+    "consumer_ack_pr": 275,
+    "production_mutations_executed": 0
+  },
+  "scope": {
+    "first_pr": 249,
+    "last_pr": 274,
+    "count": 26,
+    "assigned_to_replacement_count": 25,
+    "evidence_only_prs": [267]
+  },
+  "policy": "Do not merge the stack sequentially. Preserve old Drafts until replacement batches are accepted and separately approved for archival.",
+  "replacement_batches": {
+    "A": {
+      "name": "RELEASE TRUTH + INGRESS HARDENING",
+      "replacement_pr": 278,
+      "replacement_head": "65a09dc0137b97bda407ee24b0914e8f9bffd9c0",
+      "replacement_tree": "5775ba6a315abde9bbe55f770ccda2a64f897362",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION",
+      "prs": [
+        249,
+        250,
+        251,
+        252,
+        265,
+        266,
+        268,
+        269,
+        270,
+        271
+      ]
+    },
+    "B": {
+      "name": "DURABLE NOTIFICATION OPERATIONS",
+      "replacement_pr": 279,
+      "replacement_head": "131072e619eff72882c91931b60b8e93080d1280",
+      "replacement_tree": "a30a239d25d5a577130433999b48d48ea05ba9af",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION_MIGRATION_SEPARATE",
+      "prs": [
+        258,
+        260,
+        261,
+        262,
+        263,
+        264,
+        272
+      ]
+    },
+    "C": {
+      "name": "SMS CONSENT/STATUS FOUNDATION",
+      "replacement_pr": 277,
+      "replacement_head": "a2b5acf01006e3105d746cf8d8ca4da653d75cec",
+      "replacement_tree": "99910b7988daaef012d3b567a9897faa7c6b016b",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION_PROVIDER_DISABLED",
+      "prs": [
+        273,
+        274
+      ],
+      "provider_enabled": false
+    },
+    "D": {
+      "name": "WORDPRESS / OPEN-HOUSE / RENTAL PLACEMENT READINESS",
+      "replacement_pr": 280,
+      "replacement_head": "d1b2aa4219eb6176b6e0607d38f4fd822e0dcbf6",
+      "replacement_tree": "e5d11221e611268c8bc12909cd86f5a189cdaaae",
+      "replacement_status": "VERIFIED_NOT_PRODUCTION",
+      "prs": [
+        253,
+        254,
+        255,
+        256,
+        257,
+        259
+      ]
+    }
+  },
+  "entries": [
+    {
+      "pr": 249,
+      "title": "fix: make Production launch authority consume secret-safe Vercel evidence",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/249",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/wordpress-connector-attribution-v1-1-0-20260901",
+        "sha": "f6134b71f258003aa5dc201cf5ef7cdb6eb61ee7"
+      },
+      "head": {
+        "branch": "codex/launch-authority-vercel-evidence-20260901",
+        "sha": "3ef287adade6184a46953e571ec4c91c8780cd72",
+        "tree": "9055d2254032d2da11bcc1bae00fb137ce55dc4d"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "8789ebab5531f8cb52faefe2f1101f26de221845",
+          "subject": "fix: verify production env names in launch authority"
+        },
+        {
+          "sha": "3ef287adade6184a46953e571ec4c91c8780cd72",
+          "subject": "fix: harden secret-safe Vercel manifest parsing"
+        }
+      ],
+      "commits_ahead_of_current_main": 6,
+      "changed_files": [
+        "docs/CHANGELOG.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/VERCEL_ENV_PRESENCE_TRUTH.md",
+        "scripts/amm/launch-authority-report.mjs",
+        "scripts/amm/launch-readiness-doctor.mjs",
+        "tests/scripts/launch-authority-report.test.ts",
+        "tests/scripts/launch-readiness-doctor.test.ts"
+      ],
+      "change_size": {
+        "files": 8,
+        "additions": 314,
+        "deletions": 10
+      },
+      "capability": "Secret-safe Vercel environment-presence evidence in launch authority.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-01T20:59:00Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 250-251 launch-authority scripts; port once into Batch A.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 250,
+      "title": "fix(release): bind launch gates to current Production authority",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/250",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/launch-authority-vercel-evidence-20260901",
+        "sha": "3ef287adade6184a46953e571ec4c91c8780cd72"
+      },
+      "head": {
+        "branch": "codex/current-release-authority-gate-20260901",
+        "sha": "4d2b9860a69077ef667826c64dae6863e88599e9",
+        "tree": "4eb27bc8d8d6ad9815522cf327817202a73c9bf9"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "1e1eaddb4acd74a3651845ad7e9dfa99ba875a19",
+          "subject": "fix(release): bind launch checks to current authority"
+        },
+        {
+          "sha": "0725e109e326e1c7de4a50b6828c2a2aa99d6762",
+          "subject": "merge: refresh PR 250 on hardened launch-authority base"
+        },
+        {
+          "sha": "4d2b9860a69077ef667826c64dae6863e88599e9",
+          "subject": "fix(deps): patch Browserslist security advisories"
+        }
+      ],
+      "commits_ahead_of_current_main": 9,
+      "changed_files": [
+        "docs/CHANGELOG.md",
+        "docs/DOCUMENTATION_AUTHORITY.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/PRODUCTION_RELEASE_LOG.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/VERCEL_ENV_PRESENCE_TRUTH.md",
+        "package.json",
+        "pnpm-lock.yaml",
+        "scripts/amm/launch-authority-report.mjs",
+        "scripts/amm/launch-readiness-doctor.mjs",
+        "tests/scripts/current-release-authority-docs.test.ts",
+        "tests/scripts/launch-readiness-doctor.test.ts",
+        "tests/security/production-dependency-overrides.test.ts"
+      ],
+      "change_size": {
+        "files": 13,
+        "additions": 366,
+        "deletions": 59
+      },
+      "capability": "Bind release gates to the accepted Production authority and refresh dependency overrides.",
+      "migrations": [],
+      "env_config_changes": [
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-01T21:27:54Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 249 and 251 authority/dependency work; re-evaluate dependency pins.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": "Dependency overrides must be re-audited against the current lockfile.",
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 251,
+      "title": "fix(ops): make launch command center current and fail closed",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/251",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/current-release-authority-gate-20260901",
+        "sha": "4d2b9860a69077ef667826c64dae6863e88599e9"
+      },
+      "head": {
+        "branch": "codex/current-operator-command-center-20260901",
+        "sha": "13231b1eb55448b63df3028d644ed70b1fa6d2d7",
+        "tree": "a71759d943759cd90ca51713312d2550fba87fd8"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "611a30ac4f8f90c830169fcd88854ea5728f2b55",
+          "subject": "fix(ops): make launch command center current and fail closed"
+        },
+        {
+          "sha": "13231b1eb55448b63df3028d644ed70b1fa6d2d7",
+          "subject": "Merge remote-tracking branch 'origin/codex/current-release-authority-gate-20260901' into codex/current-operator-command-center-20260901"
+        }
+      ],
+      "commits_ahead_of_current_main": 11,
+      "changed_files": [
+        "docs/CHANGELOG.md",
+        "docs/CONTROLLED_LAUNCH_RUNBOOK.md",
+        "docs/CONTROLLED_TRAFFIC_ACTIVATION.md",
+        "docs/CURRENT_STATE_RECONCILIATION.md",
+        "docs/DOCUMENTATION_AUTHORITY.md",
+        "docs/GO_LIVE_RUNBOOK.md",
+        "docs/GO_NO_GO_COMMAND_CENTER.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/OWNER_ACTION_PROOF_PACK.md",
+        "docs/PRODUCTION_DEPLOY_REHEARSAL.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/VERCEL_ENV_PRESENCE_TRUTH.md",
+        "scripts/amm/launch-authority-report.mjs",
+        "scripts/amm/launch-readiness-doctor.mjs",
+        "tests/scripts/launch-readiness-doctor.test.ts"
+      ],
+      "change_size": {
+        "files": 15,
+        "additions": 1335,
+        "deletions": 1611
+      },
+      "capability": "Fail-closed operator launch command center and current runbooks.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-01T21:49:10Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Runbook evidence is dated; port only live fail-closed logic.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 252,
+      "title": "fix(ask): require consented contact for lead capture",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/252",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/current-operator-command-center-20260901",
+        "sha": "13231b1eb55448b63df3028d644ed70b1fa6d2d7"
+      },
+      "head": {
+        "branch": "codex/ask-followup-consent-hardening-20260901",
+        "sha": "7d40fcc3ba36def760fd3c3abaf6429e8ca27c77",
+        "tree": "76da0b84bfcc5317d093907e46ee7fa71f4f68da"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "5563038cd05c7d1908149b398a91db8062adec1d",
+          "subject": "fix(ask): require consented contact for lead capture"
+        },
+        {
+          "sha": "0c79414e6e7614df6df983e15c3b59c7733d3ada",
+          "subject": "docs(qa): seal ask follow-up preview evidence"
+        },
+        {
+          "sha": "cbb9e89c5b231adfcbb0459bf2531397a13b36fe",
+          "subject": "chore(qa): verify protected previews via Vercel CLI"
+        },
+        {
+          "sha": "0ba4fac4f4d2c673e4d9d4bc1f1af97c570d2d5d",
+          "subject": "docs(qa): seal protected preview release evidence"
+        },
+        {
+          "sha": "5d52d5c13fec6ee61607e101e4225ff373f87d7c",
+          "subject": "test(ask): align browser identity with consented follow-up"
+        },
+        {
+          "sha": "9492c734254a2d99affe828748a1f5df07655cac",
+          "subject": "Merge remote-tracking branch 'origin/codex/current-operator-command-center-20260901' into codex/ask-followup-consent-hardening-20260901"
+        },
+        {
+          "sha": "7d40fcc3ba36def760fd3c3abaf6429e8ca27c77",
+          "subject": "fix(ask): harden consented follow-up boundary"
+        }
+      ],
+      "commits_ahead_of_current_main": 18,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/chat/route.ts",
+        "app/api/leads/route.ts",
+        "app/components/black-diamond/AskMikeChatPanel.tsx",
+        "app/components/black-diamond/LeadConsentField.tsx",
+        "docs/ANALYTICS_EVENT_SPEC.md",
+        "docs/CHANGELOG.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/ASK_CHAT_CONTACTABILITY_HARDENING.md",
+        "docs/preview-qa-checklist.md",
+        "docs/release-gate.md",
+        "scripts/preview-qa-lib.mjs",
+        "scripts/preview-qa.mjs",
+        "scripts/release-candidate-report.mjs",
+        "tests/api/chat-route-security.test.ts",
+        "tests/e2e/ask-flow.spec.ts",
+        "tests/e2e/funnel-event-identity-preview.spec.ts",
+        "tests/leadops/api-leads-route.test.ts",
+        "tests/public/ask-conversion-accessibility.test.tsx",
+        "tests/scripts/preview-qa-current-routes.test.ts",
+        "tests/scripts/preview-qa-lib.test.ts"
+      ],
+      "change_size": {
+        "files": 22,
+        "additions": 1195,
+        "deletions": 106
+      },
+      "capability": "Require contactability and exact consent for Ask/chat lead capture.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-01T22:17:26Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Lead/chat files overlap 265-271; consolidate once in Batch A.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 253,
+      "title": "chore(wordpress): reconcile canonical capture coverage",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/253",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/ask-followup-consent-hardening-20260901",
+        "sha": "7d40fcc3ba36def760fd3c3abaf6429e8ca27c77"
+      },
+      "head": {
+        "branch": "codex/wordpress-capture-consolidation-audit-20260901",
+        "sha": "3e87775182232314cd6862eb2abe3a8e1f59c006",
+        "tree": "77a3756455854174f71b91047c6b316f3890c111"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "c6394f8b55aeed84c809ddef5f43c77a5c030c6c",
+          "subject": "chore(wordpress): reconcile canonical capture coverage"
+        },
+        {
+          "sha": "56b1db86577955962ac5ebba00917ad4d130bc48",
+          "subject": "Merge PR252 exact head into WordPress capture audit"
+        },
+        {
+          "sha": "3e87775182232314cd6862eb2abe3a8e1f59c006",
+          "subject": "fix(wordpress): distinguish audit allowlist states"
+        }
+      ],
+      "commits_ahead_of_current_main": 21,
+      "changed_files": [
+        "CHANGELOG.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md",
+        "scripts/amm/wordpress-surface-audit-lib.mjs",
+        "scripts/audit-wordpress-form-placements.mjs",
+        "tests/wordpress/wordpress-surface-audit.test.mjs"
+      ],
+      "change_size": {
+        "files": 7,
+        "additions": 328,
+        "deletions": 7
+      },
+      "capability": "Read-only WordPress canonical-capture coverage audit.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [
+        "docs/phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md",
+        "scripts/amm/wordpress-surface-audit-lib.mjs",
+        "scripts/audit-wordpress-form-placements.mjs",
+        "tests/wordpress/wordpress-surface-audit.test.mjs"
+      ],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-01T22:38:31Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Audit tooling supports 254-259; keep one canonical auditor.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "D",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 254,
+      "title": "feat: gate Form 7 consent cutover",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/254",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/wordpress-capture-consolidation-audit-20260901",
+        "sha": "3e87775182232314cd6862eb2abe3a8e1f59c006"
+      },
+      "head": {
+        "branch": "codex/form7-consent-cutover-contract-20260901",
+        "sha": "2a462b1bf9effb082e6e460d6ad14fcfc4860258",
+        "tree": "0d7ae4689ebb5d60f98fda73999937f969f5a7b3"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "70aaf71fcfeb26a1caa0545d3e50bd395e289c31",
+          "subject": "feat(wordpress): gate form 7 consent cutover"
+        },
+        {
+          "sha": "a347beaa423ab368ce319ceb05c004cb2303a95b",
+          "subject": "chore: refresh form 7 cutover onto sealed wordpress audit"
+        },
+        {
+          "sha": "1e0611ccee64d6132eec88a870cbf98bdd88db95",
+          "subject": "fix(wordpress): harden consent bridge boundary"
+        },
+        {
+          "sha": "2a462b1bf9effb082e6e460d6ad14fcfc4860258",
+          "subject": "docs(qa): align exact release totals"
+        }
+      ],
+      "commits_ahead_of_current_main": 25,
+      "changed_files": [
+        ".env.example",
+        "app/api/leads/route.ts",
+        "app/lib/leadConsent.ts",
+        "app/lib/leadPayload.ts",
+        "app/lib/wordpressBridgeSignature.ts",
+        "docs/CHANGELOG.md",
+        "docs/ENVIRONMENT_VARIABLE_MATRIX.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/WORDPRESS_INTEGRATION.md",
+        "docs/phase9/WORDPRESS_FORM7_CONSENT_CUTOVER_READINESS_2026-09-01.md",
+        "docs/phase9/form7-live-snapshot-2026-09-01.json",
+        "output/release/ask-magic-mike-canonical-bridge-1.3.0.sha256",
+        "output/release/ask-magic-mike-canonical-bridge-1.3.0.zip",
+        "package.json",
+        "scripts/amm/wordpress-form-cutover-lib.mjs",
+        "scripts/amm/wordpress-form7-cutover-readiness.mjs",
+        "tests/leadops/api-leads-route.test.ts",
+        "tests/leadops/lead-consent-evidence.test.ts",
+        "tests/security/wordpress-bridge-signature.test.ts",
+        "tests/wordpress/canonical-bridge-contract.test.ts",
+        "tests/wordpress/wordpress-form-cutover.test.mjs",
+        "wordpress/ask-magic-mike-canonical-bridge/README.md",
+        "wordpress/ask-magic-mike-canonical-bridge/ask-magic-mike-canonical-bridge.php",
+        "wordpress/ask-magic-mike-canonical-bridge/form-contracts/form-7-property-alert-v1.json"
+      ],
+      "change_size": {
+        "files": 25,
+        "additions": 1441,
+        "deletions": 37
+      },
+      "capability": "Form 7 signed bridge and exact consent cutover package.",
+      "migrations": [],
+      "env_config_changes": [
+        ".env.example",
+        "package.json"
+      ],
+      "provider_changes": [],
+      "wordpress_changes": [
+        "app/lib/wordpressBridgeSignature.ts",
+        "docs/WORDPRESS_INTEGRATION.md",
+        "docs/phase9/WORDPRESS_FORM7_CONSENT_CUTOVER_READINESS_2026-09-01.md",
+        "scripts/amm/wordpress-form-cutover-lib.mjs",
+        "scripts/amm/wordpress-form7-cutover-readiness.mjs",
+        "tests/security/wordpress-bridge-signature.test.ts",
+        "tests/wordpress/canonical-bridge-contract.test.ts",
+        "tests/wordpress/wordpress-form-cutover.test.mjs",
+        "wordpress/ask-magic-mike-canonical-bridge/README.md",
+        "wordpress/ask-magic-mike-canonical-bridge/ask-magic-mike-canonical-bridge.php",
+        "wordpress/ask-magic-mike-canonical-bridge/form-contracts/form-7-property-alert-v1.json"
+      ],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-01T23:33:39Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Parallel canonical bridge package requires explicit consolidation with connector 1.1.0.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": "Do not install a second bridge or activate Form 7 until the canonical connector/bridge boundary is re-decided.",
+      "recommended_disposition": "SEPARATE_GATE",
+      "target_batch": "D",
+      "disposition_reason": "Preserve package, but bridge installation and form cutover require isolated WordPress and secret gates."
+    },
+    {
+      "pr": 255,
+      "title": "fix(wordpress): bind exact page cutovers to rollback and seller decisions",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/255",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/form7-consent-cutover-contract-20260901",
+        "sha": "2a462b1bf9effb082e6e460d6ad14fcfc4860258"
+      },
+      "head": {
+        "branch": "codex/page3952-source-cutover-contract-20260901",
+        "sha": "9f50a261a093e5de433f4b15910e8cbed1e6d561",
+        "tree": "2403d81d686a6f0b55327745cb502fea2f9d00bf"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "a0522c6d3ce57ced280d15d3d2744f0ca4ade4e7",
+          "subject": "fix(wordpress): bind page 3952 cutover to source hash"
+        },
+        {
+          "sha": "9f50a261a093e5de433f4b15910e8cbed1e6d561",
+          "subject": "fix(wordpress): preserve seller CTA and decision gate"
+        }
+      ],
+      "commits_ahead_of_current_main": 27,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/lib/growth/wordpress-activation-change-set.ts",
+        "config/wordpress-page3631-cutover-contract.json",
+        "config/wordpress-page3952-cutover-contract.json",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/phase9/OWNED_DEMAND_READINESS_MAINLINE_QA_EVIDENCE.md",
+        "docs/phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md",
+        "docs/phase9/WORDPRESS_CONNECTOR_ATTRIBUTION_UPGRADE.md",
+        "docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md",
+        "docs/phase9/WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md",
+        "docs/phase9/WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md",
+        "docs/phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md",
+        "package.json",
+        "scripts/amm/wordpress-page-source-cutover-lib.mjs",
+        "scripts/amm/wordpress-page3631-cutover-readiness.mjs",
+        "scripts/amm/wordpress-page3952-cutover-readiness.mjs",
+        "tests/adminops/wordpress-activation-change-set.test.ts",
+        "tests/adminops/wordpress-page3631-cutover-readiness.test.ts",
+        "tests/adminops/wordpress-page3952-cutover-readiness.test.ts",
+        "wordpress/ask-magic-mike-connector/placement-contracts.json"
+      ],
+      "change_size": {
+        "files": 20,
+        "additions": 1516,
+        "deletions": 17
+      },
+      "capability": "Page 3952 and 3631 source-hash cutover and rollback contracts.",
+      "migrations": [],
+      "env_config_changes": [
+        "config/wordpress-page3631-cutover-contract.json",
+        "config/wordpress-page3952-cutover-contract.json",
+        "package.json"
+      ],
+      "provider_changes": [],
+      "wordpress_changes": [
+        "app/lib/growth/wordpress-activation-change-set.ts",
+        "config/wordpress-page3631-cutover-contract.json",
+        "config/wordpress-page3952-cutover-contract.json",
+        "docs/phase9/WORDPRESS_CAPTURE_CONSOLIDATION_RECONCILIATION_2026-09-01.md",
+        "docs/phase9/WORDPRESS_CONNECTOR_ATTRIBUTION_UPGRADE.md",
+        "docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md",
+        "docs/phase9/WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md",
+        "docs/phase9/WORDPRESS_PAGE3952_SOURCE_CUTOVER_READINESS_2026-09-01.md",
+        "docs/phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md",
+        "scripts/amm/wordpress-page-source-cutover-lib.mjs",
+        "scripts/amm/wordpress-page3631-cutover-readiness.mjs",
+        "scripts/amm/wordpress-page3952-cutover-readiness.mjs",
+        "tests/adminops/wordpress-activation-change-set.test.ts",
+        "tests/adminops/wordpress-page3631-cutover-readiness.test.ts",
+        "tests/adminops/wordpress-page3952-cutover-readiness.test.ts",
+        "wordpress/ask-magic-mike-connector/placement-contracts.json"
+      ],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T00:45:47Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps PR 248 connector files and PR 256 decision tooling.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "D",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 256,
+      "title": "fix(wordpress): verify seller decision artifact against exact evidence",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/256",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/page3952-source-cutover-contract-20260901",
+        "sha": "9f50a261a093e5de433f4b15910e8cbed1e6d561"
+      },
+      "head": {
+        "branch": "codex/seller-decision-artifact-verification-20260901",
+        "sha": "6c4c82e359d986758631298107aad19968559bc0",
+        "tree": "0b1e3246f4cb5ab56caabd09e356ccf4c1758dfc"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "6c4c82e359d986758631298107aad19968559bc0",
+          "subject": "fix(wordpress): bind seller decision to exact evidence"
+        }
+      ],
+      "commits_ahead_of_current_main": 28,
+      "changed_files": [
+        "CHANGELOG.md",
+        "config/wordpress-page3631-cutover-contract.json",
+        "config/wordpress-seller-intent-decision-template.json",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/phase9/WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md",
+        "docs/phase9/WORDPRESS_SELLER_INTENT_APPROVAL_ARTIFACT_2026-09-01.md",
+        "docs/phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md",
+        "package.json",
+        "scripts/amm/wordpress-page-source-cutover-lib.mjs",
+        "scripts/amm/wordpress-page3631-cutover-readiness.mjs",
+        "scripts/amm/wordpress-seller-intent-decision-artifact-lib.mjs",
+        "scripts/amm/wordpress-seller-intent-decision-artifact.mjs",
+        "tests/adminops/wordpress-page3631-cutover-readiness.test.ts",
+        "tests/adminops/wordpress-seller-intent-decision-artifact.test.ts"
+      ],
+      "change_size": {
+        "files": 14,
+        "additions": 1236,
+        "deletions": 76
+      },
+      "capability": "Seller-intent decision artifact bound to exact page evidence.",
+      "migrations": [],
+      "env_config_changes": [
+        "config/wordpress-page3631-cutover-contract.json",
+        "config/wordpress-seller-intent-decision-template.json",
+        "package.json"
+      ],
+      "provider_changes": [],
+      "wordpress_changes": [
+        "config/wordpress-page3631-cutover-contract.json",
+        "config/wordpress-seller-intent-decision-template.json",
+        "docs/phase9/WORDPRESS_PAGE3631_SOURCE_CUTOVER_READINESS_2026-09-01.md",
+        "docs/phase9/WORDPRESS_SELLER_INTENT_APPROVAL_ARTIFACT_2026-09-01.md",
+        "docs/phase9/WORDPRESS_SELLER_INTENT_DECISION_PACKET.md",
+        "scripts/amm/wordpress-page-source-cutover-lib.mjs",
+        "scripts/amm/wordpress-page3631-cutover-readiness.mjs",
+        "scripts/amm/wordpress-seller-intent-decision-artifact-lib.mjs",
+        "scripts/amm/wordpress-seller-intent-decision-artifact.mjs",
+        "tests/adminops/wordpress-page3631-cutover-readiness.test.ts",
+        "tests/adminops/wordpress-seller-intent-decision-artifact.test.ts"
+      ],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T01:19:19Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Evidence/tooling only; regenerate from current WordPress snapshot.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "EVIDENCE_ONLY",
+      "target_batch": "D",
+      "disposition_reason": "Retain provenance; regenerate current truth instead of porting dated authority text."
+    },
+    {
+      "pr": 257,
+      "title": "feat(growth): add bounded open-house QR registration packets",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/257",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/seller-decision-artifact-verification-20260901",
+        "sha": "6c4c82e359d986758631298107aad19968559bc0"
+      },
+      "head": {
+        "branch": "codex/open-house-qr-registration-packet-20260901",
+        "sha": "1bd1cbce9a7cfa20ddbf141c66d25e087debfe4b",
+        "tree": "392fc03ba96b1798e638a0ca424541488eec4bad"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "1bd1cbce9a7cfa20ddbf141c66d25e087debfe4b",
+          "subject": "feat(growth): add open-house QR registration packets"
+        }
+      ],
+      "commits_ahead_of_current_main": 29,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/admin/distribution/OpenHouseQrPacketBuilder.tsx",
+        "app/admin/distribution/page.tsx",
+        "app/api/admin/distribution/open-house/[reference]/route.ts",
+        "app/go/open-house/[reference]/route.ts",
+        "app/lib/growth/open-house-registration.ts",
+        "app/lib/growth/owned-demand-activation.ts",
+        "app/lib/growth/owned-demand.ts",
+        "app/open-house/[propertyOrId]/page.tsx",
+        "config/active-route-manifest.json",
+        "docs/GO_LIVE_RUNBOOK.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/OPEN_HOUSE_QR_REGISTRATION_PACKET.md",
+        "docs/phase9/OWNED_DEMAND_ASSET_STUDIO.md",
+        "tests/adminops/open-house-qr-registration.test.ts",
+        "tests/adminops/owned-demand-activation-loop.test.ts",
+        "tests/adminops/owned-demand-command.test.ts"
+      ],
+      "change_size": {
+        "files": 18,
+        "additions": 1039,
+        "deletions": 13
+      },
+      "capability": "Bounded open-house QR registration packet and routes.",
+      "migrations": [],
+      "env_config_changes": [
+        "config/active-route-manifest.json"
+      ],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T01:55:24Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Open-house code is unique but owned-demand docs overlap current main.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "D",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 258,
+      "title": "fix(ops): reconcile first-response risks into Action Queue",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/258",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/open-house-qr-registration-packet-20260901",
+        "sha": "1bd1cbce9a7cfa20ddbf141c66d25e087debfe4b"
+      },
+      "head": {
+        "branch": "codex/first-response-action-queue-reconciliation-20260901",
+        "sha": "82b9137a64099a8b09c0104007236de8215ab1c1",
+        "tree": "a01e7c9c54578b179ca80c1e25d5ba6b76577bbc"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "82b9137a64099a8b09c0104007236de8215ab1c1",
+          "subject": "fix(ops): reconcile first-response risks into action queue"
+        }
+      ],
+      "commits_ahead_of_current_main": 30,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/admin/action-queue/page.tsx",
+        "app/lib/firstResponseRisk.ts",
+        "app/lib/growth/intelligence.ts",
+        "app/lib/persistence/neonAdminAppointmentFollowupOps.ts",
+        "app/lib/persistence/supabase/adminAppointmentFollowupOps.ts",
+        "docs/GO_LIVE_RUNBOOK.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/FIRST_RESPONSE_ACTION_QUEUE_RECONCILIATION.md",
+        "tests/adminops/admin-appointment-followup-ops.test.ts",
+        "tests/adminops/first-response-risk.test.ts",
+        "tests/adminops/neon-action-queue-first-response.test.ts"
+      ],
+      "change_size": {
+        "files": 13,
+        "additions": 578,
+        "deletions": 18
+      },
+      "capability": "First-response risk reconciliation in the Action Queue.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T02:19:39Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 260-261 first-response operations.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "B",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 259,
+      "title": "feat(wordpress): add rental placement readiness",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/259",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/first-response-action-queue-reconciliation-20260901",
+        "sha": "82b9137a64099a8b09c0104007236de8215ab1c1"
+      },
+      "head": {
+        "branch": "codex/rental-placement-readiness-20260901",
+        "sha": "b5bb3ab7baa8abe7282fe6cf2fba655edd30b9c5",
+        "tree": "3e1f943c2d88a5269a5de6877193824f1f33be6d"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "b5bb3ab7baa8abe7282fe6cf2fba655edd30b9c5",
+          "subject": "feat(wordpress): add rental placement readiness"
+        }
+      ],
+      "commits_ahead_of_current_main": 31,
+      "changed_files": [
+        "CHANGELOG.md",
+        "README.md",
+        "app/lib/growth/wordpress-activation-change-set.ts",
+        "config/current-release-authority.json",
+        "docs/CANONICAL_PRODUCTION_STACK.md",
+        "docs/CURRENT_RELEASE_AUTHORITY.md",
+        "docs/GO_LIVE_RUNBOOK.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/KNOWN_BLOCKERS.md",
+        "docs/OWNER_APPROVAL_QUEUE.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/REVENUE_COMMAND_CENTER_DAILY_OPS.md",
+        "docs/ROLLBACK_PLAN.md",
+        "docs/WORDPRESS_INSTALL_PACKET.md",
+        "docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md",
+        "docs/phase9/WORDPRESS_OWNED_TRAFFIC_CONSOLIDATION_AUDIT_2026-08-21.md",
+        "docs/phase9/WORDPRESS_RENTAL_PLACEMENT_READINESS_2026-09-01.md",
+        "tests/adminops/wordpress-activation-change-set.test.ts",
+        "tests/adminops/wordpress-activation-route.test.ts",
+        "tests/scripts/current-release-authority-docs.test.ts"
+      ],
+      "change_size": {
+        "files": 20,
+        "additions": 554,
+        "deletions": 71
+      },
+      "capability": "Rental placement readiness and source attribution.",
+      "migrations": [],
+      "env_config_changes": [
+        "config/current-release-authority.json"
+      ],
+      "provider_changes": [],
+      "wordpress_changes": [
+        "app/lib/growth/wordpress-activation-change-set.ts",
+        "docs/WORDPRESS_INSTALL_PACKET.md",
+        "docs/phase9/WORDPRESS_OWNED_DEMAND_ACTIVATION_CHANGE_SET.md",
+        "docs/phase9/WORDPRESS_OWNED_TRAFFIC_CONSOLIDATION_AUDIT_2026-08-21.md",
+        "docs/phase9/WORDPRESS_RENTAL_PLACEMENT_READINESS_2026-09-01.md",
+        "tests/adminops/wordpress-activation-change-set.test.ts",
+        "tests/adminops/wordpress-activation-route.test.ts"
+      ],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T02:48:33Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps PR 248 connector and authority docs; port rental delta only.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "D",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 260,
+      "title": "feat(ops): prove first-response work coverage",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/260",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/rental-placement-readiness-20260901",
+        "sha": "b5bb3ab7baa8abe7282fe6cf2fba655edd30b9c5"
+      },
+      "head": {
+        "branch": "codex/first-response-coverage-invariant-20260901",
+        "sha": "24ce1a5f0df9d2dfe425a94044e58a575a9db033",
+        "tree": "1581d6ddafa56e913a75fd4aa5825445624a3b7f"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "24ce1a5f0df9d2dfe425a94044e58a575a9db033",
+          "subject": "feat(ops): prove first-response work coverage"
+        }
+      ],
+      "commits_ahead_of_current_main": 32,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/admin/action-queue/page.tsx",
+        "app/lib/adminAppointmentFollowupOps.ts",
+        "app/lib/persistence/neonAdminAppointmentFollowupOps.ts",
+        "app/lib/persistence/supabase/adminAppointmentFollowupOps.ts",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/KNOWN_BLOCKERS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/REVENUE_COMMAND_CENTER_DAILY_OPS.md",
+        "docs/phase9/FIRST_RESPONSE_WORK_COVERAGE_INVARIANT.md",
+        "src/app/api/admin/health/route.ts",
+        "tests/adminops/action-queue-response-coverage-ui.test.ts",
+        "tests/adminops/admin-appointment-followup-ops.test.ts",
+        "tests/adminops/neon-action-queue-first-response.test.ts",
+        "tests/security/admin-health-route-security.test.ts"
+      ],
+      "change_size": {
+        "files": 15,
+        "additions": 566,
+        "deletions": 35
+      },
+      "capability": "First-response work-coverage invariant and protected health visibility.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T03:14:39Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 258 and 261 Action Queue/SLA files.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "B",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 261,
+      "title": "Phase 9: harden SLA response truth and cadence",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/261",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/first-response-coverage-invariant-20260901",
+        "sha": "24ce1a5f0df9d2dfe425a94044e58a575a9db033"
+      },
+      "head": {
+        "branch": "codex/sla-truth-cadence-20260901",
+        "sha": "8e1cd8e076ab07a5475d59b5eda0a855ebc70adb",
+        "tree": "cd55be150fbd9114b32651e770da6cc834c4f3cf"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "8e1cd8e076ab07a5475d59b5eda0a855ebc70adb",
+          "subject": "Harden SLA response truth and cadence"
+        }
+      ],
+      "commits_ahead_of_current_main": 33,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/lib/firstResponseRisk.ts",
+        "app/lib/growth/intelligence.ts",
+        "app/lib/persistence/supabase/adminAppointmentFollowupOps.ts",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/phase9/FIRST_RESPONSE_ACTION_QUEUE_RECONCILIATION.md",
+        "docs/phase9/SLA_TRUTH_AND_CADENCE_HARDENING.md",
+        "docs/vercel-cron-sla-sweep.md",
+        "src/lib/persistence/neon/sla-sweep-repository.ts",
+        "tests/adminops/admin-appointment-followup-ops.test.ts",
+        "tests/adminops/first-response-risk.test.ts",
+        "tests/persistence/neon-sla-sweep-repository.test.ts",
+        "tests/scripts/route-manifest.test.ts",
+        "tests/scripts/vercel-cron-policy.test.ts",
+        "vercel.json"
+      ],
+      "change_size": {
+        "files": 15,
+        "additions": 276,
+        "deletions": 37
+      },
+      "capability": "SLA truth, cadence, persistence, and cron policy.",
+      "migrations": [],
+      "env_config_changes": [
+        "vercel.json"
+      ],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T03:40:39Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 258/260 and notification cron work in 262.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "B",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 262,
+      "title": "Phase 9: automate durable notification retries",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/262",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/sla-truth-cadence-20260901",
+        "sha": "8e1cd8e076ab07a5475d59b5eda0a855ebc70adb"
+      },
+      "head": {
+        "branch": "codex/notification-retry-cron-20260901",
+        "sha": "0a255a7988d761577eb11c702b2e00e8cdaac3ce",
+        "tree": "cebab89389df957b4b5cc919dc7d2bcb0e02d34b"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "ebeb0565f632c087af3ce76fbeee633003027d57",
+          "subject": "Automate durable notification retries"
+        },
+        {
+          "sha": "0a255a7988d761577eb11c702b2e00e8cdaac3ce",
+          "subject": "Revalidate notification retry permissions"
+        }
+      ],
+      "commits_ahead_of_current_main": 35,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/admin/notifications/actions.ts",
+        "app/api/admin/notifications/retry/route.ts",
+        "app/lib/emailProviderConfiguration.ts",
+        "app/lib/leadAlertService.ts",
+        "app/lib/leadNotificationService.ts",
+        "app/lib/persistence/neonLeadNotificationRepository.ts",
+        "docs/EMAIL_DELIVERY_SPEC.md",
+        "docs/GO_LIVE_RUNBOOK.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/AUTONOMOUS_NOTIFICATION_RETRY.md",
+        "tests/adminops/admin-notification-guards.test.ts",
+        "tests/adminops/lead-notification-service.test.ts",
+        "tests/adminops/smtp-email-provider.test.ts",
+        "tests/api/notification-retry-cron.test.ts",
+        "tests/leadops/lead-alert-retry-policy.test.ts",
+        "tests/leadops/notification-retry-batch.test.ts",
+        "tests/persistence/neon-lead-notification-retry-scope.test.ts",
+        "tests/scripts/vercel-cron-policy.test.ts",
+        "vercel.json"
+      ],
+      "change_size": {
+        "files": 21,
+        "additions": 1244,
+        "deletions": 37
+      },
+      "capability": "Automated durable notification retry worker and cron.",
+      "migrations": [],
+      "env_config_changes": [
+        "vercel.json"
+      ],
+      "provider_changes": [
+        "app/lib/emailProviderConfiguration.ts"
+      ],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T04:39:44Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 263-264 and existing retry paths; port as one Batch B worker.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "B",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 263,
+      "title": "Recover stale pending notification outbox rows",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/263",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/notification-retry-cron-20260901",
+        "sha": "0a255a7988d761577eb11c702b2e00e8cdaac3ce"
+      },
+      "head": {
+        "branch": "codex/notification-pending-recovery-20260902",
+        "sha": "e1d7fd5cc6a04d7f80679234bc1c22b00f2af713",
+        "tree": "246756ecdb4277a280e359c71e04e627b4aa73d7"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "9ec39422e59063c7964c59f3e4701425cec877d8",
+          "subject": "Recover stale pending notifications"
+        },
+        {
+          "sha": "e1d7fd5cc6a04d7f80679234bc1c22b00f2af713",
+          "subject": "Document pending recovery review vehicle"
+        }
+      ],
+      "commits_ahead_of_current_main": 37,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/admin/notifications/page.tsx",
+        "app/lib/leadAlertService.ts",
+        "app/lib/leadNotificationRetryPolicy.ts",
+        "app/lib/leadNotificationService.ts",
+        "app/lib/leadNotificationTypes.ts",
+        "app/lib/persistence/neonLeadNotificationOperations.ts",
+        "app/lib/persistence/neonLeadNotificationRepository.ts",
+        "app/lib/persistence/supabase/leadNotificationRepository.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/EMAIL_DELIVERY_SPEC.md",
+        "docs/GO_LIVE_RUNBOOK.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/ROLLBACK_PLAN.md",
+        "docs/phase9/PENDING_NOTIFICATION_RECOVERY.md",
+        "tests/adminops/admin-notification-guards.test.ts",
+        "tests/adminops/lead-notification-service.test.ts",
+        "tests/leadops/notification-retry-batch.test.ts",
+        "tests/persistence/neon-lead-notification-retry-scope.test.ts"
+      ],
+      "change_size": {
+        "files": 20,
+        "additions": 446,
+        "deletions": 35
+      },
+      "capability": "Recovery of stale pending notification outbox rows.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T05:11:29Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 262 retry repositories; port pending recovery once.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "B",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 264,
+      "title": "Make public lead alert intent atomic",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/264",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/notification-pending-recovery-20260902",
+        "sha": "e1d7fd5cc6a04d7f80679234bc1c22b00f2af713"
+      },
+      "head": {
+        "branch": "codex/atomic-lead-alert-capture-20260902",
+        "sha": "95e1893d341ac755e3c1e5da63c4ce6f013caad7",
+        "tree": "f359acef3dd22829a7d9bf7ace04f63232bb67fe"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "95e1893d341ac755e3c1e5da63c4ce6f013caad7",
+          "subject": "Make public lead alert intent atomic"
+        }
+      ],
+      "commits_ahead_of_current_main": 38,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/health/ready/route.ts",
+        "app/api/leads/route.ts",
+        "app/lib/leadAlertService.ts",
+        "app/lib/persistence/contracts.ts",
+        "app/lib/persistence/neonPostgresAdapter.ts",
+        "app/lib/persistence/supabasePostgrestAdapter.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/EMAIL_DELIVERY_SPEC.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/ROLLBACK_PLAN.md",
+        "docs/architecture/ACTIVE_PERSISTENCE_BOUNDARY.md",
+        "docs/phase9/ATOMIC_PUBLIC_LEAD_DELIVERY_INTENT_QA_EVIDENCE.md",
+        "supabase/migrations/20260902012000_atomic_public_lead_delivery_intent.sql",
+        "tests/leadops/api-leads-route.test.ts",
+        "tests/leadops/atomic-seeded-lead-alert-delivery.test.ts",
+        "tests/persistence/atomic-public-lead-delivery-intent.test.ts",
+        "tests/persistence/neon-postgres-adapter.test.ts",
+        "tests/persistence/supabase-postgrest-adapter.test.ts"
+      ],
+      "change_size": {
+        "files": 20,
+        "additions": 774,
+        "deletions": 141
+      },
+      "capability": "Atomic internal lead-alert intent in public lead capture.",
+      "migrations": [
+        "supabase/migrations/20260902012000_atomic_public_lead_delivery_intent.sql"
+      ],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T05:51:47Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Superseded in part by the preserved consumer-ack v3 wrapper; retain internal-alert atomic contract.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "B",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 265,
+      "title": "Harden public appointment conversion boundary",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/265",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/atomic-lead-alert-capture-20260902",
+        "sha": "95e1893d341ac755e3c1e5da63c4ce6f013caad7"
+      },
+      "head": {
+        "branch": "codex/public-appointment-boundary-20260902",
+        "sha": "32509a8a1d5f566c3f8647cb44e9ea4c12ebdf2b",
+        "tree": "9f6644d23dda4688625a84076f2bf812fff09735"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "32509a8a1d5f566c3f8647cb44e9ea4c12ebdf2b",
+          "subject": "Harden public appointment conversion boundary"
+        }
+      ],
+      "commits_ahead_of_current_main": 39,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/appointments/request/route.ts",
+        "app/components/black-diamond/AppointmentRequestCTA.tsx",
+        "app/lib/constants.ts",
+        "app/lib/leadPayload.ts",
+        "app/lib/publicAppointmentRequest.ts",
+        "docs/ANALYTICS_EVENT_SPEC.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/PUBLIC_APPOINTMENT_BOUNDARY_HARDENING.md",
+        "docs/phase9/PUBLIC_APPOINTMENT_BOUNDARY_HARDENING_QA_EVIDENCE.md",
+        "src/lib/analytics/privacy.ts",
+        "tests/analytics/client-analytics-privacy.test.ts",
+        "tests/api/public-appointment-route-security.test.ts",
+        "tests/public/appointment-funnel-identity.test.tsx"
+      ],
+      "change_size": {
+        "files": 15,
+        "additions": 677,
+        "deletions": 44
+      },
+      "capability": "Public appointment conversion boundary hardening.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T14:58:00Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps shared lead payload/privacy files with 270-271.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 266,
+      "title": "Harden public AI chat provider boundary",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/266",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/public-appointment-boundary-20260902",
+        "sha": "32509a8a1d5f566c3f8647cb44e9ea4c12ebdf2b"
+      },
+      "head": {
+        "branch": "codex/public-chat-provider-boundary-20260902",
+        "sha": "2f11aa8630717538b38c346267a5915541d814cd",
+        "tree": "9e7e2813afaaaa204b8c4289ee2c22d0e0ce84a2"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "2f11aa8630717538b38c346267a5915541d814cd",
+          "subject": "Harden public AI chat provider boundary"
+        }
+      ],
+      "commits_ahead_of_current_main": 40,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/chat/route.ts",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/OPENAI_CAPABILITY_AUDIT_CURRENT.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/phase9/PUBLIC_CHAT_PROVIDER_BOUNDARY.md",
+        "docs/phase9/PUBLIC_CHAT_PROVIDER_BOUNDARY_QA_EVIDENCE.md",
+        "tests/api/chat-route-security.test.ts",
+        "tests/public/ask-conversion-accessibility.test.tsx"
+      ],
+      "change_size": {
+        "files": 10,
+        "additions": 574,
+        "deletions": 34
+      },
+      "capability": "Public AI chat provider boundary hardening.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [
+        "docs/OPENAI_CAPABILITY_AUDIT_CURRENT.md"
+      ],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T15:35:46Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps PR 252 chat route and PR 268 session route.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 267,
+      "title": "Reconcile current release authority documentation",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/267",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/public-chat-provider-boundary-20260902",
+        "sha": "2f11aa8630717538b38c346267a5915541d814cd"
+      },
+      "head": {
+        "branch": "codex/release-authority-doc-drift-20260902",
+        "sha": "0428e385a420a43403114106981daae3d022fbbf",
+        "tree": "576df3e0b95f2e0a5e206f2af3e3c0efa3c1bd7f"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "0428e385a420a43403114106981daae3d022fbbf",
+          "subject": "Reconcile current release authority documentation"
+        }
+      ],
+      "commits_ahead_of_current_main": 41,
+      "changed_files": [
+        "CHANGELOG.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/KNOWN_LIMITATIONS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/phase9/CURRENT_RELEASE_LEDGER_RECONCILIATION.md",
+        "docs/phase9/CURRENT_RELEASE_LEDGER_RECONCILIATION_QA_EVIDENCE.md",
+        "tests/scripts/current-release-authority-docs.test.ts"
+      ],
+      "change_size": {
+        "files": 7,
+        "additions": 252,
+        "deletions": 27
+      },
+      "capability": "Historical release-ledger documentation reconciliation.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T15:57:25Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Authority evidence predates current audit; do not port as current truth.",
+      "superseded_work": "Current Production authority is now a2f3de8/dpl_7csa; dated ledger text is evidence only.",
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "EVIDENCE_ONLY",
+      "target_batch": null,
+      "disposition_reason": "Retain provenance; regenerate current truth instead of porting dated authority text."
+    },
+    {
+      "pr": 268,
+      "title": "Harden public chat session boundary",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/268",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/release-authority-doc-drift-20260902",
+        "sha": "0428e385a420a43403114106981daae3d022fbbf"
+      },
+      "head": {
+        "branch": "codex/public-chat-session-boundary-20260902",
+        "sha": "93b44071bec9110ba391179beebddc8cbd91f011",
+        "tree": "44dffbc5fddab87c527294f73d49b8db414ad369"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "93b44071bec9110ba391179beebddc8cbd91f011",
+          "subject": "Harden public chat session boundary"
+        }
+      ],
+      "commits_ahead_of_current_main": 42,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/chat/session/route.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/phase9/PUBLIC_CHAT_SESSION_BOUNDARY.md",
+        "docs/phase9/PUBLIC_CHAT_SESSION_BOUNDARY_QA_EVIDENCE.md",
+        "tests/api/chat-session-route-security.test.ts"
+      ],
+      "change_size": {
+        "files": 9,
+        "additions": 467,
+        "deletions": 5
+      },
+      "capability": "Public chat-session boundary hardening.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T16:25:36Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Pairs with 266; port together.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 269,
+      "title": "Harden public analytics ingress boundary",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/269",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/public-chat-session-boundary-20260902",
+        "sha": "93b44071bec9110ba391179beebddc8cbd91f011"
+      },
+      "head": {
+        "branch": "codex/public-event-ingress-boundary-20260902",
+        "sha": "14e8ef0c61aa7e046b3b88b7344bdc947c25a423",
+        "tree": "4163875366b8eed7743a3721b2d8254d4bd176fb"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "14e8ef0c61aa7e046b3b88b7344bdc947c25a423",
+          "subject": "Harden public analytics ingress boundary"
+        }
+      ],
+      "commits_ahead_of_current_main": 43,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/events/route.ts",
+        "docs/ANALYTICS_EVENT_SPEC.md",
+        "docs/ARCHITECTURE.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/phase9/PUBLIC_ANALYTICS_INGRESS_BOUNDARY.md",
+        "docs/phase9/PUBLIC_ANALYTICS_INGRESS_BOUNDARY_QA_EVIDENCE.md",
+        "src/app/api/analytics/event/route.ts",
+        "src/lib/security/rate-limit.ts",
+        "tests/api/analytics-event-route.test.ts",
+        "tests/api/public-events-route.test.ts"
+      ],
+      "change_size": {
+        "files": 13,
+        "additions": 777,
+        "deletions": 69
+      },
+      "capability": "Public analytics/event ingress boundary hardening.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T17:03:47Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps rate-limit and ingress contracts in 270-271.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 270,
+      "title": "Phase 9: harden public lead ingress boundary",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/270",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/public-event-ingress-boundary-20260902",
+        "sha": "14e8ef0c61aa7e046b3b88b7344bdc947c25a423"
+      },
+      "head": {
+        "branch": "codex/public-lead-ingress-boundary-20260902",
+        "sha": "9257c7ed720495a82370a2821d4f63a9900d8e9f",
+        "tree": "93de962ed215fbf1a9c99fbe7a8b31669fee8d67"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "9257c7ed720495a82370a2821d4f63a9900d8e9f",
+          "subject": "Harden public lead ingress boundary"
+        }
+      ],
+      "commits_ahead_of_current_main": 44,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/leads/route.ts",
+        "app/lib/leadConsent.ts",
+        "app/lib/leadPayload.ts",
+        "app/lib/publicLeadIngress.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/phase9/PUBLIC_LEAD_INGRESS_BOUNDARY.md",
+        "docs/phase9/PUBLIC_LEAD_INGRESS_BOUNDARY_QA_EVIDENCE.md",
+        "tests/leadops/api-leads-route.test.ts",
+        "tests/leadops/lead-consent-evidence.test.ts",
+        "tests/leadops/normalize-payload.test.ts"
+      ],
+      "change_size": {
+        "files": 14,
+        "additions": 1314,
+        "deletions": 176
+      },
+      "capability": "Public lead ingress boundary hardening.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T17:51:56Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps PR 252/254/264/265/271 lead capture files.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 271,
+      "title": "Phase 9: harden public experiment conversion boundary",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/271",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/public-lead-ingress-boundary-20260902",
+        "sha": "9257c7ed720495a82370a2821d4f63a9900d8e9f"
+      },
+      "head": {
+        "branch": "codex/public-experiment-ingress-boundary-20260902",
+        "sha": "da61572f3c76e37c436c6f8d266508619cb8181e",
+        "tree": "75050a43d56df0c2c7a5ea170887c925b0f1e33a"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "da61572f3c76e37c436c6f8d266508619cb8181e",
+          "subject": "Harden public experiment conversion boundary"
+        }
+      ],
+      "commits_ahead_of_current_main": 45,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/experiments/event/route.ts",
+        "app/api/leads/route.ts",
+        "app/components/black-diamond/HomeValueFunnel.tsx",
+        "app/lib/growth/experiment-registry.ts",
+        "app/lib/growth/lead-experiment-conversion.ts",
+        "app/lib/growth/public-experiment-client.ts",
+        "app/lib/leadPayload.ts",
+        "app/lib/persistence/neonPublicExperimentRepository.ts",
+        "app/lib/publicLeadIngress.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/phase9/PUBLIC_EXPERIMENT_INGRESS_BOUNDARY.md",
+        "docs/phase9/PUBLIC_EXPERIMENT_INGRESS_BOUNDARY_QA_EVIDENCE.md",
+        "tests/api/public-experiment-event-route.test.ts",
+        "tests/leadops/api-leads-route.test.ts",
+        "tests/leadops/lead-experiment-conversion.test.ts",
+        "tests/leadops/public-experiment-lead-context.test.ts",
+        "tests/persistence/neon-public-experiment-repository.test.ts",
+        "tests/public/home-value-inline-validation.test.tsx"
+      ],
+      "change_size": {
+        "files": 22,
+        "additions": 1296,
+        "deletions": 192
+      },
+      "capability": "Public experiment conversion boundary hardening.",
+      "migrations": [],
+      "env_config_changes": [],
+      "provider_changes": [],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T18:28:55Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Overlaps 265/269/270 experiment and lead ingress files.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "A",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 272,
+      "title": "Phase 9: make Resend webhook lifecycle atomic",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/272",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/public-experiment-ingress-boundary-20260902",
+        "sha": "da61572f3c76e37c436c6f8d266508619cb8181e"
+      },
+      "head": {
+        "branch": "codex/email-webhook-boundary-20260902",
+        "sha": "933cf730f2d73665e92e513244668ce0adf7d2ba",
+        "tree": "619c6eb8ab2f9a6571d83c87e1bb1f56de1c92bc"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "933cf730f2d73665e92e513244668ce0adf7d2ba",
+          "subject": "Harden Resend webhook retry atomicity"
+        }
+      ],
+      "commits_ahead_of_current_main": 46,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/webhooks/email/events/route.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/EMAIL_DELIVERY_SPEC.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY.md",
+        "docs/phase9/EMAIL_WEBHOOK_ATOMIC_BOUNDARY_QA_EVIDENCE.md",
+        "package.json",
+        "scripts/verify-resend-webhook-atomic-sql.mjs",
+        "tests/api/phase7-resend-webhook.test.ts",
+        "tests/api/webhook-email-reliability.test.ts"
+      ],
+      "change_size": {
+        "files": 13,
+        "additions": 1176,
+        "deletions": 228
+      },
+      "capability": "Atomic Resend webhook lifecycle handling.",
+      "migrations": [],
+      "env_config_changes": [
+        "package.json"
+      ],
+      "provider_changes": [
+        "app/api/webhooks/email/events/route.ts",
+        "scripts/verify-resend-webhook-atomic-sql.mjs",
+        "tests/api/phase7-resend-webhook.test.ts"
+      ],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T19:03:22Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Pairs with Batch B retry/provider lifecycle.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "B",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 273,
+      "title": "Phase 9: make Twilio status callbacks atomic",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/273",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/email-webhook-boundary-20260902",
+        "sha": "933cf730f2d73665e92e513244668ce0adf7d2ba"
+      },
+      "head": {
+        "branch": "codex/sms-status-boundary-20260902",
+        "sha": "dca35b2fcd245c0ce3220378719fc350d4e0895a",
+        "tree": "770fa932e72219f7713beb8d6720fcd4bb88792f"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "dca35b2fcd245c0ce3220378719fc350d4e0895a",
+          "subject": "Harden Twilio status webhook atomicity"
+        }
+      ],
+      "commits_ahead_of_current_main": 47,
+      "changed_files": [
+        "CHANGELOG.md",
+        "app/api/webhooks/sms/status/route.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/SMS_DELIVERY_SPEC.md",
+        "docs/phase9/SMS_STATUS_ATOMIC_BOUNDARY.md",
+        "docs/phase9/SMS_STATUS_ATOMIC_BOUNDARY_QA_EVIDENCE.md",
+        "package.json",
+        "scripts/verify-twilio-status-atomic-sql.mjs",
+        "tests/leadops/sms-status-callback.test.ts"
+      ],
+      "change_size": {
+        "files": 12,
+        "additions": 1203,
+        "deletions": 69
+      },
+      "capability": "Atomic SMS status callback handling with provider still gated.",
+      "migrations": [],
+      "env_config_changes": [
+        "package.json"
+      ],
+      "provider_changes": [
+        "app/api/webhooks/sms/status/route.ts",
+        "scripts/verify-twilio-status-atomic-sql.mjs"
+      ],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T19:30:51Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Pairs with 274 SMS safety; no carrier activation.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "C",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    },
+    {
+      "pr": 274,
+      "title": "Phase 9: harden inbound SMS consent atomicity",
+      "url": "https://github.com/brandonnarron1-lang/ask-magic-mike/pull/274",
+      "state": "OPEN",
+      "draft": true,
+      "mergeable": "MERGEABLE",
+      "base": {
+        "branch": "codex/sms-status-boundary-20260902",
+        "sha": "dca35b2fcd245c0ce3220378719fc350d4e0895a"
+      },
+      "head": {
+        "branch": "codex/sms-inbound-consent-boundary-20260902",
+        "sha": "cd259391bce3a149206d6a55bba4b9a3af54e749",
+        "tree": "ccf7a1bb153a49584f5854b751b6f841ede9a7c6"
+      },
+      "unique_commits_relative_to_pr_base": [
+        {
+          "sha": "cd259391bce3a149206d6a55bba4b9a3af54e749",
+          "subject": "Harden inbound SMS consent atomicity"
+        }
+      ],
+      "commits_ahead_of_current_main": 48,
+      "changed_files": [
+        "app/api/webhooks/sms/inbound/route.ts",
+        "docs/ARCHITECTURE.md",
+        "docs/CHANGELOG.md",
+        "docs/IMPLEMENTATION_NOTES.md",
+        "docs/IMPLEMENTATION_STATUS.md",
+        "docs/QA_EVIDENCE.md",
+        "docs/SECURITY_AND_COMPLIANCE.md",
+        "docs/SMS_DELIVERY_SPEC.md",
+        "docs/phase7/SMS_MOCK_PROVIDER_ACCEPTANCE.md",
+        "docs/phase9/SMS_INBOUND_CONSENT_ATOMIC_BOUNDARY.md",
+        "docs/phase9/SMS_INBOUND_CONSENT_ATOMIC_BOUNDARY_QA_EVIDENCE.md",
+        "docs/preview-qa-checklist.md",
+        "package.json",
+        "scripts/verify-inbound-sms-atomic-sql.mjs",
+        "tests/api/webhook-sms-reliability.test.ts"
+      ],
+      "change_size": {
+        "files": 15,
+        "additions": 1280,
+        "deletions": 215
+      },
+      "capability": "Atomic inbound SMS STOP/HELP/consent handling with provider still gated.",
+      "migrations": [],
+      "env_config_changes": [
+        "package.json"
+      ],
+      "provider_changes": [
+        "app/api/webhooks/sms/inbound/route.ts"
+      ],
+      "wordpress_changes": [],
+      "external_mutations": {
+        "executed": false,
+        "planned": false,
+        "note": "Draft source change only; no live mutation is evidenced or authorized."
+      },
+      "verification_evidence": {
+        "github_checks": [
+          {
+            "name": "verify-production",
+            "status": "SKIPPED"
+          },
+          {
+            "name": "local-release-gate",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel",
+            "status": "SUCCESS"
+          },
+          {
+            "name": "Vercel Preview Comments",
+            "status": "SUCCESS"
+          }
+        ],
+        "last_updated": "2026-09-02T19:59:15Z",
+        "current_revalidation": "Required after port to fresh main."
+      },
+      "files_already_production_exact_blob": [],
+      "duplicated_work": "Pairs with 273 SMS safety; no carrier activation.",
+      "superseded_work": null,
+      "stale_evidence_docs": true,
+      "unsafe_or_obsolete": null,
+      "recommended_disposition": "PORT",
+      "target_batch": "C",
+      "disposition_reason": "Port only the unique capability into the named current-main batch; do not merge the stacked PR."
+    }
+  ]
+}
