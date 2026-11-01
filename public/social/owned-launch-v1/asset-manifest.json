@@ -1,6 +1,6 @@
 {
   "version": "amm.owned-social.v1",
-  "generatedAt": "2026-11-01T21:34:19.375Z",
+  "generatedAt": "2026-11-01T22:11:08.794Z",
   "renderer": "SVG + Sharp; FFmpeg libx264; no generative API/audio",
   "identity": "Existing approved portrait unchanged; no generated person",
   "fonts": "System Arial/Georgia rasterized; no font binaries redistributed",
@@ -293,8 +293,8 @@
     },
     {
       "name": "facebook-cover.jpg",
-      "sha256": "0a5267b38762a322a2c90f8f23fe774a7a46bb049eb93bca14e01cb48d98b842",
-      "bytes": 88798,
+      "sha256": "b1f929d67f1320e4974c096250699abd6086dbec706379c8ea3e9345763f4790",
+      "bytes": 85904,
       "width": 1640,
       "height": 624
     }
