@@ -18,6 +18,27 @@ continuation authorizes no new Production submissions, queues, sends or activati
 
 ## What V1 Does
 
+### Public direct contact is not staff notification delivery
+
+The owner's November1 mobile-contact instruction supplies Mike's public direct
+line `(252) 245-4337` (`tel:+12522454337`, number-only `sms:+12522454337`).
+`src/lib/site-config.ts` separates it from the brokerage office `252-243-7700`.
+`PublicMikeContact` is shared by public headers, the widget and confirmations;
+it is not installed in the root layout, staff login or device-install utilities.
+Call/Text intent events have no phone, message body or inquiry details. They
+are not captured inquiries, sent messages, connected calls or conversions.
+Text receipt and physical app-return behavior require separate device evidence.
+
+The existing v6 internal-email path and recipient/provider configuration are
+unchanged. The v6 branch returns no SMS/push envelopes; legacy V1 SMS flags are
+not a v6 activation path. Carrier SMS remains held: current recipient/sender
+authorization, provider requirements and a genuine zero-new-spend entitlement
+are not established. No verified cost quote or activation is implied here.
+Brandon's protected `/admin/notifications/phone` page is the existing Web Push
+entry. Enrollment, provider acceptance and physical receipt are separate; a
+desktop-ready button does not prove an iPhone is enrolled. Do not require Mike
+to enroll or test to operate the email/Lead-Center workflow.
+
 - Creates an assignment notification event after successful AdminOps assignment and audit.
 - Prevents duplicate events with a unique idempotency key.
 - Sends only when explicitly enabled and configured.

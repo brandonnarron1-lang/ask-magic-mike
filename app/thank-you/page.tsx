@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { nonIndexablePageMetadata } from "../lib/publicMetadata";
+import { PublicMikeContact } from "../components/black-diamond/PublicMikeContact";
 
 export const metadata: Metadata = nonIndexablePageMetadata(
   "Request Received",
@@ -16,6 +17,7 @@ export default function ThankYouPage() {
         <p className="mt-5 text-lg leading-8 text-[#d9ceb8]">Mike or the approved Our Town Properties team will review the information you shared and follow up through the contact path you selected.</p>
         <p className="mt-5 text-sm leading-6 text-[#8f8778]">This page does not promise a valuation, offer, appointment, availability, or response time. Not a survey.</p>
         <Link href="/" className="amm-primary-button mt-8 inline-flex px-5 py-3">Return to Ask Magic Mike</Link>
+        <div className="mt-6"><PublicMikeContact surface="thank_you" /></div>
       </div>
     </main>
   );

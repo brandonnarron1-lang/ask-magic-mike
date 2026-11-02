@@ -1,5 +1,15 @@
 # Current Release Authority
 
+## November1 mobile/direct-contact continuation
+
+Authenticated resolution at `2026-11-02T02:40:23.668Z` (November1 Eastern)
+confirmed accepted PR316, merge `f221acf13264761973ab5ab7e30067b337c0a603`,
+tree `61677c45210bbea98f618449131046351c2afd51`, deployment
+`dpl_FDdVc7wBBCn36tdPNuaJ78kzXpbQ`; all25 checks passed. The local mobile
+follow-on is not accepted Production. Frozen PR317 remains separately held;
+neither native profile edits nor a hosted CI pass replaces immutable protected
+Preview acceptance or exact-source release authority.
+
 ## October31 accepted application and bounded continuation
 
 The authenticated resolver returned accepted25/25 at2026-10-31T13:32:01.352Z:

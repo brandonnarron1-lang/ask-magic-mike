@@ -10,6 +10,7 @@ import type { Attribution } from "../../lib/leadPayload";
 import { postToWidgetParent } from "../../lib/widgetMessaging";
 import { widgetFullFormQuery } from "../../lib/widgetFullForm";
 import { PUBLIC_INTAKE_PENDING_EVENT, readPendingHomeValueRequest } from "../../lib/homeValuePendingRequest";
+import { PublicMikeContact } from "./PublicMikeContact";
 
 type Tab = "value" | "buy" | "ask" | "sell";
 
@@ -70,6 +71,7 @@ export function WidgetApp() {
         <header className="border-b border-[#cda24a33] bg-[linear-gradient(135deg,#080808,rgba(34,198,210,.08))] px-4 py-4">
           <h1 className="text-xs font-bold uppercase tracking-[0.2em] text-[#e2c06f]">Ask Magic Mike</h1>
           <p className="mt-1 text-sm text-[#d9ceb8]">Local guidance from Our Town Properties</p>
+          <div className="mt-3"><PublicMikeContact surface="widget" compact /></div>
         </header>
         <nav className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] border-b border-[#cda24a24] bg-black" role="tablist" aria-label="Ask Magic Mike paths">
           {[
@@ -106,7 +108,7 @@ export function WidgetApp() {
             </button>
           ))}
         </nav>
-        <div id="widget-path-panel" role="tabpanel" aria-labelledby={`widget-tab-${active}`} className="flex-1 overflow-auto p-4">
+        <div id="widget-path-panel" role="tabpanel" aria-labelledby={`widget-tab-${active}`} className="min-w-0 flex-1 p-4">
           {active === "value" ? (
             <HomeValueFunnel surface="widget" compact attributionOverrides={attributionOverrides} />
           ) : null}

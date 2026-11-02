@@ -9,6 +9,8 @@ import { SellerIntentSection } from "./SellerIntentSection";
 import { TrustProofStrip } from "./TrustProofStrip";
 import { HomepageRequestDetails } from "./HomepageRequestDetails";
 import { publicNavigation, experienceDestination } from "../../lib/experienceContract";
+import { PublicMikeContact } from "./PublicMikeContact";
+import { siteConfig } from "@/lib/site-config";
 
 const paths = [
   {
@@ -106,7 +108,9 @@ export function Footer() {
     <footer className="border-t border-[#cda24a2e] bg-[#050505] px-5 py-10 sm:px-8 lg:px-10">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 text-sm text-[#d9ceb8] [overflow-wrap:anywhere] md:grid-cols-[1fr_auto]">
         <div>
-          <p className="font-semibold text-[#f4ead4]">Our Town Properties</p>
+          <p className="font-semibold text-[#f4ead4]">{siteConfig.parentBrandName}</p>
+          <div className="my-4"><PublicMikeContact surface="public_footer" /></div>
+          <p>Brokerage office: <a className="inline-flex min-h-11 items-center text-[#e2c06f] underline" href="tel:+12522437700">{siteConfig.officePhoneDisplay}</a></p>
           <p className="mt-2">askmagicmike.com | ourtownproperties.com | Wilson, NC</p>
           <p className="mt-4 max-w-3xl leading-6">
             Ask Magic Mike provides general real estate guidance and lead intake for Our Town Properties. Property-specific pricing, listing strategy, agency relationships, and legal or financial decisions should be confirmed directly with a licensed professional.

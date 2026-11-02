@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageTracker } from "../components/black-diamond/PageTracker";
 import { nonIndexablePageMetadata } from "../lib/publicMetadata";
+import { PublicMikeContact } from "../components/black-diamond/PublicMikeContact";
 
 export const metadata: Metadata = nonIndexablePageMetadata(
   "Widget Integration Preview",
@@ -12,6 +13,7 @@ export default function WidgetPreviewPage() {
     <main className="min-h-screen bg-[#f7f3eb] text-[#151515]">
       <PageTracker funnelName="widget_preview" />
       <section className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
+        <PublicMikeContact surface="widget_preview" />
         <div className="border-b border-black/10 pb-5">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#6e1626]">Our Town Properties preview</p>
           <h1 className="mt-4 font-serif text-5xl leading-tight">Wilson real estate, locally guided.</h1>
