@@ -121,7 +121,12 @@ test("intercepted confirmation keeps direct contact readable on paper; failure s
   await page.getByLabel("Your name", { exact: true }).fill("SYNTHETIC INTERNAL QA DO NOT CONTACT");
   await page.getByLabel("Email for your valuation follow-up", { exact: true }).fill("public-contact@example.test");
   await page.getByRole("button", { name: "Request Valuation", exact: true }).click();
-  await expect(page.getByRole("alert")).toBeVisible();
+  // Next's route announcer is also role=alert; target the actual form failure,
+  // not whichever framework alert happens to mount first on a CI worker.
+  const failure = page.locator("#home-value-form-error");
+  await expect(failure).toHaveAttribute("role", "alert");
+  await expect(failure).toBeVisible();
+  await expect(failure).toContainText("couldn't confirm whether your request was saved");
   await expect(page.getByRole("heading", { name: "Your request is in.", exact: true })).toHaveCount(0);
   await page.screenshot({ path: path.join(dir, "home-value-error-390.png"), fullPage: true });
   accept = true;
