@@ -1,0 +1,19 @@
+{
+  "version": "amm.owned-social.v1",
+  "brokerage": "Our Town Properties, Inc.",
+  "brand": "Ask Magic Mike",
+  "operator": "Brandon Narron",
+  "authority": "Owner submitted owned-social launch instruction, November 1, 2026",
+  "masterPaused": true,
+  "mediaEdition": "owned-launch-v2",
+  "brokerageAdvertisingApproval": null,
+  "entitlement": null,
+  "channels": [],
+  "caps": { "channels": 3, "queuePerChannel": 7, "providerQueueHardLimit": 10, "createsPerRun": 3, "apiCallsPerRun": 50, "ledgerEntries": 1000 },
+  "timezone": "America/New_York",
+  "localPostingHour": 12,
+  "allowedCategories": ["intake_explanation", "evergreen_education", "existing_offer"],
+  "prohibited": ["property_specific", "market_statistics", "testimonials", "guaranteed_outcomes", "unapproved_likeness", "consumer_outreach"],
+  "spendCapUsd": 0,
+  "activation": "HELD_ACCOUNT_ENTITLEMENT_AND_BROKERAGE_EVIDENCE_REQUIRED"
+}

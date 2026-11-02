@@ -1,0 +1,32 @@
+# REVIEW TEMPLATE ONLY: not installed in .github/workflows and NOT ACTIVE.
+# Activate only after exact-source review, approved account/policy binding,
+# actual $0 entitlement and dedicated secrets installed through secure controls.
+name: Bounded owned-social replenishment
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 11 * * *' # 06:17 EST / 07:17 EDT; posts use civil Eastern noon.
+permissions:
+  contents: write # REPOSITORY-wide permission; script pins one ref/file. NOT branch-scoped.
+concurrency:
+  group: owned-social-publisher
+  cancel-in-progress: false
+jobs:
+  replenish:
+    if: vars.AMM_OWNED_SOCIAL_ENABLED == 'true'
+    runs-on: ubuntu-latest # Public repo standard runner, no larger/paid runner.
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --execute
+        env:
+          AMM_SOCIAL_BUFFER_KEY: ${{ secrets.AMM_SOCIAL_BUFFER_KEY }}
+          AMM_SOCIAL_BUFFER_ORG: ${{ vars.AMM_SOCIAL_BUFFER_ORG }}
+          AMM_SOCIAL_STATE_TOKEN: ${{ github.token }}
+      # GitHub's existing owner workflow-failure notification is the intervention
+      # path. No new mail transport, consumer message, artifact/cache upload.

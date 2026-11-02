@@ -28,6 +28,32 @@ merely by preparing this correction. Cleaner QA copy remains separately unsent.
 Private implementation/gate/release packet location:
 `.amm-run/home-value-lead-loop-20261029/solo-operator-readiness-20261031/`.
 
+## November1 owned-social continuation — source review, activation held
+
+Current release authority remains `config/release-authority-policy.json` plus
+authenticated `pnpm release:authority:resolve`, not an approval below by itself.
+
+The submitted owned-social mandate authorizes three new owner-controlled brand
+accounts, $0 organic content, one verified Free publisher and a bounded durable
+replenisher. It does not authorize personal-profile substitution, consumer sends,
+paid creative/ads, new model usage, fabricated BIC approval or bypassed platform
+security/Terms. PR316 is accepted; its consumed release/QA approval is not reused.
+
+`config/owned-social-policy.json` remains master-paused; runtime bindings are not
+activated. Owner setup and explicit platform confirmations produced the new
+Facebook Page, two actual Buffer channel connections and one verified Public
+Facebook launch. Actual Free entitlement and the owner's express representation
+of brokerage power/consent are recorded. No scheduler, secret, state ref,
+hosted Preview or application release is claimed. The exact
+source/activation packet is retained privately under
+`.amm-run/home-value-lead-loop-20261029/owned-social-launch-20261101/`.
+
+Actual next gates: supported profile destinations/disclosures, Page-only Buffer
+scope without unrelated account/ads access, exact-source hosted/protected release
+and separate secure secret/runtime installation. Do not repeat completed account
+setup or advertising-authority questions. See `OWNED_SOCIAL_OPERATIONS.md` for scope,
+caps, pause/recovery, actual account boundaries and deliberately paused paid test.
+
 ## October31 owner execution authority — completed bounded effects
 
 Brandon's direct October31 instruction explicitly authorized the two exact

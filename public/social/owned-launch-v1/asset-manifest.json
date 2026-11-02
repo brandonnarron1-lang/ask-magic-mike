@@ -1,0 +1,302 @@
+{
+  "version": "amm.owned-social.v1",
+  "generatedAt": "2026-11-01T22:11:08.794Z",
+  "renderer": "SVG + Sharp; FFmpeg libx264; no generative API/audio",
+  "identity": "Existing approved portrait unchanged; no generated person",
+  "fonts": "System Arial/Georgia rasterized; no font binaries redistributed",
+  "sources": [
+    {
+      "file": "public/images/ask-magic-mike/mike-eatmon-headshot.png",
+      "sha256": "a73e224336af69ef5d562f3e11f0f115e555f152f3a30e8290bf281276dec007"
+    },
+    {
+      "file": "public/images/ask-magic-mike/brand-pack-v2/our-town-logo-clean.png",
+      "sha256": "294e5ed44a2a4917a49083978f8493a2770369638c5c3da98634c9faa7d72c8a"
+    },
+    {
+      "file": "config/owned-social-content.json",
+      "sha256": "73f68ed48564497f66473146ba4fcb24edbc4a9d204821c5782ae2eece2a3242"
+    }
+  ],
+  "files": [
+    {
+      "name": "01-your-next-move-feed.jpg",
+      "sha256": "8ae68763d6c3e9cb403ddf9520cb7790d20ca7930fb3e8f7d9917f6ab4c9dc3f",
+      "bytes": 110060,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "01-your-next-move-story.jpg",
+      "sha256": "59077736b204a6227fc568facc97af257c018ad9b59401d01f269fc46722df30",
+      "bytes": 122278,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move-frame-1.jpg",
+      "sha256": "a34a4d6fb6f0e595c9cdbdd9248412ae80910360c8ce84e9bb533992166739c2",
+      "bytes": 82861,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move-frame-2.jpg",
+      "sha256": "dbb0881dcc101876aa56c6762ab5edd203dac5e8c0882e65f99672499d2262e6",
+      "bytes": 83388,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move-frame-3.jpg",
+      "sha256": "e6ccdacb5426fa3c31136b6357182c2bfb24b5cf7416f5513b1d148477aa04d1",
+      "bytes": 83201,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "01-your-next-move.mp4",
+      "sha256": "ded5c4592de6aa1d5f7a019ab927e2d176b65e2e49814e5f66cf6e0640afa310",
+      "bytes": 187185
+    },
+    {
+      "name": "02-value-conversation-feed.jpg",
+      "sha256": "7d3bcd82bdf61cb26723cfc4b6a548eb657629b0d7fd05f95da5ba61bc7b88a2",
+      "bytes": 99068,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "02-value-conversation-story.jpg",
+      "sha256": "834aa88460c36bad4479b51697a8e7827ce36cf7b810e126d218751e14230177",
+      "bytes": 109455,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "02-value-conversation-slide-1.jpg",
+      "sha256": "dfc2925ee28ef6b91f4c59f84abd9ff19798cdb05fc9b6dd6789fd6a7b5b2335",
+      "bytes": 77678,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "02-value-conversation-slide-2.jpg",
+      "sha256": "96b1cc9545c85a9f3c949f0a34840ad3d99a000b1a3ffc30c3e5bf7f0242dc68",
+      "bytes": 78642,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "02-value-conversation-slide-3.jpg",
+      "sha256": "06f61de63502dbf5d009d65acc606acfd605a60d24dffb4bb5f7aba16c1c90f3",
+      "bytes": 75861,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-feed.jpg",
+      "sha256": "7daa9a690b097b27e37b326d9cf0015e44d5f6d82344129004fb9a08c229c08f",
+      "bytes": 91139,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-story.jpg",
+      "sha256": "320429b1a1d848768ee6b4e7878ebcfea456c32692941299984626d7973de526",
+      "bytes": 101439,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "03-seller-preparation-slide-1.jpg",
+      "sha256": "f5129f0af4cae91276e589167a25081a8e7fd339d0867fcaf0db62de53c641f5",
+      "bytes": 69755,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-slide-2.jpg",
+      "sha256": "ec30a1b5ccdd4da33351c6c76100b7ca957f47e6fff24e5b7e233cccf6d1d548",
+      "bytes": 70232,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "03-seller-preparation-slide-3.jpg",
+      "sha256": "cf1759253546bd3aee3aa8c496d675359cf68b63439b58118db1ebbe92606166",
+      "bytes": 71182,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "04-selling-options-feed.jpg",
+      "sha256": "c41697d83463fbb39819a32ec8d53b06b39a9f9475da33ff799adbc870b6b6e4",
+      "bytes": 98234,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "04-selling-options-story.jpg",
+      "sha256": "ee296b47ee34bf15b7b36a72e480e84a03445bc5cf38e34b95bcc702147298ae",
+      "bytes": 108362,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options-frame-1.jpg",
+      "sha256": "a61bd7823997aa271465564ba094ac82572759d8e59587cbf5221a010f1a4e2d",
+      "bytes": 83168,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options-frame-2.jpg",
+      "sha256": "902609500a606650ebba7bb7d7572c86a910e0653a1852dc3c96e3aeab3b58ac",
+      "bytes": 86036,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options-frame-3.jpg",
+      "sha256": "d08146677c7423073c0488e0b1685a03def313cf75eba74bdc03e4452b3d8dc2",
+      "bytes": 86784,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "04-selling-options.mp4",
+      "sha256": "9d89a73e1adc66f33eab1306dd94b2ed51efcd0b83faf661d8845a907b65a175",
+      "bytes": 191640
+    },
+    {
+      "name": "05-buyer-readiness-feed.jpg",
+      "sha256": "ccaeb435f48ab11163ec3afeca7263697ceed041e8f0b0ab6f5826daa31f64e5",
+      "bytes": 87537,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "05-buyer-readiness-story.jpg",
+      "sha256": "75ce18cac19d59bd61f2bf2266138c89322238f6163d83797397bf53863a661a",
+      "bytes": 96992,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "05-buyer-readiness-slide-1.jpg",
+      "sha256": "d86ab7f238d81c06f1b4a928b646d5f74c5732be92aab9b3845efc8a8e9d5c30",
+      "bytes": 68336,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "05-buyer-readiness-slide-2.jpg",
+      "sha256": "55e2d5d96c75fede73f3a69098f5876d5bb690256a20449f21dcc140a82101bc",
+      "bytes": 66901,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "05-buyer-readiness-slide-3.jpg",
+      "sha256": "9ff841f94218d1f14d5906f64538ed7914d5a27e9f24821ce27e81b646c7efb9",
+      "bytes": 65984,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "06-after-your-request-feed.jpg",
+      "sha256": "383f7a5e8e2fc1455ce7a2226053a4b5d47c17a831e892058c64533230d07925",
+      "bytes": 95404,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "06-after-your-request-story.jpg",
+      "sha256": "83d54ae2bda51a78eb44ba18b4f78f1fa1a78310746830238ed581457533c50c",
+      "bytes": 106013,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request-frame-1.jpg",
+      "sha256": "f5c5829be458848c1dcd3826db6f9d9b05a0909e87a16f25584452d8c4229c39",
+      "bytes": 82069,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request-frame-2.jpg",
+      "sha256": "9aa2ac152971020f04a79fd1371071ec2952dfbd13830890395af289af32a4c3",
+      "bytes": 82062,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request-frame-3.jpg",
+      "sha256": "a53d134a61aad70185d709b1fca3fdc9b0d0d8e283cbf2b47cc83b45b9c5132c",
+      "bytes": 82140,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "06-after-your-request.mp4",
+      "sha256": "57f849b7eb4cc477983a5ee9251b4a5ad4c2c41b314d54965ac857a7458b749e",
+      "bytes": 185422
+    },
+    {
+      "name": "07-not-an-appraisal-feed.jpg",
+      "sha256": "0ba2e6ce88c6453911fec66683a556aaf43e27b0330d7ceb456ef9965df6aece",
+      "bytes": 95891,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "07-not-an-appraisal-story.jpg",
+      "sha256": "e0ad801d3858f2b6f691254fa1443fac72ea626cc936a07c0ce3ac04765e8a92",
+      "bytes": 106248,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal-frame-1.jpg",
+      "sha256": "2646e65e5d27873768076d979733ad92a708a8a1c133e0811ec92ed11cce65d0",
+      "bytes": 81377,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal-frame-2.jpg",
+      "sha256": "cd87036f045a1e3ab91007b900808b244c0e2ef35441cd555a59a9649b710ff3",
+      "bytes": 82389,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal-frame-3.jpg",
+      "sha256": "5fec5e3668752a8c25bc3aebe5b66e2c3037ef4fd4c7a65d3902bb5f61672fb7",
+      "bytes": 83281,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "07-not-an-appraisal.mp4",
+      "sha256": "aa92542e0e8a6097baca0728f24c6bf5c1b60e1ee4505a244ee3e7bf96b2aa26",
+      "bytes": 186858
+    },
+    {
+      "name": "profile.jpg",
+      "sha256": "c108e1d208b30e9b5d28644441c6752b1e1514aa94b001da087140652f1a3e18",
+      "bytes": 79570,
+      "width": 1024,
+      "height": 1024
+    },
+    {
+      "name": "facebook-cover.jpg",
+      "sha256": "b1f929d67f1320e4974c096250699abd6086dbec706379c8ea3e9345763f4790",
+      "bytes": 85904,
+      "width": 1640,
+      "height": 624
+    }
+  ]
+}
