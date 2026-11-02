@@ -5,7 +5,7 @@ export function assertPublicLedger(value: unknown): asserts value is Ledger {
     if (!v || typeof v !== "object" || Array.isArray(v) || Object.keys(v).some(k => !fields.includes(k))) throw Error("public_ledger_schema_rejected");
     return v as Record<string, unknown>;
   };
-  const text = (v: unknown, max = 2100) => typeof v === "string" && v.length > 0 && v.length <= max && !/[\u0000-\u0008]/.test(v);
+  const text = (v: unknown, max = 2100) => typeof v === "string" && v.length > 0 && v.length <= max && ![...v].some(c => c.charCodeAt(0) <= 8);
   const stamp = (v: unknown) => typeof v === "string" && /^\d{4}-\d{2}-\d{2}T/.test(v) && Number.isFinite(Date.parse(v));
   const s = object(value, ["revision", "intents", "incidents", "masterPaused", "pausedChannels", "lease", "effectBudget", "health"]);
   if (!Number.isInteger(s.revision) || Number(s.revision) < 0 || !Array.isArray(s.intents) || s.intents.length > 1000) throw Error("public_ledger_schema_rejected");
