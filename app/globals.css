@@ -260,6 +260,17 @@ textarea:focus-visible {
   background: #e8dfcc;
   border-color: #a28e66;
 }
+/* The public contact inset stays dark even inside a warm-paper confirmation.
+   Scope this exception to its own content, not the form's consent or errors. */
+[data-acquisition-form] .amm-glass-card [data-public-mike-contact] :is(p,strong) {
+  color: #d9ceb8;
+}
+[data-acquisition-form] .amm-glass-card [data-public-mike-contact] :is([data-mike-call],[data-mike-call] span) {
+  color: #14110b;
+}
+[data-acquisition-form] .amm-glass-card [data-public-mike-contact] [data-mike-text] {
+  color: #f4ead4;
+}
 [data-acquisition-form] .amm-glass-card input.amm-form-field:-webkit-autofill {
   -webkit-text-fill-color: #26231f;
   caret-color: #26231f;
