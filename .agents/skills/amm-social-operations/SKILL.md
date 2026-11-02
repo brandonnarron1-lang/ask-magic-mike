@@ -1,6 +1,6 @@
 ---
 name: amm-social-operations
-description: Prepare, verify, publish and reconcile Ask Magic Mike's owned organic channels using exact account scope, approved brokerage content, the dedicated Buffer adapter and durable pause/recovery controls.
+description: Resume Ask Magic Mike campaigns, observe/reconcile queues, select unused content, recover unknown outcomes and execute authorized bounded owned or Brandon introductory/community actions with durable state and no new spend.
 ---
 
 # Owned social operations
@@ -17,7 +17,7 @@ Check current scope and entitlement, not historical Free labels or login success
 
 ## Account and editorial gates
 
-- Reuse genuine owner-controlled accounts; never substitute a personal profile,
+- Reuse genuine owner-controlled accounts; never substitute an unauthorized personal profile,
   an unrelated managed Page or the inaccessible Our Town Page.
 - Password creation, recovery, MFA, identity and Terms steps use the supported
   owner/security interaction. Never put passwords/cookies/recovery data in records.
@@ -44,6 +44,53 @@ Check current scope and entitlement, not historical Free labels or login success
 GraphQL Buffer adapter is not the legacy REST API. The workflow beside it is a
 review template, not an installed scheduler. Do not call it autonomous until the
 durable runtime, binding, queue and one real replenishment run are verified.
+
+Routine invocation: “Use amm-social-operations to resume the current campaign,
+reconcile actual state, perform the next eligible bounded actions, verify effects,
+and save the checkpoint.” Follow OBSERVE → RECONCILE → SELECT → VALIDATE → EXECUTE
+→ VERIFY → CHECKPOINT. Use the actual commands in `docs/OWNED_SOCIAL_OPERATIONS.md`.
+Observation does not write; reconciliation does. Both remain available when
+publication is paused or content exhausted. Native Facebook is a separate queue:
+Buffer alone cannot attest to it. Never infer publication from a missing row.
+
+Read durable state before selecting from all completed concepts. Occupied slots
+and used content identities survive dates, commits and sessions. Apply batch caps
+after selection; preserve lease fencing, the shared ten-minute effect allowance,
+and ambiguous-outcome holds. A pre-dispatch crash with a persisted legacy
+processing intent is uncertain, not permission to replay. The finite reserve is
+not unlimited fresh content. Preserve unresolved history at capacity; archive
+recoverably only under the normal reviewed process.
+
+Classify queue-full as deferral and unsupported format as a policy hold, not an
+incident. Persist incident first/last/acknowledgement/recheck/resolution and notify
+new, recurring-after-resolution or materially changed incidents, not the same
+unchanged daily hold. Do not claim an operator alert or missed-run monitor exists
+until actually installed and verified. A weekly-review flag is not a review.
+
+Mutable capabilities need exact account/format/destination scope, evidence,
+observation time, recheck condition and verified/provisional/obsolete/unavailable
+state. Recheck deadlines do not manufacture expiration of standing owner consent.
+The GitHub Contents credential is repository-wide: pin the ref/file, validate the
+public ledger schema and approved catalogue, and state the residual scope honestly.
+Never put private relationship/group evidence, prospect data or secrets there.
+
+## Separately authorized one-time introduction
+
+The owner can expressly authorize Brandon's genuine personal introduction; this
+is not the prohibited substitution for an inaccessible brokerage Page. Verify
+his acting identity and the exact current scope. Read stable campaign action IDs
+in the existing private evidence store. Completed or unknown actions are never
+repeated because the date, prompt or source changes. Missing private state means
+reconcile or HOLD, not reset. Persist intent before submit and inspect actual
+platform state after a timeout before any retry. Keep friend identities private.
+
+Check actual community rules, geography, acting identity and membership before a
+join/post; public pages are not groups and follows are not advertising permission.
+Use lower actual limits, not quota filling. No social-graph export, scraping,
+mass comments, DMs or promotional City-feed comments. A specifically authorized
+single TikTok awareness introduction needs its own receipt, honest navigation
+and supported AI/commercial disclosures; it never enables direct-response
+automation without a verified clickable destination.
 
 Before effects: exact source review, immutable Preview where required, actual $0
 entitlement, channel ownership, policy approval and media byte/hash validation.

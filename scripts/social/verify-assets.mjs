@@ -27,7 +27,10 @@ for(const file of manifest.files) {
     images++;
   }
 }
-if(images!==(edition==='owned-launch-v2'?41:37)||videos!==4)throw Error('expected_launch_asset_count_mismatch');
+const concepts=JSON.parse(await fs.readFile('config/owned-social-content.json','utf8')).concepts;
+const expectedImages=edition==='owned-launch-v2'?6+concepts.reduce((n,c)=>n+2+(c.format==='carousel'||c.format==='video'?3:0),0):37;
+if(images!==expectedImages||videos!==4)throw Error('expected_launch_asset_count_mismatch');
+if(edition==='owned-launch-v2')for(const c of concepts)for(const kind of ['feed','story',...(c.format==='carousel'?['slide-1','slide-2','slide-3']:['frame-1','frame-2','frame-3'])])if(!manifest.files.some(f=>f.name===`${c.id}-${kind}.jpg`))throw Error('concept_asset_missing');
 const privateOut='.amm-run/home-value-lead-loop-20261029/owned-social-launch-20261101'+(edition==='owned-launch-v2'?'/cinematic-v2':'');
 await fs.mkdir(privateOut,{recursive:true});
 await sharp(`${base}/02-value-conversation-feed.jpg`).resize(390).png().toFile(`${privateOut}/mobile-feed-390.png`);

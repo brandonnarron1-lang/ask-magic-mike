@@ -9,8 +9,9 @@ const require=createRequire(import.meta.url);
 const sharp=createRequire(require.resolve('next/package.json'))('sharp');
 const args=process.argv.slice(2);
 const inputArg=args.find(x=>x.startsWith('--inputs='));
-if(!inputArg) throw Error('explicit_private_owner_input_manifest_required');
-const inputs=JSON.parse(await fs.readFile(inputArg.slice(9),'utf8'));
+const append=args.includes('--append');
+if(!inputArg&&!append) throw Error('explicit_private_owner_input_manifest_required');
+const inputs=inputArg?JSON.parse(await fs.readFile(inputArg.slice(9),'utf8')):{selected:{}};
 const content=JSON.parse(await fs.readFile('config/owned-social-content.json','utf8'));
 const visual=JSON.parse(await fs.readFile('config/owned-social-visuals.v2.json','utf8'));
 const out=path.join('public/social',visual.edition);
@@ -19,7 +20,10 @@ const onlyStills=args.includes('--stills');
 const {ink,cream,gold,ruby}=visual.palette;
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
 const hash=b=>createHash('sha256').update(b).digest('hex');
-const sources=[];
+const prior=append?JSON.parse(await fs.readFile(path.join(out,'asset-manifest.json'),'utf8')):null;
+// Append only: never regenerate an asset already published or queued.
+if(prior)for(const f of prior.files){const b=await fs.readFile(path.join(out,f.name));if(hash(b)!==f.sha256)throw Error('existing_asset_changed_stop');}
+const sources=prior?.sourceImages||[];
 for(const [key,file] of Object.entries(inputs.selected)) {
   const bytes=await fs.readFile(file),m=await sharp(bytes).metadata();
   if(!m.width||!m.height||m.width<600||m.height<600) throw Error(`insufficient_source:${key}`);
@@ -66,7 +70,7 @@ function overlay(c,h,panel=0) {
     ${lines(78,cta+210,26,[visual.conceptLabel],'#d5d4ce',450)}
   </svg>`;
 }
-const outputs=[];
+const outputs=prior?prior.files.filter(f=>!f.name.startsWith('source-')).map(f=>f.name):[];
 async function card(c,name,h,panel=0) {
   const background=await sharp(path.join(out,'source-portrait.jpg')).resize(1080,h,{fit:'cover',position:'centre'}).png().toBuffer();
   const layer=Buffer.from(overlay(c,h,panel));
@@ -76,6 +80,7 @@ async function card(c,name,h,panel=0) {
   outputs.push(name);
 }
 for(const c of content.concepts) {
+  if(append&&prior.files.some(f=>f.name===`${c.id}-feed.jpg`))continue;
   await card(c,`${c.id}-feed.jpg`,1350);
   await card(c,`${c.id}-story.jpg`,1920);
   if(c.format==='carousel')for(let p=1;p<=3;p++)await card(c,`${c.id}-slide-${p}.jpg`,1350,p);
@@ -91,18 +96,20 @@ for(const c of content.concepts) {
     }
   }
 }
+if(!append){
 // Same supplied face as the campaign, without a substitute person or old monogram.
 const avatarRing=Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024"><circle cx="512" cy="512" r="491" fill="none" stroke="${gold}" stroke-width="5"/></svg>`);
 await sharp(path.join(out,'source-avatar.jpg')).resize(1024,1024).composite([{input:avatarRing}]).jpeg({quality:94,mozjpeg:true}).toFile(path.join(out,'profile.jpg'));outputs.push('profile.jpg');
 const coverOverlay=Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1640" height="624"><defs><linearGradient id="shade"><stop stop-color="${ink}" stop-opacity=".82"/><stop offset=".63" stop-color="${ink}" stop-opacity=".55"/><stop offset="1" stop-color="${ink}" stop-opacity=".02"/></linearGradient></defs><rect width="1640" height="624" fill="url(#shade)"/>${lines(270,106,28,['OUR TOWN PROPERTIES, INC.'],gold,550,1,1)}${lines(265,235,78,['Your next move.','Made personal.'],cream,650,1.05,-3)}${lines(270,465,30,['askmagicmike.com'],cream,550)}${lines(270,520,24,['Brand concept imagery · Not a listing'],'#e0ddd5',450)}</svg>`);
 const cover=await sharp(path.join(out,'source-wide.jpg')).resize(1640,624,{fit:'cover',position:'north'}).png().toBuffer();
 await sharp(cover).composite([{input:coverOverlay}]).jpeg({quality:94,mozjpeg:true}).toFile(path.join(out,'facebook-cover.jpg'));outputs.push('facebook-cover.jpg');
+}
 const manifest={version:visual.version,generatedAt:new Date().toISOString(),renderer:'Existing SVG + Sharp and FFmpeg, owner-supplied source pixels; no generation/retouch/audio',stillsOnly:onlyStills,identity:visual.identityRule,provenance:visual.sourceProvenance,fonts:'Installed Avenir Next rasterized; no font binaries redistributed',sourceImages:sources,sources:[],files:[]};
 for(const file of ['config/owned-social-content.json','config/owned-social-visuals.v2.json',visual.logo])manifest.sources.push({file,sha256:hash(await fs.readFile(file))});
 for(const name of [...sources.map(s=>s.file),...outputs]){const b=await fs.readFile(path.join(out,name));const m=name.endsWith('.jpg')?await sharp(b).metadata():{};manifest.files.push({name,sha256:hash(b),bytes:b.length,width:m.width,height:m.height});}
 await fs.writeFile(path.join(out,'asset-manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 const previews=await Promise.all(content.concepts.map(c=>sharp(path.join(out,`${c.id}-feed.jpg`)).resize(270,338).toBuffer()));
-await sharp({create:{width:1080,height:676,channels:3,background:ink}}).composite(previews.map((input,i)=>({input,left:i%4*270,top:Math.floor(i/4)*338}))).jpeg({quality:92}).toFile(path.join(out,'contact-sheet.jpg'));
+await sharp({create:{width:1080,height:Math.ceil(previews.length/4)*338,channels:3,background:ink}}).composite(previews.map((input,i)=>({input,left:i%4*270,top:Math.floor(i/4)*338}))).jpeg({quality:92}).toFile(path.join(out,'contact-sheet.jpg'));
 const gallery=`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Ask Magic Mike · cinematic brand edition</title><style>body{margin:0;background:${ink};color:${cream};font:18px/1.5 'Avenir Next',Arial,sans-serif}main{max-width:1400px;padding:clamp(20px,5vw,70px);margin:auto}h1{font-size:clamp(38px,6vw,88px);letter-spacing:-.055em;line-height:1.03;max-width:12ch}h2{font-size:clamp(26px,3vw,42px);letter-spacing:-.035em}a{color:${gold}}.lead{color:#c8c8c2;max-width:66ch}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:24px}img,video{display:block;width:100%;height:auto}article{padding:50px 0;border-top:1px solid #ffffff24}.tag{color:${gold};letter-spacing:.14em;font-size:13px;text-transform:uppercase}.caption{max-width:72ch;color:#dbd8cf}.hero{width:100%;margin:40px 0}.identity{display:grid;grid-template-columns:160px 1fr;gap:30px;align-items:center}.identity img{border-radius:100%}.paths{display:flex;gap:20px;flex-wrap:wrap;margin:25px 0}.paths a{min-height:44px;display:inline-flex;align-items:center}video{max-height:720px;background:#101212}@media(max-width:500px){.identity{grid-template-columns:90px 1fr}}</style><main><p class="tag">Cinematic edition · local review, not deployed or queued</p><h1>Real questions.<br>A clearer next move.</h1><p class="lead">A consistent photographic direction for Ask Magic Mike and Our Town Properties, Inc. Owner-supplied concept imagery—not listings, documented locations or a promise of results. Supplied likeness preserved; no model/API call.</p><div class="paths"><a href="https://www.askmagicmike.com/home-value">Home value review ↗</a><a href="https://www.askmagicmike.com/buy">Buying help ↗</a><a href="https://www.askmagicmike.com/sell?seller_option=compare">Selling options ↗</a><a href="https://www.askmagicmike.com/ask">Other real-estate questions ↗</a></div><div class="identity"><img src="profile.jpg" alt="Owner-supplied Mike Eatmon brand portrait"><p>Same person. Same brokerage. One recognizable visual language.<br>Modern sans typography, photographic fields and one clear action.</p></div><img class="hero" src="facebook-cover.jpg" alt="Ask Magic Mike cinematic cover; illustrative lakeside brand scene">${content.concepts.map(c=>`<article><p class="tag">${esc(c.id)} · ${esc(c.category)}</p><h2>${esc(visual.headlines[c.id].join(' '))}</h2><div class="grid"><img src="${c.id}-feed.jpg" alt="${esc(c.points.join(' '))} Illustrative brand imagery, not a listing.">${c.format==='video'&&!onlyStills?`<video controls playsinline preload="metadata" poster="${c.id}-story.jpg"><source src="${c.id}.mp4" type="video/mp4"></video>`:`<img src="${c.id}-story.jpg" alt="Matching vertical Story layout">`}</div><p class="caption">${esc(c.caption)}</p><p class="lead">Profile website must actually be configured before using a “link in profile” caption. Preparation is not publication or demand.</p></article>`).join('')}</main></html>`;
 await fs.writeFile(path.join(out,'index.html'),gallery);
 console.log(JSON.stringify({status:onlyStills?'STILLS_PREVIEW_NOT_QUEUED':'RENDERED_NOT_QUEUED',output:out,derivatives:outputs.length,sourceImages:sources.length,paidCalls:0}));

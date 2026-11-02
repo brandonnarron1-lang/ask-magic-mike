@@ -1,11 +1,13 @@
 # Owned social operation — November 1, 2026
 
-Current state: **FACEBOOK INITIAL POST PUBLISHED / QUEUE NOT SCHEDULED /
-AUTOMATION BLOCKED**. This is separate from the R2 draft-only workers. PR316
+Current state: **FACEBOOK + INSTAGRAM INITIAL POSTS PUBLISHED / FIVE FACEBOOK
+AND FOUR INSTAGRAM POSTS SCHEDULED / REPLENISHER NOT INSTALLED**. November1
+evening native queue observation confirms those separate schedules. This is
+separate from the R2 draft-only workers. PR316
 remains accepted Production; PR317 is a Draft candidate, not deployed or active.
 
-Owner-requested visual refresh: `public/social/owned-launch-v2/`, seven concepts,
-four encoded vertical videos, three carousels and modern photographic feed/Story
+Owner-requested visual refresh: `public/social/owned-launch-v2/`, fourteen concepts,
+four encoded vertical videos, ten carousels and modern photographic feed/Story
 layouts. Supplied lakeside/interior/portrait concepts are not represented as real
 listings or documentary locations. No generated replacement likeness or paid API.
 The v1 asset and its actual Facebook publication are retained, not overwritten.
@@ -16,8 +18,10 @@ hashes, 390px pixel checks and actual encoded video evidence remain distinct.
 
 ## Prepared implementation
 
-- `config/owned-social-content.json`: seven evergreen concepts, 21 platform
-  captions/destinations, seven additional concepts held as backlog. No listing,
+- `config/owned-social-content.json`: fourteen finished evergreen concepts, 42
+  platform variants. The seven former backlog topics have actual matched media.
+  This is a finite reserve, not fourteen days of verified eligible queue coverage.
+  No listing,
   market-statistic, valuation, testimonial or response-time promises.
 - `public/social/owned-launch-v1/`: four 1080×1920 H.264 videos (12 seconds,
   24fps, no audio), three carousels, seven feed/Story layouts, profile/cover,
@@ -37,15 +41,22 @@ hashes, 390px pixel checks and actual encoded video evidence remain distinct.
 | Channel | Current evidence | Publication capability |
 |---|---|---|
 | Facebook | Owner-created Ask Magic Mike Page [61595981377188](https://www.facebook.com/profile.php?id=61595981377188); Manage Page and ordinary Page actor verified. | One initial Public announcement verified; tracked Home Value website/CTA saved. Buffer's broad default request included unrelated assets/ads and was cancelled without grant. |
-| Instagram | [@askmagicmikenc](https://www.instagram.com/askmagicmikenc/), Business / Real Estate Service. Bio/photo saved, private contact info excluded. | Buffer connected after one preserved generic failure and one same-scope retry. Comments OFF. Web explicitly requires the mobile app to set a clickable Website; no post yet. |
+| Instagram | [@askmagicmikenc](https://www.instagram.com/askmagicmikenc/), Business / Real Estate Service. Bio/photo saved, private contact info excluded. | Buffer connected, comments OFF. Owner added the mobile profile link; actual click reached Home Value. Initial post published; four future scheduled posts. Buyer/compare destinations are not implied by that seller-only profile link. |
 | TikTok | [@askmagicmike](https://www.tiktok.com/@askmagicmike), own Edit profile verified; factual bio saved and reloaded. | Buffer connected, both comment scopes OFF. Native web photo upload did not save after two bounded attempts. Website-link eligibility and commercial disclosure not yet verified; no post. |
-| Buffer | Actual signed-in Free billing: $0 forever, 3 channels, 10 scheduled posts/channel, one API key/client. | 2/3 channels connected; empty queues. No trial/card/upgrade, API credential or active replenishment workflow. |
+| Buffer | Actual signed-in Free billing: $0 forever, 3 channels, 10 scheduled posts/channel, one API key/client. | 2/3 channels connected; Instagram queue four. No trial/card/upgrade, API credential or active replenishment workflow. |
 
 Verified Public initial announcement:
 [Facebook launch](https://www.facebook.com/permalink.php?story_fbid=pfbid0UnvxUjGxLBg3Qac5d2r1fNvpCThWqMp4aRmMFLi7bwwQ1T57x1pixBYepH82opAkl&id=61595981377188).
 One Post click; exact image/caption/custom alt text/link read back. Boost and Story
 OFF; no personal-profile post or consumer contact. Facebook's automatic profile
 picture update is a separate setup effect, not another launch announcement.
+
+[Instagram launch](https://www.instagram.com/p/DfN8vQrKFEV/) is separately verified
+published, with native AI disclosure. Native Facebook schedules: November2,3,5,6,7
+at noon Eastern; Instagram Buffer schedules: November2,3,6,7 at noon Eastern.
+These gaps are deliberate, not continuous daily coverage. Native Facebook IDs and
+exact media/caption receipts remain private. Buffer UI did not expose opaque post
+IDs; obtain authoritative inventory before activation, never guess them.
 
 Only the genuine Our Town Facebook Page was identified; that does not establish
 new account publisher rights. Mike's Instagram/TikTok handles were not established
@@ -120,22 +131,68 @@ stop; a quota failure is a blocked gate, not permission to enable billing.
 Node24, no dependency additions:
 
 ```sh
-node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --start=YYYY-MM-DD --summary
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --summary
+# Optional LOCAL snapshot: { ledger, inventory }; no live-state claim:
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --plan --snapshot=/absolute/private/snapshot.json --summary
+# Existing dedicated Buffer binding only; provider reads, NO mutations:
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --observe --summary
+# Provider reads + durable ledger writes, NOT read-only; works while paused:
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --reconcile --summary
+# State read / durable pause / incident acknowledgement (no provider mutation):
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --status
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --pause
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --pause --channel=EXACT_CHANNEL_ID
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --acknowledge --incident=EXACT_INCIDENT_ID
 # Only after all activation requirements:
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --execute
+# Separate effect, only tracked queued work; cancellation requires readback:
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --cancel-queued --channel=EXACT_CHANNEL_ID
 ```
 
-Slots are civil Eastern noon, converted per date including DST. Dry-run dates
-are proposals, not booked slots. The initial seven concepts are a finite library;
-the seven backlog ideas require completed, eligible media/copy before refill.
+Slots are civil Eastern noon, converted per date including DST. Only unused
+content receives the next unoccupied permitted slot; old intents never move.
+The entire bounded catalogue is scanned and selection is channel-fair. Dry-run
+dates are proposals, not booked slots. Fourteen concepts are a finite library.
 No infinite duplicate recycling or paid model fallback. Exhaustion must hold and
 notify the operator; it is not evidence of a replenishing autonomous operation.
 R2's source registry and its marketing=false grant remain unchanged. The social
 offers use the existing owner-approved kit under a separate advertising gate,
 not a promotion or rights expansion of an intelligence source.
-Weekly review is marked in the same run (Monday); future evidence is not claimed.
+The old Monday Boolean is only a reminder; no weekly review is claimed completed.
 The existing owner GitHub workflow-failure notification is the proposed alert
 path, not a new email transport. Its delivery has NOT been tested.
+
+`--observe` never writes state. `--reconcile` writes known provider results even
+when publishing is paused or no new content is eligible. Missing scheduled rows
+become UNKNOWN, not assumed published or reusable. Incomplete inventory cannot
+resolve incidents. Incidents retain stable identity, first/last observations,
+acknowledgement, next recheck and resolution. New or resolved/recurrent incidents
+produce change IDs; unchanged daily holds do not. Full queues are ordinary
+deferrals; known unsupported Facebook disclosure is a channel hold, not an
+Instagram failure. Unknown remote outcomes and revoked access remain actionable.
+
+Mutation attempts share a durable ten-minute execution allowance across manual
+restarts, in addition to the three-create/50-API-call per-run cap. Each explicit
+observation command is separately bounded and must not become a polling loop.
+The fixed state ref/file is a software restriction, NOT a branch-limited token:
+Contents write can affect the repository. Schema validation rejects unknown/private
+fields and unsafe URLs; reviewed catalogue matching remains a separate activation
+check. Never place private one-time introductions, friends/groups or customer data
+in public state. At 1,000 entries/750KB HOLD for recoverable reviewed archival;
+preserve unresolved intents and dedup identities. No silent truncation.
+
+The workflow remains an UNINSTALLED template. No next runtime run, first real
+replenishment, operator alert delivery or independent missed-run monitor is proven.
+Protected immutable Preview/source acceptance remains required for PR317; the
+consumed PR316 QA exception supplies no new venue authority. Keep the existing
+native/Buffer queues intact while that separate release/runtime boundary is held.
+
+One-time personal/community distribution uses stable private campaign action IDs
+and exact platform readback. Missing/unknown action state requires reconciliation,
+not another introduction or invitation batch. Only explicit owner authority permits
+Brandon's genuine personal lane. A one-off awareness-only TikTok introduction does
+not relax the publisher's clickable-destination gate. Group rules must be actually
+verified; a professional directory entry is neither a join nor a publication.
 
 Master pause: persist `masterPaused: true` in the policy and durable ledger;
 disable the workflow enable variable. Per-channel pause is stored by exact channel

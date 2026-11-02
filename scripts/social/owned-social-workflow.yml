@@ -7,7 +7,7 @@ on:
   schedule:
     - cron: '17 11 * * *' # 06:17 EST / 07:17 EDT; posts use civil Eastern noon.
 permissions:
-  contents: write # Publication ledger ref only; no lead/database credentials.
+  contents: write # REPOSITORY-wide permission; script pins one ref/file. NOT branch-scoped.
 concurrency:
   group: owned-social-publisher
   cancel-in-progress: false

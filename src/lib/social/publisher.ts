@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { reconcileSnapshot, type Incident } from "./operations";
 
 // Separate authority from the existing intelligence workers' draft_only_no_send.
 // No lead DB, consumer transport, model call or implicit production credential.
@@ -16,6 +17,7 @@ export interface Channel {
   platform: Platform; id: string; accountId: string; ownerVerifiedAt: string;
   paused: boolean; automaticFormats: ("image" | "video")[];
   profileLinkVerified: boolean; disclosureVerified: boolean;
+  capability?: { evidence: string; observedAt: string; recheckAfter: string; status: "verified" | "provisional" | "obsolete" | "unavailable"; destinationPaths: string[] };
 }
 export interface Policy {
   version: string; masterPaused: boolean;
@@ -27,8 +29,14 @@ export interface Policy {
 export interface Intent {
   key: string; item: SocialItem; channelId: string; state: PublicationState;
   providerId?: string; permalink?: string; reason?: string; updatedAt: string;
+  attemptedAt?: string;
 }
-export interface Ledger { revision: number; intents: Intent[]; masterPaused?: boolean; pausedChannels?: string[]; lease?: { token: string; until: string } }
+export interface Ledger {
+  revision: number; intents: Intent[]; incidents?: Incident[]; masterPaused?: boolean; pausedChannels?: string[];
+  lease?: { token: string; until: string };
+  effectBudget?: { ownerToken: string; until: string };
+  health?: { lastStart?: string; lastObservation: string; lastReconciliation: string; lastPublication?: string; lastCompleted?: string; trigger: "manual" | "scheduled"; nextExpected?: string };
+}
 export interface Store {
   read(): Promise<Ledger>;
   // Atomic compare-and-swap MUST be durable before any provider effect.
@@ -73,6 +81,7 @@ export function holdReason(policy: Policy, item: SocialItem, now: Date): string 
   const channel = policy.channels.find(c => c.platform === item.platform);
   if (policy.masterPaused) return "master_paused";
   if (!channel || !channel.accountId || !channel.ownerVerifiedAt || channel.paused) return "account_unverified_or_paused";
+  if (!channel.capability || channel.capability.status !== "verified" || !channel.capability.evidence || !Number.isFinite(Date.parse(channel.capability.observedAt)) || Date.parse(channel.capability.observedAt) > +now || !Number.isFinite(Date.parse(channel.capability.recheckAfter)) || Date.parse(channel.capability.recheckAfter) <= +now) return "capability_recheck_required";
   const e = policy.entitlement, a = policy.brokerageAdvertisingApproval;
   if (!e || e.plan !== "Free" || !Number.isFinite(Date.parse(e.expiresAt)) || Date.parse(e.expiresAt) <= +now || !e.runtimeZeroCostVerified) return "zero_cost_entitlement_unverified";
   if (!a || !a.reference || a.scope !== "owned_evergreen" || !Number.isFinite(Date.parse(a.expiresAt)) || Date.parse(a.expiresAt) <= +now) return "brokerage_advertising_scope_unverified";
@@ -82,6 +91,7 @@ export function holdReason(policy: Policy, item: SocialItem, now: Date): string 
   if (!validPublicUrl(item.destination) || !item.assets.length || item.assets.length > 4 || item.assets.some(a => !validPublicUrl(a.url, true) || !a.url.endsWith(a.type === "video" ? ".mp4" : ".jpg") || !/^[a-f0-9]{64}$/.test(a.sha256) || !a.alt || !channel.automaticFormats.includes(a.type))) return "media_or_destination_not_verified";
   if (new URL(item.destination).searchParams.get("utm_source") !== item.platform) return "attribution_platform_mismatch";
   if (item.platform !== "facebook" && !channel.profileLinkVerified) return "clickable_profile_destination_unverified";
+  if (item.platform !== "facebook" && !channel.capability.destinationPaths.includes(new URL(item.destination).pathname)) return "offer_profile_destination_unverified";
   if (!channel.disclosureVerified) return "required_disclosure_unverified";
   const unsupportedLabel = item.platform === "facebook" || (item.platform === "tiktok" && item.assets.some(a => a.type !== "video"));
   if (requiresNativeAiDisclosure(item) && unsupportedLabel) return "native_ai_disclosure_required_for_this_format";
@@ -91,13 +101,6 @@ export function holdReason(policy: Policy, item: SocialItem, now: Date): string 
 function matchingPost(intent: Intent, p: RemotePost) {
   return p.channelId === intent.channelId && p.text === intent.item.text && p.dueAt === intent.item.dueAt &&
     JSON.stringify(p.assets) === JSON.stringify(intent.item.assets.map(a => a.url));
-}
-function remoteState(p: RemotePost): PublicationState {
-  if (p.status === "sent") return "published";
-  if (["buffer", "scheduled"].includes(p.status)) return "scheduled";
-  if (p.status === "error") return "failed";
-  if (p.status === "draft") return "draft";
-  return "processing";
 }
 async function update(store: Store, key: string, apply: (i: Intent) => Intent) {
   // Bounded CAS retry only for local ledger writes, NEVER provider mutations.
@@ -125,7 +128,8 @@ async function replenishLocked(options: { policy: Policy; items: SocialItem[]; s
   // No external calls at all when globally paused.
   if (policy.masterPaused) { result.held.push("master_paused"); return result; }
   const eligible = items.filter(item => !holdReason(policy, item, now));
-  if (!eligible.length) {
+  const before = await store.read();
+  if (!eligible.length && !before.intents.length) {
     result.held.push(...items.map(item => `${item.id}:${item.platform}:${holdReason(policy, item, now)}`));
     return result;
   }
@@ -133,25 +137,18 @@ async function replenishLocked(options: { policy: Policy; items: SocialItem[]; s
   const inventory = await provider.inventory();
   if (!inventory.complete) throw new Error("inventory_incomplete_no_publish");
   const existing = await store.read();
-  for (const intent of existing.intents) {
-    if (!["processing", "unknown", "scheduled"].includes(intent.state)) continue;
-    const matches = inventory.posts.filter(p => intent.providerId ? p.id === intent.providerId && p.channelId === intent.channelId : matchingPost(intent, p));
-    if (matches.length === 1) {
-      const p = matches[0];
-      if (!matchingPost(intent, p)) {
-        await update(store, intent.key, i => ({ ...i, state: "unknown", reason: "remote_content_slot_or_media_changed", updatedAt: new Date().toISOString() }));
-        result.held.push(`${intent.item.platform}:remote_intent_conflict`);
-        continue;
-      }
-      await update(store, intent.key, i => ({ ...i, providerId: p.id, state: remoteState(p), permalink: p.permalink, updatedAt: now.toISOString() }));
-      result.reconciled++;
-    } else if (intent.state === "processing") {
-      // A crash after persisted intent may have reached Buffer. Absence in one
-      // snapshot is NOT proof of non-acceptance. Never automatically replay.
-      await update(store, intent.key, i => ({ ...i, state: "unknown", reason: "ambiguous_create_requires_reconciliation", updatedAt: now.toISOString() }));
-    }
+  const reconciled = reconcileSnapshot(existing, inventory, now);
+  if (!(await store.compareAndSwap(existing.revision, { ...reconciled, revision: existing.revision + 1 }))) throw Error("reconciliation_conflict_stop");
+  for (const intent of reconciled.intents) {
+    if (intent.reason === "remote_content_slot_or_media_changed") result.held.push(`${intent.item.platform}:remote_intent_conflict`);
+    else if (["scheduled", "published", "failed", "draft"].includes(intent.state)) result.reconciled++;
   }
-  for (const item of items.slice(0, 21)) {
+  if (items.length > 300) throw Error("catalogue_bound_exceeded");
+  // Round-robin the complete catalogue, not its first seven concepts.
+  const groups = policy.channels.map(c => items.filter(i => i.platform === c.platform));
+  const ordered: SocialItem[] = [];
+  for (let n = 0; groups.some(g => g[n]); n++) for (const group of groups) if (group[n]) ordered.push(group[n]);
+  for (const item of ordered) {
     const reason = holdReason(policy, item, new Date());
     if (reason) { result.held.push(`${item.id}:${item.platform}:${reason}`); continue; }
     const channel = policy.channels.find(c => c.platform === item.platform)!;
@@ -162,6 +159,10 @@ async function replenishLocked(options: { policy: Policy; items: SocialItem[]; s
     if (old.pausedChannels?.includes(channel.id)) { result.held.push(`${channel.platform}:durable_channel_pause`); continue; }
     if (old.intents.some(i => i.channelId === channel.id && ["unknown", "processing"].includes(i.state))) { result.held.push(`${channel.platform}:unresolved_provider_result`); continue; }
     if (old.intents.some(i => i.key === key || (i.channelId === channel.id && (i.item.id === item.id || i.item.dueAt === item.dueAt)))) continue;
+    if (old.effectBudget && Date.parse(old.effectBudget.until) > Date.now() && old.effectBudget.ownerToken !== token) { result.held.push("shared_effect_window_cap"); break; }
+    // A manual retry/new invocation shares the same conservative ten-minute
+    // mutation allowance. Unknown attempts consume it too; no free retry budget.
+    if (old.intents.filter(i => Date.parse(i.attemptedAt || i.updatedAt) > Date.now() - 600_000).length >= Math.min(3, policy.caps.createsPerRun)) { result.held.push("shared_create_window_cap"); break; }
     const remoteAtSlot = inventory.posts.filter(p => p.channelId === channel.id && p.dueAt === item.dueAt && p.status !== "error");
     if (remoteAtSlot.length) { result.held.push(`${channel.platform}:remote_slot_occupied_reconcile_before_create`); continue; }
     // Account-level remote occupancy includes posts created outside this runner.
@@ -169,8 +170,9 @@ async function replenishLocked(options: { policy: Policy; items: SocialItem[]; s
     const cap = Math.min(7, policy.caps.queuePerChannel, policy.caps.providerQueueHardLimit, policy.entitlement!.queueLimit);
     if (count >= cap || result.created >= Math.min(3, policy.caps.createsPerRun)) { result.held.push(`${channel.platform}:run_or_queue_cap`); continue; }
     if (old.intents.length >= Math.min(1000, policy.caps.ledgerEntries)) throw new Error("ledger_capacity_manual_archive_required");
-    const intent: Intent = { key, item, channelId: channel.id, state: "processing", updatedAt: now.toISOString() };
-    if (!(await store.compareAndSwap(old.revision, { ...old, revision: old.revision + 1, intents: [...old.intents, intent] }))) { result.held.push("concurrent_run_stop"); break; }
+    const intent: Intent = { key, item, channelId: channel.id, state: "processing", attemptedAt: now.toISOString(), updatedAt: now.toISOString() };
+    const effectBudget = old.effectBudget?.ownerToken === token ? old.effectBudget : { ownerToken: token, until: new Date(Date.now() + 600_000).toISOString() };
+    if (!(await store.compareAndSwap(old.revision, { ...old, effectBudget, revision: old.revision + 1, intents: [...old.intents, intent] }))) { result.held.push("concurrent_run_stop"); break; }
     try {
       const fresh = await store.read(), freshReason = holdReason(policy, item, new Date());
       if (freshReason || fresh.masterPaused || fresh.pausedChannels?.includes(channel.id) || fresh.lease?.token !== token || Date.parse(fresh.lease.until) <= Date.now()) {
@@ -222,6 +224,8 @@ export async function cancelQueued(store: Store, provider: Provider, channelId?:
       continue;
     }
     await provider.cancel(matches[0].id);
+    const confirmed = await provider.inventory();
+    if (!confirmed.complete || confirmed.posts.some(p => p.id === matches[0].id && p.channelId === i.channelId)) throw Error("remote_cancel_unconfirmed_no_retry");
     await update(store, i.key, value => ({ ...value, state: "cancelled", reason: "operator_pause_remote_cancel", updatedAt: new Date().toISOString() }));
     cancelled++;
   }

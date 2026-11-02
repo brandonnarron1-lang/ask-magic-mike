@@ -17,6 +17,13 @@
     "04-selling-options": ["Different paths.", "Your priorities."],
     "05-buyer-readiness": ["Find your place.", "Start your plan."],
     "06-after-your-request": ["Your question.", "A human next step."],
-    "07-not-an-appraisal": ["Start with facts.", "Keep perspective."]
+    "07-not-an-appraisal": ["Start with facts.", "Keep perspective."],
+    "08-property-reference": ["Found a place?", "Bring the details."],
+    "09-flexible-timing": ["Not in a rush?", "Start with a plan."],
+    "10-seller-questions": ["Better questions.", "A clearer start."],
+    "11-existing-representation": ["Already represented?", "Say so up front."],
+    "12-address-check": ["Right property.", "Right starting point."],
+    "13-choose-your-path": ["One next move.", "Your starting point."],
+    "14-appointment-status": ["Request first.", "Confirm together."]
   }
 }
