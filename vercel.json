@@ -1,6 +1,7 @@
 {
   "git": {
     "deploymentEnabled": {
+      "codex/instagram-home-value-reserve-20261103": false,
       "codex/owned-social-publisher-20261101": false,
       "codex/owned-social-publication-state": false,
       "codex/mobile-direct-contact-20261101": false,

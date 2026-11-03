@@ -77,7 +77,7 @@ describe("Integrated publisher runtime, mocked state/provider/alerts",()=>{
   });
   it("keeps both source exclusions and the PR318 mandatory browser acceptance",()=>{
     const config=JSON.parse(readFileSync('vercel.json','utf8'));
-    for(const branch of ['codex/mobile-direct-contact-20261101','codex/owned-social-publisher-20261101','codex/owned-social-publication-state'])expect(config.git.deploymentEnabled[branch]).toBe(false);
+    for(const branch of ['codex/mobile-direct-contact-20261101','codex/owned-social-publisher-20261101','codex/owned-social-publication-state','codex/instagram-home-value-reserve-20261103'])expect(config.git.deploymentEnabled[branch]).toBe(false);
     expect(readFileSync('.github/workflows/release-gate.yml','utf8')).toContain('public-contact-mobile.spec.ts');
     expect(readFileSync('src/lib/analytics/privacy.ts','utf8')).toContain('sms_composer_opened');
     const workflow=readFileSync('.github/workflows/owned-social.yml','utf8');expect(workflow).toBe(readFileSync('scripts/social/owned-social-workflow.yml','utf8'));

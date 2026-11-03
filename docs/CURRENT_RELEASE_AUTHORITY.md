@@ -4,7 +4,24 @@ Use `config/release-authority-policy.json` and authenticated
 `pnpm release:authority:resolve` for current decisions. Dated snapshots below
 do not replace that resolver or authorize replaying a consumed approval.
 
-## November2 integrated Instagram candidate — accepted PR318 preserved
+## November3 accepted PR317 and bounded reserve continuation
+
+Authenticated resolution at `2026-11-03T17:53:03.162Z` returned accepted25/25:
+merge `2ea7cf17f5205ea0efb9492c3b1ab3c6fa9ce84c`, tree
+`6aef25ccac295afcbd33a7221534c1ecc6af6de6`, deployment
+`dpl_Es864QpKq2xTrh8QCBuJJJhME3aP`. PR318's mobile/contact changes are retained.
+The exact PR317 A+B approval was exercised; setup/QA/teardown are completed.
+Bounded Instagram recurrence remains enabled under its standing activation scope.
+
+The new November3 reserve branch appends four seller concepts/media and corrects
+stale operating prose, not application behavior or runtime permissions. Its branch
+automatic Vercel build is excluded before push. Routine implementation/review is
+authorized; new exact-source merge/deployment and a new protected synthetic venue
+are not covered by PR317/318's consumed exceptions. Keep accepted Production and
+the live campaign unchanged while completing local/hosted verification and one
+precise final-source packet. Editorial authority is not technical release authority.
+
+## Historical November2 integrated candidate — superseded by accepted PR317
 
 The authenticated resolver observed accepted25/25 at2026-11-03T01:47:09.607Z
 (November2 Eastern): PR318 merge `281f327e7481a57f7eeb3f2ff11c6b8018cc5aaf`,

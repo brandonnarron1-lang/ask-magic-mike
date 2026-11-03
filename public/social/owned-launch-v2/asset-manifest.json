@@ -1,6 +1,6 @@
 {
   "version": "amm.owned-social.visuals.v2",
-  "generatedAt": "2026-11-02T01:17:53.121Z",
+  "generatedAt": "2026-11-03T17:55:38.853Z",
   "renderer": "Existing SVG + Sharp and FFmpeg, owner-supplied source pixels; no generation/retouch/audio",
   "stillsOnly": false,
   "identity": "Use the supplied image pixels; no face/body reconstruction, retouch, animation, voice or synthetic action",
@@ -47,11 +47,11 @@
   "sources": [
     {
       "file": "config/owned-social-content.json",
-      "sha256": "7a81b4e9279f0b0505e614b6878dba6eed8f64f6ce6f48e37a3e34de5a4da768"
+      "sha256": "a22b31521f39c1a929a7b91901d456cf5486ec4adc05e88d26d3608bc427e002"
     },
     {
       "file": "config/owned-social-visuals.v2.json",
-      "sha256": "7cd80fb86133dfcdc66827eaf4573e3476dbe11f8c899a178cda02bdbeb6876e"
+      "sha256": "224856699ba11e15ab34fab37d68ef4cdc06b0a684a03ed651aa12e32fbbf608"
     },
     {
       "file": "public/images/ask-magic-mike/brand-pack-v2/our-town-logo-clean.png",
@@ -608,6 +608,146 @@
       "name": "14-appointment-status-slide-3.jpg",
       "sha256": "3eb4e51bb6334289a351f078821001bca79de59097d4d16886c7b1044d1813f4",
       "bytes": 196317,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "15-project-cost-feed.jpg",
+      "sha256": "b26c0e0bf7cbec253b3cf937707908553fe9d375f44516dbb65ee81808a97142",
+      "bytes": 210862,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "15-project-cost-story.jpg",
+      "sha256": "1b201c71c6a201d90228d0a40f377b5fe2bc08071bd5a6e075ea07ddc171dd20",
+      "bytes": 245633,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "15-project-cost-slide-1.jpg",
+      "sha256": "b4d0e0fc67496e594170c7c27cd66ca03b494427ccf1a90a077994b953b36442",
+      "bytes": 199441,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "15-project-cost-slide-2.jpg",
+      "sha256": "7cc6e7f9b0c617dc4906605345387ca1a3f4892d168db41a88e2af4c0f8377d8",
+      "bytes": 199313,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "15-project-cost-slide-3.jpg",
+      "sha256": "6abd3557cb8bf7be99e28e80cd0a26a916cdda3d1681aaddeb54e95affaf382a",
+      "bytes": 199836,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "16-request-privacy-feed.jpg",
+      "sha256": "467baf0f9b44e2232127cabe42ca6b75b21302041c94583bbf87c73b3d78939d",
+      "bytes": 211785,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "16-request-privacy-story.jpg",
+      "sha256": "89075fdccb96118d6c06d3088c0c48fd7849aeb2859705168302a80fcf524814",
+      "bytes": 245948,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "16-request-privacy-slide-1.jpg",
+      "sha256": "699318374c563d9cc65273f47556c6a70e6c7cb0d91c0e2b9a2493ab45313a79",
+      "bytes": 199368,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "16-request-privacy-slide-2.jpg",
+      "sha256": "1e102a5587d1d1e827e82ea15f2d90db000f4dec43c47a3e17f8bc8c9f8b8539",
+      "bytes": 199752,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "16-request-privacy-slide-3.jpg",
+      "sha256": "bc4c9bad70c5fb2d62b0fd7915be5a14f3900a9a4e678447e6c44f19f9eb1418",
+      "bytes": 199259,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "17-helping-another-owner-feed.jpg",
+      "sha256": "d591aaf8cb342e5379bbf7dedf4ca98ee99a8d38259ca8973c4ccceca26629fe",
+      "bytes": 209282,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "17-helping-another-owner-story.jpg",
+      "sha256": "ebe718546e157388b5fa2716121e162b67eeed0e5437efac537069603febd099",
+      "bytes": 243955,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "17-helping-another-owner-slide-1.jpg",
+      "sha256": "73f3ce6a42536be0cf52b18b64c296ae02a28a6a088f552377974915660905fd",
+      "bytes": 197102,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "17-helping-another-owner-slide-2.jpg",
+      "sha256": "5f559550831bf9d222a1d69bad9049e79e6a728c0439751748d1ac28450f40a3",
+      "bytes": 198298,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "17-helping-another-owner-slide-3.jpg",
+      "sha256": "34a792a8ec30fc23d4d4d9a51da1050471ed588b91978c8074dc9d85ff0aa57c",
+      "bytes": 198333,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "18-tax-record-context-feed.jpg",
+      "sha256": "9c4b6db77c17017b739d4b037d8775fd46b2075719ab7f6c3a634471ebbb0ba2",
+      "bytes": 212271,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "18-tax-record-context-story.jpg",
+      "sha256": "e2c0d57262af951f17414b3908dae58e8cdaf1a312bf808db3d0908d22003734",
+      "bytes": 246814,
+      "width": 1080,
+      "height": 1920
+    },
+    {
+      "name": "18-tax-record-context-slide-1.jpg",
+      "sha256": "b27f59419a2ff8cb5213ef7dd385e488020387069d1ae3bd45f4c8bb41fcd619",
+      "bytes": 199503,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "18-tax-record-context-slide-2.jpg",
+      "sha256": "be0e9a2355c3d9d5292a3546639c04a3ea1d22e3605eabfb96d5380393928a8b",
+      "bytes": 199440,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "18-tax-record-context-slide-3.jpg",
+      "sha256": "d8b0234252243e99487f445823d78506449dd5074b4191b47c95372584acc019",
+      "bytes": 199779,
       "width": 1080,
       "height": 1350
     }

@@ -98,7 +98,15 @@ describe("Repeatable campaign operations, synthetic only and no delivery", () =>
   });
   it("executes default local planning with fetch forbidden and no credential binding", () => {
     const output = execFileSync(process.execPath, ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", "--input-type=module", "-e", "globalThis.fetch=()=>{throw Error('NETWORK_FORBIDDEN')};process.argv=['node','run','--summary'];await import('./scripts/social/run.mjs')"], { encoding: "utf8", env: { ...process.env, AMM_SOCIAL_BUFFER_KEY: "", AMM_SOCIAL_STATE_TOKEN: "" } });
-    expect(JSON.parse(output)).toMatchObject({ status: "PREPARED_NOT_SCHEDULED", concepts: 14, variants: 42 });
+    expect(JSON.parse(output)).toMatchObject({ status: "PREPARED_NOT_SCHEDULED", concepts: 18, variants: 54 });
+  });
+  it("admits one new seller carousel through the actual catalogue without resetting native-used history",()=>{
+    const code=`import fs from 'node:fs/promises';const read=fs.readFile.bind(fs),RealDate=Date;globalThis.Date=class extends RealDate{constructor(...a){super(...(a.length?a:['2026-11-03T18:00:00Z']));}};globalThis.fetch=()=>{throw Error('NETWORK_FORBIDDEN')};const c=JSON.parse(await read('config/owned-social-content.json','utf8')),p=JSON.parse(await read('config/owned-social-policy.json','utf8'));const snapshot={ledger:{revision:14,intents:c.concepts.slice(0,14).map((c,n)=>({key:'synthetic-'+n,channelId:p.channels[0].id,item:{id:c.id,platform:'instagram'},state:'held',reason:'native_history_reserved_not_provider_attested',updatedAt:'2026-11-03T17:00:00Z'}))},inventory:{complete:true,posts:[],disconnected:[]}};fs.readFile=async(file,...a)=>String(file)==='synthetic-snapshot'?JSON.stringify(snapshot):read(file,...a);process.argv=['node','run','--plan','--snapshot=synthetic-snapshot'];await import('./scripts/social/run.mjs');`;
+    const result=JSON.parse(execFileSync(process.execPath,["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON","--input-type=module","-e",code],{encoding:"utf8",env:{PATH:process.env.PATH!,HOME:process.env.HOME!} as unknown as NodeJS.ProcessEnv}));
+    expect(result.status).toBe("PREPARED_NOT_SCHEDULED");expect(result.items).toHaveLength(1);
+    const selected=result.items[0];expect(selected).toMatchObject({id:"15-project-cost",platform:"instagram",requiresAiDisclosure:true});
+    expect(new URL(selected.destination).pathname).toBe("/home-value");expect(selected.text).toContain("Our Town Properties, Inc.");expect(selected.text).toContain("website link in our profile");
+    expect(selected.assets).toHaveLength(3);for(const a of selected.assets){expect(a.type).toBe("image");expect(a.sha256).toMatch(/^[a-f0-9]{64}$/);expect(a.alt).toContain("not a listing");}
   });
   it.each(["friends", "privateGroup", "prospect", "credential", "notes"])("rejects private %s fields from public state", field => expect(() => assertPublicLedger({ revision: 0, intents: [], [field]: "private" })).toThrow("schema"));
   it("rejects sensitive URLs and contact addresses inside public intent text", () => {

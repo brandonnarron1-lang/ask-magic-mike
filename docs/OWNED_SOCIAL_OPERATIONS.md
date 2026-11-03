@@ -1,6 +1,110 @@
 # Owned social operations
 
-## November2 integration — prepared, NOT activated
+## Current operating checkpoint — November3, 2026
+
+PR317 is **merged, deployed and accepted**, not a Draft setup task. Authenticated
+resolution at `2026-11-03T17:53:03.162Z` returned25/25: merge
+`2ea7cf17f5205ea0efb9492c3b1ab3c6fa9ce84c`, tree
+`6aef25ccac295afcbd33a7221534c1ecc6af6de6`, deployment
+`dpl_Es864QpKq2xTrh8QCBuJJJhME3aP`. The
+[activation receipt](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/317#issuecomment-6610800860)
+supersedes the dated pre-activation statements below. PR318 mobile/contact and
+all intake, permission, ownership and Mike/Brandon email protections are retained.
+Live allocation, carrier SMS and remote address predictions remain OFF.
+
+The dedicated Buffer binding, nonempty durable ledger, installed workflow and
+both runtime/scheduler flags were verified ON. Do **not** repeat credential setup,
+initialize state, resume again, or replay the initial create to demonstrate cron.
+Source policy, GitHub variables, durable pause, provider state and accepted
+Production are separate evidence. The informational `activation` string is not
+read by the runner and must not be used as a kill switch or runtime status.
+
+### Recurrence and current inventory
+
+`.github/workflows/owned-social.yml` is installed and active. Its daily11:17UTC
+trigger is06:17EST/07:17EDT; posting slots remain civil Eastern noon. Recurrence
+was enabled November3 around12:15EST, **after** that day's trigger. The first
+nominal automatic opportunity is November4 at06:17EST (`11:17Z`), not November3.
+At the17:53:05.531Z observation no `schedule` event was due or present: **NOT RUN**.
+Manual `workflow_dispatch` success is not automatic-execution proof. GitHub cron
+is not an exact-time SLA; no new monitor or overnight polling is installed.
+
+The exact authorized Instagram channel/organization read returned complete
+inventory: **six scheduled, three published** at that observation. Ledger revision13
+had eight historical held native-used reservations and one verified scheduled
+intent, no processing/UNKNOWN intents and no active incident. A pure reconciliation
+projection required no state change; this run made no provider/state mutation.
+The eight reservations prevent reuse; they are not eight failed publications.
+Concept11 remains scheduled for November9 noonEST, not published. Concepts13/14
+are the two unused eligible catalogue items in the accepted source. A GitHub
+operator issue was created/read back and later resolved during activation;
+Brandon's personal email/push receipt remains unverified. No independent missed-run
+monitor is claimed. Facebook's native queue is separate and unchanged; TikTok's
+UNKNOWN action remains held with no retry.
+
+Keep one create/run, seven queued or lower actual capacity,50API calls/run, five
+inventory pages and the existing lease/CAS/history limits. Current Buffer Free
+entitlement was observed November3; capability/entitlement recheck is due
+`2026-11-10T01:59:58Z` (November9,20:59:58EST). Do not extend that deadline to
+avoid a hold or reinterpret it as expiry of standing editorial authority.
+
+### Finite reserve additions — reviewed locally, not released or scheduled
+
+The November3 candidate appends four three-image seller carousels to the existing
+fourteen concepts. Each uses the same supplied portrait/logo, firm identification,
+illustrative-image disclosure, alt text and Home Value profile CTA. No new likeness,
+format, paid generation, provider, cadence or destination is introduced.
+
+| Stable ID | Distinct question / honest offer | State |
+|---|---|---|
+|15-project-cost|How does project cost differ from a selling-price question? Describe the work without promising a return.|Local media/caption reviewed; release held.|
+|16-request-privacy|What useful context belongs in the request, and which private numbers/documents should stay out?|Local media/caption reviewed; release held.|
+|17-helping-another-owner|How can someone ask using their own authorized contact details without claiming another owner's authority?|Local media/caption reviewed; release held.|
+|18-tax-record-context|What does the date on a tax record mean for the question being asked today, without setting an asking price?|Local media/caption reviewed; release held.|
+
+Cost estimates describe work/cost, not a promised resale return; see the
+[FTC's contractor-estimate guidance](https://consumer.ftc.gov/articles/how-avoid-home-improvement-scam).
+Tax-record context must retain the record's effective date; see the official
+[county revaluation explanation](https://www.johnstonnc.gov/tax2/Revaluation.cfm).
+No county's particular valuation date or figure is generalized to all properties.
+Privacy/third-party request copy follows the existing intake contract, not a new
+consent or ownership grant. No source is promoted into the intelligence service.
+
+Use `node scripts/social/render-cinematic.mjs --append` only after reviewing its
+effects. It checks old hashes, creates missing concept media and refreshes review
+gallery/manifest/contact sheet; it does not publish. Verify with
+`node scripts/social/verify-assets.mjs --edition=owned-launch-v2 --evidence-dir=.amm-run/<current-task>`
+so earlier diagnostics are retained. `tests/support/owned-social-published-baseline.json`
+pins all80 accepted media hashes and14 original concept objects independently
+of a regenerated manifest. Feed/Story derivatives support existing review/export
+contracts; the publisher selects the three carousel panels.
+
+New catalogue entries become usable only through the existing source release and
+public media byte/hash validation. Local rendering or editorial authority alone
+does not release them. The accepted workflow continues with its existing reserve
+until the new exact-source candidate passes all required gates and has applicable
+release authority. No extra execute operation is dispatched for these drafts.
+
+### Seven-day acquisition assessment
+
+Fixed evaluation window: `[2026-11-03T17:13:41.793Z, 2026-11-10T17:13:41.793Z)`.
+The first read requested only the elapsed portion ending17:53:05.531Z (39.4minutes).
+The saved staff session expired on navigation: **BLOCKED**, not zero inquiries.
+Visits, starts, eligible inquiries/contacts, qualification, human response and
+appointment outcomes are UNKNOWN until an authorized current report is read.
+The old three-inquiry cohort is not this pilot's result. Keep the historic three-tag
+WordPress report separate from all-source totals. A social category is not a
+post-specific attribution claim; define source/window/exclusions before rates.
+Too little exposure and unavailable denominators do not establish conversion lift.
+
+Private execution/evidence is indexed under the current pilot-replenishment task
+in the existing Home Value lead-loop handoff. Prepared, eligible, scheduled,
+published, delivered and converted remain distinct. Pausing runtime/durable state
+stops new intents but does not cancel remote posts; any cancellation needs its
+own exact-ID authority and readback. Current accepted PR317 is the compatible
+app/media rollback target, with data and existing remote schedules preserved.
+
+## Historical November2 integration — pre-activation snapshot, superseded above
 
 Accepted Production is PR318 merge `281f327e7481a57f7eeb3f2ff11c6b8018cc5aaf`,
 tree `f0d9a304d0cc63f67bf4884eb7796fc0b141efae`, deployment

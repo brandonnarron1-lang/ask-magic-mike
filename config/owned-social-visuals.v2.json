@@ -24,6 +24,10 @@
     "11-existing-representation": ["Already represented?", "Say so up front."],
     "12-address-check": ["Right property.", "Right starting point."],
     "13-choose-your-path": ["One next move.", "Your starting point."],
-    "14-appointment-status": ["Request first.", "Confirm together."]
+    "14-appointment-status": ["Request first.", "Confirm together."],
+    "15-project-cost": ["Your project cost.", "A different question."],
+    "16-request-privacy": ["Useful context.", "Keep private data out."],
+    "17-helping-another-owner": ["Helping with", "someone else's home?"],
+    "18-tax-record-context": ["A tax snapshot.", "Not your asking price."]
   }
 }
