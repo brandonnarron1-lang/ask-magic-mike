@@ -1,4 +1,122 @@
-# Owned social operation — November 1, 2026
+# Owned social operations
+
+## November2 integration — prepared, NOT activated
+
+Accepted Production is PR318 merge `281f327e7481a57f7eeb3f2ff11c6b8018cc5aaf`,
+tree `f0d9a304d0cc63f67bf4884eb7796fc0b141efae`, deployment
+`dpl_b8VkVwqTaF2pEyHZ4jAVotu7WJxP`; authenticated resolver accepted25/25 at
+2026-11-03T01:47:09.607Z (November2 Eastern). Its two QA venues and cleanup
+jobs are completed history. PR317 integrates main without replacing those bytes.
+
+### Standing editorial authority
+
+The owner expressly represented delegated brokerage power and consent on
+November1 for owned evergreen education, existing offers and intake explanations.
+Reuse that retained statement; no fabricated per-post Mike review or invented
+expiry. Include Our Town Properties, Inc. in every asset/caption. Listings,
+statistics, testimonials, guarantees and consumer outreach remain excluded.
+Technical release and credential/runtime activation are separate decisions.
+
+### Instagram pilot binding
+
+Signed-in native observation on November2 Eastern verifies Instagram
+[@askmagicmikenc](https://www.instagram.com/askmagicmikenc/), connected Buffer
+channel `6ae7c527e29c69a1712eb7ec`. Policy explicitly binds its **public handle**,
+not a guessed native service ID. Every API inventory/create checks that exact
+channel, handle, business service and the separately installed actual organization
+binding. The organization display name is “My organization”; its API ID and
+dedicated key are not installed or fabricated.
+
+The current profile link is the registered `/home-value` Instagram/seller tuple.
+Only that offer is eligible; buyer/compare remain held. Native existing queued
+Post uses Automatic and AI-Generated ON; Reels are also present. API disclosure
+support is independently documented in the [Buffer reference](https://developers.buffer.com/reference.html).
+Create now requires an independent exact-ID readback of caption, media, due time,
+automatic mode and native AI disclosure. Failed/changed readback retains the
+observed provider ID as UNKNOWN, never permission to create again.
+
+Fresh Buffer inventory has **six scheduled items** (November3–8 noon Eastern)
+and **two Sent entries** with actual Instagram permalinks. Native profile reload
+also shows both posts. These are not traffic, inquiries or conversions. Facebook's
+native planner was observed separately; no Buffer inventory claims its coverage.
+The native Scheduled library and planner have different partial views; current
+whole-queue count is not inferred. TikTok's one UNKNOWN submission stays held.
+
+Actual signed-in billing shows **$0 forever**, three channels, ten scheduled slots
+per channel, one key/client. [Current included API limits](https://support.buffer.com/articles/using-buffers-api-GtIYIQilz5)
+are1,000requests/channel/30days (up to3,000), shared keys and shorter rate windows;
+quota denial holds with no upgrade/retry. Public standard Ubuntu Actions compute
+is [free](https://docs.github.com/en/billing/concepts/product-billing/github-actions);
+repository visibility was authenticated as public. No larger runner, cache/media
+upload, paid action, model or new billing is used. This verifies entitlement, not
+a settled invoice or future credits. Recheck capability/entitlement by the policy's
+recorded date; it is not expiration of standing editorial authority.
+
+Initial policy: **one create/run**, seven queued maximum (or lower actual limit),
+50Buffer calls/run, five inventory pages,1,000intents/750KB, finite14concepts.
+The source policy is prepared unpaused for exact-source review, but execution
+requires `AMM_OWNED_SOCIAL_ENABLED=true` **and** no durable master/channel pause.
+The runtime variable is absent/OFF and no state ref/key is installed. This avoids
+an unreviewed source edit after acceptance. It does not activate publishing now.
+
+### Installation, operator signal and activation
+
+`.github/workflows/owned-social.yml` is the single reviewed installation candidate;
+`scripts/social/owned-social-workflow.yml` is its identical reference copy. It is
+not installed on accepted main or enabled. Daily11:17UTC means06:17EST/07:17EDT;
+posts retain civil Eastern noon. GitHub cron is not a timing SLA. Manual status,
+observe, reconcile and pause remain available while disabled; execute/resume do
+not. Observation is read-only; reconciliation/pause/acknowledgment write state.
+
+Use dedicated `AMM_SOCIAL_BUFFER_KEY`, nonsecret `AMM_SOCIAL_BUFFER_ORG` and the
+ephemeral `github.token` as `AMM_SOCIAL_STATE_TOKEN`; no long-lived GitHub PAT.
+`contents:write` and `issues:write` are **repository-wide**, not branch-scoped.
+Code pins the state ref/file and rejects private fields, but does not narrow that
+credential's platform authority. No lead DB, mail/model token or prospect data.
+
+The fixed state ref currently returns authenticated404. Before any authorized
+installation, reconcile existing provider history and the retained native action
+receipts. Do NOT start an empty ledger that would reuse completed concepts.
+Reserve the known native-used content identities as held history reservations,
+explicitly not API-attested media/caption records, until exact provider records
+are available. Preserve actual IDs/outcomes and all UNKNOWN identities. Verify
+effective Vercel exclusions for publisher, mobile-contact and publication-state
+branches before creating that ref. Never force/overwrite an existing ledger.
+
+New actionable incidents produce one assigned GitHub operator issue, read back
+through the current API. Stable bodies suppress unchanged daily holds, including
+when ledger storage is unavailable. Resolution/reappearance updates that same
+issue; no repetitive comments. Queue-full creates no issue. Failed/ambiguous
+provider results are checkpointed after the effect and exit nonzero, so green
+does not hide intervention. Issue/API failure is itself nonzero and not retried.
+Issue creation is a visible signal, **not** verified personal email/push delivery.
+Live signal/receipt testing and recurring execution remain NOT RUN. There is no
+independent missed-run monitor.
+
+One final packet must separately cover app/media release, workflow installation,
+secure key/org binding, nonempty historical state provisioning, one identified
+internal operator-signal test, durable resume/runtime enable and at most one real
+Instagram schedule/readback plus recurring bounded operation. PR318 approval does
+not cover this final tree. The new PR317-only synthetic QA exception applies only
+after freeze, verified$0 capacity, secure-input readiness and <=6h exact teardown.
+No venue has been created by this integration. Prior release gates are historical.
+
+Resume after approved activation: reconcile complete inventory; resolve genuine
+UNKNOWN before `--resume`; runtime kill must be enabled and source pause clear.
+`--resume` clears the reviewed durable pause only, not incidents or history, and
+does not create a post. One unused eligible item then gets a future free slot.
+The first seven-day evaluation begins at the actual first verified operation,
+not this document's date. Scheduled, published, measured visits and inquiries
+stay separate; existing Distribution reporting is reused.
+
+Recovery: set runtime variable false and save durable pause first. Already
+scheduled remote posts survive. After in-flight reconciliation, separately cancel
+only tracked queued IDs with exact readback if authorized; preserve unrelated and
+published posts. App-only compatible rollback is accepted PR318 and retains all
+mobile/direct contacts, R2privacy/revocation, S2guards, v6readers and data. No DB
+rollback/migration or lead-alert change. Preserve Facebook/TikTok/native actions.
+
+## Historical November1 snapshot (not current queue/runtime evidence)
 
 Current state: **FACEBOOK + INSTAGRAM INITIAL POSTS PUBLISHED / FIVE FACEBOOK
 AND FOUR INSTAGRAM POSTS SCHEDULED / REPLENISHER NOT INSTALLED**. November1
@@ -94,8 +212,9 @@ unverified towns, phone/recovery information, staffing or opening hours.
    repo-scoped state token only; never Production/model/database credentials.
 6. Provision the state ref only AFTER its Vercel Git-build exclusion is verified
    effective: `codex/owned-social-publication-state`, file
-   `owned-social-ledger.json`, initial `{ "revision": 0, "intents": [] }`.
-   No automatic fallback to a local file, cache or missing/empty ledger.
+   `owned-social-ledger.json`. Reconcile current provider/native history first;
+   never initialize an empty ledger over known/unknown prior actions. No automatic
+   fallback to a local file, cache or missing/empty ledger.
 7. Real launch per account: verify public post, then queue six future days and
    verify provider IDs. The current CLI creates scheduled intents only; the
    initial native launch is separate and must be reconciled before scheduling.
@@ -143,6 +262,8 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --sta
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --pause
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --pause --channel=EXACT_CHANNEL_ID
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --acknowledge --incident=EXACT_INCIDENT_ID
+# Separately authorized activation; fresh inventory, no UNKNOWN and kill switch enabled:
+node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --resume
 # Only after all activation requirements:
 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --execute
 # Separate effect, only tracked queued work; cancellation requires readback:
@@ -159,8 +280,8 @@ R2's source registry and its marketing=false grant remain unchanged. The social
 offers use the existing owner-approved kit under a separate advertising gate,
 not a promotion or rights expansion of an intelligence source.
 The old Monday Boolean is only a reminder; no weekly review is claimed completed.
-The existing owner GitHub workflow-failure notification is the proposed alert
-path, not a new email transport. Its delivery has NOT been tested.
+The historical failure-notification proposal below is superseded by the prepared
+deduplicated GitHub operator issue above. Live receipt has NOT been tested.
 
 `--observe` never writes state. `--reconcile` writes known provider results even
 when publishing is paused or no new content is eligible. Missing scheduled rows

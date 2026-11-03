@@ -4,16 +4,21 @@
   "brand": "Ask Magic Mike",
   "operator": "Brandon Narron",
   "authority": "Owner submitted owned-social launch instruction, November 1, 2026",
-  "masterPaused": true,
+  "masterPaused": false,
   "mediaEdition": "owned-launch-v2",
-  "brokerageAdvertisingApproval": null,
-  "entitlement": null,
-  "channels": [],
-  "caps": { "channels": 3, "queuePerChannel": 7, "providerQueueHardLimit": 10, "createsPerRun": 3, "apiCallsPerRun": 50, "ledgerEntries": 1000 },
+  "brokerageAdvertisingApproval": { "reference": "docs/OWNED_SOCIAL_OPERATIONS.md#standing-editorial-authority", "scope": "owned_evergreen" },
+  "entitlement": { "plan": "Free", "verifiedAt": "2026-11-03T01:59:58Z", "expiresAt": "2026-11-10T01:59:58Z", "channelLimit": 3, "queueLimit": 10, "runtimeZeroCostVerified": true },
+  "channels": [{
+    "platform": "instagram", "id": "6ae7c527e29c69a1712eb7ec", "accountId": "askmagicmikenc", "accountIdentity": "handle",
+    "ownerVerifiedAt": "2026-11-03T01:59:58Z", "paused": false, "automaticFormats": ["image", "video"],
+    "profileLinkVerified": true, "disclosureVerified": true,
+    "capability": { "evidence": "docs/OWNED_SOCIAL_OPERATIONS.md#instagram-pilot-binding", "observedAt": "2026-11-03T01:59:58Z", "recheckAfter": "2026-11-10T01:59:58Z", "status": "verified", "destinationPaths": ["/home-value"] }
+  }],
+  "caps": { "channels": 3, "queuePerChannel": 7, "providerQueueHardLimit": 10, "createsPerRun": 1, "apiCallsPerRun": 50, "ledgerEntries": 1000 },
   "timezone": "America/New_York",
   "localPostingHour": 12,
   "allowedCategories": ["intake_explanation", "evergreen_education", "existing_offer"],
   "prohibited": ["property_specific", "market_statistics", "testimonials", "guaranteed_outcomes", "unapproved_likeness", "consumer_outreach"],
   "spendCapUsd": 0,
-  "activation": "HELD_ACCOUNT_ENTITLEMENT_AND_BROKERAGE_EVIDENCE_REQUIRED"
+  "activation": "PREPARED_SOURCE_POLICY_ONLY_RUNTIME_AND_DURABLE_PAUSE_HELD"
 }

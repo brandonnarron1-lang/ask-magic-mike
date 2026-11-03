@@ -41,8 +41,10 @@ Check current scope and entitlement, not historical Free labels or login success
 ## Execute only the verified path
 
 `scripts/social/run.mjs` defaults to no-key/no-network preview. The current
-GraphQL Buffer adapter is not the legacy REST API. The workflow beside it is a
-review template, not an installed scheduler. Do not call it autonomous until the
+GraphQL Buffer adapter is not the legacy REST API. The reviewed workflow is
+`.github/workflows/owned-social.yml`; the adjacent script template is its reference
+copy. Source presence is not installation on accepted main or runtime enablement.
+Do not call it autonomous until the
 durable runtime, binding, queue and one real replenishment run are verified.
 
 Routine invocation: “Use amm-social-operations to resume the current campaign,
@@ -66,6 +68,30 @@ incident. Persist incident first/last/acknowledgement/recheck/resolution and not
 new, recurring-after-resolution or materially changed incidents, not the same
 unchanged daily hold. Do not claim an operator alert or missed-run monitor exists
 until actually installed and verified. A weekly-review flag is not a review.
+
+Initial automated scope is verified Instagram/Home Value only, one create/run,
+seven queued maximum or lower actual capacity. Preserve native Facebook separately
+and TikTok UNKNOWN/disclosure/destination holds. Source policy, runtime kill switch
+and durable pause are independent: execute/resume require the explicit runtime
+enable value; observe/reconcile/pause remain distinct operations. A prepared source
+transition must be reviewed before sealing, not edited after app acceptance.
+
+Every create needs independent provider readback of actual ID, text, media, slot,
+automatic mode and native AI disclosure. Preserve an observed provider ID if
+readback fails, and hold UNKNOWN without retry. Scheduling health is not publication.
+GitHub operator issues deduplicate stable incident state, including storage failures;
+new/changed incidents and signal failures are nonzero. A verified issue is not
+Brandon's personal inbox/push receipt. Never route these incidents to lead alerts.
+No independent missed-run monitoring exists merely because cron is configured.
+
+Read state before installation. A missing ref is not empty history: reconcile
+retained native action receipts and real inventory. Reserve used concept identities
+without pretending native uploads match the application's media/caption. Preserve
+UNKNOWN and completed identities. Explicit handle bindings must be validated as
+handles with the actual channel/organization; never invent native service IDs.
+Before any short-lived protected QA, freeze source and establish sanctioned masked
+input readiness, current $0 entitlement and exact-resource teardown. Respect a
+denied Terminal operation; no alternate automation/clipboard path around it.
 
 Mutable capabilities need exact account/format/destination scope, evidence,
 observation time, recheck condition and verified/provisional/obsolete/unavailable

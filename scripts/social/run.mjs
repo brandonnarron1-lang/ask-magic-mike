@@ -6,15 +6,35 @@ const root=new URL('../../src/lib/social/',import.meta.url).href;
 // Resolve only the reviewed extensionless Next module graph for native Node TS.
 registerHooks({resolve(s,c,next){return next(c.parentURL?.startsWith(root)&&['./publisher','./operations'].includes(s)?s+'.ts':s,c);}});
 const {easternNoon,replenish,cancelQueued,pausePublisher}=await import('../../src/lib/social/publisher.ts');
-const {observe,reconcile,plan,classify,checkpointIncidents,acknowledgeIncident}=await import('../../src/lib/social/operations.ts');
+const {observe,reconcile,plan,classify,actionableFindings,checkpointIncidents,acknowledgeIncident,resumePublisher}=await import('../../src/lib/social/operations.ts');
 const {BufferProvider}=await import('../../src/lib/social/buffer.ts');
 const {GitHubLedgerStore}=await import('../../src/lib/social/github-store.ts');
+const {signalOperator}=await import('../../src/lib/social/operator-signal.ts');
 let failureStore;
+async function report(result,incidents=[]){
+  const actionable=incidents.filter(i=>!i.resolvedAt);
+  const needsAction=result.status==='INTERVENTION_REQUIRED'||actionable.length>0;
+  if(needsAction)process.exitCode=2; // Never conceal intervention behind a green run.
+  let signal={status:'NOT_CONFIGURED'};
+  if(process.env.AMM_SOCIAL_OPERATOR_SIGNALS_ENABLED==='true'){
+    try{signal=await signalOperator({token:process.env.AMM_SOCIAL_STATE_TOKEN,repository:process.env.GITHUB_REPOSITORY,incidents});}
+    catch{signal={status:'UNCONFIRMED_NO_RETRY'};process.exitCode=2;}
+  }
+  const signalFailed=signal.status==='UNCONFIRMED_NO_RETRY';
+  if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,
+    `## Owned Instagram operation\n\n${needsAction||signalFailed?'**INTERVENTION REQUIRED**':result.status}\n\nOperator signal: ${signal.status}${signal.url?' — '+signal.url:''}. Active incidents: ${actionable.length}.\n\nScheduled is not published. A GitHub issue is not proof of Brandon receiving email or push. No independent missed-run monitor is installed.\n`);
+  console.log(JSON.stringify({...result,...(signalFailed?{status:'INTERVENTION_REQUIRED',signalCode:'operator_signal_unconfirmed'}:{}),operatorSignal:signal,activeIncidents:actionable.length}));
+}
 try {
-const args=process.argv.slice(2), modes=args.filter(a=>['--observe','--reconcile','--execute','--status','--pause','--acknowledge','--cancel-queued'].includes(a));
+const args=process.argv.slice(2), modes=args.filter(a=>['--observe','--reconcile','--execute','--status','--pause','--resume','--acknowledge','--cancel-queued'].includes(a));
 if(modes.length>1)throw Error('choose_one_operation');
 if(args.some(a=>!['--plan','--summary',...modes].includes(a)&&!/^--(snapshot|channel|incident)=.+/.test(a)))throw Error('unsupported_argument');
 const mode=modes[0]||'--plan';
+if(['--execute','--resume'].includes(mode)&&process.env.AMM_OWNED_SOCIAL_ENABLED!=='true'){
+  console.log(JSON.stringify({status:'RUNTIME_PAUSED_NO_EFFECTS'}));
+  process.exit(0);
+}
+if(mode==='--execute'&&(process.env.AMM_SOCIAL_OPERATOR_SIGNALS_ENABLED!=='true'||process.env.GITHUB_REPOSITORY!=='brandonnarron1-lang/ask-magic-mike'))throw Error('operator_signal_binding_missing');
 const policy=JSON.parse(await fs.readFile('config/owned-social-policy.json','utf8'));
 const content=JSON.parse(await fs.readFile('config/owned-social-content.json','utf8'));
 const edition=policy.mediaEdition||'owned-launch-v1';
@@ -62,10 +82,15 @@ else{
         if(!store)throw Error('dedicated_social_state_binding_missing');
         await reconcile(store,inventory,now);
         const old=await store.read(),p=plan(policy,items,old,inventory,now);
-        const findings=p.held.filter(c=>['incident','unknown'].includes(classify(c))).map(code=>({code,channelId:code.split(':')[0]}));
+        const findings=actionableFindings(policy,p.held,old);
         const checkpoint=checkpointIncidents(old.incidents||[],findings,now);
         if(!(await store.compareAndSwap(old.revision,{...old,revision:old.revision+1,incidents:checkpoint.incidents,health:{...old.health,lastStart:now.toISOString(),lastCompleted:mode==='--reconcile'?new Date().toISOString():old.health?.lastCompleted,trigger:process.env.GITHUB_EVENT_NAME==='schedule'?'scheduled':'manual'}})))throw Error('incident_checkpoint_conflict');
-        if(mode==='--reconcile')console.log(JSON.stringify({status:'RECONCILED_LEDGER_CHANGED',notify:checkpoint.notify,...summary(await store.read(),inventory)}));
+        if(mode==='--reconcile')await report({status:findings.length?'INTERVENTION_REQUIRED':'RECONCILED_LEDGER_CHANGED',notify:checkpoint.notify,...summary(await store.read(),inventory)},checkpoint.incidents);
+        else if(mode==='--resume'){
+          if(policy.masterPaused)throw Error('source_policy_paused_no_resume');
+          await resumePublisher(store,inventory,new Date(),channel);
+          console.log(JSON.stringify({status:'DURABLE_PAUSE_CLEARED_NO_PROVIDER_CREATE'}));
+        }
         else{
           for(const asset of [...new Map(p.selected.flatMap(i=>i.assets).map(a=>[a.url,a])).values()]){
             const r=await fetch(asset.url,{redirect:'error',signal:AbortSignal.timeout(15_000)}),size=Number(r.headers.get('content-length'));
@@ -75,9 +100,10 @@ else{
           }
           const r=p.selected.length?await replenish({policy,items:p.selected,store,provider,now}):{created:0,reconciled:0,held:[]};
           const completed=await store.read();
-          if(!(await store.compareAndSwap(completed.revision,{...completed,revision:completed.revision+1,health:{...completed.health,lastCompleted:new Date().toISOString(),...(r.created?{lastPublication:new Date().toISOString()}:{})}})))throw Error('completion_checkpoint_conflict');
           const holds=[...p.held,...r.held];
-          console.log(JSON.stringify({status:r.created?'COMPLETED':holds.some(c=>['incident','unknown'].includes(classify(c)))?'INTERVENTION_REQUIRED':holds.length?'HELD_OR_DEFERRED':'NO_WORK',...r,holds:holds.map(code=>({code,outcome:classify(code)})),notify:checkpoint.notify}));
+          const final=checkpointIncidents(completed.incidents||[],actionableFindings(policy,holds,completed),new Date());
+          if(!(await store.compareAndSwap(completed.revision,{...completed,revision:completed.revision+1,incidents:final.incidents,health:{...completed.health,lastCompleted:new Date().toISOString(),...(r.created?{lastScheduling:new Date().toISOString()}:{})}})))throw Error('completion_checkpoint_conflict');
+          await report({status:final.incidents.some(i=>!i.resolvedAt)?'INTERVENTION_REQUIRED':r.created?'COMPLETED':holds.length?'HELD_OR_DEFERRED':'NO_WORK',...r,holds:holds.map(code=>({code,outcome:classify(code)})),notify:[...new Set([...checkpoint.notify,...final.notify])]},final.incidents);
         }
       }
     }
@@ -85,11 +111,12 @@ else{
 }
 } catch(error) {
   const code=/^[a-z0-9_:.-]{1,150}$/.test(error?.message||'')?error.message:'operation_failed_redacted';
-  let incidentState='UNAVAILABLE',notify=[];
+  let incidentState='UNAVAILABLE',notify=[],incidents=checkpointIncidents([],[{code,channelId:'shared'}],new Date(),false).incidents;
   // Do not retry an uncertain state mutation in the error handler.
   if(failureStore&&!/ledger|checkpoint|conflict|durable|schema/.test(code))try{
     const old=await failureStore.read(),c=checkpointIncidents(old.incidents||[],[{code,channelId:'shared'}],new Date(),false);
+    incidents=c.incidents;
     if(await failureStore.compareAndSwap(old.revision,{...old,revision:old.revision+1,incidents:c.incidents})){incidentState='SAVED';notify=c.notify;}
   }catch{ /* Permission/state failures remain explicit; no fallback ledger. */ }
-  console.log(JSON.stringify({status:'INTERVENTION_REQUIRED',code,incidentState,notify}));process.exitCode=2;
+  await report({status:'INTERVENTION_REQUIRED',code,incidentState,notify},incidents);process.exitCode=2;
 }

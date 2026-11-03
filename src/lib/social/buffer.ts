@@ -1,14 +1,19 @@
 import type { Channel, Intent, Provider, RemotePost, PublicationState } from "./publisher";
-import { requiresNativeAiDisclosure } from "./publisher";
+import { ProviderOutcomeUnknownError, requiresNativeAiDisclosure } from "./publisher";
+import { matches } from "./operations";
 
 // Current GraphQL API, verified against https://developers.buffer.com/reference.html.
 // No legacy REST calls, experimental analytics, customer data, automatic retries,
 // or raw provider error/credential output. Caller supplies a dedicated binding.
-const fields = "id channelId text dueAt status externalLink assets { source }";
+const fields = "id channelId text dueAt status externalLink schedulingType assets { source } metadata { ... on InstagramPostMetadata { isAiGenerated } ... on TiktokPostMetadata { isAiGenerated } }";
+type BoundChannel = Pick<Channel, "id" | "platform" | "accountId" | "accountIdentity">;
+function remote(n: { id: string; channelId: string; text: string; dueAt: string | null; status: string; assets: { source: string }[]; externalLink?: string; metadata?: { isAiGenerated?: boolean }; schedulingType?: string }): RemotePost {
+  return { id: n.id, channelId: n.channelId, text: n.text, dueAt: n.dueAt ? new Date(n.dueAt).toISOString() : null, status: n.status, assets: n.assets.map(a => a.source), permalink: n.externalLink || undefined, nativeAiDisclosure: n.metadata?.isAiGenerated, automatic: n.schedulingType === "automatic" };
+}
 export class BufferProvider implements Provider {
   private calls = 0;
-  private key: string; private organizationId: string; private channels: Pick<Channel, "id" | "platform" | "accountId">[]; private transport: typeof fetch;
-  constructor(key: string, organizationId: string, channels: Pick<Channel, "id" | "platform" | "accountId">[], transport: typeof fetch = fetch) {
+  private key: string; private organizationId: string; private channels: BoundChannel[]; private transport: typeof fetch;
+  constructor(key: string, organizationId: string, channels: BoundChannel[], transport: typeof fetch = fetch) {
     this.key = key; this.organizationId = organizationId; this.channels = channels; this.transport = transport;
     if (!key || !organizationId || !channels.length || channels.length > 3) throw new Error("buffer_binding_missing");
   }
@@ -22,8 +27,9 @@ export class BufferProvider implements Provider {
   }
   private async verifyChannel(id: string) {
     const expected = this.channels.find(c => c.id === id);
-    const d = await this.request("query($input:ChannelInput!){channel(input:$input){id service serviceId type isDisconnected isLocked organizationId}}", { input: { id } });
-    if (!expected || d.channel?.id !== id || d.channel.organizationId !== this.organizationId || d.channel.service !== expected.platform || d.channel.serviceId !== expected.accountId || (expected.platform === "facebook" && d.channel.type !== "page") || (expected.platform === "instagram" && d.channel.type !== "business")) throw new Error("buffer_account_identity_mismatch");
+    const d = await this.request("query($input:ChannelInput!){channel(input:$input){id name service serviceId type isDisconnected isLocked organizationId}}", { input: { id } });
+    const identity = expected?.accountIdentity === "handle" ? d.channel?.name : d.channel?.serviceId;
+    if (!expected || d.channel?.id !== id || d.channel.organizationId !== this.organizationId || d.channel.service !== expected.platform || identity !== expected.accountId || (expected.platform === "facebook" && d.channel.type !== "page") || (expected.platform === "instagram" && d.channel.type !== "business")) throw new Error("buffer_account_identity_mismatch");
     return d.channel;
   }
   async inventory() {
@@ -40,7 +46,7 @@ export class BufferProvider implements Provider {
       if (!p?.pageInfo || !Array.isArray(p.edges)) throw new Error("buffer_inventory_invalid");
       for (const { node: n } of p.edges) {
         if (!n?.id || !channelIds.includes(n.channelId) || !Array.isArray(n.assets)) throw new Error("buffer_post_scope_invalid");
-        posts.push({ id: n.id, channelId: n.channelId, text: n.text, dueAt: n.dueAt ? new Date(n.dueAt).toISOString() : null, status: n.status, assets: n.assets.map((a: { source: string }) => a.source), permalink: n.externalLink || undefined });
+        posts.push(remote(n));
       }
       if (!p.pageInfo.hasNextPage) return { complete: true, posts, disconnected };
       if (!p.pageInfo.endCursor || p.pageInfo.endCursor === after) throw new Error("buffer_pagination_invalid");
@@ -63,8 +69,15 @@ export class BufferProvider implements Provider {
     const d = await this.request(`mutation($input:CreatePostInput!){createPost(input:$input){__typename ... on PostActionSuccess{post{${fields}}}}}`, { input });
     const n = d.createPost?.post;
     if (d.createPost?.__typename !== "PostActionSuccess" || !n?.id || n.channelId !== intent.channelId) throw new Error("buffer_create_not_confirmed");
-    const state: PublicationState = n.status === "sent" ? "published" : ["scheduled", "buffer"].includes(n.status) ? "scheduled" : "processing";
-    return { id: n.id, state, permalink: n.externalLink || undefined };
+    // A mutation response is not independent readback. Preserve its actual ID
+    // if the following read fails/changes; never replay an uncertain create.
+    try {
+      const readback = await this.request(`query($input:PostInput!){post(input:$input){${fields}}}`, { input: { id: n.id } });
+      const p = remote(readback.post);
+      if (p.id !== n.id || !matches(intent, p) || !p.automatic || !["scheduled", "buffer"].includes(p.status)) throw Error("buffer_readback_conflict");
+      const state: PublicationState = "scheduled";
+      return { id: p.id, state, permalink: p.permalink };
+    } catch { throw new ProviderOutcomeUnknownError(n.id); }
   }
   async cancel(id: string) {
     // Validate ownership/current state again immediately before remote removal.

@@ -1,5 +1,31 @@
 # Owner Approval Queue
 
+## November2 PR317 integration — one exact-source release/activation packet
+
+Accepted PR318 is preserved (merge281f327e7/treef0d9a304d0,
+deployment`dpl_b8VkVwqTaF2pEyHZ4jAVotu7WJxP`, fresh authenticated25/25).
+Its release and both QA teardowns are completed; no consumed approval is replayed.
+The current instruction authorizes PR317 integration, focused fixes/tests and
+review publication. It conditionally permits one separate verified-$0 PR317-only
+synthetic protected venue after final source freeze, secure-input readiness and
+exact-resource <=6h teardown preparation, including that venue's cleanup.
+
+The final integrated tree is not preapproved. One private packet under the current
+owned-social integration receipt must separately identify app/media release,
+workflow installation, dedicated Buffer key/org binding, reconciled nonempty state
+ref provisioning, repository-wide Contents/Issues permissions, one identified
+internal operator-signal test, durable/source/runtime pauses, one Instagram
+scheduling action and bounded recurring enablement. No new generic brokerage or
+per-post Mike approval is needed for the retained standing evergreen authority.
+
+Source policy prepares Instagram/Home Value only, one create/run and seven queued
+maximum. Actual runtime remains OFF; no key, ledger ref or scheduler activation
+is claimed. Native Facebook and TikTok UNKNOWN remain separate. Existing intake,
+Mike/Brandon delivery, public contacts, consent/suppression and ownership remain
+unchanged. Allocation, carrier SMS and remote address predictions stay OFF.
+No Production migration/env/provider/recipient changes, paid resources/API calls,
+consumer contact, WordPress/DNS or unrelated publication.
+
 ## November1 mobile/direct-contact follow-on — separate from frozen PR317
 
 The owner's controlled-mobile-intake instruction authorizes focused engineering,

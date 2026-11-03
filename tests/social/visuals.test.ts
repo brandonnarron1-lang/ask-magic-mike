@@ -17,5 +17,11 @@ describe("Cinematic owned-brand edition: source rights, privacy and export contr
   it("records owner-supplied illustrative provenance instead of asserting a listing or documentary scene",()=>{expect(manifest.sourceImages).toHaveLength(4);for(const source of manifest.sourceImages){expect(source.rights).toBe("owner_supplied_brand_use");expect(source.originalSha256).toMatch(/^[a-f0-9]{64}$/);expect(source.provenance).toContain("not established");}expect(visual.conceptLabel).toContain("Not a listing");});
   it("uses editable native typography and never a replacement generated person",()=>{expect(visual.font).toBe("Avenir Next");expect(visual.identityRule).toContain("no face/body reconstruction");expect(read("scripts/social/render-cinematic.mjs")).not.toMatch(/font-family=\\"Georgia|api\.openai|OPENAI_API_KEY/);});
   it("keeps intake destinations and broader questions within existing contracts",()=>{expect(visual.currentConsumerPaths).toEqual({seller:"/home-value",buyer:"/buy",compare:"/sell?seller_option=compare",other_questions:"/ask"});expect(visual.widerNeeds).toContain("Do not invent listings");});
-  it("leaves the actual publisher paused while selecting the reviewed edition",()=>{expect(JSON.parse(read("config/owned-social-policy.json"))).toMatchObject({masterPaused:true,mediaEdition:"owned-launch-v2",channels:[],spendCapUsd:0});});
+  it("prepares only Home Value Instagram, with one-create cap and an independent default-OFF runtime gate",()=>{
+    const policy=JSON.parse(read("config/owned-social-policy.json"));
+    expect(policy).toMatchObject({masterPaused:false,mediaEdition:"owned-launch-v2",spendCapUsd:0,caps:{createsPerRun:1,queuePerChannel:7,apiCallsPerRun:50,ledgerEntries:1000}});
+    expect(policy.channels).toHaveLength(1);expect(policy.channels[0]).toMatchObject({platform:"instagram",accountId:"askmagicmikenc",capability:{destinationPaths:["/home-value"]}});
+    expect(policy.activation).toContain("RUNTIME_AND_DURABLE_PAUSE_HELD");
+    expect(read("scripts/social/run.mjs")).toContain("process.env.AMM_OWNED_SOCIAL_ENABLED!=='true'");
+  });
 });

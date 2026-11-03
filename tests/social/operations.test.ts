@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { execFileSync } from "node:child_process";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { checkpointIncidents, classify, observe, plan, reconcile, type Inventory } from "../../src/lib/social/operations";
+import { checkpointIncidents, classify, actionableFindings, observe, plan, reconcile, resumePublisher, type Inventory } from "../../src/lib/social/operations";
 import { easternNoon, holdReason, replenish, type Intent, type Ledger, type Policy, type Provider, type SocialItem, type Store } from "../../src/lib/social/publisher";
 import { assertPublicLedger } from "../../src/lib/social/github-store";
 
@@ -42,7 +42,7 @@ describe("Repeatable campaign operations, synthetic only and no delivery", () =>
   });
   it("observes without writes, then reconciles while paused and content exhausted", async () => {
     const s = new Memory(); s.value = { revision: 0, masterPaused: true, intents: [{ ...used(1), state: "scheduled", providerId: "remote" }] };
-    const i = s.value.intents[0]; const remote = { ...inventory(), posts: [{ id: "remote", channelId: i.channelId, text: i.item.text, dueAt: i.item.dueAt, status: "sent", assets: i.item.assets.map(a => a.url) }] };
+    const i = s.value.intents[0]; const remote = { ...inventory(), posts: [{ id: "remote", channelId: i.channelId, text: i.item.text, dueAt: i.item.dueAt, status: "sent", assets: i.item.assets.map(a => a.url), nativeAiDisclosure: true }] };
     const provider: Provider = { inventory: vi.fn(async () => remote), create: vi.fn(), cancel: vi.fn() };
     const snapshot = await observe(provider); expect(s.value.revision).toBe(0);
     await reconcile(s, snapshot, now);
@@ -80,6 +80,13 @@ describe("Repeatable campaign operations, synthetic only and no delivery", () =>
     expect(checkpointIncidents(again.incidents, [], new Date(+now + 3 * 86400_000), false).incidents[0].resolvedAt).toBeUndefined();
     expect(checkpointIncidents(again.incidents, [], new Date(+now + 3 * 86400_000)).notify).toHaveLength(1);
   });
+  it("does not alert again when an ambiguous create becomes the same unresolved hold on the next run",()=>{
+    const ledger={revision:0,intents:[{...used(1),state:"unknown" as const}]};
+    const first=actionableFindings(policy(),["instagram:provider_result_unknown"],ledger);
+    const next=actionableFindings(policy(),["instagram:unresolved_provider_result"],ledger);
+    expect(first).toEqual(next);expect(first).toHaveLength(1);
+    const a=checkpointIncidents([],first,now);expect(checkpointIncidents(a.incidents,next,new Date(+now+86400_000)).notify).toEqual([]);
+  });
   it("does not reset historical slot/content IDs or silently truncate a full ledger", () => {
     const ledger = { revision: 0, intents: [used(1)] }; expect(plan(policy(), [{ ...item, id: "01", dueAt: easternNoon("2026-11-05") }], ledger, inventory(), now).selected).toEqual([]);
     expect(ledger.intents).toHaveLength(1);
@@ -96,9 +103,32 @@ describe("Repeatable campaign operations, synthetic only and no delivery", () =>
   });
   it("shares the mutation allowance across manual restarts", async () => {
     const s = new Memory(); const remote = inventory();
-    const provider: Provider = { inventory: vi.fn(async ( ) => structuredClone(remote)), create: vi.fn(async (i: Intent) => { const id = "remote-" + remote.posts.length; remote.posts.push({ id, channelId: i.channelId, text: i.item.text, dueAt: i.item.dueAt, assets: i.item.assets.map(a => a.url), status: "scheduled" }); return { id, state: "scheduled" as const }; }), cancel: vi.fn() };
+    const provider: Provider = { inventory: vi.fn(async ( ) => structuredClone(remote)), create: vi.fn(async (i: Intent) => { const id = "remote-" + remote.posts.length; remote.posts.push({ id, channelId: i.channelId, text: i.item.text, dueAt: i.item.dueAt, assets: i.item.assets.map(a => a.url), status: "scheduled", nativeAiDisclosure: true }); return { id, state: "scheduled" as const }; }), cancel: vi.fn() };
     await replenish({ policy: policy(), items: [item], store: s, provider, now });
     const result = await replenish({ policy: policy(), items: [{ ...item, id: "02", dueAt: easternNoon("2026-11-03") }], store: s, provider, now });
     expect(provider.create).toHaveBeenCalledTimes(1); expect(result.held).toContain("shared_effect_window_cap");
+  });
+  it("native-history reservations prevent reuse without claiming new provider attempts",async()=>{
+    const s=new Memory();s.value.intents=[{...used(1),state:"held",reason:"native_history_reserved_not_provider_attested",updatedAt:now.toISOString()}];
+    const p=policy();p.caps.createsPerRun=1;
+    const remote=inventory();const provider:Provider={inventory:vi.fn(async()=>remote),create:vi.fn(async()=>({id:"actual-new",state:"scheduled" as const})),cancel:vi.fn()};
+    const selection=plan(p,[item,{...item,id:"new"}],s.value,remote,now);expect(selection.selected.map(i=>i.id)).toEqual(["new"]);
+    await replenish({policy:p,items:selection.selected,store:s,provider,now});expect(provider.create).toHaveBeenCalledTimes(1);expect(s.value.intents[0].state).toBe("held");
+  });
+  it("does not invent an expiry for standing authority, but honors an actual one",()=>{
+    const p=policy();delete p.brokerageAdvertisingApproval!.expiresAt;expect(holdReason(p,item,now)).toBeNull();
+    p.brokerageAdvertisingApproval!.expiresAt=now.toISOString();expect(holdReason(p,item,now)).toBe("brokerage_advertising_scope_unverified");
+  });
+  it("retains an UNKNOWN hold when native AI disclosure is absent or revoked",async()=>{
+    const s=new Memory();const i={...used(1),state:"scheduled" as const,providerId:"remote"};s.value.intents=[i];
+    await reconcile(s,{...inventory(),posts:[{id:"remote",channelId:i.channelId,text:i.item.text,dueAt:i.item.dueAt,status:"scheduled",assets:i.item.assets.map(a=>a.url),nativeAiDisclosure:false}]},now);
+    expect(s.value.intents[0].state).toBe("unknown");
+  });
+  it("clears only a reviewed durable pause, without provider writes or resetting history",async()=>{
+    const s=new Memory();s.value={revision:2,masterPaused:true,intents:[used(1)]};await resumePublisher(s,inventory(),now);
+    expect(s.value).toMatchObject({revision:3,masterPaused:false,intents:[used(1)]});
+    s.value.intents[0].state="unknown";await expect(resumePublisher(s,inventory(),now)).rejects.toThrow("unresolved");
+    await expect(resumePublisher(s,{...inventory(),complete:false},now)).rejects.toThrow("incomplete");
+    s.value.intents[0].state="published";s.compareAndSwap=async()=>false;await expect(resumePublisher(s,inventory(),now)).rejects.toThrow("conflict");
   });
 });

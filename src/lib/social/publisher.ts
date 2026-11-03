@@ -15,13 +15,15 @@ export interface SocialItem {
 }
 export interface Channel {
   platform: Platform; id: string; accountId: string; ownerVerifiedAt: string;
+  // A verified public handle is an explicit binding, never a fabricated native ID.
+  accountIdentity?: "service_id" | "handle";
   paused: boolean; automaticFormats: ("image" | "video")[];
   profileLinkVerified: boolean; disclosureVerified: boolean;
   capability?: { evidence: string; observedAt: string; recheckAfter: string; status: "verified" | "provisional" | "obsolete" | "unavailable"; destinationPaths: string[] };
 }
 export interface Policy {
   version: string; masterPaused: boolean;
-  brokerageAdvertisingApproval: { reference: string; scope: "owned_evergreen"; expiresAt: string } | null;
+  brokerageAdvertisingApproval: { reference: string; scope: "owned_evergreen"; expiresAt?: string } | null;
   entitlement: { plan: "Free"; verifiedAt: string; expiresAt: string; channelLimit: number; queueLimit: number; runtimeZeroCostVerified: boolean } | null;
   channels: Channel[]; allowedCategories: string[];
   caps: { channels: number; queuePerChannel: number; providerQueueHardLimit: number; createsPerRun: number; apiCallsPerRun: number; ledgerEntries: number };
@@ -35,19 +37,23 @@ export interface Ledger {
   revision: number; intents: Intent[]; incidents?: Incident[]; masterPaused?: boolean; pausedChannels?: string[];
   lease?: { token: string; until: string };
   effectBudget?: { ownerToken: string; until: string };
-  health?: { lastStart?: string; lastObservation: string; lastReconciliation: string; lastPublication?: string; lastCompleted?: string; trigger: "manual" | "scheduled"; nextExpected?: string };
+  health?: { lastStart?: string; lastObservation: string; lastReconciliation: string; lastPublication?: string; lastScheduling?: string; lastCompleted?: string; trigger: "manual" | "scheduled"; nextExpected?: string };
 }
 export interface Store {
   read(): Promise<Ledger>;
   // Atomic compare-and-swap MUST be durable before any provider effect.
   compareAndSwap(expected: number, next: Ledger): Promise<boolean>;
 }
-export interface RemotePost { id: string; channelId: string; text: string; dueAt: string | null; status: string; assets: string[]; permalink?: string }
+export interface RemotePost { id: string; channelId: string; text: string; dueAt: string | null; status: string; assets: string[]; permalink?: string; nativeAiDisclosure?: boolean; automatic?: boolean }
 export interface Provider {
   // An incomplete inventory is a hard stop, never evidence of absence.
   inventory(): Promise<{ complete: boolean; posts: RemotePost[]; disconnected: string[] }>;
   create(intent: Intent): Promise<{ id: string; state: PublicationState; permalink?: string }>;
   cancel(id: string): Promise<void>;
+}
+export class ProviderOutcomeUnknownError extends Error {
+  readonly providerId: string;
+  constructor(providerId: string) { super("provider_readback_unknown_do_not_retry"); this.providerId = providerId; }
 }
 export const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 export function intentKey(channelId: string, item: SocialItem) {
@@ -84,7 +90,9 @@ export function holdReason(policy: Policy, item: SocialItem, now: Date): string 
   if (!channel.capability || channel.capability.status !== "verified" || !channel.capability.evidence || !Number.isFinite(Date.parse(channel.capability.observedAt)) || Date.parse(channel.capability.observedAt) > +now || !Number.isFinite(Date.parse(channel.capability.recheckAfter)) || Date.parse(channel.capability.recheckAfter) <= +now) return "capability_recheck_required";
   const e = policy.entitlement, a = policy.brokerageAdvertisingApproval;
   if (!e || e.plan !== "Free" || !Number.isFinite(Date.parse(e.expiresAt)) || Date.parse(e.expiresAt) <= +now || !e.runtimeZeroCostVerified) return "zero_cost_entitlement_unverified";
-  if (!a || !a.reference || a.scope !== "owned_evergreen" || !Number.isFinite(Date.parse(a.expiresAt)) || Date.parse(a.expiresAt) <= +now) return "brokerage_advertising_scope_unverified";
+  // Standing owner authority has no invented expiry. An actual recorded expiry,
+  // when present, is still enforced independently of capability rechecks.
+  if (!a || !a.reference || a.scope !== "owned_evergreen" || (a.expiresAt !== undefined && (!Number.isFinite(Date.parse(a.expiresAt)) || Date.parse(a.expiresAt) <= +now))) return "brokerage_advertising_scope_unverified";
   if (policy.channels.length > Math.min(3, e.channelLimit, policy.caps.channels) || new Set(policy.channels.map(c => c.id)).size !== policy.channels.length) return "account_scope_invalid";
   if (item.policyVersion !== policy.version || item.rights !== "approved_owned" || !item.sourceReferences.length || !policy.allowedCategories.includes(item.category)) return "editorial_evidence_missing";
   if (!item.text.includes("Our Town Properties, Inc.") || item.text.length > 2100) return "brokerage_identification_or_caption_invalid";
@@ -162,7 +170,7 @@ async function replenishLocked(options: { policy: Policy; items: SocialItem[]; s
     if (old.effectBudget && Date.parse(old.effectBudget.until) > Date.now() && old.effectBudget.ownerToken !== token) { result.held.push("shared_effect_window_cap"); break; }
     // A manual retry/new invocation shares the same conservative ten-minute
     // mutation allowance. Unknown attempts consume it too; no free retry budget.
-    if (old.intents.filter(i => Date.parse(i.attemptedAt || i.updatedAt) > Date.now() - 600_000).length >= Math.min(3, policy.caps.createsPerRun)) { result.held.push("shared_create_window_cap"); break; }
+    if (old.intents.filter(i => (i.attemptedAt || i.state !== "held") && Date.parse(i.attemptedAt || i.updatedAt) > Date.now() - 600_000).length >= Math.min(3, policy.caps.createsPerRun)) { result.held.push("shared_create_window_cap"); break; }
     const remoteAtSlot = inventory.posts.filter(p => p.channelId === channel.id && p.dueAt === item.dueAt && p.status !== "error");
     if (remoteAtSlot.length) { result.held.push(`${channel.platform}:remote_slot_occupied_reconcile_before_create`); continue; }
     // Account-level remote occupancy includes posts created outside this runner.
@@ -184,8 +192,8 @@ async function replenishLocked(options: { policy: Policy; items: SocialItem[]; s
       await update(store, key, i => ({ ...i, providerId: response.id, state: response.state, permalink: response.permalink, updatedAt: now.toISOString() }));
       inventory.posts.push({ id: response.id, channelId: channel.id, text: item.text, dueAt: item.dueAt, status: "scheduled", assets: item.assets.map(a => a.url) });
       result.created++;
-    } catch {
-      await update(store, key, i => ({ ...i, state: "unknown", reason: "provider_result_unknown_do_not_retry", updatedAt: now.toISOString() }));
+    } catch (error) {
+      await update(store, key, i => ({ ...i, ...(error instanceof ProviderOutcomeUnknownError ? { providerId: error.providerId } : {}), state: "unknown", reason: "provider_result_unknown_do_not_retry", updatedAt: now.toISOString() }));
       result.held.push(`${channel.platform}:provider_result_unknown`);
       break;
     }

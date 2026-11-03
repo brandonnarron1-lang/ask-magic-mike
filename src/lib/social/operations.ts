@@ -1,4 +1,4 @@
-import { digest, easternNoon, holdReason, intentKey, type Intent, type Ledger, type Policy, type Provider, type RemotePost, type SocialItem, type Store } from "./publisher";
+import { digest, easternNoon, holdReason, intentKey, requiresNativeAiDisclosure, type Intent, type Ledger, type Policy, type Provider, type RemotePost, type SocialItem, type Store } from "./publisher";
 
 export type Inventory = Awaited<ReturnType<Provider["inventory"]>>;
 export type Outcome = "completed" | "no_work" | "deferred" | "policy_hold" | "incident" | "unknown";
@@ -15,7 +15,8 @@ export async function observe(provider: Provider): Promise<Inventory> {
 }
 export function matches(intent: Intent, post: RemotePost) {
   return post.channelId === intent.channelId && post.text === intent.item.text &&
-    post.dueAt === intent.item.dueAt && JSON.stringify(post.assets) === JSON.stringify(intent.item.assets.map(a => a.url));
+    post.dueAt === intent.item.dueAt && JSON.stringify(post.assets) === JSON.stringify(intent.item.assets.map(a => a.url)) &&
+    (!requiresNativeAiDisclosure(intent.item) || post.nativeAiDisclosure === true);
 }
 export function reconcileSnapshot(ledger: Ledger, inventory: Inventory, now: Date): Ledger {
   if (!inventory.complete) throw Error("inventory_incomplete_no_reconcile");
@@ -101,6 +102,14 @@ export function classify(code: string): Outcome {
   if (/queue_full|queue_cap|run_or|window_full|shared_.*_cap/.test(code)) return "deferred";
   return "policy_hold";
 }
+export function actionableFindings(policy: Policy, holds: string[], ledger: Ledger) {
+  const values = holds.filter(c => ["incident", "unknown"].includes(classify(c))).map(raw => {
+    const leaf = raw.split(":").at(-1)!;
+    return { code: classify(leaf) === "unknown" ? "unresolved_provider_result" : leaf, channelId: policy.channels.find(c => raw.split(":").includes(c.platform))?.id || "shared" };
+  });
+  for (const i of ledger.intents) if (["unknown", "processing", "failed"].includes(i.state)) values.push({ code: i.state === "failed" ? "provider_result_failed" : "unresolved_provider_result", channelId: i.channelId });
+  return [...new Map(values.map(i => [i.channelId + ":" + i.code, i])).values()];
+}
 export function checkpointIncidents(previous: Incident[], findings: { code: string; channelId: string }[], now: Date, complete = true) {
   const active = new Set(findings.map(f => digest([f.channelId, f.code]))), notify: string[] = [];
   const next = previous.map(i => ({ ...i }));
@@ -122,4 +131,15 @@ export async function acknowledgeIncident(store: Store, id: string, now: Date) {
   const old = await store.read();
   if (!old.incidents?.some(i => i.id === id)) throw Error("incident_not_found");
   if (!(await store.compareAndSwap(old.revision, { ...old, revision: old.revision + 1, incidents: old.incidents.map(i => i.id === id ? { ...i, acknowledgedAt: now.toISOString() } : i) }))) throw Error("incident_acknowledgement_conflict");
+}
+
+// Resume is a separately authorized administrative action. It neither creates
+// content nor clears UNKNOWN outcomes; reconciliation must establish them first.
+export async function resumePublisher(store: Store, inventory: Inventory, now: Date, channelId?: string) {
+  if (!inventory.complete) throw Error("inventory_incomplete_no_resume");
+  const old = await store.read();
+  if (old.lease && Date.parse(old.lease.until) > +now) throw Error("publisher_already_running");
+  if (inventory.disconnected.some(id => !channelId || id === channelId) || old.intents.some(i => (!channelId || i.channelId === channelId) && ["unknown", "processing"].includes(i.state))) throw Error("unresolved_provider_result_no_resume");
+  const next = channelId ? { ...old, pausedChannels: (old.pausedChannels || []).filter(id => id !== channelId) } : { ...old, masterPaused: false };
+  if (!(await store.compareAndSwap(old.revision, { ...next, revision: old.revision + 1 }))) throw Error("resume_checkpoint_conflict_stop");
 }
