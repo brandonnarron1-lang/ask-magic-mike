@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { getAllCampaignAssets } from "../../src/lib/admin/campaign-assets";
 import { CAMPAIGN_PRESETS } from "../../src/lib/content/campaign-presets";
+import { siteConfig } from "../../src/lib/site-config";
 
 const FORBIDDEN_PUBLIC_CLAIMS = [
   { id: "unverified_volume_or_tenure", pattern: /(?:\$750m\+?|\b2,?500\+?|\b30\+\s*years|\bover 30 years|\bsince 1993|\bthree decades)\b/i },
@@ -27,7 +28,7 @@ function sourceTree(directory: string): string[] {
   });
 }
 
-function retainedMarketingSource() {
+function retainedMarketingSource(includeContactConfiguration = true) {
   const repo = process.cwd();
   return [
     ...sourceTree(path.join(repo, "src/components/amm")),
@@ -38,7 +39,7 @@ function retainedMarketingSource() {
     readFileSync(path.join(repo, "src/app/page.tsx"), "utf8"),
     readFileSync(path.join(repo, "src/lib/admin/campaign-assets.ts"), "utf8"),
     readFileSync(path.join(repo, "src/lib/content/campaign-presets.ts"), "utf8"),
-    readFileSync(path.join(repo, "src/lib/site-config.ts"), "utf8"),
+    ...(includeContactConfiguration ? [readFileSync(path.join(repo, "src/lib/site-config.ts"), "utf8")] : []),
   ].join("\n");
 }
 
@@ -97,11 +98,15 @@ describe("campaign copy safety", () => {
     }
   });
 
-  it("does not publish an unapproved or conflicting phone number from retained marketing code", () => {
-    const source = retainedMarketingSource();
+  it("uses the approved shared direct line without reviving conflicting hard-coded marketing numbers", () => {
+    // Owner's November1 mobile-contact mandate establishes this direct line.
+    // Keep old hard-coded copies banned outside the single configuration.
+    const source = retainedMarketingSource(false);
 
     expect(source).not.toMatch(/252[-.() ]*245[-.() ]*4337|252[-.() ]*341[-.() ]*0645/);
     expect(source).toContain("252-243-7700");
+    expect(siteConfig.agentPhone).toBe("+12522454337");
+    expect(siteConfig.officePhone).toBe("252-243-7700");
   });
 
   it("keeps every campaign destination on the canonical HTTPS host", () => {

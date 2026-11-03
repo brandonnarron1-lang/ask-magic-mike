@@ -67,6 +67,7 @@ export const analyticsEvents = [
   "thank_you_viewed",
   "appointment_cta_clicked",
   "phone_click",
+  "sms_composer_opened",
   "email_click",
   "widget_step_completed",
   "notification_queued",

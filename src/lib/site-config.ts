@@ -30,12 +30,12 @@ export const siteConfig = {
   homeValueUrl: "https://www.ourtownproperties.com/home-value/",
 
   /**
-   * Public contact line. Keep this aligned with the brokerage number currently
-   * published by Our Town Properties. Private routing numbers belong only in
-   * protected notification configuration and must never flow into public UI.
+   * Owner-supplied public direct line for Mike, not the brokerage office or
+   * private notification routing. Visitor-initiated call/text links do not
+   * establish delivery, consent for automation, or a captured inquiry.
    */
-  agentPhone: "+12522437700",
-  agentPhoneDisplay: "252-243-7700",
+  agentPhone: "+12522454337",
+  agentPhoneDisplay: "(252) 245-4337",
 
   /** Our Town Properties main office. */
   officePhone: "252-243-7700",
