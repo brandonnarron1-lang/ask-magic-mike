@@ -71,6 +71,23 @@ appointment or outcome. Preserve unknown prior contact as unknown.
 
 ## Focused verification and hard stops
 
+Public `Call Magic Mike` / visitor Text is a separate boundary from contacting a
+prospect. Reuse `PublicMikeContact` and the public `siteConfig` direct/office
+distinction in public shells, never the root layout or staff lead controls.
+Number-only `tel:` / `sms:` anchors are visitor intent, not intake, consent,
+delivery or human follow-through. Do not test them by calling/texting Mike.
+Disclose contact-intent analytics rather than claiming that no data is saved.
+Keep the office fallback and internal notification configuration unchanged.
+The paper-form cascade can override a dark confirmation inset: check actual
+success-state pixels and contrast, not only the initial step.
+
+For mobile intake use the existing native FormData/address-entry tests and
+`public-contact-mobile.spec.ts`. Keep synthetic UI interception separate from
+real isolated SQL and physical return-from-app evidence. Remote Places remains
+Production/configuration/rights/cost gated; a disabled categorical capability is
+not a reason to purchase a provider or bypass Preview restrictions. Existing
+profile edits do not authorize account recovery, carrier SMS or scheduler setup.
+
 Review scripts before execution. Use `tests/support/qa-audit-postgres.ts` and
 `scripts/amm/reference-session-acceptance.mjs` only with proven fresh local
 synthetic PostgreSQL, stripped external credentials and outbound disabled.

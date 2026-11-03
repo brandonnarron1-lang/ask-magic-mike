@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 import { publicNavigation, experienceDestination } from "../../lib/experienceContract";
+import { PublicMikeContact } from "./PublicMikeContact";
 
 type HeaderProps = {
   onAsk?: () => void;
@@ -134,6 +135,10 @@ export function BlackDiamondHeader({ onAsk }: HeaderProps) {
         >
           {mobileNavigationOpen ? <X aria-hidden="true" size={18} /> : <Menu aria-hidden="true" size={18} />}
         </button>
+      </div>
+
+      <div className="w-full border-t border-[#cda24a24] pt-3">
+        <PublicMikeContact surface="public_header" compact />
       </div>
 
       {mobileNavigationOpen ? (

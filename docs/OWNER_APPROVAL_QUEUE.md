@@ -1,5 +1,21 @@
 # Owner Approval Queue
 
+## November1 mobile/direct-contact follow-on — separate from frozen PR317
+
+The owner's controlled-mobile-intake instruction authorizes focused engineering,
+factual public profile/contact edits and continuation inside existing policy,
+not a new hosted venue, provider activation or a replay of PR316's consumed QA.
+Work branches from accepted PR316 as `codex/mobile-direct-contact-20261101`;
+PR317 remains frozen. No migration/dependency/recipient/provider change, live
+test, consumer send, WordPress effect or allocation activation. Branch Git builds
+are disabled; normal hosted release gates include the new local mobile check.
+
+The exact final source, tests, effect counts, compatible recovery and remaining
+immutable protected-Preview resource boundary belong in the existing private
+Home Value lead-loop packet. New resource/release/runtime operations retain
+their actual distinct gates. Native public contact updates neither release code
+nor activate the held social scheduler. Never reset UNKNOWN post identities.
+
 ## October31 solo-operator contact-readiness continuation
 
 Resolve accepted Production with `pnpm release:authority:resolve` using

@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { trackEvent } from "../../lib/analytics";
+import { PublicMikeContact } from "./PublicMikeContact";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { tryCreateBrowserSubmissionId } from "../../lib/browserSubmissionId";
 import { timelineOptions } from "../../lib/constants";
@@ -503,9 +504,7 @@ export function HomeValueFunnel({
             funnelName="home_value"
             attribution={attribution}
           /> : <p className="text-sm text-[#d9ceb8]">Marked INTERNAL QA — DO NOT CONTACT. This test request does not create an appointment or consumer outreach.</p>}
-          <p className="text-sm leading-6 text-[#d9ceb8]">
-            Prefer a direct call? Our Town Properties can be reached through the contact information on ourtownproperties.com.
-          </p>
+          <PublicMikeContact surface="intake_confirmation" />
           <p className="text-xs leading-5 text-[#8f8778]">This is broker-reviewed guidance, not an automated appraisal. Not a survey.</p>
         </div>
       ) : null}
