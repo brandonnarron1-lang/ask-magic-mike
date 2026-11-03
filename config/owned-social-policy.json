@@ -20,5 +20,5 @@
   "allowedCategories": ["intake_explanation", "evergreen_education", "existing_offer"],
   "prohibited": ["property_specific", "market_statistics", "testimonials", "guaranteed_outcomes", "unapproved_likeness", "consumer_outreach"],
   "spendCapUsd": 0,
-  "activation": "PREPARED_SOURCE_POLICY_ONLY_RUNTIME_AND_DURABLE_PAUSE_HELD"
+  "activation": "READ_RUNTIME_FLAGS_AND_DURABLE_PAUSE; SOURCE_POLICY_IS_NOT_RUNTIME_STATE"
 }

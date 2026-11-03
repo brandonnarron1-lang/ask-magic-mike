@@ -1,6 +1,22 @@
 # Owner Approval Queue
 
-## November2 PR317 integration — one exact-source release/activation packet
+## November3 reserve continuation — completed activation is not a new approval
+
+PR317 A+B was approved and exercised for head852d9936/tree6aef25cc. Accepted
+Production is merge2ea7cf17/deployment`dpl_Es864QpKq2xTrh8QCBuJJJhME3aP`,
+authenticated25/25 at2026-11-03T17:53:03.162Z. Credentials, nonempty history,
+workflow and recurrence are installed/enabled. Its one initial create is complete;
+do not repeat it or request the same setup approval. All task QA cleanup is complete.
+
+The November3 instruction authorizes four distinct evergreen seller concepts,
+append-only media, focused tests, coherent commits and review PR work. It does not
+preapprove a final unknown release tree or a new QA backend. Finish the candidate
+and required gates, then retain one exact-source app/media/protected-review packet
+for only missing authority. No per-post Mike approval, new advertising consent,
+credential/state installation, runtime activation, cap increase or manual scheduling
+is needed. The current campaign must keep operating on accepted source meanwhile.
+
+## Historical November2 PR317 packet — consumed by later A+B approval
 
 Accepted PR318 is preserved (merge281f327e7/treef0d9a304d0,
 deployment`dpl_b8VkVwqTaF2pEyHZ4jAVotu7WJxP`, fresh authenticated25/25).

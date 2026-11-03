@@ -87,6 +87,21 @@ new/changed incidents and signal failures are nonzero. A verified issue is not
 Brandon's personal inbox/push receipt. Never route these incidents to lead alerts.
 No independent missed-run monitoring exists merely because cron is configured.
 
+The first nominal cron opportunity is the first scheduled time **after** actual
+enablement. Check event=`schedule`, source, result and durable/provider effects;
+workflow_dispatch is not recurrence proof. If not due, finish independent work
+without an extra execute, overnight polling or another monitoring job.
+
+Historical held native-used reservations consume content identities without
+claiming failed/new API publications. Preserve them on resume. Add genuinely
+distinct finite editorial concepts, not renamed/cropped duplicates. Append media
+with the existing renderer; pin accepted old hashes independently of the new
+manifest and inspect each phone-size panel/caption. Use verify-assets' private
+`--evidence-dir=.amm-run/<current-task>` to preserve historical diagnostics.
+New catalogue/media require actual source release and public byte validation
+before eligibility; editorial authority does not replay a consumed release/QA
+exception. Keep the healthy accepted publisher running while reserve work is held.
+
 Read state before installation. A missing ref is not empty history: reconcile
 retained native action receipts and real inventory. Reserve used concept identities
 without pretending native uploads match the application's media/caption. Preserve
