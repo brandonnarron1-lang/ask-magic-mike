@@ -98,7 +98,7 @@ export function plan(policy: Policy, catalogue: SocialItem[], ledger: Ledger, in
 }
 export function classify(code: string): Outcome {
   if (/unknown|unresolved|ambiguous|not_established/.test(code)) return "unknown";
-  if (/revoked|incomplete|conflict|credential|ledger|provider_result|unavailable/.test(code)) return "incident";
+  if (/revoked|incomplete|conflict|credential|ledger|provider_result|unavailable|capability_recheck_required|zero_cost_entitlement_unverified/.test(code)) return "incident";
   if (/queue_full|queue_cap|run_or|window_full|shared_.*_cap/.test(code)) return "deferred";
   return "policy_hold";
 }

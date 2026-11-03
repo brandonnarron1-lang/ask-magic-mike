@@ -66,6 +66,11 @@ describe("Repeatable campaign operations, synthetic only and no delivery", () =>
     const result = plan(policy(), [item], { revision: 0, intents: [] }, remote, now);
     expect(result.selected).toEqual([]); expect(result.held.map(classify)).toEqual(["deferred"]);
   });
+  it("signals a required capability/cost recheck but keeps known unsupported formats a policy hold",()=>{
+    expect(classify("concept:instagram:capability_recheck_required")).toBe("incident");
+    expect(classify("zero_cost_entitlement_unverified")).toBe("incident");
+    expect(classify("native_ai_disclosure_required_for_this_format")).toBe("policy_hold");
+  });
   it("requires current capability evidence without manufacturing consent expiration", () => {
     const p = policy(); p.channels[0].capability!.recheckAfter = now.toISOString();
     expect(holdReason(p, item, now)).toBe("capability_recheck_required");

@@ -21,8 +21,9 @@ async function report(result,incidents=[]){
     catch{signal={status:'UNCONFIRMED_NO_RETRY'};process.exitCode=2;}
   }
   const signalFailed=signal.status==='UNCONFIRMED_NO_RETRY';
+  const reasons=(result.holds||[]).map(h=>typeof h==='string'?h:h.code).filter(c=>/^[a-z0-9_:.-]{1,150}$/.test(c)).slice(0,30);
   if(process.env.GITHUB_STEP_SUMMARY)await fs.appendFile(process.env.GITHUB_STEP_SUMMARY,
-    `## Owned Instagram operation\n\n${needsAction||signalFailed?'**INTERVENTION REQUIRED**':result.status}\n\nOperator signal: ${signal.status}${signal.url?' — '+signal.url:''}. Active incidents: ${actionable.length}.\n\nScheduled is not published. A GitHub issue is not proof of Brandon receiving email or push. No independent missed-run monitor is installed.\n`);
+    `## Owned Instagram operation\n\n${needsAction||signalFailed?'**INTERVENTION REQUIRED**':result.status}\n\nOperator signal: ${signal.status}${signal.url?' — '+signal.url:''}. Active incidents: ${actionable.length}.\n\n${reasons.map(c=>'- '+c).join('\n')}\n\nScheduled is not published. A GitHub issue is not proof of Brandon receiving email or push. No independent missed-run monitor is installed.\n`);
   console.log(JSON.stringify({...result,...(signalFailed?{status:'INTERVENTION_REQUIRED',signalCode:'operator_signal_unconfirmed'}:{}),operatorSignal:signal,activeIncidents:actionable.length}));
 }
 try {
