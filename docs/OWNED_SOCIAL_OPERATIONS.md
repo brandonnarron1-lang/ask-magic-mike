@@ -1,6 +1,60 @@
 # Owned social operations
 
-## Current operating checkpoint — November3, 2026
+## Resume from accepted evidence, not a dated setup snapshot
+
+PR320's [authenticated acceptance receipt](https://github.com/brandonnarron1-lang/ask-magic-mike/releases/tag/amm-production-acceptance/dpl_27FwMnE2FS3TyFYZJy18sUnq3whG)
+and [verified closeout](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/320#issuecomment-6615051764)
+supersede the pre-release reserve state below. Its four additional concepts are
+released; eligibility, unused identity, current capacity and public media are
+still rechecked by the existing runner. QA teardown and activation are completed
+work, not prerequisites to repeat for observation. Resolve any later accepted
+Production through `pnpm release:authority:resolve`; this paragraph does not pin
+future operation to an old deployment. Current counts, private query/results and
+access evidence belong in the focused Home Value lead-loop handoff, not this guide.
+
+### Read-only measurement contract
+
+Keep the original pilot window and an explicit elapsed cutoff. The protected
+Distribution report's exact range is not the rolling legacy sections beneath it.
+Its all-source summary and historical WordPress tags are separate, not additive;
+the social category is not Instagram-only or post-specific attribution.
+
+| Measure | Stored grain and limit |
+|---|---|
+| `page_view` | A `PageTracker` effect on a mounted page; no form UUID is supplied. It is not a unique visitor or deduplicated visit. |
+| `intake_started` | First native input/change per mounted logical form. An optional validated form UUID becomes `properties.funnel_session_id`; a distinct UUID is an intake identity, not a distinct person. Remounts can repeat events, including a retained pending-request identity. |
+| Durable inquiries | Accepted `leads` rows by server creation time with the existing test/suppression/spam exclusions. Same-key retries add none; genuine repeat inquiries remain separate. |
+| Recorded contacts | Distinct canonical contact IDs within the selected cohort. Retain unresolved links; never sum overlapping group-contact counts. |
+| Human/appointment outcomes | Actual recorded events for the defined inquiry cohort. Attempts, two-way contact, requested and confirmed appointments remain separate; an empty cohort supplies no success-rate denominator. |
+| Call/Text intents and SLA events | Neither composer/dialer intents nor `sla_*_breached` operating events establish a new inquiry, human contact or audience visit. |
+
+First-party collection already runs through `trackEvent` → `/api/events` →
+`recordNeonAnalyticsEvent` → canonical `analytics_events`. HTTP202 can mean
+automation exclusion with `persisted:false`; only successful persistence establishes
+a stored event. A failed write returns503. Absence of a row alone does not prove
+an attempted transport failed, zero audience exposure, or missing instrumentation.
+External analytics has its separate consent/QA boundary and is not interchangeable
+with the first-party ledger.
+
+If the installed report lacks an event metric, use an existing authorized aggregate
+reader or the legitimate Console, not exported credentials or a new tracker.
+Retain the exact SQL in the private operation record. Verify the actual schema,
+SELECT grants and RLS coverage; use one Repeatable Read **READ ONLY** transaction
+with transaction-local five-second statement and one-second lock timeouts. Return
+bounded aggregates only. Link tests/suppressed inquiries through stored lead,
+session or validated funnel UUIDs—never guessed identity or address. Explicit flags
+and coarse automation classification do not guarantee complete bot/operator exclusion,
+especially for unlinked events. Preserve that coverage limit in any traffic claim.
+Source/campaign dimensions are client-reported evidence, not proof of a click from
+a particular post; compute rates only for compatible populations and counting grains.
+
+For public publication evidence, use the actual permalink/account/caption and
+native timestamp. Buffer `dueAt` is scheduled time, not actual publication time.
+Native labels require a full current observation; absence from an incremental UI
+diff is not a missing label. Historical Buffer metadata can differ from the native
+label: preserve both provenances rather than rewriting native-used reservations.
+
+## Historical pre-reserve operating checkpoint — November3, 2026
 
 PR317 is **merged, deployed and accepted**, not a Draft setup task. Authenticated
 resolution at `2026-11-03T17:53:03.162Z` returned25/25: merge
