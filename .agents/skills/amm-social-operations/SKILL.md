@@ -75,6 +75,9 @@ and TikTok UNKNOWN/disclosure/destination holds. Source policy, runtime kill swi
 and durable pause are independent: execute/resume require the explicit runtime
 enable value; observe/reconcile/pause remain distinct operations. A prepared source
 transition must be reviewed before sealing, not edited after app acceptance.
+Recurring triggers additionally require AMM_OWNED_SOCIAL_SCHEDULE_ENABLED=true;
+leave it OFF during the manual pilot and enable only after verified readback.
+Both workflow admission and native runner enforce that separate scheduler gate.
 
 Every create needs independent provider readback of actual ID, text, media, slot,
 automatic mode and native AI disclosure. Preserve an observed provider ID if

@@ -31,6 +31,10 @@ const args=process.argv.slice(2), modes=args.filter(a=>['--observe','--reconcile
 if(modes.length>1)throw Error('choose_one_operation');
 if(args.some(a=>!['--plan','--summary',...modes].includes(a)&&!/^--(snapshot|channel|incident)=.+/.test(a)))throw Error('unsupported_argument');
 const mode=modes[0]||'--plan';
+if(mode==='--execute'&&process.env.GITHUB_EVENT_NAME==='schedule'&&process.env.AMM_OWNED_SOCIAL_SCHEDULE_ENABLED!=='true'){
+  console.log(JSON.stringify({status:'SCHEDULER_PAUSED_NO_EFFECTS'}));
+  process.exit(0);
+}
 if(['--execute','--resume'].includes(mode)&&process.env.AMM_OWNED_SOCIAL_ENABLED!=='true'){
   console.log(JSON.stringify({status:'RUNTIME_PAUSED_NO_EFFECTS'}));
   process.exit(0);

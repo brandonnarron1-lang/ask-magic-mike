@@ -67,6 +67,12 @@ not installed on accepted main or enabled. Daily11:17UTC means06:17EST/07:17EDT;
 posts retain civil Eastern noon. GitHub cron is not a timing SLA. Manual status,
 observe, reconcile and pause remain available while disabled; execute/resume do
 not. Observation is read-only; reconciliation/pause/acknowledgment write state.
+Recurring runs additionally require `AMM_OWNED_SOCIAL_SCHEDULE_ENABLED=true`.
+Keep that separate gate OFF during the approved manual pilot; enable it only after
+the first operation's readback/checkpoint (or verified queue-full deferral). Both
+workflow admission and native runner enforce this distinction. Default absent
+values are OFF; installing the file or enabling the manual runtime does not prove
+an enabled recurring replenisher.
 
 Use dedicated `AMM_SOCIAL_BUFFER_KEY`, nonsecret `AMM_SOCIAL_BUFFER_ORG` and the
 ephemeral `github.token` as `AMM_SOCIAL_STATE_TOKEN`; no long-lived GitHub PAT.

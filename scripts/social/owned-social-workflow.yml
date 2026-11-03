@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   replenish:
-    if: vars.AMM_OWNED_SOCIAL_ENABLED == 'true' || (github.event_name == 'workflow_dispatch' && (inputs.operation == 'status' || inputs.operation == 'pause' || inputs.operation == 'observe' || inputs.operation == 'reconcile'))
+    if: (github.event_name == 'schedule' && vars.AMM_OWNED_SOCIAL_ENABLED == 'true' && vars.AMM_OWNED_SOCIAL_SCHEDULE_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && (vars.AMM_OWNED_SOCIAL_ENABLED == 'true' || inputs.operation == 'status' || inputs.operation == 'pause' || inputs.operation == 'observe' || inputs.operation == 'reconcile'))
     runs-on: ubuntu-latest # Public repo standard runner, no larger/paid runner.
     timeout-minutes: 7
     steps:
@@ -34,6 +34,7 @@ jobs:
         env:
           OPERATION: ${{ github.event_name == 'schedule' && 'execute' || inputs.operation }}
           AMM_OWNED_SOCIAL_ENABLED: ${{ vars.AMM_OWNED_SOCIAL_ENABLED }}
+          AMM_OWNED_SOCIAL_SCHEDULE_ENABLED: ${{ vars.AMM_OWNED_SOCIAL_SCHEDULE_ENABLED }}
           AMM_SOCIAL_OPERATOR_SIGNALS_ENABLED: 'true'
           AMM_SOCIAL_BUFFER_KEY: ${{ secrets.AMM_SOCIAL_BUFFER_KEY }}
           AMM_SOCIAL_BUFFER_ORG: ${{ vars.AMM_SOCIAL_BUFFER_ORG }}

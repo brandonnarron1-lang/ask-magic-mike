@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const script="./scripts/social/run.mjs";
-function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled"){
+function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled", scheduledTrigger=false){
   // Native Node24 runner, all filesystem policy input and outbound providers
   // replaced before import. No credentials, live data, browser, or real network.
   const code=`
@@ -45,7 +45,7 @@ function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled"){
   `;
   // Project ambient ProcessEnv requires Production keys. Intentionally do NOT
   // inherit or populate them in this isolated child; only synthetic bindings.
-  const result=spawnSync(process.execPath,["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON","--input-type=module","-e",code],{encoding:"utf8",env:{PATH:process.env.PATH!,HOME:process.env.HOME!,AMM_OWNED_SOCIAL_ENABLED:"true",AMM_SOCIAL_OPERATOR_SIGNALS_ENABLED:"true",AMM_SOCIAL_STATE_TOKEN:"synthetic",AMM_SOCIAL_BUFFER_KEY:"synthetic",AMM_SOCIAL_BUFFER_ORG:"synthetic-org",GITHUB_REPOSITORY:"brandonnarron1-lang/ask-magic-mike"} as unknown as NodeJS.ProcessEnv});
+  const result=spawnSync(process.execPath,["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON","--input-type=module","-e",code],{encoding:"utf8",env:{PATH:process.env.PATH!,HOME:process.env.HOME!,AMM_OWNED_SOCIAL_ENABLED:"true",AMM_OWNED_SOCIAL_SCHEDULE_ENABLED:scheduledTrigger?"true":"false",GITHUB_EVENT_NAME:scheduledTrigger?"schedule":"workflow_dispatch",AMM_SOCIAL_OPERATOR_SIGNALS_ENABLED:"true",AMM_SOCIAL_STATE_TOKEN:"synthetic",AMM_SOCIAL_BUFFER_KEY:"synthetic",AMM_SOCIAL_BUFFER_ORG:"synthetic-org",GITHUB_REPOSITORY:"brandonnarron1-lang/ask-magic-mike"} as unknown as NodeJS.ProcessEnv});
   expect(result.stderr).toBe("");return {status:result.status,lines:result.stdout.trim().split("\n").map(s=>JSON.parse(s))};
 }
 describe("Integrated publisher runtime, mocked state/provider/alerts",()=>{
@@ -68,12 +68,19 @@ describe("Integrated publisher runtime, mocked state/provider/alerts",()=>{
       expect(r.status).toBe(0);expect(JSON.parse(r.stdout)).toEqual({status:'RUNTIME_PAUSED_NO_EFFECTS'});
     }
   });
+  it("keeps recurring execution network-free while an authorized manual pilot is enabled",()=>{
+    const r=spawnSync(process.execPath,["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON","--input-type=module","-e",`globalThis.fetch=()=>{throw Error('NETWORK_FORBIDDEN')};process.argv=['node','run','--execute'];await import('${script}')`],{encoding:'utf8',env:{PATH:process.env.PATH!,HOME:process.env.HOME!,AMM_OWNED_SOCIAL_ENABLED:'true',AMM_OWNED_SOCIAL_SCHEDULE_ENABLED:'false',GITHUB_EVENT_NAME:'schedule'} as unknown as NodeJS.ProcessEnv});
+    expect(r.status).toBe(0);expect(JSON.parse(r.stdout)).toEqual({status:'SCHEDULER_PAUSED_NO_EFFECTS'});
+  });
+  it("the enabled scheduler uses the same readback/checkpoint path and records its actual trigger",()=>{
+    const r=run('scheduled',true);expect(r.status).toBe(0);expect(r.lines[1].fixtureLedger.health.trigger).toBe('scheduled');expect(r.lines[1].fixtureLedger.intents[0].state).toBe('scheduled');
+  });
   it("keeps both source exclusions and the PR318 mandatory browser acceptance",()=>{
     const config=JSON.parse(readFileSync('vercel.json','utf8'));
     for(const branch of ['codex/mobile-direct-contact-20261101','codex/owned-social-publisher-20261101','codex/owned-social-publication-state'])expect(config.git.deploymentEnabled[branch]).toBe(false);
     expect(readFileSync('.github/workflows/release-gate.yml','utf8')).toContain('public-contact-mobile.spec.ts');
     expect(readFileSync('src/lib/analytics/privacy.ts','utf8')).toContain('sms_composer_opened');
     const workflow=readFileSync('.github/workflows/owned-social.yml','utf8');expect(workflow).toBe(readFileSync('scripts/social/owned-social-workflow.yml','utf8'));
-    expect(workflow).toContain('17 11 * * *');expect(workflow).toContain('github.token');expect(workflow).toContain('issues: write');expect(workflow).toContain("vars.AMM_OWNED_SOCIAL_ENABLED == 'true'");
+    expect(workflow).toContain('17 11 * * *');expect(workflow).toContain('github.token');expect(workflow).toContain('issues: write');expect(workflow).toContain("vars.AMM_OWNED_SOCIAL_ENABLED == 'true'");expect(workflow).toContain("vars.AMM_OWNED_SOCIAL_SCHEDULE_ENABLED == 'true'");
   });
 });
