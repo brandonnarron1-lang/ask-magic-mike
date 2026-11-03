@@ -1,0 +1,43 @@
+# Reviewed installation copy is .github/workflows/owned-social.yml.
+# Runtime remains OFF unless separately approved AMM_OWNED_SOCIAL_ENABLED=true.
+name: Bounded owned-social replenishment
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Existing bounded operation (resume/execute need runtime approval)
+        type: choice
+        default: status
+        options: [status, observe, reconcile, pause, resume, execute]
+  schedule:
+    - cron: '17 11 * * *' # 06:17 EST / 07:17 EDT; posts use civil Eastern noon.
+permissions:
+  contents: write # REPOSITORY-wide permission; script pins one ref/file. NOT branch-scoped.
+  issues: write # REPOSITORY-wide operator issue signal; not branch-scoped.
+concurrency:
+  group: owned-social-publisher
+  cancel-in-progress: false
+jobs:
+  replenish:
+    if: (github.event_name == 'schedule' && vars.AMM_OWNED_SOCIAL_ENABLED == 'true' && vars.AMM_OWNED_SOCIAL_SCHEDULE_ENABLED == 'true') || (github.event_name == 'workflow_dispatch' && (vars.AMM_OWNED_SOCIAL_ENABLED == 'true' || inputs.operation == 'status' || inputs.operation == 'pause' || inputs.operation == 'observe' || inputs.operation == 'reconcile'))
+    runs-on: ubuntu-latest # Public repo standard runner, no larger/paid runner.
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Bounded operation and deduplicated operator signal
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs "--${OPERATION}"
+        env:
+          OPERATION: ${{ github.event_name == 'schedule' && 'execute' || inputs.operation }}
+          AMM_OWNED_SOCIAL_ENABLED: ${{ vars.AMM_OWNED_SOCIAL_ENABLED }}
+          AMM_OWNED_SOCIAL_SCHEDULE_ENABLED: ${{ vars.AMM_OWNED_SOCIAL_SCHEDULE_ENABLED }}
+          AMM_SOCIAL_OPERATOR_SIGNALS_ENABLED: 'true'
+          AMM_SOCIAL_BUFFER_KEY: ${{ secrets.AMM_SOCIAL_BUFFER_KEY }}
+          AMM_SOCIAL_BUFFER_ORG: ${{ vars.AMM_SOCIAL_BUFFER_ORG }}
+          AMM_SOCIAL_STATE_TOKEN: ${{ github.token }}
+      # Intervention is nonzero and has a deduplicated persistent operator issue.
+      # Issue/API readback does not prove Brandon's personal email/push receipt.

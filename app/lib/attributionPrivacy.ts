@@ -8,6 +8,7 @@ const CONTENT = new Set([
   "wordpress_home_value_page", "wordpress_homepage_ask_mike", "wordpress_we_buy_homes", "wordpress_we_buy_houses", "wordpress_listing_buyer", "wordpress_rental_to_homeownership", "wordpress_homepage_cta", "wordpress_ask_mike_page",
   "facebook_local_question_seller_review", "sitewide-floating", "owned-seller-buyer-launch", "full_form_fallback", "seller_plan", "buyer_plan", "annual_review", "relocation_plan",
   ...["seller", "buyer"].flatMap(a => ["facebook", "instagram", "owned_site", "qr"].map(c => `${a}_${c}`)),
+  ...["seller", "buyer", "compare"].flatMap(a => ["facebook", "instagram", "tiktok"].map(c => `${a}_${c}`)),
 ]);
 const EXTRA: Record<string, readonly string[]> = { source: ["widget", "external", "home_value_page", "seller_page", "buyer_page", "renter_page", "ask_page", "open_house", "homepage"], medium: ["embed"], campaign: ["sitewide-widget", "parent-site-widget", "full_form_fallback", "amm_seller_buyer_launch_2026"] };
 

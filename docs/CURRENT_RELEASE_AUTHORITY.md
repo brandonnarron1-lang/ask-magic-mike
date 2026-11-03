@@ -1,6 +1,43 @@
 # Current Release Authority
 
-## November1 mobile/direct-contact continuation
+Use `config/release-authority-policy.json` and authenticated
+`pnpm release:authority:resolve` for current decisions. Dated snapshots below
+do not replace that resolver or authorize replaying a consumed approval.
+
+## November2 integrated Instagram candidate — accepted PR318 preserved
+
+The authenticated resolver observed accepted25/25 at2026-11-03T01:47:09.607Z
+(November2 Eastern): PR318 merge `281f327e7481a57f7eeb3f2ff11c6b8018cc5aaf`,
+tree `f0d9a304d0cc63f67bf4884eb7796fc0b141efae`, deployment
+`dpl_b8VkVwqTaF2pEyHZ4jAVotu7WJxP`. Its release and QA teardown are complete.
+The PR317 integration preserves the accepted mobile/contact implementation and
+mandatory browser gate; it is a new candidate, not accepted Production.
+
+The current owner instruction permits integration/review and one conditional,
+verified-$0 PR317-only synthetic protected venue after final source freeze,
+secure-input readiness and exact-resource lifecycle preparation. It does not
+approve an unknown final tree, install credentials/state, or activate publishing.
+App/media release, workflow installation and Instagram runtime activation remain
+separately enumerated in one final exact-source owner packet. PR318's consumed
+approval is never replayed. Facebook remains native and TikTok UNKNOWN held.
+
+## November1 observed accepted baseline and held social candidate
+
+The latest focused authenticated receipt resolved PR316 accepted25/25 at
+2026-11-01T13:04:55.530Z: merge
+`f221acf13264761973ab5ab7e30067b337c0a603`, tree
+`61677c45210bbea98f618449131046351c2afd51`, deployment
+`dpl_FDdVc7wBBCn36tdPNuaJ78kzXpbQ`. The current owned-social task's main read
+still matched this merge. The prior approval and synthetic QA teardown are
+completed, not waiting to be repeated. Private authenticated evidence is indexed
+in the Home Value pilot/owned-social continuation under `.amm-run/`.
+
+The owned-social branch is a new review candidate, not accepted Production.
+Account/publisher/runtime activation and any new app release follow their actual
+exact-source and external-action gates. No scheduler, provider, recipient,
+Production environment, database or allocation change is authorized implicitly by
+a source commit. The existing draft-only workers remain unchanged.
+## Historical November1 mobile/direct-contact continuation
 
 Authenticated resolution at `2026-11-02T02:40:23.668Z` (November1 Eastern)
 confirmed accepted PR316, merge `f221acf13264761973ab5ab7e30067b337c0a603`,
