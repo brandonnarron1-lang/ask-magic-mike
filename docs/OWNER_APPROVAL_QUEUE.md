@@ -1,5 +1,9 @@
 # Owner Approval Queue
 
+Use `config/release-authority-policy.json` and authenticated
+`pnpm release:authority:resolve` for current release decisions. Dated approval
+entries do not replace exact-source authority or replay a consumed scope.
+
 ## November3 reserve continuation — completed activation is not a new approval
 
 PR317 A+B was approved and exercised for head852d9936/tree6aef25cc. Accepted
