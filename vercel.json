@@ -1,6 +1,7 @@
 {
   "git": {
     "deploymentEnabled": {
+      "codex/pr321-report-grants-20261104": false,
       "codex/qualified-lead-conversion-20261103": false,
       "codex/instagram-home-value-reserve-20261103": false,
       "codex/owned-social-publisher-20261101": false,

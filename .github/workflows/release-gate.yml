@@ -106,7 +106,7 @@ jobs:
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/bounded-intelligence-postgres.test.ts tests/persistence/evaluation-checkpoint-postgres.test.ts tests/persistence/operator-handoff-postgres.test.ts tests/persistence/source-lifecycle-postgres.test.ts tests/persistence/intelligence-feedback-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Isolated traffic identity, seller request and operator digest claims (no sends)
-        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/qualified-conversion-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+        run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/qualified-conversion-postgres.test.ts tests/persistence/operational-report-grants-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
       - name: Typecheck
         run: pnpm run typecheck

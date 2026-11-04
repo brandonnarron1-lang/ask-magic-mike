@@ -58,6 +58,8 @@ DO $$ BEGIN
    REVOKE ALL ON FUNCTION public.capture_public_lead_v5(jsonb,jsonb,jsonb,text,jsonb) FROM authenticated;
  END IF;
  IF EXISTS(SELECT 1 FROM pg_roles WHERE rolname='service_role') THEN
+   -- Owner defaults can grant DELETE on new tables; narrow this table only.
+   REVOKE ALL ON public.operational_daily_reports FROM service_role;
    GRANT SELECT,INSERT,UPDATE ON public.operational_daily_reports TO service_role;
    GRANT EXECUTE ON FUNCTION public.capture_public_lead_v5(jsonb,jsonb,jsonb,text,jsonb) TO service_role;
  END IF;

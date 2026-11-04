@@ -1,5 +1,27 @@
 # Owner Approval Queue
 
+## November4 PR321 demonstrated migration correction — new source boundary
+
+The owner's exact PR321/one-migration/four-binding/digest authorization was
+received; do not ask for that same scope again. Protected acceptance completed
+on its frozen tree, and its one synthetic QA venue was disconnected, revoked,
+deleted from active provider state and its cleanup task removed. Normal Neon
+recovery retention is not an immediate physical-purge claim.
+
+Production refused the new report ledger's inherited DELETE privilege and the
+cutover transaction rolled back. No migration ledger row, v5, seller column or
+report table committed. Existing owner defaults remain unchanged. The bounded
+follow-up `codex/pr321-report-grants-20261104` explicitly revokes this new table's
+service-role grants before applying SELECT/INSERT/UPDATE, with a real SQL
+regression that reproduces the prior failure. It preserves the original PR321
+source and requires a newly sealed head/tree/migration hash, normal gates and
+an exact changed-source decision. No approval transfers silently to new bytes.
+
+The original private release packet records the correction, rollback proof,
+current tests and any missing protected venue authority. Email-plan/quota access
+is an independent digest-enablement dependency, not a reason to weaken grants
+or send a forced acceptance email. Runtime bindings/digest remain unactivated.
+
 ## Qualified conversion — prepare one exact-source release decision
 
 The attached November3 mandate authorizes implementation and intended Brandon

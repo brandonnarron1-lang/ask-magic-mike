@@ -1,5 +1,23 @@
 # Current Release Authority
 
+## November4 PR321 cutover hold — original application tree not released
+
+The exact PR321 candidate passed its immutable protected Preview gate. Its
+Production cutover was rolled back before commit when the existing owner's
+default table ACL retained DELETE for service_role on the new daily-report ledger.
+The new migration version remains absent; authenticated accepted Production is
+still PR320. A Ready Preview or technical promotion verdict is not a release.
+
+The isolated follow-up branch `codex/pr321-report-grants-20261104` narrows only the
+new table's grants and adds a real isolated SQL/default-ACL regression to the
+required hosted gate. It does not change owner defaults, existing tables,
+application behavior, recipients or runtime settings. The original candidate,
+failed checks, validated private backup and all QA evidence remain preserved.
+The changed migration bytes require their own exact-source disposition; the
+original hash approval and retired Preview do not cover the follow-up tree.
+Use the current private qualified-conversion handoff for final source and gates.
+No replacement hosted venue is implicitly authorized.
+
 ## Qualified conversion continuation — new candidate, not accepted Production
 
 The November3 authenticated resolver still accepts PR320 merge8076de45,
