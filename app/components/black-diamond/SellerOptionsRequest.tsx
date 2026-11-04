@@ -98,7 +98,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
       trackEvent("thank_you_viewed", attribution, { funnel_name: "seller" }, eventOptions);
     }
   }
-  const stateMessage = saved?.message || (recovery.restored ? "An earlier request has not been confirmed. Retain its reference and ask Our Town Properties to check it before starting another."
+  const stateMessage = saved ? "Your request is stored for review. Your recorded contact choices still apply; no offer or appointment is confirmed." : (recovery.restored ? "An earlier request has not been confirmed. Retain its reference and ask Our Town Properties to check it before starting another."
     : "message" in recovery.state ? recovery.state.message : null);
   return <LuxuryCard className={`amm-seller-review min-w-0 [overflow-wrap:anywhere] ${compact ? "p-[16px]" : "p-[20px] sm:p-[28px]"}`}>
     <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Our Town Properties · Seller options</p>
