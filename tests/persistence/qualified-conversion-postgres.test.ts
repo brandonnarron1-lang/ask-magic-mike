@@ -54,6 +54,16 @@ describe.skipIf(!opted)("qualified conversion actual SQL, synthetic only",()=>{
   expect(psql(`SELECT count(DISTINCT contact_id)||':'||count(*) FROM leads WHERE email=${literal(original.email)}`)).toBe("1:2");
   expect(psql(`SELECT count(*) FROM lead_notifications WHERE lead_id=${literal(saved.body.lead_id)}::uuid AND private_intake_snapshot->'submitted'->'seller_request'->>'option'='cash-review'`)).toBe("2");
  });
+ it("retains seller intent when v6 generation is disabled instead of losing the request context",async()=>{
+  vi.stubEnv("LEAD_ALERT_V6_ENABLED","false");
+  try {
+   const original=fixture();const saved=await submit(original);expect(saved.status).toBe(200);
+   expect((await localQuery.query("SELECT seller_request FROM leads WHERE id=$1::uuid",[saved.body.lead_id]))[0].seller_request).toEqual(seller);
+   expect((await submit(original)).body.lead_id).toBe(saved.body.lead_id);
+   expect((await submit({...original,seller_request:{...seller,representation:"represented"}})).status).toBe(409);
+   expect(psql("SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL")).toBe("0");
+  } finally {vi.stubEnv("LEAD_ALERT_V6_ENABLED","true");}
+ });
  it("rejects cash/as-is mismatch before writes; invalid shape rolls back SQL",async()=>{
   const before=psql("SELECT count(*) FROM leads");
   expect((await submit(fixture({lead_type:"seller"}))).status).toBe(400);

@@ -136,10 +136,12 @@ for (const width of [320, 390, 430, 768, 1440]) {
   });
 }
 
-test("clean seller and unknown option preserve legacy defaults; alias retains valid query", async ({ page }) => {
-  await page.goto("/sell"); await expect(page.getByLabel("Phone required", { exact: true })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveCount(0);
-  await page.goto("/sell?seller_option=guaranteed-offer"); await expect(page.getByLabel("Phone required", { exact: true })).toBeVisible();
+test("clean seller and unknown option use modern comparison without inventing an offer; alias retains valid query", async ({ page }) => {
+  await page.goto("/sell"); await expect(page.getByLabel("Name", { exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("compare");
+  await page.goto("/sell?seller_option=guaranteed-offer");
+  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("compare");
+  await expect(page.getByText("A review request is not an offer", { exact: false })).toBeVisible();
   await page.goto("/we-buy-houses?seller_option=guidance&utm_source=ourtownproperties&utm_medium=owned_media");
   await expect(page).toHaveURL(/\/sell\?seller_option=guidance/);
   await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("guidance");

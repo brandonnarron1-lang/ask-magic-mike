@@ -117,11 +117,12 @@ for (const viewport of viewports) {
       fullPage: false,
     });
     await page.getByLabel("Property address").fill("456 INTERNAL QA Street, Wilson, NC");
-    await page.getByLabel("Name optional").fill("INTERNAL QA DO NOT CONTACT");
-    await page.getByLabel("Phone required").fill("2525550101");
-    await page.getByLabel("Email optional").fill("seller-funnel-qa@example.com");
+    await page.getByLabel("Name", { exact: true }).fill("INTERNAL QA DO NOT CONTACT");
+    await page.getByLabel("Phone", { exact: true }).fill("2525550101");
+    await page.getByLabel("Email", { exact: true }).fill("seller-funnel-qa@example.test");
     await page.getByRole("checkbox").check();
-    await page.getByRole("button", { name: "Send Seller Details" }).click();
+    await page.getByRole("button", { name: "Review property request", exact: true }).click();
+    await page.getByRole("button", { name: "Send property review request", exact: true }).click();
     await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
     const sellerLead = capture.leads.at(-1) as JsonRecord;
     expect(sellerLead).not.toHaveProperty("condition");
@@ -133,7 +134,7 @@ for (const viewport of viewports) {
       eventStart,
       sellerSessionId,
       ["funnel_started", "contact_submitted", "consent_accepted", "thank_you_viewed"],
-      ["INTERNAL QA DO NOT CONTACT", "seller-funnel-qa@example.com", "2525550101", "456 INTERNAL QA Street"],
+      ["INTERNAL QA DO NOT CONTACT", "seller-funnel-qa@example.test", "2525550101", "456 INTERNAL QA Street"],
     );
     await expectBrowserConversion(page);
     await expectNoHorizontalOverflow(page);

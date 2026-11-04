@@ -236,23 +236,27 @@ test("Marked seller UI persists without consumer CTA; distinct ordinary seller H
   // guard, clear a test flag, inject a component/receipt or fabricate delivery.
   await owner.goto(`/sell?utm_source=${source}&utm_medium=owned_media&utm_campaign=amm_owned_demand_2026&utm_content=wordpress_we_buy_homes`);
   await owner.getByLabel("Property address", { exact: true }).fill("3 Synthetic Test Street, Wilson, NC");
-  await owner.getByLabel("Name optional", { exact: true }).fill("INTERNAL QA — DO NOT CONTACT — SYNTHETIC SELLER UI");
-  await owner.getByLabel("Phone required", { exact: true }).fill("+12025550198");
-  await owner.getByLabel("Email optional", { exact: true }).fill(qaEmail);
+  await expect(owner.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("compare");
+  await owner.getByLabel("Name", { exact: true }).fill("INTERNAL QA — DO NOT CONTACT — SYNTHETIC SELLER UI");
+  await owner.getByLabel("Phone", { exact: true }).fill("+12025550198");
+  await owner.getByLabel("Email", { exact: true }).fill(qaEmail);
   await owner.getByRole("combobox", { name: /Timeline \(optional\)/ }).selectOption(timelineOptions[1]);
   await owner.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
   await expect(owner.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
+  await owner.getByRole("button", { name: "Review property request", exact: true }).click();
+  await expect(owner.getByRole("region", { name: "Review your property request", exact: true })).toContainText("Compare listing with an as-is option");
   const [intake] = await Promise.all([
     owner.waitForResponse(response => new URL(response.url()).pathname === "/api/leads" && response.request().method() === "POST"),
-    owner.getByRole("button", { name: "Send Seller Details", exact: true }).click(),
+    owner.getByRole("button", { name: "Send property review request", exact: true }).click(),
   ]);
   const qaBody = await intake.json();
   expect(intake.status(), JSON.stringify(qaBody)).toBe(200);
-  expect(intake.request().postDataJSON()).toMatchObject({ funnel_type: "seller", lead_source_surface: "seller_page", email:qaEmail });
+  expect(intake.request().postDataJSON()).toMatchObject({ funnel_type: "seller", lead_source_surface: "seller_page", email:qaEmail,
+    seller_request:{version:1,option:"compare"} });
   expect(qaBody.session_id).toBe(intake.request().postDataJSON().idempotency_key);
-  expect((await sql("SELECT email,is_test,communication_suppressed FROM leads WHERE id=$1",[qaBody.lead_id]))[0])
-    .toMatchObject({email:qaEmail,is_test:true,communication_suppressed:true});
-  await expect(owner.locator("#seller-form-status")).toContainText("stored for review");
+  expect((await sql("SELECT email,is_test,communication_suppressed,seller_request FROM leads WHERE id=$1",[qaBody.lead_id]))[0])
+    .toMatchObject({email:qaEmail,is_test:true,communication_suppressed:true,seller_request:{version:1,option:"compare"}});
+  await expect(owner.locator("#seller-options-status")).toContainText("stored for review");
   await expect(owner.getByRole("button", { name: "Request a conversation", exact: true })).toHaveCount(0);
   expect((await sql("SELECT count(*)::int AS n FROM lead_appointments WHERE lead_id=$1",[qaBody.lead_id]))[0].n).toBe(0);
   // A separate ordinary synthetic record tests the real public appointment

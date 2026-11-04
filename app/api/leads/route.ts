@@ -472,7 +472,7 @@ async function insertLead(
     notificationMode: process.env.NODE_ENV === "test" ? "disabled" : notificationMode(),
     internalNotification: {
       templateVersion: launch ? LAUNCH_LEAD_ALERT_TEMPLATE_VERSION : LEAD_ALERT_TEMPLATE_VERSION,
-      ...(launch || payload.buyer_interest ? { requestContext: inquiryRequestContext(payload) } : {}),
+      ...(launch || payload.buyer_interest || payload.seller_request ? { requestContext: inquiryRequestContext(payload) } : {}),
       ...(launch ? { launchDraft: prepareLaunchAlertDraft({ payload, sessionId, receivedAt, sourceLabel: routing.sourceLabel }) } : {}),
       metadata: { source_label: routing.sourceLabel, intent_label: routing.intentLabel,
         score: score.score, score_grade: score.grade, is_test: payload.is_test === true,
