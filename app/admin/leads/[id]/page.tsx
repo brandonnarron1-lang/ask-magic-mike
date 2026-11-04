@@ -709,6 +709,12 @@ export default async function AdminLeadDetailPage({
                 </> : <p className="mt-2">A supervisor must directly assign and review this inquiry before any response. Inherited access remains read-only.</p>}
               </section> : null}
               {dossier ? <LeadQualificationPanel dossier={dossier} simulation={simulation}/> : null}
+              {lead.seller_request ? <section className="mt-5 rounded-xl border border-[#cda24a55] p-4 text-sm leading-6" aria-label="Seller review context">
+                <h2 className="font-semibold text-[#e2c06f]">Requested seller review · {lead.seller_request.option}</h2>
+                <p>Client-reported relationship: {lead.seller_request.relationship}. Representation: {lead.seller_request.representation}. Occupancy: {lead.seller_request.occupancy}.</p>
+                <p>Next: review the property, timing and current contact permission. Clarify unknowns before substantive advice. Existing representation requires appropriate agency/conflict review, not solicitation or an automatic reassignment.</p>
+                <p>No purchaser, funding, offer, contract or closing is established by this inquiry.</p>
+              </section> : null}
               {(["seller","cash_seller","investor_buyer"] as string[]).includes(leadSubtype(lead)) ? <Panel title="Property evidence (optional)"><LeadEvidenceWorkspace leadId={lead.id} kind={leadSubtype(lead) as "seller"|"cash_seller"|"investor_buyer"} allowed={canUpdateLead&&!lead.is_test&&!lead.communication_suppressed}/></Panel> : null}
               <Panel title="Lead state">
                 <div className="flex flex-wrap gap-2">

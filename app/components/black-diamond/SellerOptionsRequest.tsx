@@ -81,7 +81,8 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
     }
     const question = sellerOptionsQuestion(actual);
     setQa(/INTERNAL QA|DO NOT CONTACT/.test([actual.name, actual.address.acceptedText, actual.context].join(" ").toUpperCase()));
-    const payload = { funnel_type: "seller", lead_source_surface: surface, address: actual.address.acceptedText,
+    const payload = { funnel_type: "seller", lead_type: actual.option === "cash-review" ? "seller_cash_offer" : actual.option === "home-value" ? "home_value" : "seller",
+      seller_request: actual.sellerRequest, lead_source_surface: surface, address: actual.address.acceptedText,
       address_entry: actual.address, name: actual.name, email: actual.email, phone: actual.phone,
       condition: actual.condition || undefined, timeline: actual.timeline || undefined, question,
       consent: actual.consent, consent_email: actual.consent && Boolean(actual.email), consent_call: actual.consent && Boolean(actual.phone),
@@ -99,10 +100,10 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
   }
   const stateMessage = saved?.message || (recovery.restored ? "An earlier request has not been confirmed. Retain its reference and ask Our Town Properties to check it before starting another."
     : "message" in recovery.state ? recovery.state.message : null);
-  return <LuxuryCard className={`min-w-0 [overflow-wrap:anywhere] ${compact ? "p-4" : "p-5 sm:p-7"}`}>
+  return <LuxuryCard className={`amm-seller-review min-w-0 [overflow-wrap:anywhere] ${compact ? "p-[16px]" : "p-[20px] sm:p-[28px]"}`}>
     <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Our Town Properties · Seller options</p>
     <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">Explore your selling options.</h2>
-    <p className="mt-3 text-sm leading-6 text-[#d9ceb8]">Request a property review with Mike Eatmon. Compare the paths before deciding how to sell.</p>
+    <p className="mt-3 text-sm leading-6 text-[#d9ceb8]">Considering an as-is sale? Share your property and timing to explore a possible direct purchase or compare selling options. Our Town Properties, Inc. reviews the request before any offer or decision. A purchaser, funding, terms and closing date have not been established by this form.</p>
     <form noValidate onSubmit={submit} onInputCapture={recordEngagement} onChangeCapture={recordEngagement} onInput={edited} onChange={edited} className="mt-6" aria-describedby="seller-options-status">
       <fieldset disabled={recovery.locked} className="grid min-w-0 gap-4 sm:grid-cols-2">
         <legend className="sr-only">Property review request</legend>
@@ -117,6 +118,11 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
         <p id="seller-options-contact" className="text-sm leading-6 text-[#d9ceb8] sm:col-span-2">Provide at least one: email or phone. Permission to contact is optional.</p>
         <SelectField name="condition" label="Condition (optional)" defaultValue=""><option value="">Select condition</option>{conditionOptions.map(value => <option key={value}>{value}</option>)}</SelectField>
         <SelectField name="seller-timeline" label="Timeline (optional)" defaultValue=""><option value="">Select timeline</option>{timelineOptions.map(value => <option key={value}>{value}</option>)}</SelectField>
+        <details className="sm:col-span-2"><summary className="min-h-11 cursor-pointer py-3 text-sm text-[#e2c06f]">Optional property and representation context</summary><div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <SelectField name="relationship" label="Your relationship to the property" defaultValue="unknown"><option value="unknown">Unknown / prefer to discuss</option><option value="owner">Owner</option><option value="co-owner">Co-owner</option><option value="authorized-helper">Authorized helper</option></SelectField>
+          <SelectField name="representation" label="Existing representation" defaultValue="unknown"><option value="unknown">Unknown / prefer to discuss</option><option value="represented">Currently represented</option><option value="not-represented">Not currently represented</option></SelectField>
+          <SelectField name="occupancy" label="Occupancy" defaultValue="unknown"><option value="unknown">Unknown / prefer to discuss</option><option value="owner-occupied">Owner occupied</option><option value="tenant-occupied">Tenant occupied</option><option value="vacant">Vacant</option></SelectField>
+        </div></details>
         <TextAreaField name="seller-context" label="Additional context (optional)" maxLength={2000} rows={3} className="sm:col-span-2" />
         <div className="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
         <LeadConsentField />
@@ -125,6 +131,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
           <p>{SELLER_OPTIONS[review.option]}</p><p className="select-text">{review.address.acceptedText}</p>
           <p className="select-text">{review.name} · {review.email || "Email not provided"} · {review.phone || "Phone not provided"}</p>
           <p>{review.condition || "Condition not provided"} · {review.timeline || "Timeline not provided"}</p>
+          <p>Relationship: {review.sellerRequest.relationship} · Representation: {review.sellerRequest.representation} · Occupancy: {review.sellerRequest.occupancy}</p>
           {review.context ? <p className="whitespace-pre-wrap">{review.context}</p> : null}
           <p>{review.consent ? "Permission granted for the provided email/phone channels." : "Permission declined. This request can still be saved for review."}</p>
           <p>Address entered or confirmed by you; postal, ownership and property verification have not been performed.</p>

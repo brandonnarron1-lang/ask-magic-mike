@@ -8,6 +8,7 @@ import type { StalledLeadSignal } from "../../adminLeadLifecycle";
 import type { LeadSourceEvidence } from "../../leadSourceEvidence";
 import { normalizeAddressValue, type AddressValue } from "../../address/addressValue";
 import { normalizeBuyerInterest, type BuyerInterestV1 } from "../../buyerInterest";
+import { normalizeSellerRequest } from "../../sellerRequest";
 import {
   normalizeAppointment,
   normalizeTask,
@@ -65,6 +66,7 @@ export type AdminLeadView = {
   address: string | null;
   address_entry?: AddressValue | null;
   buyer_interest?: BuyerInterestV1 | null;
+  seller_request?: import("../../sellerRequest").SellerRequest | null;
   duplicate_of_lead_id?: string | null;
   /** Read ownership only; never an invented assignment on this inquiry. */
   inquiry_owner_agent_id?: string | null;
@@ -378,6 +380,7 @@ export function normalizeAdminLeadRow(row: Record<string, unknown>): AdminLeadVi
     address,
     address_entry: addressEntry,
     buyer_interest: buyerInterest,
+    seller_request: (() => { try { return row.seller_request ? normalizeSellerRequest(row.seller_request) : null; } catch { return null; } })(),
     duplicate_of_lead_id: text(row.duplicate_of_lead_id),
     inquiry_owner_agent_id: firstText(row.assigned_agent_id, row.inquiry_owner_agent_id),
     inquiry_owner_agent_name: text(row.inquiry_owner_agent_name),

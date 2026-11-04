@@ -56,7 +56,8 @@ describe("opt-in seller options without replacing accepted intake", () => {
       name: "INTERNAL QA — DO NOT CONTACT — SELLER OPTIONS", email: "seller-options@example.test", phone: "",
       consent: false, consent_email: false, consent_call: false,
       address_entry: { validation: "not_performed", confirmation: "manual" },
-      question: "Seller option requested: Consider an as-is/direct-purchase option." });
+      lead_type: "seller", seller_request: {version:1,option:"as-is",relationship:"unknown",representation:"unknown",occupancy:"unknown"},
+      question: "Seller option requested: Explore an as-is sale" });
     expect(screen.queryByRole("button", { name: /request.*appointment/i })).toBeNull();
   });
 
@@ -101,9 +102,9 @@ describe("opt-in seller options without replacing accepted intake", () => {
     expect(sessionStorage.getItem("amm-home-value-pending-v1") || "").not.toContain("seller-options@example.test");
   });
 
-  it("only explicit allowlisted URL configuration activates the variant", async () => {
+  it("uses modern compare as the safe plain/invalid default and preserves explicit goals", async () => {
     const legacy = await SellPage({ searchParams: Promise.resolve({ seller_option: "untrusted-claim" }) });
-    render(legacy); expect(screen.getByLabelText("Phone required")).toBeRequired(); cleanup();
+    render(legacy); expect(screen.getByRole("combobox", {name:"Selling goal"})).toHaveValue("compare"); cleanup();
     const options = await SellPage({ searchParams: Promise.resolve({ seller_option: "compare" }) });
     render(options); expect(screen.getByRole("combobox", { name: "Selling goal" })).toHaveValue("compare");
   });

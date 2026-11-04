@@ -73,6 +73,8 @@ export type NotificationRequest = {
   frozenFrom?: string;
   deliveryTimeoutMs?: number;
   intakeV6?: boolean;
+  /** Lead-independent internal report: strict transport without lead callback tags. */
+  operationalDigest?: boolean;
 };
 
 export type NotificationResult =

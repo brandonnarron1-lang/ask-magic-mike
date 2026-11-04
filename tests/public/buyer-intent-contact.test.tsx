@@ -27,6 +27,7 @@ function response(call: Call, status = 200, extra: Record<string, unknown> = {},
 }
 function transport(reply: (call: Call, index: number, init: RequestInit) => Promise<Response> | Response = call => response(call)) {
   const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+    if(url==="/api/address-suggestions" && !init?.method) return Promise.resolve(Response.json({enabled:false}));
     if (url === "/api/events") {
       ledger.push(JSON.parse(String(init?.body)));
       return Promise.resolve(new Response(null, { status: 202 }));
@@ -180,7 +181,7 @@ describe("buyer-family native review and durable receipt integrity (intercepted 
     transport(); render(<BuyerIntentSection />); fillBuyer();
     fireEvent.change(screen.getByLabelText("Property address (or provide a listing URL)"), { target: { value: "" } });
     fireEvent.change(screen.getByLabelText("Listing URL (or provide an address)"), { target: { value: "https://listing.example.test/home/17" } });
-    fireEvent.change(screen.getByLabelText("Unit or apartment (optional)"), { target: { value: "Unit 4" } });
+    fireEvent.change(screen.getByLabelText("Unit / apartment (if applicable)"), { target: { value: "Unit 4" } });
     fireEvent.change(screen.getByLabelText("Listing reference (optional)"), { target: { value: "SYNTHETIC-17" } });
     review(); send(); await screen.findByText("Your request is in.");
     expect(JSON.parse(calls[0].body).buyer_interest).toEqual({ version: 1, kind: "specific", properties: [{ listing_url: "https://listing.example.test/home/17", unit: "Unit 4", reference: "SYNTHETIC-17" }] });
@@ -344,7 +345,7 @@ describe("buyer-family native review and durable receipt integrity (intercepted 
     vi.useFakeTimers(); transport((call, index) => index === 1 ? response(call, 429, { code: "rate_limited" }, { "Retry-After": "2" }) : response(call));
     render(<BuyerIntentSection />); fillBuyer(); review(); send(); await act(async () => { await Promise.resolve(); });
     expect(screen.getByRole("button", { name: "Retry identical request" })).toBeDisabled();
-    expect(screen.getByRole("status")).toHaveTextContent("Wait 2 seconds");
+    expect(screen.getByText(/Wait 2 seconds/)).toBeVisible();
     await act(async () => { vi.advanceTimersByTime(2000); });
     fireEvent.click(screen.getByRole("button", { name: "Retry identical request" }));
     await act(async () => { await Promise.resolve(); });

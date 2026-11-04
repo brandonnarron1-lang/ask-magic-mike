@@ -1,6 +1,7 @@
 {
   "git": {
     "deploymentEnabled": {
+      "codex/qualified-lead-conversion-20261103": false,
       "codex/instagram-home-value-reserve-20261103": false,
       "codex/owned-social-publisher-20261101": false,
       "codex/owned-social-publication-state": false,
@@ -15,6 +16,10 @@
     }
   },
   "crons": [
+    {
+      "path": "/api/admin/operations/daily-digest",
+      "schedule": "0 12,13,14,15 * * *"
+    },
     {
       "path": "/api/admin/notifications/retry",
       "schedule": "* * * * *"

@@ -1,5 +1,6 @@
 import { normalizeBuyerInterest, type BuyerInterestV1 } from "../buyerInterest";
 import { isValidLeadEmail, isValidLeadPhone } from "../leadContactValidation";
+import { addressFromData, type AddressValue } from "../address/addressValue";
 
 export type BuyerFormSnapshot = {
   name: string; email: string; phone: string; consent: boolean;
@@ -30,7 +31,7 @@ export function isSafeListingReference(value: string) {
 }
 
 /** Read the native form at review AND confirmation, including eventless autofill. */
-export function readBuyerForm(data: FormData, preset: "buyer" | "renter" | "open_house", kind: "specific" | "search"): BuyerFormSnapshot {
+export function readBuyerForm(data: FormData, preset: "buyer" | "renter" | "open_house", kind: "specific" | "search", previousAddress?: AddressValue | null): BuyerFormSnapshot {
   const email = text(data, "buyer-email", 254);
   const phone = text(data, "buyer-phone", 40);
   if (!email && !phone) throw new IntakeReviewError("buyer-email", "Add an email or phone number so Mike can follow up.");
@@ -40,7 +41,12 @@ export function readBuyerForm(data: FormData, preset: "buyer" | "renter" | "open
   if (preset === "buyer" && name.length < 2) throw new IntakeReviewError("buyer-name", "Enter your name so Mike knows who requested the review.");
   let buyerInterest: BuyerInterestV1 | undefined;
   if (preset === "buyer" && kind === "specific") {
-    const address_text = text(data, "buyer-address", 500);
+    const enteredAddress = text(data, "buyer-address", 500);
+    const hasStructuredAddress = ["buyer-address_line1","buyer-address_city","buyer-address_region","buyer-address_postal"].some(key=>Boolean(data.get(key)));
+    // Shared address control owns one unit field, retaining the existing
+    // buyer-unit wire contract and detecting eventless edits after selection.
+    data.set("buyer-address_line2",String(data.get("buyer-unit")||""));
+    const address_text = hasStructuredAddress ? addressFromData(data, previousAddress, "buyer-", "buyer-address").acceptedText : enteredAddress;
     const listing_url = text(data, "buyer-listing-url", 2048);
     const unit = text(data, "buyer-unit", 100);
     const reference = text(data, "buyer-reference", 160);

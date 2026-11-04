@@ -152,6 +152,19 @@ unrelated queue content. Check for an in-flight run before cancellation.
 
 ## Verification and handoff
 
+For a future traffic/digest release, inspect the actual accepted reader before
+reusing the old event-grain definition. Root navigation ownership and optional
+first-party identity must not double-count legacy mounts or create lead sessions.
+Consented browser/visit estimates are not people; unknown coverage is not zero.
+Use the existing Distribution aggregate and its definitions, not a new tracker.
+Daily site reports need lead-independent delivery records: never fabricate a
+lead or borrow an assignment. Freeze period/recipient/sender/body, keep retry keys
+independent of template edits, and hold ambiguous SMTP/HTTP outcomes without
+replay. Inspect exact-source acceptance and activation separately; code presence
+does not mean a daily email is running. Remote Places allowance/budget alerts
+are not account-wide zero-spend proof. As-is intent does not mean cash review;
+retain the explicit request and do not invent a purchaser or closing promise.
+
 For elapsed acquisition reads, follow the existing
 `docs/OWNED_SOCIAL_OPERATIONS.md#read-only-measurement-contract` and the current
 private handoff's exact safe SQL. The installed report covers inquiries/delivery,

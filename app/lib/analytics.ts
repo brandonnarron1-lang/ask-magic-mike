@@ -11,6 +11,7 @@ import {
   safeRegisteredPublicAnalyticsDimension,
 } from "@/lib/analytics/privacy";
 import { publishExternalAnalyticsEvent } from "./externalAnalytics";
+import { publicTrafficEvidence } from "./client/publicTraffic";
 
 export type EventName = (typeof analyticsEvents)[number];
 
@@ -21,6 +22,7 @@ type TrackEventOptions = {
    * continue to receive the event name and privacy-allowlisted dimensions.
    */
   sessionId?: string | null;
+  trafficEventId?: string;
 };
 
 const UUID_PATTERN =
@@ -37,6 +39,8 @@ export function trackEvent(
   options: TrackEventOptions = {},
 ) {
   if (typeof window === "undefined") return;
+  const traffic = event === "page_view" || event === "intake_started"
+    ? publicTrafficEvidence(options.trafficEventId) : null;
 
   const safeProperties = safePublicAnalyticsProperties(event, {
     ...properties,
@@ -65,7 +69,8 @@ export function trackEvent(
   // A valid form/session UUID lets the server join funnel steps to the lead it
   // later stores. Invalid or absent identifiers fail closed to an unlinked
   // event rather than becoming an arbitrary analytics dimension.
-  if (!isBrowserAutomation() && !isCanonicalLedgerProtectedEvent(event)) {
+  if (!isBrowserAutomation() && !isCanonicalLedgerProtectedEvent(event) &&
+    (!(event === "page_view" || event === "intake_started") || traffic)) {
     const sessionId = options.sessionId && UUID_PATTERN.test(options.sessionId)
       ? options.sessionId
       : undefined;
@@ -76,6 +81,7 @@ export function trackEvent(
         event_name: event,
         event_category: "intake",
         session_id: sessionId,
+        ...(traffic ? { traffic } : {}),
         properties: safeProperties,
         attribution: {
           source: safeRegisteredPublicAnalyticsDimension("utm_source", attribution.source) ?? undefined,

@@ -5,6 +5,7 @@ import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 import { siteConfig } from "@/lib/site-config";
 import { ExternalAnalyticsConsentManager } from "./components/analytics/ExternalAnalyticsConsent";
 import { WebVitalsReporter } from "./components/experience/WebVitalsReporter";
+import { PublicTrafficTracker } from "./components/analytics/PublicTrafficTracker";
 import { resolveProductionGtmContainerId } from "./lib/googleTagConfig";
 import "./globals.css";
 
@@ -79,6 +80,7 @@ export default function RootLayout({
       <body className="antialiased">
         <Suspense fallback={null}>
           <ExternalAnalyticsConsentManager gtmContainerId={gtmContainerId} />
+          <PublicTrafficTracker />
         </Suspense>
         {process.env.VERCEL_ENV === "production" ? <WebVitalsReporter /> : null}
         {children}

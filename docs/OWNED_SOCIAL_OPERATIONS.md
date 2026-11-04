@@ -1,5 +1,93 @@
 # Owned social operations
 
+## Qualified conversion candidate (November3; NOT released by this heading)
+
+Accepted PR320 remains authoritative via the authenticated resolver. Preserve
+local documentation commit25ee16e2; the following is new candidate behavior and
+must not be treated as already activated.
+
+- Root PublicTrafficTracker owns one hydrated pathname view per document
+  navigation. Existing PageTracker mounts are inert compatibility markers.
+  Refresh counts; remount/StrictMode and query/hash-only changes do not.
+  Public paths are explicit, open-house IDs project to a template, staff/QA/
+  automation and unsupported routes are excluded. Widget/iframe traffic is separate.
+- Existing first-party events remain best-effort, asynchronous and cookieless
+  without optional identity. After the existing analytics grant, a per-tab visit
+  ID expires after30idle minutes and a first-party browser estimate after90days.
+  These do not create canonical sessions/contacts or identify exact people.
+  Blocked storage/denial preserves permissible unlinked counts. No fingerprint,
+  email matching, third-party ID export or historical reidentification.
+- Traffic v1 IDs bypass public property allowlists only through the strict
+  first-party evidence parser/repository. They never enter GTM or widget messages.
+  The added unique event index makes identical beacon identities idempotent.
+  Intake starts remain first native input per form mount, not distinct people.
+- Distribution retains its existing inquiry/report and adds read-only traffic
+  aggregates with full-cohort grant/RLS checks and bounded snapshot/timeouts.
+  Page/start event counts, consented visit/browser estimates, inquiries and
+  contacts are separate. Missing coverage/schema/storage is UNKNOWN, not zero.
+  Suppressed/test/spam/internal-QA inquiries remain excluded; contact-permission
+  refusal alone is not exclusion. No incompatible conversion rate is calculated.
+
+### Brandon daily digest candidate
+
+Lead-independent operational_daily_reports is necessary: lead notifications and
+messaging plans require a real lead/assignment and must not be abused for a site
+digest. The dedicated worker reuses the current email provider, no model call.
+It pins the second-operator mailbox to an explicitly bound, verified, non-banned
+administrator, never Mike/BCC or a browser-selected recipient. Sender/transport
+and deterministic body freeze with the period; retry keys exclude template version.
+
+The proposed Vercel checks are12/13/14/15UTC; local-hour admission gives8a.m.
+Eastern in both DST seasons and later recovery opportunities. Posting slots and
+the Instagram scheduler are unchanged. The previous Eastern calendar day is
+midnight-inclusive/midnight-exclusive (23/24/25hours). The activation-day report
+is partial when collection started mid-day. At most one provider attempt per
+invocation; seven-day catch-up horizon, maximum3safe attempts/period within23h
+of first attempt. Atomic claims precede sends; interrupted/ambiguous outcomes
+stay UNKNOWN without replay. SMTP uncertainty is not treated as a safe retry.
+Failed/unknown reports are visible in Distribution; the cron returns503 on
+intervention. Verified Resend delivery callbacks are read separately; accepted
+email is not personal receipt. No independent missed-run monitor is claimed.
+
+Activation requires exact-source release, reviewed unapplied migration/grants,
+current recipient binding, included delivery/cron capacity, collection-start
+and digest activation timestamps, then the enabled flag. The owner authorized
+one controlled Brandon acceptance email after those gates, not a Mike/customer
+test. No live write/send is authorized merely by committing this candidate.
+
+### Address and seller-review candidate
+
+Shared AddressEntry supports optional buyer-address naming without changing
+listing-URL-only/search-area serialization. Manual fallback, units, native
+autofill, review/frozen retries and signed selection are retained.
+Remote lookup remains OFF unless existing Google gates plus reviewed zero-spend
+admission are satisfied. Global durable100-or-lower/day and1000-or-lower/32-day
+attempt caps supplement—not replace—verified account-wide SKU limits. All
+attempts, failures, abandoned sessions and Details consume admission first.
+One Details attempt/session prevents blind candidate replay. Preview stays off.
+
+The official end-user-address exception applies only to the selected street
+address the end user could completely/accurately have supplied, solely for that
+transaction—not prediction lists, POIs, unrelated Details data or resale.
+No prediction catalogue is persisted; no coordinates are requested.
+Sources: [Places policies](https://developers.google.com/maps/documentation/places/web-service/policies),
+[session billing](https://developers.google.com/maps/documentation/places/web-service/session-pricing),
+[usage/billing](https://developers.google.com/maps/documentation/places/web-service/usage-and-billing).
+Free allowances/budget alerts are not hard spending ceilings. Account/API/key
+restrictions, actual usage/quotas, rights and coverage remain activation evidence.
+
+The modern seller form is the plain /sell default. Explicit cash-review selects
+seller_cash_offer; as-is remains seller, not an implied cash request.
+The versioned seller_request captures only self-reported option/relationship/
+representation/occupancy. Additive capture v5 delegates to the unmodified v4
+atomic consent/contact/outbox/idempotency chain, then enriches in that same
+transaction. No existing lead is backfilled or reassigned. Protected detail and
+alerts expose the exact request. Complete review facts do not establish capacity,
+purchase eligibility, agency, contact permission, a written offer or a closing.
+Purchaser/funding/territory/closing claims remain unsupported until actual records
+establish them. Instagram automation stays HomeValue-only with its existing
+profile promise; no cash creatives are admitted to that policy by this change.
+
 ## Resume from accepted evidence, not a dated setup snapshot
 
 PR320's [authenticated acceptance receipt](https://github.com/brandonnarron1-lang/ask-magic-mike/releases/tag/amm-production-acceptance/dpl_27FwMnE2FS3TyFYZJy18sUnq3whG)

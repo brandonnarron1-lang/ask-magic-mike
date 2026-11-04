@@ -1,6 +1,7 @@
 import { normalizeAddressValue, type AddressValue } from "./address/addressValue";
 import { normalizeBuyerInterest, type BuyerInterestV1 } from "./buyerInterest";
 import { publicAttributionSnapshot, publicAttributionUrl } from "./attributionPrivacy";
+import { normalizeSellerRequest, type SellerRequest } from "./sellerRequest";
 
 export type FunnelType =
   | "home_value"
@@ -75,6 +76,7 @@ export type LeadPayload = {
   address?: string;
   address_entry?: AddressValue;
   buyer_interest?: BuyerInterestV1;
+  seller_request?: SellerRequest;
   property_address?: string;
   name?: string;
   first_name?: string;
@@ -149,6 +151,7 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     funnel_type: funnelType,
     lead_source_surface: normalizeSurface(input.lead_source_surface, funnelType),
     lead_type: cleanOptional(input.lead_type),
+    ...(input.seller_request !== undefined ? { seller_request: normalizeSellerRequest(input.seller_request) } : {}),
     address: cleanOptional(input.address || input.property_address),
     ...(input.address_entry !== undefined ? { address_entry: normalizeAddressValue(input.address_entry) } : {}),
     ...(input.buyer_interest !== undefined && input.buyer_interest !== null

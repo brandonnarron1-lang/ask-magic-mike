@@ -18,6 +18,7 @@ export function leadSourceLabel(value?: string | null) {
 }
 
 export function leadRequestLabel(funnel?: string | null) {
+  if (funnel === "seller_cash_offer") return "Cash / direct-purchase review";
   const labels: Record<string, string> = { seller: "Home value request", home_value: "Home value request", buyer: "Buying a home", renter: "Rental-to-homeownership plan", open_house: "Open house inquiry", ask: "Real estate question", cash_seller: "Cash offer review", investor_buyer: "Investment inquiry" };
   return labels[funnel || ""] || "Real estate inquiry";
 }

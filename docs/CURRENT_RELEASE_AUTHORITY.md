@@ -1,5 +1,25 @@
 # Current Release Authority
 
+## Qualified conversion continuation — new candidate, not accepted Production
+
+The November3 authenticated resolver still accepts PR320 merge8076de45,
+treec34baef1, deploymentdpl_27FwMnE2FS3TyFYZJy18sUnq3whG (25/25).
+Local25ee16e2 is preserved as an ancestor. The new conversion branch adds
+traffic measurement, a Brandon-only digest, optional buyer address lookup UI
+and explicit seller-review intent. It is not PR320's consumed app/media scope.
+
+One additive migration is prepared, not applied: traffic event dedup index,
+seller_request column/validated v5 wrapper delegating unmodified v4, and a
+lead-independent operational digest table. New worker activation/configuration,
+exact-source release/protected acceptance and migration/grants require the
+current scoped release process. No new QA resource is provisioned merely to
+prepare this candidate. Google lookup and unsupported purchaser claims remain
+independently held; Instagram HomeValue operation is unchanged.
+
+See OWNER_APPROVAL_QUEUE.md and the focused private qualified-conversion packet
+for the final source seal, evidence, operations, cost gates and compatible
+rollback. This section is chronology, never an authenticated release receipt.
+
 Use `config/release-authority-policy.json` and authenticated
 `pnpm release:authority:resolve` for current decisions. Dated snapshots below
 do not replace that resolver or authorize replaying a consumed approval.

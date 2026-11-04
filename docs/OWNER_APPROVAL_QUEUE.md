@@ -1,5 +1,31 @@
 # Owner Approval Queue
 
+## Qualified conversion — prepare one exact-source release decision
+
+The attached November3 mandate authorizes implementation and intended Brandon
+daily operational email, including one controlled acceptance email after gates.
+It does not replay PR320 release/QA authority or establish Google entitlement,
+purchaser facts or consent to contact a consumer.
+
+Before effects, bind the final head/tree in the existing private packet and PR:
+one reviewed additive migration (ledger preflight, v5/role checks, no historical
+rewrite), same-tree application release, four core runtime bindings
+(collection start, digest operator ID, activation time, enabled flag), minimal
+8a.m.Eastern/catch-up cron and existing provider to the verified existing second
+operator only. No change to Mike/Brandon lead-alert recipients or configuration.
+Preview remains synthetic/outbound-disabled. New exact protected venue, if
+required, needs explicit current $0/six-hour lifecycle authority and usable
+secure handoff before its clock starts. No venue/automatic teardown job exists
+for this candidate yet.
+
+Independent holds: remote Google lookup needs actual account/SKU/quota/key/
+rights/coverage evidence plus bounded global admission; no free-tier inference.
+Purchaser/entity/funding/closing claims stay unsupported, not invented.
+Cash content is not admitted to Instagram's HomeValue-only policy. Existing
+WordPress, Facebook queue, TikTok UNKNOWN, allocation/SMS controls and settled
+NO FOLLOW-UP are preserved. The final packet distinguishes these from app/digest
+approval so they cannot stall safe seller capture or first-party reporting.
+
 Use `config/release-authority-policy.json` and authenticated
 `pnpm release:authority:resolve` for current release decisions. Dated approval
 entries do not replace exact-source authority or replay a consumed scope.

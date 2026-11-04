@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { parseTrafficEvidence } from "../../lib/trafficContract";
 import {
   checkRateLimit,
   LIMITS,
@@ -181,6 +182,14 @@ export async function POST(req: Request) {
     );
   }
   const body = parsed.value;
+  const trafficEvent = body.event_name === "page_view" || body.event_name === "intake_started";
+  const traffic = trafficEvent ? parseTrafficEvidence(body.traffic) : null;
+  if (traffic && !coarseAnalyticsUserAgent(req.headers.get("user-agent"))?.startsWith("browser/"))
+    return eventResponse(correlationId,{ok:true,persisted:false,excluded:"automation"},202);
+  if (trafficEvent && body.traffic !== undefined && !traffic)
+    return eventResponse(correlationId, { error: "Invalid traffic evidence.", code: "invalid_traffic" }, 400);
+  if (trafficEvent && /(?:^|;\s*)(?:__Secure-)?amm-lead-center[.]/.test(req.headers.get("cookie") || ""))
+    return eventResponse(correlationId, { ok: true, persisted: false, excluded: "operator" }, 202);
   if (typeof body.event_name !== "string" || !approvedEventNames.has(body.event_name)) {
     return eventResponse(
       correlationId,
@@ -229,6 +238,7 @@ export async function POST(req: Request) {
   const funnelSessionId = webVitalProperties ? null : publicEventSessionId(body.session_id);
   const persisted = await recordServerAnalyticsEvent({
     eventName: body.event_name,
+    ...(traffic ? { traffic } : {}),
     category: body.event_name === "web_vital_observed"
       ? "system"
       : body.event_name === "page_view" ? "session" : "intake",

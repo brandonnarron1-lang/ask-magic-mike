@@ -14,6 +14,7 @@ const session = "10000000-0000-4000-8000-000000000001";
 const otherSession = "10000000-0000-4000-8000-000000000002";
 const query = "100 Synthetic Fixture Road";
 const production = { VERCEL_ENV: "production", ADDRESS_LOOKUP_ENABLED: "true",
+  ADDRESS_ZERO_SPEND_ADMISSION_APPROVED:"true", ADDRESS_LOOKUP_DAILY_CALL_CAP:"50", ADDRESS_LOOKUP_MONTHLY_CALL_CAP:"500",
   ADDRESS_GOOGLE_CONTENT_USE_APPROVED: "true", GOOGLE_PLACES_API_KEY: "fictional-offline-key",
   ADDRESS_LOOKUP_SIGNING_SECRET: "fictional-offline-signing-secret-not-a-real-key" };
 const suggest = { operation: "suggest" as const, query, sessionToken: session };
@@ -45,7 +46,7 @@ describe("disabled-by-default provider and strict address-only contract", () => 
   it("requires every explicit gate and exposes only categorical capability", () => {
     expect(getAddressLookupCapability({})).toEqual({ enabled: false });
     expect(getAddressLookupCapability(production)).toEqual({ enabled: true });
-    for (const key of ["ADDRESS_LOOKUP_ENABLED", "ADDRESS_GOOGLE_CONTENT_USE_APPROVED", "GOOGLE_PLACES_API_KEY", "ADDRESS_LOOKUP_SIGNING_SECRET"]) {
+    for (const key of ["ADDRESS_LOOKUP_ENABLED", "ADDRESS_GOOGLE_CONTENT_USE_APPROVED", "ADDRESS_ZERO_SPEND_ADMISSION_APPROVED", "GOOGLE_PLACES_API_KEY", "ADDRESS_LOOKUP_SIGNING_SECRET"]) {
       expect(getAddressLookupCapability({ ...production, [key]: undefined }).enabled).toBe(false);
     }
     expect(getAddressLookupCapability({ ...production, ADDRESS_LOOKUP_ENABLED: "1" }).enabled).toBe(false);

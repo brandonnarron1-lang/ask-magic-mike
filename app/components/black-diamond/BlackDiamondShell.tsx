@@ -77,6 +77,7 @@ export function BlackDiamondShell() {
               </Link>
             ))}
           </div>
+          <p className="mt-5 max-w-2xl text-sm leading-6 text-[#d9ceb8]">Considering an as-is sale? <Link href="/sell?seller_option=cash-review" className="inline-flex min-h-11 items-center font-semibold text-[#e2c06f] underline">Request a cash-offer review</Link>. A review is not an offer or closing commitment.</p>
         </div>
       </section>
 
