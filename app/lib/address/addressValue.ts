@@ -75,9 +75,11 @@ export function normalizeAddressValue(value: unknown): AddressValue {
 }
 
 export function addressFromForm(form: HTMLFormElement, previous?: AddressValue | null): AddressValue {
-  const data = new FormData(form);
-  const text = (name: string) => String(data.get(name) ?? "");
-  const entered = text("address");
+  return addressFromData(new FormData(form), previous);
+}
+export function addressFromData(data: FormData, previous?: AddressValue | null, prefix = "", mainName = "address"): AddressValue {
+  const text = (name: string) => String(data.get(prefix + name) ?? "");
+  const entered = String(data.get(mainName) ?? "");
   let components: AddressComponents = {
     line1: text("address_line1"), line2: text("address_line2"), locality: text("address_city"),
     region: text("address_region"), postalCode: text("address_postal"), country: text("address_country"),

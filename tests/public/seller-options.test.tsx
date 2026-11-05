@@ -2,7 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SellerIntentSection } from "../../app/components/black-diamond/SellerIntentSection";
 import SellPage from "../../app/sell/page";
-import { PUBLIC_LEAD_SAVED_MESSAGE } from "../../app/lib/publicLeadReceipt";
+const SAVED_REVIEW = "Your request is stored for review. Your recorded contact choices still apply; no offer or appointment is confirmed.";
 
 const mode = vi.hoisted(() => ({ value: "live" }));
 vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => mode.value }));
@@ -50,13 +50,15 @@ describe("opt-in seller options without replacing accepted intake", () => {
     expect(calls).toHaveLength(0);
     expect(screen.getByRole("region", { name: "Review your property request" })).toHaveTextContent("101 Synthetic Fixture Road, Unit B");
     expect(screen.getByRole("region", { name: "Review your property request" })).toHaveTextContent("Permission declined");
-    send(); await screen.findByText(PUBLIC_LEAD_SAVED_MESSAGE);
+    send(); await screen.findByText(SAVED_REVIEW);
+    expect(screen.queryByText(/will follow up through the contact path/)).toBeNull();
     expect(calls).toHaveLength(1);
     expect(JSON.parse(calls[0].body)).toMatchObject({ funnel_type: "seller", lead_source_surface: "seller_page",
       name: "INTERNAL QA — DO NOT CONTACT — SELLER OPTIONS", email: "seller-options@example.test", phone: "",
       consent: false, consent_email: false, consent_call: false,
       address_entry: { validation: "not_performed", confirmation: "manual" },
-      question: "Seller option requested: Consider an as-is/direct-purchase option." });
+      lead_type: "seller", seller_request: {version:1,option:"as-is",relationship:"unknown",representation:"unknown",occupancy:"unknown"},
+      question: "Seller option requested: Explore an as-is sale" });
     expect(screen.queryByRole("button", { name: /request.*appointment/i })).toBeNull();
   });
 
@@ -72,7 +74,7 @@ describe("opt-in seller options without replacing accepted intake", () => {
     (screen.getByLabelText("Email") as HTMLInputElement).value = "changed@example.test";
     send(); expect(calls).toHaveLength(0);
     expect(screen.getByRole("region", { name: "Review your property request" })).toHaveTextContent("changed@example.test");
-    send(); await screen.findByText(PUBLIC_LEAD_SAVED_MESSAGE);
+    send(); await screen.findByText(SAVED_REVIEW);
     expect(JSON.parse(calls[0].body)).toMatchObject({ email: "changed@example.test",
       address: "102 Synthetic Fixture Lane, Suite 2, Wilson, NC 27893",
       address_entry: { components: { line2: "Suite 2", locality: "Wilson", postalCode: "27893" } } });
@@ -101,9 +103,9 @@ describe("opt-in seller options without replacing accepted intake", () => {
     expect(sessionStorage.getItem("amm-home-value-pending-v1") || "").not.toContain("seller-options@example.test");
   });
 
-  it("only explicit allowlisted URL configuration activates the variant", async () => {
+  it("uses modern compare as the safe plain/invalid default and preserves explicit goals", async () => {
     const legacy = await SellPage({ searchParams: Promise.resolve({ seller_option: "untrusted-claim" }) });
-    render(legacy); expect(screen.getByLabelText("Phone required")).toBeRequired(); cleanup();
+    render(legacy); expect(screen.getByRole("combobox", {name:"Selling goal"})).toHaveValue("compare"); cleanup();
     const options = await SellPage({ searchParams: Promise.resolve({ seller_option: "compare" }) });
     render(options); expect(screen.getByRole("combobox", { name: "Selling goal" })).toHaveValue("compare");
   });

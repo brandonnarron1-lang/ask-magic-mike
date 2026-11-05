@@ -90,6 +90,13 @@ function isInternalQaAttribution(value: unknown) {
   const record = value as Record<string, unknown>;
   return isQaTouch(record.first_touch) || isQaTouch(record.last_touch);
 }
+/** Shared known-QA exclusion, without granting third-party analytics or changing
+ * embedded-context eligibility. This is not an exhaustive bot/operator detector. */
+export function isKnownQaAnalyticsContext(search:string, storedAttribution:unknown, trafficClass:string|null) {
+  const source=normalized(new URLSearchParams(search).get("utm_source"));
+  return trafficClass==="internal_qa" || ["launch_qa","preview_qa"].includes(source) ||
+    isInternalQaSearch(search) || isInternalQaAttribution(storedAttribution);
+}
 
 function parseStoredAttribution(raw: string | null) {
   if (!raw || raw.length > 8_192) return null;

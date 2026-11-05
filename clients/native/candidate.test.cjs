@@ -9,7 +9,10 @@ const root = path.resolve(__dirname, "../..");
 const allowed = new Set([
   ...["contracts.ts", "localPlan.ts", "transport.ts"].map(file => path.join(__dirname, file)),
   ...["app/lib/groundedConciergeContract.ts", "app/lib/experienceContract.ts", "app/lib/consumerInterests.ts", "app/lib/buyerInterest.ts",
-    "app/lib/client/publicIntakeReview.ts", "app/lib/leadContactValidation.ts", "config/experience-contract.v1.json"].map(file => path.join(root, file)),
+    "app/lib/client/publicIntakeReview.ts", "app/lib/leadContactValidation.ts",
+    // Reviewed pure address value/serialization helper used by buyer review.
+    // No provider, server, storage or native package dependency is admitted.
+    "app/lib/address/addressValue.ts", "config/experience-contract.v1.json"].map(file => path.join(root, file)),
 ]);
 const modules = new Map();
 function load(file) {
@@ -32,6 +35,17 @@ function load(file) {
 const contracts = load(path.join(__dirname, "contracts.ts"));
 const local = load(path.join(__dirname, "localPlan.ts"));
 const { R2Client, readCurrentAnswer, readFeedback } = load(path.join(__dirname, "transport.ts"));
+test("shared buyer address helper stays pure and does not admit provider/server modules", () => {
+  const address = load(path.join(root, "app/lib/address/addressValue.ts"));
+  const data = new FormData();
+  data.set("buyer-address", "101 Synthetic Fixture Road");
+  data.set("buyer-address_line1", "101 Synthetic Fixture Road");
+  data.set("buyer-address_line2", "Apt 4");
+  const value = address.addressFromData(data, null, "buyer-", "buyer-address");
+  assert.equal(value.components.line2, "Apt 4");
+  assert.equal(value.validation, "not_performed");
+  assert.throws(() => load(path.join(root, "app/lib/address/addressProvider.ts")), /No unreviewed\/server module/);
+});
 const now = Date.parse("2026-10-19T12:00:00Z");
 const answerId = "11111111-1111-4111-8111-111111111111";
 const requestId = "22222222-2222-4222-8222-222222222222";

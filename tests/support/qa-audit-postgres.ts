@@ -163,6 +163,7 @@ export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: bo
   const omitted = new Set(excluded);
   if (!includeRepair) for (const file of [migration, reliabilityMigration, addressCaptureMigration]) omitted.add(file);
   const predecessors: Readonly<Record<string, readonly string[]>> = {
+    "20261103233000_traffic_daily_digest_seller_review.sql": [launchIntakeMigration],
     [launchIntakeMigration]: [addressCaptureMigration],
     "20261018163000_reviewed_handoff_operator.sql": [launchIntakeMigration, "20261017220000_bounded_intelligence_workers.sql"],
     "20261018180000_grounded_source_lifecycle.sql": ["20261018163000_reviewed_handoff_operator.sql", "20261017180000_consumer_saved_workspace.sql"],

@@ -79,7 +79,7 @@ function configuration(env: Environment, explicitlyMocked = false) {
     !env.VERCEL && !env.VERCEL_URL && !env.PREVIEW_URL;
   const secret = env.ADDRESS_LOOKUP_SIGNING_SECRET ?? "";
   return (production || localMock) && env.ADDRESS_LOOKUP_ENABLED === "true" &&
-    env.ADDRESS_GOOGLE_CONTENT_USE_APPROVED === "true" &&
+    env.ADDRESS_GOOGLE_CONTENT_USE_APPROVED === "true" && env.ADDRESS_ZERO_SPEND_ADMISSION_APPROVED === "true" &&
     Boolean(env.GOOGLE_PLACES_API_KEY?.trim()) && secret.trim().length >= 32
     ? { key: env.GOOGLE_PLACES_API_KEY!, secret } : null;
 }

@@ -13,6 +13,7 @@ import {
 } from "@/lib/analytics/privacy";
 
 export type ServerAnalyticsEvent = {
+  traffic?: import("./trafficContract").TrafficEvidence;
   eventName: string;
   category?: string;
   sessionId?: string | null;
@@ -37,6 +38,7 @@ export {
 export async function recordServerAnalyticsEvent(event: ServerAnalyticsEvent) {
   return recordNeonAnalyticsEvent({
     eventName: event.eventName,
+    traffic: event.traffic,
     eventCategory: event.category,
     sessionId: event.sessionId,
     funnelSessionId: event.funnelSessionId,

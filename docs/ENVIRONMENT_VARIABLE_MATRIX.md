@@ -19,6 +19,9 @@ and scope, never values.
 | Customer channels | `CUSTOMER_EMAIL_ENABLED`, `CUSTOMER_SMS_ENABLED` | server | separately approved acknowledgments |
 | Legacy compatibility | `ALLOW_LEGACY_SUPABASE_FALLBACK`, `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY` | non-Production only | SUPERSEDED; forbidden as a Production fallback |
 | Optional address lookup candidate | `ADDRESS_LOOKUP_ENABLED`, `ADDRESS_GOOGLE_CONTENT_USE_APPROVED`, `GOOGLE_PLACES_API_KEY`, `ADDRESS_LOOKUP_SIGNING_SECRET` | server only; absent/false by default, never enabled in Preview | separately approved Places REST New lookup; manual entry requires none of these. Activation is not part of review publication. |
+| Address cost admission candidate | `ADDRESS_ZERO_SPEND_ADMISSION_APPROVED`, `ADDRESS_LOOKUP_DAILY_CALL_CAP`, `ADDRESS_LOOKUP_MONTHLY_CALL_CAP` | server only, held until current account-wide evidence; caps1–100/day and day–1000/32days | durable shared pre-dispatch limits include errors/abandonment; not a provider/account billing ceiling |
+| Daily operator digest candidate | `OPERATOR_DAILY_DIGEST_USER_ID`, `OPERATOR_DAILY_DIGEST_ACTIVATED_AT`, `OPERATOR_DAILY_DIGEST_ENABLED` | server only; disabled/absent until reviewed activation | pins verified administrator to existing second-operator mailbox, no Mike fallback/BCC; operational delivery table not a lead notification |
+| Traffic coverage candidate | `PUBLIC_TRAFFIC_COLLECTION_STARTED_AT` | server UTC activation timestamp, not a backdated claim | controls partial/complete measurement labels; optional browser storage still requires the existing analytics grant |
 
 Production and Preview must use different Neon branches/credentials. Preview
 mutation stays fail-closed unless `DATABASE_ENV=preview`, Vercel reports Preview,

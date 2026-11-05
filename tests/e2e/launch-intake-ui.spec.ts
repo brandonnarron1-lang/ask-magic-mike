@@ -107,10 +107,11 @@ test("opt-in seller goals retain native address/contact review and one frozen re
   await expect(review).toContainText("102 Synthetic Fixture Road, Unit B, Wilson, NC 27893");
   await expect(review).toContainText("Permission declined");
   await page.getByRole("button", { name: "Send property review request", exact: true }).click();
-  await expect(page.getByText("Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Your request is stored for review. Your recorded contact choices still apply; no offer or appointment is confirmed.", { exact: true })).toBeVisible();
   expect(capture.attempts).toHaveLength(1);
   expect(capture.attempts[0].payload).toMatchObject({ funnel_type: "seller", phone: "", email: EMAIL, consent: false,
-    question: "Seller option requested: Compare listing with an as-is option.",
+    question: "Seller option requested: Compare listing with an as-is option",
+    seller_request: { version: 1, option: "compare" },
     address_entry: { validation: "not_performed", components: { line2: "Unit B", locality: "Wilson" } },
     attribution: { source: "ourtownproperties", medium: "owned_media", content: "wordpress_we_buy_homes" } });
   expect(capture.appointmentBodies).toHaveLength(0);
@@ -136,10 +137,12 @@ for (const width of [320, 390, 430, 768, 1440]) {
   });
 }
 
-test("clean seller and unknown option preserve legacy defaults; alias retains valid query", async ({ page }) => {
-  await page.goto("/sell"); await expect(page.getByLabel("Phone required", { exact: true })).toBeVisible();
-  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveCount(0);
-  await page.goto("/sell?seller_option=guaranteed-offer"); await expect(page.getByLabel("Phone required", { exact: true })).toBeVisible();
+test("clean seller and unknown option use modern comparison without inventing an offer; alias retains valid query", async ({ page }) => {
+  await page.goto("/sell"); await expect(page.getByLabel("Name", { exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("compare");
+  await page.goto("/sell?seller_option=guaranteed-offer");
+  await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("compare");
+  await expect(page.getByText("A review request is not an offer", { exact: false })).toBeVisible();
   await page.goto("/we-buy-houses?seller_option=guidance&utm_source=ourtownproperties&utm_medium=owned_media");
   await expect(page).toHaveURL(/\/sell\?seller_option=guidance/);
   await expect(page.getByRole("combobox", { name: "Selling goal", exact: true })).toHaveValue("guidance");
@@ -168,7 +171,8 @@ test("rapid native typing, idle and touch-390 specific property retain a reviewe
 test("URL-only property, unit and reference remain unverified references", async ({ page }) => {
   const capture = captures.get(page)!; await page.goto("/buy"); await buyer(page);
   await page.getByLabel("Listing URL (or provide an address)").fill("https://listing.example.test/17");
-  await page.getByLabel("Unit or apartment (optional)").fill("Unit 4");
+  await page.getByRole("button", { name: "Enter / edit address manually", exact: true }).click();
+  await page.getByLabel("Unit / apartment (if applicable)", { exact: true }).fill("Unit 4");
   await page.getByLabel("Listing reference (optional)").fill("SYNTHETIC-17");
   await review(page); await expect(page.getByText("Listing URL: https://listing.example.test/17")).toBeVisible(); await submit(page);
   expect(capture.attempts[0].payload.buyer_interest).toEqual({ version: 1, kind: "specific", properties: [{ listing_url: "https://listing.example.test/17", unit: "Unit 4", reference: "SYNTHETIC-17" }] });

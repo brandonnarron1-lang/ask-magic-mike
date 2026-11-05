@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { trafficProperties, type TrafficEvidence } from "../../../../app/lib/trafficContract";
 import {
   coarseAnalyticsUserAgent,
   safeAnalyticsDimension,
@@ -26,6 +27,7 @@ type NeonQuery = {
 };
 
 export type AnalyticsEventWrite = {
+  traffic?: TrafficEvidence;
   eventName: string;
   eventCategory?: string | null;
   sessionId?: string | null;
@@ -60,6 +62,7 @@ export class NeonAnalyticsEventRepository {
 
     const sessionId = validUuid(event.sessionId);
     const properties = safeAnalyticsProperties(event.properties);
+    if (event.traffic) Object.assign(properties, trafficProperties(event.traffic));
     const funnelSessionId = validUuid(event.funnelSessionId);
     if (funnelSessionId) properties.funnel_session_id = funnelSessionId;
     const utmSource = safeAnalyticsDimension(event.utmSource);
@@ -89,7 +92,7 @@ export class NeonAnalyticsEventRepository {
        ) VALUES (
          $1::uuid, $2::uuid, $3::uuid, $4::text, $5::text, $6::jsonb,
          $7::text, $8::text, $9::text, $10::text
-       )`,
+       ) ON CONFLICT DO NOTHING`,
       params,
     );
     return true;
@@ -114,7 +117,7 @@ export async function recordNeonAnalyticsEvent(
   } catch (error) {
     console.error("[analytics] canonical event write failed", {
       eventName: event.eventName,
-      error: error instanceof Error ? error.message : "unknown_error",
+      error: error instanceof Error && ["AbortError","TimeoutError"].includes(error.name) ? error.name : "event_storage_unavailable",
     });
     return false;
   }

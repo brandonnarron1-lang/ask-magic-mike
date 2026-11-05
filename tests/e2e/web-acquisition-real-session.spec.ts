@@ -130,7 +130,7 @@ test("sentinel: ordinary seller review creates one inquiry and two unsent v6 ope
   const response = page.waitForResponse(r => new URL(r.url()).pathname === "/api/leads" && r.request().method() === "POST");
   await page.getByRole("button", { name: "Send property review request", exact: true }).click();
   expect((await response).status()).toBe(200);
-  await expect(page.getByText("Your request is stored for review. Mike or the approved team will follow up through the contact path you provided.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Your request is stored for review. Your recorded contact choices still apply; no offer or appointment is confirmed.", { exact: true })).toBeVisible();
   await assertEnvelope("web-ordinary-seller@example.test", false);
   expect(await counts()).toEqual({ ...before, leads: before.leads + 1, envelopes: before.envelopes + 2 });
   await page.screenshot({ path: path.join(output, "seller-confirmation-390.png"), fullPage: true }); expect(errors).toEqual([]);

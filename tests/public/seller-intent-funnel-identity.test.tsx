@@ -355,7 +355,7 @@ describe("seller funnel identity integrity", () => {
       expect(screen.getByLabelText("Name", { exact: true })).toHaveValue(NAME);
       const retry = screen.getByRole("button", { name: "Retry identical request" });
       if (storageDenied) expect(screen.getByText(/cannot retain the reference across a reload/)).toBeVisible();
-      fireEvent.click(retry); await screen.findByText(PUBLIC_LEAD_SAVED_MESSAGE);
+      fireEvent.click(retry); await screen.findByText("Your request is stored for review. Your recorded contact choices still apply; no offer or appointment is confirmed.");
       expect(leadCalls).toHaveLength(2); expect(leadCalls[1]).toEqual(leadCalls[0]);
       expect(readPendingHomeValueRequest()).toBeNull();
       expect(screen.getByRole("tab", { name: "Buying Help" })).toBeEnabled();

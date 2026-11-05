@@ -52,6 +52,21 @@ export async function POST(request: Request) {
       const seconds = Math.max(1, Math.min(60, Math.ceil((limit.resetAt - Date.now()) / 1_000)));
       return respond({ state: "rate_limited" }, 429, { "Retry-After": String(seconds) });
     }
+    // Shared durable, app-wide admission, not a per-IP allowance. Each suggest
+    // or Details attempt consumes capacity before dispatch, including failures
+    // and abandonment. This is additional to verified account-wide SKU quotas;
+    // it is NOT evidence that a provider free tier cannot charge.
+    const daily=Number(runtimeEnv.ADDRESS_LOOKUP_DAILY_CALL_CAP), monthly=Number(runtimeEnv.ADDRESS_LOOKUP_MONTHLY_CALL_CAP);
+    if (!Number.isSafeInteger(daily) || daily<1 || daily>100 || !Number.isSafeInteger(monthly) || monthly<daily || monthly>1000)
+      return respond({state:"unavailable",code:"cost_admission_unverified"},503);
+    for (const [key,cap,window] of [["address-all-daily",daily,86400000],["address-all-monthly",monthly,32*86400000]] as const) {
+      const admission=await checkRateLimit(key,cap,window,"addressLookup");
+      if (!admission.durable || !admission.allowed) return respond({state:"rate_limited",code:"cost_capacity_held"},429,{"Retry-After":"3600"});
+    }
+    if (input.operation==="resolve") {
+      const claim=await checkRateLimit("address-resolve:"+input.sessionToken,1,ADDRESS_LOOKUP_LIMITS.candidateTtlMs,"addressLookup");
+      if (!claim.durable || !claim.allowed) return respond({state:"unavailable",code:"lookup_session_already_used"},409);
+    }
     const provider = createAddressProvider({ signal: request.signal });
     const result = input.operation === "suggest" ? await provider.suggest(input) : await provider.resolve(input);
     return respond(result, result.state === "unavailable" ? 503 : result.state === "rate_limited" ? 429 : 200,

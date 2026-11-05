@@ -6,6 +6,7 @@ import {
 } from "./leadPayload";
 import { normalizeAddressValue } from "./address/addressValue";
 import { normalizeBuyerInterest } from "./buyerInterest";
+import { normalizeSellerRequest } from "./sellerRequest";
 
 export const MAX_PUBLIC_LEAD_BODY_BYTES = 65_536;
 
@@ -202,6 +203,13 @@ export function validateRawPublicLeadInput(
         return { code: "invalid_address_entry", message: "Address fields do not match. Review your entry." };
       }
     } catch { return { code: "invalid_address_entry", message: "Invalid address details. Review your entry." }; }
+  }
+  if (input.seller_request !== undefined) {
+    try {
+      const request = normalizeSellerRequest(input.seller_request);
+      const expected = request.option === "cash-review" ? "seller_cash_offer" : request.option === "home-value" ? "home_value" : "seller";
+      if (input.funnel_type !== "seller" || input.lead_type !== expected) throw new Error("mismatch");
+    } catch { return { code: "invalid_seller_request", message: "Review the requested seller service." }; }
   }
   for (const field of RAW_STRING_FIELDS) {
     const value = input[field];

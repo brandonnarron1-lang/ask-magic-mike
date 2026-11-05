@@ -53,6 +53,9 @@ import { NativePublicationHandoff } from "./NativePublicationHandoff";
 import { OpenHouseQrPacketBuilder } from "./OpenHouseQrPacketBuilder";
 import { recordOwnedDemandPublicationProofAction } from "./actions";
 import { AcquisitionReport } from "./AcquisitionReport";
+import { TrafficSummary } from "../../components/admin/TrafficSummary";
+import { loadTrafficReport } from "../../lib/persistence/neonTrafficReport";
+import { DailyDigestStatus,loadDailyDigestStatus } from "../../components/admin/DailyDigestStatus";
 import { parseAcquisitionWindow } from "../../lib/growth/acquisition-window";
 import { loadAcquisitionReport } from "../../lib/persistence/neonAcquisitionReport";
 
@@ -896,7 +899,11 @@ export default async function DistributionPage({
   const acquisitionNow = new Date();
   const acquisitionFilters = { window: query?.acq_window, placement: query?.acq_placement, from: query?.acq_from, to: query?.acq_to };
   const acquisitionWindow = parseAcquisitionWindow(acquisitionFilters, ledger, acquisitionNow);
-  const acquisition = acquisitionWindow.ok ? await loadAcquisitionReport(acquisitionWindow.value, principal) : null;
+  const [acquisition,traffic,digestStatus]=await Promise.all([
+    acquisitionWindow.ok ? loadAcquisitionReport(acquisitionWindow.value, principal) : null,
+    acquisitionWindow.ok ? loadTrafficReport(acquisitionWindow.value.from, acquisitionWindow.value.to, principal) : null,
+    loadDailyDigestStatus(principal),
+  ]);
   const measurement = assessOwnedDemandMeasurement(growth);
   const wordpressReadiness = wordpressChangeSets.map(
     toOwnedDemandPlacementReadiness,
@@ -953,6 +960,8 @@ export default async function DistributionPage({
         </header>
 
         <AcquisitionReport report={acquisition} error={acquisitionWindow.ok ? undefined : acquisitionWindow.error} filters={acquisitionFilters} ledger={ledger} now={acquisitionNow} />
+        {traffic ? <TrafficSummary report={traffic}/> : null}
+        <DailyDigestStatus message={digestStatus}/>
 
         {canManage ? <FortnightReviewQueue /> : null}
 

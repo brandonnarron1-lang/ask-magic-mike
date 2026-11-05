@@ -11,7 +11,7 @@ type LeadConsentFieldProps = {
 export function LeadConsentField({ checked, onChange, required = false, inputRef }: LeadConsentFieldProps) {
   return (
     <div className="amm-consent-surface rounded-md border border-white/15 bg-black/30 p-4 sm:col-span-2">
-      <label className="flex cursor-pointer items-start gap-3 text-[.9375rem] leading-6 text-[#e4dac8]">
+      <label className="flex flex-wrap cursor-pointer items-start gap-3 text-[.9375rem] leading-6 text-[#e4dac8]">
         <input
           ref={inputRef}
           type="checkbox"
@@ -22,7 +22,7 @@ export function LeadConsentField({ checked, onChange, required = false, inputRef
           required={required}
           className="mt-0.5 h-5 w-5 shrink-0 accent-[#cda24a]"
         />
-        <span>
+        <span className="min-w-[min(100%,200px)] flex-1">
           {LEAD_CONSENT_LANGUAGE_TEXT}
           <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.12em] text-[#b7aa94]">
             Consent language version: {LEAD_CONSENT_LANGUAGE_VERSION}{required ? " · Required" : ""}

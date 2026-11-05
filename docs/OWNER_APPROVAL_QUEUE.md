@@ -1,5 +1,53 @@
 # Owner Approval Queue
 
+## November4 PR321 demonstrated migration correction — new source boundary
+
+The owner's exact PR321/one-migration/four-binding/digest authorization was
+received; do not ask for that same scope again. Protected acceptance completed
+on its frozen tree, and its one synthetic QA venue was disconnected, revoked,
+deleted from active provider state and its cleanup task removed. Normal Neon
+recovery retention is not an immediate physical-purge claim.
+
+Production refused the new report ledger's inherited DELETE privilege and the
+cutover transaction rolled back. No migration ledger row, v5, seller column or
+report table committed. Existing owner defaults remain unchanged. The bounded
+follow-up `codex/pr321-report-grants-20261104` explicitly revokes this new table's
+service-role grants before applying SELECT/INSERT/UPDATE, with a real SQL
+regression that reproduces the prior failure. It preserves the original PR321
+source and requires a newly sealed head/tree/migration hash, normal gates and
+an exact changed-source decision. No approval transfers silently to new bytes.
+
+The original private release packet records the correction, rollback proof,
+current tests and any missing protected venue authority. Email-plan/quota access
+is an independent digest-enablement dependency, not a reason to weaken grants
+or send a forced acceptance email. Runtime bindings/digest remain unactivated.
+
+## Qualified conversion — prepare one exact-source release decision
+
+The attached November3 mandate authorizes implementation and intended Brandon
+daily operational email, including one controlled acceptance email after gates.
+It does not replay PR320 release/QA authority or establish Google entitlement,
+purchaser facts or consent to contact a consumer.
+
+Before effects, bind the final head/tree in the existing private packet and PR:
+one reviewed additive migration (ledger preflight, v5/role checks, no historical
+rewrite), same-tree application release, four core runtime bindings
+(collection start, digest operator ID, activation time, enabled flag), minimal
+8a.m.Eastern/catch-up cron and existing provider to the verified existing second
+operator only. No change to Mike/Brandon lead-alert recipients or configuration.
+Preview remains synthetic/outbound-disabled. New exact protected venue, if
+required, needs explicit current $0/six-hour lifecycle authority and usable
+secure handoff before its clock starts. No venue/automatic teardown job exists
+for this candidate yet.
+
+Independent holds: remote Google lookup needs actual account/SKU/quota/key/
+rights/coverage evidence plus bounded global admission; no free-tier inference.
+Purchaser/entity/funding/closing claims stay unsupported, not invented.
+Cash content is not admitted to Instagram's HomeValue-only policy. Existing
+WordPress, Facebook queue, TikTok UNKNOWN, allocation/SMS controls and settled
+NO FOLLOW-UP are preserved. The final packet distinguishes these from app/digest
+approval so they cannot stall safe seller capture or first-party reporting.
+
 Use `config/release-authority-policy.json` and authenticated
 `pnpm release:authority:resolve` for current release decisions. Dated approval
 entries do not replace exact-source authority or replay a consumed scope.

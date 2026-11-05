@@ -1,6 +1,148 @@
 # Owned social operations
 
-## Current operating checkpoint — November3, 2026
+## Qualified conversion candidate (November3; NOT released by this heading)
+
+Accepted PR320 remains authoritative via the authenticated resolver. Preserve
+local documentation commit25ee16e2; the following is new candidate behavior and
+must not be treated as already activated.
+
+- Root PublicTrafficTracker owns one hydrated pathname view per document
+  navigation. Existing PageTracker mounts are inert compatibility markers.
+  Refresh counts; remount/StrictMode and query/hash-only changes do not.
+  Public paths are explicit, open-house IDs project to a template, staff/QA/
+  automation and unsupported routes are excluded. Widget/iframe traffic is separate.
+- Existing first-party events remain best-effort, asynchronous and cookieless
+  without optional identity. After the existing analytics grant, a per-tab visit
+  ID expires after30idle minutes and a first-party browser estimate after90days.
+  These do not create canonical sessions/contacts or identify exact people.
+  Blocked storage/denial preserves permissible unlinked counts. No fingerprint,
+  email matching, third-party ID export or historical reidentification.
+- Traffic v1 IDs bypass public property allowlists only through the strict
+  first-party evidence parser/repository. They never enter GTM or widget messages.
+  The added unique event index makes identical beacon identities idempotent.
+  Intake starts remain first native input per form mount, not distinct people.
+- Distribution retains its existing inquiry/report and adds read-only traffic
+  aggregates with full-cohort grant/RLS checks and bounded snapshot/timeouts.
+  Page/start event counts, consented visit/browser estimates, inquiries and
+  contacts are separate. Missing coverage/schema/storage is UNKNOWN, not zero.
+  Suppressed/test/spam/internal-QA inquiries remain excluded; contact-permission
+  refusal alone is not exclusion. No incompatible conversion rate is calculated.
+
+### Brandon daily digest candidate
+
+Lead-independent operational_daily_reports is necessary: lead notifications and
+messaging plans require a real lead/assignment and must not be abused for a site
+digest. The dedicated worker reuses the current email provider, no model call.
+It pins the second-operator mailbox to an explicitly bound, verified, non-banned
+administrator, never Mike/BCC or a browser-selected recipient. Sender/transport
+and deterministic body freeze with the period; retry keys exclude template version.
+
+The proposed Vercel checks are12/13/14/15UTC; local-hour admission gives8a.m.
+Eastern in both DST seasons and later recovery opportunities. Posting slots and
+the Instagram scheduler are unchanged. The previous Eastern calendar day is
+midnight-inclusive/midnight-exclusive (23/24/25hours). The activation-day report
+is partial when collection started mid-day. At most one provider attempt per
+invocation; seven-day catch-up horizon, maximum3safe attempts/period within23h
+of first attempt. Atomic claims precede sends; interrupted/ambiguous outcomes
+stay UNKNOWN without replay. SMTP uncertainty is not treated as a safe retry.
+Failed/unknown reports are visible in Distribution; the cron returns503 on
+intervention. Verified Resend delivery callbacks are read separately; accepted
+email is not personal receipt. No independent missed-run monitor is claimed.
+
+Activation requires exact-source release, reviewed unapplied migration/grants,
+current recipient binding, included delivery/cron capacity, collection-start
+and digest activation timestamps, then the enabled flag. The owner authorized
+one controlled Brandon acceptance email after those gates, not a Mike/customer
+test. No live write/send is authorized merely by committing this candidate.
+
+### Address and seller-review candidate
+
+Shared AddressEntry supports optional buyer-address naming without changing
+listing-URL-only/search-area serialization. Manual fallback, units, native
+autofill, review/frozen retries and signed selection are retained.
+Remote lookup remains OFF unless existing Google gates plus reviewed zero-spend
+admission are satisfied. Global durable100-or-lower/day and1000-or-lower/32-day
+attempt caps supplement—not replace—verified account-wide SKU limits. All
+attempts, failures, abandoned sessions and Details consume admission first.
+One Details attempt/session prevents blind candidate replay. Preview stays off.
+
+The official end-user-address exception applies only to the selected street
+address the end user could completely/accurately have supplied, solely for that
+transaction—not prediction lists, POIs, unrelated Details data or resale.
+No prediction catalogue is persisted; no coordinates are requested.
+Sources: [Places policies](https://developers.google.com/maps/documentation/places/web-service/policies),
+[session billing](https://developers.google.com/maps/documentation/places/web-service/session-pricing),
+[usage/billing](https://developers.google.com/maps/documentation/places/web-service/usage-and-billing).
+Free allowances/budget alerts are not hard spending ceilings. Account/API/key
+restrictions, actual usage/quotas, rights and coverage remain activation evidence.
+
+The modern seller form is the plain /sell default. Explicit cash-review selects
+seller_cash_offer; as-is remains seller, not an implied cash request.
+The versioned seller_request captures only self-reported option/relationship/
+representation/occupancy. Additive capture v5 delegates to the unmodified v4
+atomic consent/contact/outbox/idempotency chain, then enriches in that same
+transaction. No existing lead is backfilled or reassigned. Protected detail and
+alerts expose the exact request. Complete review facts do not establish capacity,
+purchase eligibility, agency, contact permission, a written offer or a closing.
+Purchaser/funding/territory/closing claims remain unsupported until actual records
+establish them. Instagram automation stays HomeValue-only with its existing
+profile promise; no cash creatives are admitted to that policy by this change.
+
+## Resume from accepted evidence, not a dated setup snapshot
+
+PR320's [authenticated acceptance receipt](https://github.com/brandonnarron1-lang/ask-magic-mike/releases/tag/amm-production-acceptance/dpl_27FwMnE2FS3TyFYZJy18sUnq3whG)
+and [verified closeout](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/320#issuecomment-6615051764)
+supersede the pre-release reserve state below. Its four additional concepts are
+released; eligibility, unused identity, current capacity and public media are
+still rechecked by the existing runner. QA teardown and activation are completed
+work, not prerequisites to repeat for observation. Resolve any later accepted
+Production through `pnpm release:authority:resolve`; this paragraph does not pin
+future operation to an old deployment. Current counts, private query/results and
+access evidence belong in the focused Home Value lead-loop handoff, not this guide.
+
+### Read-only measurement contract
+
+Keep the original pilot window and an explicit elapsed cutoff. The protected
+Distribution report's exact range is not the rolling legacy sections beneath it.
+Its all-source summary and historical WordPress tags are separate, not additive;
+the social category is not Instagram-only or post-specific attribution.
+
+| Measure | Stored grain and limit |
+|---|---|
+| `page_view` | A `PageTracker` effect on a mounted page; no form UUID is supplied. It is not a unique visitor or deduplicated visit. |
+| `intake_started` | First native input/change per mounted logical form. An optional validated form UUID becomes `properties.funnel_session_id`; a distinct UUID is an intake identity, not a distinct person. Remounts can repeat events, including a retained pending-request identity. |
+| Durable inquiries | Accepted `leads` rows by server creation time with the existing test/suppression/spam exclusions. Same-key retries add none; genuine repeat inquiries remain separate. |
+| Recorded contacts | Distinct canonical contact IDs within the selected cohort. Retain unresolved links; never sum overlapping group-contact counts. |
+| Human/appointment outcomes | Actual recorded events for the defined inquiry cohort. Attempts, two-way contact, requested and confirmed appointments remain separate; an empty cohort supplies no success-rate denominator. |
+| Call/Text intents and SLA events | Neither composer/dialer intents nor `sla_*_breached` operating events establish a new inquiry, human contact or audience visit. |
+
+First-party collection already runs through `trackEvent` → `/api/events` →
+`recordNeonAnalyticsEvent` → canonical `analytics_events`. HTTP202 can mean
+automation exclusion with `persisted:false`; only successful persistence establishes
+a stored event. A failed write returns503. Absence of a row alone does not prove
+an attempted transport failed, zero audience exposure, or missing instrumentation.
+External analytics has its separate consent/QA boundary and is not interchangeable
+with the first-party ledger.
+
+If the installed report lacks an event metric, use an existing authorized aggregate
+reader or the legitimate Console, not exported credentials or a new tracker.
+Retain the exact SQL in the private operation record. Verify the actual schema,
+SELECT grants and RLS coverage; use one Repeatable Read **READ ONLY** transaction
+with transaction-local five-second statement and one-second lock timeouts. Return
+bounded aggregates only. Link tests/suppressed inquiries through stored lead,
+session or validated funnel UUIDs—never guessed identity or address. Explicit flags
+and coarse automation classification do not guarantee complete bot/operator exclusion,
+especially for unlinked events. Preserve that coverage limit in any traffic claim.
+Source/campaign dimensions are client-reported evidence, not proof of a click from
+a particular post; compute rates only for compatible populations and counting grains.
+
+For public publication evidence, use the actual permalink/account/caption and
+native timestamp. Buffer `dueAt` is scheduled time, not actual publication time.
+Native labels require a full current observation; absence from an incremental UI
+diff is not a missing label. Historical Buffer metadata can differ from the native
+label: preserve both provenances rather than rewriting native-used reservations.
+
+## Historical pre-reserve operating checkpoint — November3, 2026
 
 PR317 is **merged, deployed and accepted**, not a Draft setup task. Authenticated
 resolution at `2026-11-03T17:53:03.162Z` returned25/25: merge

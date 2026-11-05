@@ -105,7 +105,7 @@ export function prepareLaunchAlertDraft(input: {
 }, env: Readonly<Record<string, string | undefined>> = process.env): LaunchAlertDraft {
   const { payload } = input;
   const buyer = payload.funnel_type === "buyer" || payload.lead_type === "buyer" || payload.lead_type === "listing_inquiry";
-  const label = buyer ? "Buyer / Property Interest" : "Seller / Home Value";
+  const label = buyer ? "Buyer / Property Interest" : payload.lead_type === "seller_cash_offer" ? "Cash / Direct-purchase Review" : "Seller / Home Value";
   const qa = payload.is_test === true;
   const preheader = qa ? "INTERNAL QA — DO NOT CONTACT. Synthetic request." : "New inquiry for the approved operators.";
   const interest = payload.buyer_interest;
@@ -121,6 +121,8 @@ export function prepareLaunchAlertDraft(input: {
       : [[buyer ? "Submitted legacy interest" : "Seller property", provided(payload.address_entry?.acceptedText || payload.property_address || payload.address || (buyer ? payload.target_geography : undefined))]];
   const permissions = [payload.consent_email ? "email" : null, payload.consent_call ? "call" : null, payload.consent_sms ? "SMS" : null].filter(Boolean).join(", ") || "none recorded";
   const rows: Array<[string, string]> = [
+    ...(payload.seller_request ? [["Seller request", payload.seller_request.option], ["Reported relationship", payload.seller_request.relationship],
+      ["Reported representation", payload.seller_request.representation], ["Reported occupancy", payload.seller_request.occupancy]] as Array<[string,string]> : []),
     ["Received", receivedTime(input.receivedAt)], ["Name", provided(payload.name || [payload.first_name, payload.last_name].filter(Boolean).join(" "))],
     ["Phone", provided(payload.phone)], ["Email", provided(payload.email)], ...propertyRows,
     ["Timeline", provided(payload.timeline)], ["Question / context", provided(payload.question || payload.notes)],

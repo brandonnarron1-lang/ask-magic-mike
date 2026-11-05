@@ -1,11 +1,8 @@
 import { addressFromForm, type AddressValue } from "./address/addressValue";
 import { isValidLeadEmail, isValidLeadPhone } from "./leadContactValidation";
+import { normalizeSellerRequest, SELLER_REQUEST_OPTIONS, type SellerRequest } from "./sellerRequest";
 
-export const SELLER_OPTIONS = {
-  "as-is": "Consider an as-is/direct-purchase option.",
-  compare: "Compare listing with an as-is option.",
-  guidance: "Get general selling guidance.",
-} as const;
+export const SELLER_OPTIONS = SELLER_REQUEST_OPTIONS;
 export type SellerOption = keyof typeof SELLER_OPTIONS;
 export function sellerOption(value: unknown): SellerOption | null {
   return typeof value === "string" && Object.hasOwn(SELLER_OPTIONS, value) ? value as SellerOption : null;
@@ -13,6 +10,7 @@ export function sellerOption(value: unknown): SellerOption | null {
 export type SellerOptionsReview = {
   option: SellerOption; address: AddressValue; name: string; email: string; phone: string;
   condition: string; timeline: string; context: string; consent: boolean; website: string;
+  sellerRequest: SellerRequest;
 };
 export class SellerOptionsInputError extends Error {
   constructor(readonly field: string, message: string) { super(message); }
@@ -27,7 +25,9 @@ export function readSellerOptionsForm(form: HTMLFormElement, previous: AddressVa
   if (!email && !phone) throw new SellerOptionsInputError("seller-email", "Add an email or phone number so Mike can follow up.");
   if (email && !isValidLeadEmail(email)) throw new SellerOptionsInputError("seller-email", "Enter a valid email address.");
   if (phone && !isValidLeadPhone(phone)) throw new SellerOptionsInputError("seller-phone", "Enter a valid phone number.");
-  return { option, address: addressFromForm(form, previous), name, email, phone, condition: text("condition"),
+  const sellerRequest = normalizeSellerRequest({ version: 1, option, relationship: text("relationship") || "unknown",
+    representation: text("representation") || "unknown", occupancy: text("occupancy") || "unknown" });
+  return { option, sellerRequest, address: addressFromForm(form, previous), name, email, phone, condition: text("condition"),
     timeline: text("seller-timeline"), context: text("seller-context"), consent: data.get("consent") === "yes", website: text("website") };
 }
 /** Human-readable request context in existing typed fields, not a JSON payload in notes. */

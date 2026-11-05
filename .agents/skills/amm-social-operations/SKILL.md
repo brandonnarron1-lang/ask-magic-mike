@@ -152,6 +152,36 @@ unrelated queue content. Check for an in-flight run before cancellation.
 
 ## Verification and handoff
 
+For a future traffic/digest release, inspect the actual accepted reader before
+reusing the old event-grain definition. Root navigation ownership and optional
+first-party identity must not double-count legacy mounts or create lead sessions.
+Consented browser/visit estimates are not people; unknown coverage is not zero.
+Use the existing Distribution aggregate and its definitions, not a new tracker.
+Daily site reports need lead-independent delivery records: never fabricate a
+lead or borrow an assignment. Freeze period/recipient/sender/body, keep retry keys
+independent of template edits, and hold ambiguous SMTP/HTTP outcomes without
+replay. Inspect exact-source acceptance and activation separately; code presence
+does not mean a daily email is running. Remote Places allowance/budget alerts
+are not account-wide zero-spend proof. As-is intent does not mean cash review;
+retain the explicit request and do not invent a purchaser or closing promise.
+
+For elapsed acquisition reads, follow the existing
+`docs/OWNED_SOCIAL_OPERATIONS.md#read-only-measurement-contract` and the current
+private handoff's exact safe SQL. The installed report covers inquiries/delivery,
+not all traffic. `page_view` has no form UUID; `intake_started` is once per mounted
+form with an optional provisional UUID, not once per visitor. HTTP202 alone is
+not persistence. Keep stored event counts, distinct intake IDs, contacts and
+genuine visits separate; operating `sla_*_breached` rows are not traffic.
+Use existing authorized read-only aggregates with a fixed cutoff, schema/grant/RLS
+checks and bounded transaction timeouts; do not request broad credentials.
+Explicit test/automation flags cannot guarantee exclusion of unlinked operator
+activity. No compatible denominator means no conversion rate.
+
+Native publication time is not Buffer's scheduled `dueAt`. Verify the actual
+permalink/account/caption/time. Check disclosure in a full current UI snapshot,
+not absence from a diff; retain historical provider/native discrepancies without
+changing used identities or replaying an action.
+
 Use mocked provider failures and a synthetic CAS store; normal CI needs no key or
 paid call. Run `tests/social/publisher.test.ts` and affected attribution contracts,
 Node24 dry-run and current release gates. Keep failed attempts and opt-in skips.

@@ -5,6 +5,8 @@ import { PageTracker } from "../components/black-diamond/PageTracker";
 import { SellerIntentSection } from "../components/black-diamond/SellerIntentSection";
 import { publicPageMetadata } from "../lib/publicMetadata";
 import { sellerOption } from "../lib/sellerOptions";
+import Image from "next/image";
+import { mikePlatformAssets } from "@/lib/mikePlatformAssets";
 
 export const metadata: Metadata = publicPageMetadata({
   title: "Seller Options in Wilson, NC",
@@ -28,13 +30,20 @@ export default async function SellPage({ searchParams }: { searchParams?: Promis
           <div className="min-w-0 [overflow-wrap:anywhere]">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#e2c06f]">Seller options</p>
             <h1 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4] sm:text-4xl lg:text-6xl">
-              Compare your selling options.
+              {option === "cash-review" ? "Considering an as-is sale?" : "Compare your selling options."}
             </h1>
             <p className="mt-3 max-w-xl text-base leading-6 text-[#d9ceb8] lg:mt-5 lg:text-lg lg:leading-8">
               Request a review of listing, preparation and possible as-is paths with Mike Eatmon and Our Town Properties. Property review comes before any offer or decision.
             </p>
+            <nav aria-label="Seller review choices" className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#e2c06f]">
+              <a href="/home-value" className="inline-flex min-h-11 items-center underline">Home Value review</a>
+              <a href="/sell?seller_option=cash-review" className="inline-flex min-h-11 items-center underline">Cash-offer review</a>
+              <a href="/sell?seller_option=compare" className="inline-flex min-h-11 items-center underline">Compare options</a>
+            </nav>
+            <Image src={mikePlatformAssets.feedAd.src} alt={mikePlatformAssets.feedAd.alt} width={360} height={440}
+              className="mt-6 hidden max-w-full rounded-2xl border border-[#cda24a33] lg:block" />
           </div>
-          <SellerIntentSection surface="seller_page" variant={option ? "options" : undefined} initialOption={option || undefined} />
+          <SellerIntentSection surface="seller_page" variant="options" initialOption={option || "compare"} />
         </div>
       </section>
       <Footer />

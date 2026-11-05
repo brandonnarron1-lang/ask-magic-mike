@@ -87,7 +87,7 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
           assignment_status: replay.assignment_status === "assigned" ? "assigned" : replay.duplicate_of_lead_id ? "duplicate" : "unassigned", idempotent_replay: true };
       }
       if (input.internalNotification || structuredAddress || structuredInterest) {
-        const capture = inquiryContext || structuredInterest ? "capture_public_lead_v4"
+        const capture = input.lead.seller_request ? "capture_public_lead_v5" : inquiryContext || structuredInterest ? "capture_public_lead_v4"
           : structuredAddress ? "capture_public_lead_v3" : "capture_public_lead_v2";
         const rows = await this.sql.query(
           `SELECT public.${capture}($1::jsonb, $2::jsonb, $3::jsonb, $4::text, $5::jsonb) AS result`,

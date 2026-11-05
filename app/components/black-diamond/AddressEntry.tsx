@@ -5,6 +5,7 @@ import { formatAddress, normalizeAddressValue, type AddressComponents, type Addr
 import { TextField } from "./FormField";
 
 type Props = { inputRef: RefObject<HTMLInputElement | null>; value: AddressValue | null; initialText: string;
+  name?: string; label?: string; required?: boolean; fieldPrefix?: string; unitName?: string;
   disabled: boolean; invalid?: boolean; errorId?: string; onChange: (text: string) => void; onAccept: (value: AddressValue) => void };
 type State = "idle" | "loading" | "results" | "no_results" | "unavailable" | "rate_limited";
 const fields: Array<[keyof AddressComponents, string, string, number, string]> = [
@@ -22,7 +23,8 @@ function explicitlyEnteredUnit(text: string): string {
 
 /** Uncontrolled native values survive provider updates and autofill without events.
  * Lookup state is separate from the lead's frozen submission key/payload. */
-export function AddressEntry({ inputRef, value, initialText, disabled, invalid, errorId, onChange, onAccept }: Props) {
+export function AddressEntry({ inputRef, value, initialText, disabled, invalid, errorId, onChange, onAccept,
+  name = "address", label = "Property address", required = true, fieldPrefix = "", unitName }: Props) {
   const id = useId();
   const [enabled, setEnabled] = useState(false);
   const [query, setQuery] = useState(initialText);
@@ -142,7 +144,7 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
   }
 
   return <div className="min-w-0 space-y-3">
-    <TextField label="Property address" name="address" inputRef={inputRef} defaultValue={initialText} disabled={disabled} required
+    <TextField label={label} name={name} inputRef={inputRef} defaultValue={initialText} disabled={disabled} required={required}
       maxLength={500} autoComplete="street-address" placeholder="Street, unit, city, state and ZIP"
       role="combobox" aria-autocomplete="list" aria-expanded={open} aria-controls={`${id}-list`}
       aria-activedescendant={open && active >= 0 ? `${id}-option-${active}` : undefined}
@@ -185,7 +187,7 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
     <button type="button" aria-expanded={manual} aria-controls={`${id}-manual`} disabled={disabled}
       onClick={() => setManual(current => !current)} className="min-h-11 py-3 text-sm font-semibold text-[#e2c06f] underline">{manual ? "Hide manual address fields" : "Enter / edit address manually"}</button>
     <div id={`${id}-manual`} hidden={!manual} className="grid min-w-0 gap-3 sm:grid-cols-2">
-      {fields.map(([key, label, name, maximum, autoComplete]) => <TextField key={key} label={label} name={name}
+      {fields.map(([key, label, name, maximum, autoComplete]) => <TextField key={key} label={label} name={key==="line2" && unitName ? unitName : fieldPrefix + name}
         defaultValue={value?.components[key] ?? ""} disabled={disabled} maxLength={maximum} autoComplete={autoComplete}
         inputRef={element => { if (element) refs.current[key] = element; }}
         onChange={() => { selectionSequence.current++; request.current?.abort(); setProposal(null); setStatus("Edited by you. Address validation has not been performed."); }} />)}

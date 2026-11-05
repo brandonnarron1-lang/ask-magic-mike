@@ -375,6 +375,7 @@ function buildLeadRow(
     consent_language_version: payload.consent_language_version || LEAD_CONSENT_LANGUAGE_VERSION,
     status: qualification.status,
     lead_type: leadType,
+    ...(payload.seller_request ? { seller_request: payload.seller_request } : {}),
     lead_grade: qualification.lead_grade,
     conversion_stage: qualification.status === "qualified" ? "qualified" : null,
     source: sourceFor(payload),
@@ -471,7 +472,7 @@ async function insertLead(
     notificationMode: process.env.NODE_ENV === "test" ? "disabled" : notificationMode(),
     internalNotification: {
       templateVersion: launch ? LAUNCH_LEAD_ALERT_TEMPLATE_VERSION : LEAD_ALERT_TEMPLATE_VERSION,
-      ...(launch || payload.buyer_interest ? { requestContext: inquiryRequestContext(payload) } : {}),
+      ...(launch || payload.buyer_interest || payload.seller_request ? { requestContext: inquiryRequestContext(payload) } : {}),
       ...(launch ? { launchDraft: prepareLaunchAlertDraft({ payload, sessionId, receivedAt, sourceLabel: routing.sourceLabel }) } : {}),
       metadata: { source_label: routing.sourceLabel, intent_label: routing.intentLabel,
         score: score.score, score_grade: score.grade, is_test: payload.is_test === true,
@@ -507,9 +508,10 @@ function validateLead(payload: LeadPayload) {
   }
 
   if (payload.funnel_type === "seller") {
+    if (payload.seller_request && (!payload.name || payload.name.trim().length<2)) return "Name is required for a seller review request.";
     // Opt-in structured requests accept either valid contact channel. Older
     // unstructured callers retain phone-required validation and optional name.
-    if (payload.address_entry) {
+    if (payload.address_entry || payload.seller_request) {
       if (!payload.address || (!payload.email && !payload.phone)) return "Property address and email or phone are required for seller requests.";
     } else if (!payload.address || !payload.phone) {
       return "Property address and phone are required for seller requests.";

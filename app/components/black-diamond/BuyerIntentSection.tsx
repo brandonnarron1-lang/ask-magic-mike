@@ -15,6 +15,8 @@ import { LeadConsentField } from "./LeadConsentField";
 import { LuxuryCard } from "./LuxuryCard";
 import { SelectField, TextAreaField, TextField } from "./FormField";
 import type { BuyerInterestV1 } from "../../lib/buyerInterest";
+import { AddressEntry } from "./AddressEntry";
+import type { AddressValue } from "../../lib/address/addressValue";
 
 type BuyerIntentSectionProps = {
   surface?: LeadSourceSurface;
@@ -41,6 +43,8 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
   const recovery = usePublicIntakeRecovery();
   const recordEngagement = useIntakeEngagement(attribution, preset, surface, recovery.key);
   const [kind, setKind] = useState<"specific" | "search">(initialInterest?.kind ?? "specific");
+  const addressRef = useRef<HTMLInputElement>(null);
+  const [addressValue, setAddressValue] = useState<AddressValue | null>(null);
   const [review, setReview] = useState<BuyerFormSnapshot | null>(null);
   const [error, setError] = useState<{ field?: string; message: string } | null>(null);
   const committedReview = useRef("");
@@ -85,7 +89,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
     if (recovery.locked || recovery.isBusy()) return;
     setError(null);
     let actual: BuyerFormSnapshot;
-    try { actual = readBuyerForm(new FormData(event.currentTarget), preset, kind); }
+    try { actual = readBuyerForm(new FormData(event.currentTarget), preset, kind, addressValue); }
     catch (caught) {
       const problem = caught instanceof IntakeReviewError ? caught : new IntakeReviewError("", "Review your entries before continuing.");
       setError({ field: problem.field, message: problem.message });
@@ -132,7 +136,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
 
   const describedBy = error ? "buyer-contact-requirement buyer-form-status" : "buyer-contact-requirement";
   return (
-    <LuxuryCard className={`min-w-0 [overflow-wrap:anywhere] ${compact ? "p-4" : "p-5 sm:p-7"}`}>
+    <LuxuryCard className={`min-w-0 [overflow-wrap:anywhere] ${compact ? "p-[16px]" : "p-[20px] sm:p-[28px]"}`}>
       <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">{openHouse ? "Open-house registration" : renter ? "Renter path" : "Buyer path"}</p>
       <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">
         {openHouse ? "Register interest in " + (propertyLabel || "this open house") + "." : renter ? "See what a path from renting to owning could look like." : "Turn your next move into a clear local buying plan."}
@@ -154,10 +158,11 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
             </fieldset>
             {/* Keep native values mounted across path changes; serialize only the selected path. */}
             <div hidden={kind !== "specific"} className="space-y-4 sm:col-span-2">
-              <TextField name="buyer-address" label="Property address (or provide a listing URL)" autoComplete="off" maxLength={500} placeholder="Address of the property you are considering" defaultValue={initialInterest?.kind === "specific" ? initialInterest.properties[0]?.address_text : undefined} />
+              <AddressEntry name="buyer-address" label="Property address (or provide a listing URL)" required={false} fieldPrefix="buyer-" unitName="buyer-unit"
+                inputRef={addressRef} value={addressValue} initialText={initialInterest?.kind === "specific" ? initialInterest.properties[0]?.address_text || "" : ""}
+                disabled={recovery.locked} onChange={invalidateReview} onAccept={setAddressValue} />
               <TextField name="buyer-listing-url" label="Listing URL (or provide an address)" type="url" autoComplete="off" maxLength={2048} placeholder="https://…" defaultValue={initialInterest?.kind === "specific" ? initialInterest.properties[0]?.listing_url : undefined} />
               <p className="text-xs leading-5 text-[#b7aa94]">Listing links are references only. We do not fetch or verify the listing here.</p>
-              <TextField name="buyer-unit" label="Unit or apartment (optional)" autoComplete="off" maxLength={100} />
               <TextField name="buyer-reference" label="Listing reference (optional)" autoComplete="off" maxLength={160} />
             </div>
             <div hidden={kind !== "search"} className="space-y-4 sm:col-span-2">
