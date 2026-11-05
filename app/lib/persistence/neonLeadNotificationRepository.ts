@@ -124,7 +124,7 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
          AND status IN ('pending', 'failed', 'retry_scheduled')
          AND attempt_count < max_attempts
          AND provider_message_id IS NULL
-         AND template_version <> 'lead_alert_email_v6'
+         AND template_version NOT IN ('lead_alert_email_v6','request_response_v1')
          AND (status <> 'pending' OR attempt_count = 0)
          AND (status = 'pending' OR next_attempt_at <= now())
          AND NOT EXISTS (
@@ -185,7 +185,7 @@ export class NeonLeadNotificationRepository implements LeadNotificationRepositor
         )
           AND n.attempt_count < n.max_attempts
           AND n.provider_message_id IS NULL
-          AND n.template_version <> 'lead_alert_email_v6'
+          AND n.template_version NOT IN ('lead_alert_email_v6','request_response_v1')
           AND left(n.notification_type,11) <> 'allocation_'
           AND l.is_test = false AND l.communication_suppressed = false
           AND l.email_suppressed = false AND l.sms_suppressed = false

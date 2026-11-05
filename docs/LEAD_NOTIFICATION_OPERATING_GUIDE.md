@@ -1,5 +1,79 @@
 # Lead Notification Operating Guide
 
+## Prepared mobile request/response candidate — November5, not activated
+
+Use `config/release-authority-policy.json`, `pnpm release:authority:resolve` and
+the focused private handoff to distinguish this candidate from accepted PR322.
+The implementation branch preserves its accepted tree and the e77693fb
+maintenance lineage. No Production migration, send, runtime flag or campaign
+change is implied by this section.
+
+| Request | Atomic persistence / owner | Mike / Brandon | Customer | Protected operator destination |
+| --- | --- | --- | --- | --- |
+| Home Value, all widget Home Value placements | `capture_public_lead_v6` → unchanged v4/v5/v3/v2/v1 capture/assignment; one owner | Existing separate frozen `lead_alert_email_v6` intents, never BCC duplicates | Separate inquiry receipt only with explicit new purpose + current email evidence + cutoff/gates | `/admin/leads/{id}` → Contact readiness |
+| Buying Help / buyer area or listing; widget / standalone | Same boundary; supplied area/address/unit and unknown optional answers retained | Same two per-operator intents | Same request-specific receipt, never property subscription | Same detail / current ownership |
+| Selling Options / seller / cash-review request; widget / standalone | Same boundary; cash-review remains an intent, not an offer | Same two per-operator intents | Same receipt; no price/closing promise | Same detail + seller request context |
+| Ask a Question follow-up capture | Same boundary only after supplied contact + existing consent validation; anonymous conversation is not a lead | Two v6 intents, question-labeled; legacy dispatch is NOT called too | Same explicit receipt choice, no acknowledgment of anonymous chat | Same detail + factual question |
+| Optional conversation after saved capture | `request_public_appointment_v2`: serializes inquiry, appointment, preferences, task decision, audit and request-specific outbox together | Separate `appointment_request` per operator, not a replay of the original inquiry alert | Separate appointment-request receipt, same inquiry-specific acknowledgment purpose; not a booking | Detail `#appointment-review`, Today, notification exceptions |
+| Signed legacy WordPress forms / other retained capture families | Existing canonical bridge and assignment/capture; no form-copy assumption | Existing reviewed family; do not silently migrate recipients/templates | New receipt checkbox is NOT attributed to these forms | Existing protected detail; current source evidence |
+| Visitor Call / Text Mike | Native `tel:+12522454337` / number-only `sms:+12522454337`; no capture prerequisite | No invented lead alert | No automated text or delivery claim | Not a consumer interaction/outcome record |
+
+Request preferences are optional `email`/`phone`/none, local calendar day, and
+morning/afternoon/evening/none in America/New_York. They never grant permission or
+confirm availability. The public capability is bounded to24hours from inquiry
+creation; a closed/suppressed record or expired/mismatched reference is refused.
+Any existing appointment (including completed/canceled) is returned before task
+creation. Completed/canceled confirmation tasks are not recreated. A new inquiry
+has its own identity; no matching by property address. No outcome fields clear.
+
+The new checkbox is separate, unchecked, optional and first-party only. Its exact
+copy/version are in `requestReceiptContract.ts`; SQL stores a purpose row in the
+capture transaction for that inquiry only. It never promotes existing
+`amm_contact_v2` manual-read permission to automation. Dispatch also requires
+retained canonical email evidence and current suppression/opt-out checks. Events
+and inquiries must be on/after the new activation cutoff; there is no history job.
+
+`request_response_v1` owns its immutable private body/destination, business-event
+key and claim token in the existing outbox. The existing cron invokes its bounded
+worker only with `REQUEST_RESPONSE_WORKER_ENABLED`; customer delivery additionally
+requires `REQUEST_RECEIPTS_ENABLED`, its truthful cutoff, verified monitored
+`REQUEST_RECEIPTS_REPLY_TO` and existing `CUSTOMER_EMAIL_ENABLED`. Legacy consumer
+acknowledgment remains OFF. Generic dispatch/retry cannot process this template.
+Use `/admin/notifications` for a protected one-record due retry, not a new event.
+
+Only known nonacceptance (429/425) receives a bounded retry; processing/ambiguous
+results remain UNKNOWN. Signed callback correlation checks the fixed destination
+and recorded attempt, reconciles early callbacks, and never lets a later HTTP
+completion overwrite provider evidence. Staff mailbox failures do not suppress
+the prospect. Provider acceptance, delivery to recipient server, personal receipt
+and human response remain separate. Never reset a processing row to resend.
+
+The separate push intent bridges the v6 early return only for active authorized
+subscriptions with the existing push flag. It rechecks the subscription/role at
+claim; no endpoint/key enters notification metadata. Enrollment and physical
+receipt remain separate NOT RUN evidence. Automated carrier SMS stays OFF.
+
+Focused regression: `LC_ALL=C LANG=C AMM_QA_POSTGRES_TEST=1
+AMM_QA_NATIVE_POSTGRES_TEST=1 pnpm exec vitest run
+tests/persistence/public-conversation-postgres.test.ts
+tests/persistence/launch-inquiry-postgres.test.ts --no-file-parallelism`.
+The existing owned harness runs real local PostgreSQL17, not Production18;
+provider transport is mocked. Keep opt-in skips separate from this proof.
+
+Remote Places remains OFF: the existing Production-only adapter needs verified
+same-account SKU entitlement/key restrictions, a global hard admission bound and
+content-use approval, not a free label or budget alert. Current official
+[session pricing](https://developers.google.com/maps/documentation/places/web-service/session-pricing)
+does not make every session free. The narrow
+[selected end-user-address exception](https://developers.google.com/maps/documentation/places/web-service/policies#autocomplete_for_end_user_addresses)
+is transaction-specific and does not cover suggestion lists or other content.
+No provider search/activation or new billing is authorized by this candidate.
+
+Rollback: independently disable the new receipt flag/worker (and keep address
+predictions OFF), retain intake and existing v6 staff alerts. Use compatible
+application rollback; retain additive schema, consent, tasks, outcomes and all
+delivery evidence. Never run destructive down SQL or restore deleted QA venues.
+
 ## Current use and historical scope
 
 The V1 sections below describe assignment-notification lineage, not the current

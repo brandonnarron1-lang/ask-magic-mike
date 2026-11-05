@@ -1,5 +1,20 @@
 # Owner Approval Queue
 
+Use `config/release-authority-policy.json` and `pnpm release:authority:resolve`
+before any Production effect. An implementation request is not an exact-tree
+release, migration, consumer-send or hosted-resource approval.
+
+## November5 mobile request/response continuation — implementation authorized
+
+Routine code, isolated tests, documentation and PR work are authorized on
+`codex/mobile-request-response-20261105`. Its final exact-source decision packet
+must separately cover the additive request/response migration, immutable protected
+Preview, app release and any new receipt/worker activation. No new QA venue or
+outbound effect is implicitly authorized; PR322's lifecycle is completed.
+Canonical request-contact consent remains manual-only. The new optional receipt
+checkbox records a separate inquiry-scoped acknowledgment purpose; preferences
+never amend it. Remote Places and automated carrier SMS remain held separately.
+
 ## November5 PR322 exact corrected scope — exercised, not a new approval request
 
 The current owner disposition approved replacement PR322 head

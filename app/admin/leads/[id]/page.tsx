@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { conversationPreferenceLabel } from "../../../lib/conversationPreferences";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -353,6 +354,7 @@ function AppointmentCard({ leadId, appointment, canUpdate }: { leadId: string; a
         </Badge>
       </div>
       {appointment.location_label ? <p className="mt-3 text-xs text-[#d9ceb8]">{appointment.location_label}</p> : null}
+      {appointment.request_preferences ? <p className="mt-3 rounded-md border border-[#cda24a33] p-3 text-sm text-[#e4dac8]">Requested preferences: {conversationPreferenceLabel(appointment.request_preferences)}. Not availability or contact permission.</p> : null}
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {(canUpdate ? appointmentNextStatuses(appointment.status) : []).map((status) => (
           <ConversionMutationForm key={status} action={transitionAppointmentAction} submitLabel={`Mark ${status.replaceAll("_", " ")}`} successMessage={`Appointment marked ${status.replaceAll("_", " ")}. No calendar update or invitation sent.`} confirmationLabel={status === "completed" ? "Confirm this appointment actually took place. Task completion alone does not count." : status === "no_show" ? "Confirm the appointment time passed and the person did not attend." : status === "confirmed" ? "Confirm the person actually agreed to this appointment." : `Confirm the actual appointment change to ${status.replaceAll("_", " ")}.`} className="rounded-md border border-white/10 bg-white/[0.02] p-3">

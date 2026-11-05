@@ -63,7 +63,7 @@ function expectContactValues(values: ReturnType<typeof eventlessContact>) {
   expect(screen.getByLabelText("Email for your valuation follow-up")).toHaveValue(values.email);
   expect(screen.getByLabelText("Phone (optional)")).toHaveValue(values.phone);
   expect(screen.getByLabelText("Timeline")).toHaveValue(values.timeline);
-  expect(screen.getByRole("checkbox").matches(":checked")).toBe(values.consent);
+  expect(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).matches(":checked")).toBe(values.consent);
 }
 beforeEach(() => {
   const pending = readPendingHomeValueRequest();
@@ -185,7 +185,7 @@ describe("Home Value logical-request integrity", () => {
   it("does not silently omit an eventless phone after a consent click", async () => {
     transport(call => response(call)); await contact();
     (screen.getByLabelText("Phone (optional)") as HTMLInputElement).value = "+12025550188";
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }));
     reviewNativeChanges(); await screen.findByText("Your request is in.");
     expect(calls).toHaveLength(1);
     expect(JSON.parse(calls[0].body)).toMatchObject({phone:"+12025550188",consent:true,consent_call:true});
@@ -196,7 +196,7 @@ describe("Home Value logical-request integrity", () => {
       transport(call => response(call)); await contact();
       const values = eventlessContact();
       if (interaction === "consent") {
-        fireEvent.click(screen.getByRole("checkbox")); values.consent = true;
+        fireEvent.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ })); values.consent = true;
       } else if (interaction === "timeline") {
         values.timeline = "ASAP";
         fireEvent.change(screen.getByLabelText("Timeline"), {target:{value:values.timeline}});
@@ -245,7 +245,7 @@ describe("Home Value logical-request integrity", () => {
     fireEvent.click(screen.getByRole("button", {name:"Continue"}));
     expect(screen.getByLabelText("Your name")).toHaveFocus();
     expectContactValues(values);
-    fireEvent.click(screen.getByRole("checkbox")); values.consent = true;
+    fireEvent.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ })); values.consent = true;
     expectContactValues(values);
     submit(); await screen.findByText("Your request is in.");
     expect(calls).toHaveLength(1);
@@ -264,7 +264,7 @@ describe("Home Value logical-request integrity", () => {
 
   it("retains contact values, timeline and deliberate consent while editing the address", async () => {
     await contact("+12025550199");
-    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }));
     const timeline = screen.getByLabelText("Timeline") as HTMLSelectElement;
     const selected = timeline.options[timeline.options.length-1].value;
     fireEvent.change(timeline,{target:{value:selected}});
@@ -273,7 +273,7 @@ describe("Home Value logical-request integrity", () => {
     fireEvent.change(screen.getByLabelText("Property address"),{target:{value:"102 Synthetic Fixture Road, Wilson NC"}});
     fireEvent.click(screen.getByRole("button",{name:"Continue"}));
     expect(screen.getByLabelText("Phone (optional)")).toHaveValue("+12025550199");
-    expect(screen.getByRole("checkbox")).toBeChecked();
+    expect(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeChecked();
     expect(screen.getByLabelText("Timeline")).toHaveValue(selected);
     expect(screen.getByText("102 Synthetic Fixture Road, Wilson NC")).toBeVisible();
     expect(calls).toHaveLength(0);

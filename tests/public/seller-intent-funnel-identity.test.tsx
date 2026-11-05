@@ -229,7 +229,7 @@ describe("seller funnel identity integrity", () => {
     fetchMock.mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
       if (String(input) === "/api/events") return Promise.resolve(new Response(null, { status: 202 }));
       expect(String(input)).toBe("/api/appointments/request");
-      expect(JSON.parse(String(init?.body))).toEqual({ lead_id: LEAD, session_id: leadCalls[0].key, request_surface: "seller_page" });
+      expect(JSON.parse(String(init?.body))).toEqual({ lead_id: LEAD, session_id: leadCalls[0].key, request_surface: "seller_page", preferences: { version: 1, channel: "no_preference", day: null, window: "no_preference", timezone: "America/New_York" } });
       return Promise.resolve(jsonResponse({ status: "requested" }));
     });
     fireEvent.click(screen.getByRole("button", { name: "Request a conversation" }));

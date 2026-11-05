@@ -86,6 +86,7 @@ function LegacySellerIntentSection({ surface = "seller_page", compact = false }:
       notes: clean(formData.get("notes")) || undefined,
       consent,
       consent_email: consent && Boolean(email),
+      receipt_email_requested: formData.get("receipt_email_requested") === "yes",
       consent_call: consent && Boolean(phone),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,

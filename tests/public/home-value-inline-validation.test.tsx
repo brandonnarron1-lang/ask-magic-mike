@@ -133,7 +133,7 @@ describe("home-value inline validation", () => {
     await user.type(screen.getByLabelText("Your name"), "INTERNAL QA DO NOT CONTACT");
     await user.type(screen.getByLabelText("Email for your valuation follow-up"), "email-only@example.test");
     expect(screen.getByLabelText("Phone (optional)")).toHaveValue("");
-    await user.click(screen.getByRole("checkbox"));
+    await user.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }));
     await user.click(screen.getByRole("button", { name: "Request Valuation" }));
 
     expect(await screen.findByText("Your request is in.")).toBeVisible();

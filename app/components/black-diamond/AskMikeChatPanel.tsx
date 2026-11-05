@@ -231,6 +231,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           idempotency_key: chatSessionId,
           consent: true,
           consent_email: Boolean(email),
+          receipt_email_requested: formData.get("receipt_email_requested") === "yes",
           consent_call: Boolean(phone),
           consent_sms: false,
           consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,

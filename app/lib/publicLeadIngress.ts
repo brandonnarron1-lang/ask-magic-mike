@@ -83,6 +83,7 @@ const RAW_BOOLEAN_FIELDS = [
   "is_test",
   "consent",
   "consent_email",
+  "receipt_email_requested",
   "consent_call",
   "consent_sms",
 ] as const;

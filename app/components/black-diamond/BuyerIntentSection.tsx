@@ -123,6 +123,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
       }),
       timeline: actual.timeline || undefined, question: actual.question,
       consent: actual.consent, consent_email: actual.consent && Boolean(actual.email),
+      receipt_email_requested: new FormData(event.currentTarget).get("receipt_email_requested") === "yes",
       consent_call: actual.consent && Boolean(actual.phone),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION, consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
       consent_source: surface + ":buyer-intake", website: actual.website,

@@ -107,6 +107,23 @@ Do not store changing live counts, account credentials or customer IDs here.
 
 ## Closeout
 
+### Request/receipt implementation boundary (verified locally November5, 2026)
+
+For optional conversation work, inspect `request_public_appointment_v2` and the
+focused `public-conversation-postgres` suite. Return existing appointment history
+before deciding a task; never clear terminal outcomes or recreate canceled/done
+obligations. Use the owned local harness with `LC_ALL=C LANG=C` on this Mac.
+Keep legacy-risk reproduction separate from corrected-function assertions.
+
+New request receipts use an explicit separate checkbox/purpose, not the manual
+consent projection. Read `docs/LEAD_NOTIFICATION_OPERATING_GUIDE.md` for the
+candidate's recipient matrix, cutoff, kill switches, immutable outbox and signed
+callback recovery. Check accepted source/activation before claiming it is live.
+An early callback can beat HTTP completion: preserve its provider evidence and
+do not reset UNKNOWN. Preferences, task completion and enrollment are not
+permission, an appointment, a send or device receipt. Recheck gates on resume;
+never replay older intake to obtain a new acknowledgment.
+
 Briefly report: actual change; contact ready/one precise decision/restricted with
 reason; exact existing screen/action; real contact/outcome (none if none);
 local/pushed/merged/deployed/accepted separately; source-bound tests/limits;

@@ -1,5 +1,19 @@
 # Current Release Authority
 
+Current decisions use `config/release-authority-policy.json` and authenticated
+`pnpm release:authority:resolve`, never a candidate or historical paragraph.
+
+## November5 mobile request/response candidate — prepared, not released
+
+The separate `codex/mobile-request-response-20261105` branch preserves accepted
+PR322 plus the pushed maintenance ancestry e77693fb. It adds optional conversation
+preferences, atomic request/outbox handling and separately gated request receipts.
+Its new migration, exact-source protected acceptance and Production/runtime
+activation are NOT covered by PR322's consumed approval. The final source seal,
+focused evidence and single decision packet belong in the current private
+`mobile-request-response-20261105` handoff and review PR, not a predicted receipt.
+Existing traffic, digest, campaign and lead-alert runtime remain unchanged.
+
 ## November5 PR322 accepted application — corrected continuation completed
 
 PR322's reviewed head d361fea1413fd5d0bd89f6e399bd3ead857ce286 and tree

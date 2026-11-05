@@ -1,4 +1,5 @@
 import { after, NextResponse } from "next/server";
+import { requestResponseDraft } from "../../lib/requestResponseTemplates";
 import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { publicAttributionUrl } from "../../lib/attributionPrivacy";
@@ -472,6 +473,7 @@ async function insertLead(
     notificationMode: process.env.NODE_ENV === "test" ? "disabled" : notificationMode(),
     internalNotification: {
       templateVersion: launch ? LAUNCH_LEAD_ALERT_TEMPLATE_VERSION : LEAD_ALERT_TEMPLATE_VERSION,
+      ...(launch ? { responseDraft: { ...requestResponseDraft(), receipt_requested: payload.receipt_email_requested === true } } : {}),
       ...(launch || payload.buyer_interest || payload.seller_request ? { requestContext: inquiryRequestContext(payload) } : {}),
       ...(launch ? { launchDraft: prepareLaunchAlertDraft({ payload, sessionId, receivedAt, sourceLabel: routing.sourceLabel }) } : {}),
       metadata: { source_label: routing.sourceLabel, intent_label: routing.intentLabel,
@@ -756,6 +758,9 @@ export async function POST(req: Request) {
       receivedAt,
     }),
   };
+  // Existing Gravity Forms copy has no dedicated receipt checkbox. Never
+  // attribute this new first-party purpose to an older signed bridge form.
+  if (trustedWordPressBridge) delete payload.receipt_email_requested;
 
   if (payload.honeypot) {
     return leadResponse(correlationId, { message: "Got it." }, 202);

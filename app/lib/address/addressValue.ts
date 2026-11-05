@@ -88,6 +88,11 @@ export function addressFromData(data: FormData, previous?: AddressValue | null, 
     // A native edit cannot be overwritten by unchanged old selection fields.
     components = { ...EMPTY_ADDRESS_COMPONENTS };
   }
+  // A separate unit must not force a browser-autofilled full address through
+  // extra city/ZIP fields. Keep the user's complete entry as the manual line;
+  // do not invent parsed locality or postal verification.
+  if (!components.line1.trim() && components.line2.trim() && entered.trim() &&
+    !components.locality.trim() && !components.region.trim() && !components.postalCode.trim()) components.line1 = entered.trim();
   const accepted = formatAddress(components, entered);
   const same = previous && previous.acceptedText === accepted && keys.every(key => previous.components[key] === components[key].trim());
   // Editing structured fields must not erase the original typed representation.

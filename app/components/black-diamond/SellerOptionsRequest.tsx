@@ -86,6 +86,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
       address_entry: actual.address, name: actual.name, email: actual.email, phone: actual.phone,
       condition: actual.condition || undefined, timeline: actual.timeline || undefined, question,
       consent: actual.consent, consent_email: actual.consent && Boolean(actual.email), consent_call: actual.consent && Boolean(actual.phone),
+      receipt_email_requested: new FormData(form).get("receipt_email_requested") === "yes",
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT, consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_source: `${surface}:seller-intake`, website: actual.website, status: "new", assigned_agent_id: null,
       widget_session_id: recovery.key, idempotency_key: recovery.key, attribution };

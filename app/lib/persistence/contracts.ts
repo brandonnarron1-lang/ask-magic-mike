@@ -17,6 +17,7 @@ export type LeadLifecycleCapture = {
     templateVersion: string; metadata: Record<string, unknown>;
     requestContext?: Record<string, unknown>;
     launchDraft?: import("../leadAlertLaunch").LaunchAlertDraft;
+    responseDraft?: import("../requestResponseTemplates").RequestResponseDraft;
   };
 };
 
@@ -105,6 +106,8 @@ export type AppointmentIntent = {
   sessionId: string;
   requestSurface?: string | null;
   requestedAt: string;
+  preferences?: import("../conversationPreferences").ConversationPreferences;
+  responseDraft?: import("../requestResponseTemplates").RequestResponseDraft;
 };
 
 export type AppointmentIntentResult =
@@ -116,7 +119,7 @@ export type AppointmentIntentResult =
       followup_status: "created" | "existing";
       audit_id?: string | null;
     }
-  | { ok: false; error: "appointment_request_not_found" };
+  | { ok: false; error: "appointment_request_not_found" | "appointment_request_closed" | "appointment_request_session_expired" | "appointment_preferred_channel_missing" };
 
 export interface AppointmentIntentPersistence {
   requestAppointment(input: AppointmentIntent): Promise<AppointmentIntentResult>;

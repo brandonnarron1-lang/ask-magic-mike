@@ -64,7 +64,7 @@ export function launchAlertGenerationEnabled(env: Readonly<Record<string, string
   return env.LEAD_ALERT_V6_ENABLED === "true";
 }
 export function isLaunchIntake(payload: Pick<LeadPayload, "funnel_type" | "lead_type">) {
-  return ["home_value", "seller", "buyer"].includes(payload.funnel_type) ||
+  return ["home_value", "seller", "buyer", "chat"].includes(payload.funnel_type) ||
     (payload.funnel_type === "widget" && (!payload.lead_type || payload.lead_type === "home_value"));
 }
 export function launchAlertWorkerEnabled(env: Readonly<Record<string, string | undefined>> = process.env) {
@@ -105,7 +105,7 @@ export function prepareLaunchAlertDraft(input: {
 }, env: Readonly<Record<string, string | undefined>> = process.env): LaunchAlertDraft {
   const { payload } = input;
   const buyer = payload.funnel_type === "buyer" || payload.lead_type === "buyer" || payload.lead_type === "listing_inquiry";
-  const label = buyer ? "Buyer / Property Interest" : payload.lead_type === "seller_cash_offer" ? "Cash / Direct-purchase Review" : "Seller / Home Value";
+  const label = payload.funnel_type === "chat" ? "Question / Requested Follow-up" : buyer ? "Buyer / Property Interest" : payload.lead_type === "seller_cash_offer" ? "Cash / Direct-purchase Review" : "Seller / Home Value";
   const qa = payload.is_test === true;
   const preheader = qa ? "INTERNAL QA — DO NOT CONTACT. Synthetic request." : "New inquiry for the approved operators.";
   const interest = payload.buyer_interest;

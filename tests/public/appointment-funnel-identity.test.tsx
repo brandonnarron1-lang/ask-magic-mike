@@ -14,6 +14,24 @@ afterEach(() => {
 });
 
 describe("appointment funnel identity", () => {
+  it("saves optional native preferences and retries the identical request after an ambiguous transport failure", async () => {
+    const user = userEvent.setup(); const bodies: unknown[] = [];
+    vi.stubGlobal("fetch", vi.fn(async (_url, init) => {
+      bodies.push(JSON.parse(init.body));
+      if (bodies.length === 1) throw new Error("Synthetic timeout after commit");
+      return new Response(JSON.stringify({ status: "already_requested" }), { status: 200 });
+    }));
+    render(<AppointmentRequestCTA leadId="22222222-2222-4222-8222-222222222222" sessionId="11111111-1111-4111-8111-111111111111" requestSurface="seller_page" funnelName="seller" attribution={{}} />);
+    await user.selectOptions(screen.getByLabelText("Preferred contact method"), "email");
+    await user.type(screen.getByLabelText("Preferred day (optional)"), "2026-11-12");
+    await user.selectOptions(screen.getByLabelText("Preferred Eastern-time window"), "afternoon");
+    await user.click(screen.getByRole("button", { name: "Request a conversation" }));
+    await user.click(await screen.findByRole("button", { name: "Retry identical conversation request" }));
+    expect(bodies).toHaveLength(2); expect(bodies[0]).toEqual(bodies[1]);
+    expect(bodies[0]).toMatchObject({ preferences: { version: 1, channel: "email", day: "2026-11-12", window: "afternoon", timezone: "America/New_York" } });
+    expect(screen.queryByText(/AdminOps/)).toBeNull();
+    expect(screen.getByText(/A preference is not new contact permission/)).toBeVisible();
+  });
   it("keeps both appointment intent events attached to the stored lead session", async () => {
     const user = userEvent.setup();
     const sessionId = "11111111-1111-4111-8111-111111111111";

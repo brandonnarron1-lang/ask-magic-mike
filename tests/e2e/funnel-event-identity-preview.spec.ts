@@ -89,7 +89,7 @@ for (const viewport of viewports) {
     await page.getByLabel("Your name").fill("INTERNAL QA DO NOT CONTACT");
     await page.getByLabel("Email for your valuation follow-up").fill("funnel-qa@example.test");
     await page.getByLabel("Phone (optional)").fill("2525550100");
-    await page.getByRole("checkbox").check();
+    await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
     await page.getByRole("button", { name: "Request Valuation" }).click();
     await expect(page.getByText("Your request is in.")).toBeVisible();
     const homeLead = capture.leads.at(-1) as JsonRecord;
@@ -120,7 +120,7 @@ for (const viewport of viewports) {
     await page.getByLabel("Name", { exact: true }).fill("INTERNAL QA DO NOT CONTACT");
     await page.getByLabel("Phone", { exact: true }).fill("2525550101");
     await page.getByLabel("Email", { exact: true }).fill("seller-funnel-qa@example.test");
-    await page.getByRole("checkbox").check();
+    await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
     await page.getByRole("button", { name: "Review property request", exact: true }).click();
     await page.getByRole("button", { name: "Send property review request", exact: true }).click();
     await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
@@ -188,7 +188,7 @@ for (const viewport of viewports) {
     await page.getByLabel("Your name (optional)").fill("INTERNAL QA DO NOT CONTACT");
     await page.getByLabel("Email").fill("ask-funnel-qa@example.com");
     await page.getByLabel("Phone").fill("2525550103");
-    await page.getByRole("checkbox").check();
+    await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
     await page.getByRole("button", { name: "Request local follow-up" }).click();
     await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
     await expect.poll(() => capture.leads.length).toBe(4);

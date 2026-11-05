@@ -2,6 +2,8 @@ import { assertDatabaseMutationAllowed } from "../../src/lib/preview-security";
 import { createDefaultPersistence } from "./persistence/defaultPersistence";
 import { PersistenceUnavailableError } from "./persistence/contracts";
 import type { LeadSourceSurface } from "./leadPayload";
+import { parseConversationPreferences } from "./conversationPreferences";
+import { requestResponseDraft } from "./requestResponseTemplates";
 
 export type PublicAppointmentRequestResult =
   | {
@@ -23,7 +25,10 @@ export async function requestPublicAppointment(input: {
   sessionId: string;
   requestSurface?: LeadSourceSurface | null;
   now?: Date;
+  preferences?: unknown;
 }): Promise<PublicAppointmentRequestResult> {
+  const preferences = parseConversationPreferences(input.preferences);
+  if (!preferences) return { ok: false, statusCode: 400, error: "invalid_conversation_preferences" };
   if (!UUID.test(input.leadId)) {
     return { ok: false, statusCode: 400, error: "invalid_lead_reference" };
   }
@@ -57,11 +62,13 @@ export async function requestPublicAppointment(input: {
       sessionId: input.sessionId,
       requestSurface: input.requestSurface,
       requestedAt: (input.now || new Date()).toISOString(),
+      preferences,
+      responseDraft: requestResponseDraft(process.env, preferences),
     });
     if (!result.ok) {
       return {
         ok: false,
-        statusCode: 404,
+        statusCode: result.error === "appointment_request_not_found" ? 404 : 409,
         error: result.error,
       };
     }

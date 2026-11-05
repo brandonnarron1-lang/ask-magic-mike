@@ -33,7 +33,7 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const [proposal, setProposal] = useState<{ original: string; result: AddressResolvedSuggestion; components: AddressComponents } | null>(null);
-  const [manual, setManual] = useState(Boolean(value?.components.line1));
+  const [manual, setManual] = useState(Boolean(value?.components.line1 && value.confirmation !== "user_confirmed_suggestion"));
   const [status, setStatus] = useState("");
   const refs = useRef<Partial<Record<keyof AddressComponents, HTMLInputElement>>>({});
   const selectionSequence = useRef(0);
@@ -136,7 +136,7 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
     if (acceptedText.length > 500) { setStatus("This suggestion is too long. Keep your entry or edit the fields manually."); return; }
     if (inputRef.current) inputRef.current.value = acceptedText;
     for (const [key] of fields) if (refs.current[key]) refs.current[key]!.value = proposal.components[key];
-    setManual(true); setProposal(null); setSuggestions([]); setOpen(false);
+    setManual(false); setProposal(null); setSuggestions([]); setOpen(false);
     onChange(acceptedText);
     onAccept({ version: 1, enteredText: proposal.original, acceptedText, components: proposal.components,
       confirmation: "user_confirmed_suggestion", validation: "not_performed", reportedProvider: "google_places_new", reportedPlaceId: proposal.result.id });
@@ -164,7 +164,7 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
         // Clear stale components except the separately entered unit.
         for (const [key] of fields) if (key !== "line2" && refs.current[key]) refs.current[key]!.value = "";
       }} />
-    <p id={`${id}-help`} className="text-sm leading-6 text-[#d9ceb8]">{enabled ? "Choose a suggestion to review it, or enter the address manually." : "Type the full address, including any unit. You can edit each part below."} Your entry is not postal, parcel or ownership verification.</p>
+    <p id={`${id}-help`} className="text-sm leading-6 text-[#d9ceb8]">{enabled ? "Choose a suggestion to review, or keep your own entry." : "Type your address; your browser may offer autofill. No lookup is needed."} Add a unit below if applicable. This is not address or ownership verification.</p>
     {open ? <ul id={`${id}-list`} role="listbox" aria-label="Address suggestions" className="rounded-md border border-[#cda24a66] bg-[#11100d] p-1">
       {suggestions.map((suggestion, index) => <li role="option" aria-selected={index === active} id={`${id}-option-${index}`} key={suggestion.id}
         onPointerDown={event => event.preventDefault()} onMouseDown={event => event.preventDefault()} onClick={() => void select(suggestion)}
@@ -186,12 +186,12 @@ export function AddressEntry({ inputRef, value, initialText, disabled, invalid, 
     </div> : null}
     <button type="button" aria-expanded={manual} aria-controls={`${id}-manual`} disabled={disabled}
       onClick={() => setManual(current => !current)} className="min-h-11 py-3 text-sm font-semibold text-[#e2c06f] underline">{manual ? "Hide manual address fields" : "Enter / edit address manually"}</button>
-    <div id={`${id}-manual`} hidden={!manual} className="grid min-w-0 gap-3 sm:grid-cols-2">
-      {fields.map(([key, label, name, maximum, autoComplete]) => <TextField key={key} label={label} name={key==="line2" && unitName ? unitName : fieldPrefix + name}
+    <div id={`${id}-manual`} className="grid min-w-0 gap-3 sm:grid-cols-2">
+      {fields.map(([key, label, name, maximum, autoComplete]) => <div key={key} hidden={!manual && key !== "line2"} className={key === "line2" && !manual ? "sm:col-span-2" : "min-w-0"}><TextField label={label} name={key==="line2" && unitName ? unitName : fieldPrefix + name}
         defaultValue={value?.components[key] ?? ""} disabled={disabled} maxLength={maximum} autoComplete={autoComplete}
         inputRef={element => { if (element) refs.current[key] = element; }}
-        onChange={() => { selectionSequence.current++; request.current?.abort(); setProposal(null); setStatus("Edited by you. Address validation has not been performed."); }} />)}
-      <p className="text-sm leading-6 text-[#d9ceb8] sm:col-span-2">Keep any unit number. If a field is unknown, leave it blank for broker review; do not guess a ZIP or street number. Add a street before other structured fields.</p>
+        onChange={() => { selectionSequence.current++; request.current?.abort(); setProposal(null); setStatus("Edited by you. Address validation has not been performed."); }} /></div>)}
+      {manual ? <p className="text-sm leading-6 text-[#d9ceb8] sm:col-span-2">Keep any unit number. Leave unknown fields blank for review; do not guess a ZIP or street number. Add a street before other structured fields.</p> : null}
     </div>
   </div>;
 }

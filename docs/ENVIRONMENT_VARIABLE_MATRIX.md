@@ -3,6 +3,32 @@
 Values belong only in Vercel/hosting secret interfaces. This matrix records names
 and scope, never values.
 
+## Prepared request/response controls (not activated by source presence)
+
+- `REQUEST_RESPONSE_WORKER_ENABLED=false`: independent new outbox worker kill
+  switch within the existing notification cron; does not pause v6 staff emails.
+- `REQUEST_RECEIPTS_ENABLED=false`, `REQUEST_RECEIPTS_ACTIVATED_AT` (unset):
+  generation + dispatch require both, plus existing `CUSTOMER_EMAIL_ENABLED` at
+  dispatch. Use a truthful cutoff; inquiries created before it never enter this
+  scope even if they later request a conversation. No historical seeding job.
+- `REQUEST_RECEIPTS_REPLY_TO` (unset): verified monitored mailbox; no guessed
+  fallback to the sender. Sender/provider and Mike/Brandon destinations reuse
+  their existing approved bindings; no BCC on the new per-recipient intents.
+- New request receipts require an explicit `amm_request_receipt_email_v1`
+  purpose row from the separate unchecked first-party receipt choice AND current
+  retained request-email evidence. Recheck opt-out/denial/suppression on claim.
+  A preferred channel, manual permission projection or template edit cannot seed
+  or authorize a receipt. Signed legacy WordPress forms cannot claim the new copy.
+- `AGENT_PUSH_NOTIFICATIONS_ENABLED` retains its existing gate. The new atomic
+  capture wrapper can seed one intent per active subscription (bounded to ten),
+  and claims recheck activation/role. Physical enrollment/receipt are separate.
+- Leave `CONSUMER_ACKNOWLEDGMENT_ENABLED` OFF; the legacy path is not the new
+  worker. Leave carrier SMS, allocation and remote address predictions OFF.
+
+Deploy only after `20261105224500_public_request_response.sql` passes exact-source
+review/guarded migration and protected acceptance. Roll back application code only;
+retain all additive columns, consent, task, outbox and provider history.
+
 | Group | Variables | Scope | Required for |
 | --- | --- | --- | --- |
 | Canonical DB | `DATABASE_URL`, `DATABASE_ENV`, `PREVIEW_NEON_ENDPOINT_ID`, `PRODUCTION_NEON_ENDPOINT_ID` | server, Production/Preview separated; endpoint IDs are Preview-scoped attestation inputs | durable Neon capture and fail-closed Preview identity |

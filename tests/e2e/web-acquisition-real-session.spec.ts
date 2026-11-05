@@ -99,7 +99,7 @@ test("Home Value form -> durable envelopes -> genuine staff session -> scoped ne
       await card.getByRole("button", { name: "Assign", exact: true }).click(); await expect(admin.staff).toHaveURL(/assignment_action=assigned/);
       await admin.staff.goto(`/admin/leads/${repeat}`);
       const review = admin.staff.getByRole("region", { name: "Repeat inquiry review" });
-      await review.getByRole("checkbox").check(); await review.getByRole("button", { name: "Review as separate inquiry", exact: true }).click();
+      await review.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check(); await review.getByRole("button", { name: "Review as separate inquiry", exact: true }).click();
       await expect.poll(async () => (await pool.query("SELECT conversion_stage FROM leads WHERE id=$1", [repeat])).rows[0]?.conversion_stage).toBe("assigned");
     } finally { await admin.context.close(); }
     for (const width of [320, 375, 390, 768]) {
