@@ -210,6 +210,9 @@ evidence; ignored overrides/unavailable screenshots are limits, not product bugs
 Reuse unchanged-tree protected submission/mobile evidence; never create a lead
 to demonstrate the live path.
 
+A public route view is not necessarily an initial landing or distinct visit;
+retain that limit when optional identity or first-entry evidence is absent.
+
 Assess reserve with valid future-slot planning, not a stale noon placeholder.
 Report selected proposals and holds together: a planner's additional-candidate
 queue hold does not mean zero eligible reserve. Pure projection does not authorize

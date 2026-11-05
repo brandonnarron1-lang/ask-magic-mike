@@ -157,7 +157,8 @@ Verified November5 on accepted PR322 treebe578af9; dated observations and safe
 invocations are in the existing private handoff. Take one activation-to-cutoff
 snapshot before controlled browsing. Keep the original pilot separate; optional
 identity absent means people/visit estimates UNKNOWN. A source-tagged event is
-not a verified click or person. Registered arrival route, acquisition source,
+not a verified click or person. A recorded route view need not be the first
+landing in a visit. Recorded route, acquisition source,
 inquiry type and notification channel are distinct; do not infer capture adapter
 from a campaign label. Minimum review facts are not a qualified purchase opportunity.
 
