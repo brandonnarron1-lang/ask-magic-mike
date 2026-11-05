@@ -201,6 +201,22 @@ permalink/account/caption/time. Check disclosure in a full current UI snapshot,
 not absence from a diff; retain historical provider/native discrepancies without
 changing used identities or replaying an action.
 
+For a bounded post-release pass, snapshot activation-to-cutoff before controlled
+browsing and keep the pilot separate. Use the actual clickable profile URL and
+existing attribution, not caption text. A link-shim HTTP interstitial is not a
+proven consumer failure; independently permitted browser navigation can establish
+the final URL. Read actual viewport dimensions before claiming narrow-screen
+evidence; ignored overrides/unavailable screenshots are limits, not product bugs.
+Reuse unchanged-tree protected submission/mobile evidence; never create a lead
+to demonstrate the live path.
+
+Assess reserve with valid future-slot planning, not a stale noon placeholder.
+Report selected proposals and holds together: a planner's additional-candidate
+queue hold does not mean zero eligible reserve. Pure projection does not authorize
+CAS or create. Record only non-secret owner-managed access/custody/recovery
+references in the existing private handoff; tool presence is not authentication
+and an old native handoff is not unattended capability.
+
 Use mocked provider failures and a synthetic CAS store; normal CI needs no key or
 paid call. Run `tests/social/publisher.test.ts` and affected attribution contracts,
 Node24 dry-run and current release gates. Keep failed attempts and opt-in skips.

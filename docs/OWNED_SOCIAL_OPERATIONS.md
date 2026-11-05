@@ -151,6 +151,40 @@ traffic-v1 coverage. Its optional exact Instagram filter is not the older inquir
 report's combined social category. Collection start controls coverage labels, not
 backfill. Preserve the original pilot window and explicit observation cutoff.
 
+### Bounded post-release acquisition pass
+
+Verified November5 on accepted PR322 treebe578af9; dated observations and safe
+invocations are in the existing private handoff. Take one activation-to-cutoff
+snapshot before controlled browsing. Keep the original pilot separate; optional
+identity absent means people/visit estimates UNKNOWN. A source-tagged event is
+not a verified click or person. Registered arrival route, acquisition source,
+inquiry type and notification channel are distinct; do not infer capture adapter
+from a campaign label. Minimum review facts are not a qualified purchase opportunity.
+
+Observe the complete authorized provider inventory once. Compare the saved
+permalink/account/caption to public profile/post evidence and native timestamps;
+provider `dueAt` is not publication time. Preserve native-used reservations and
+UNKNOWN outcomes. A pure `reconcileSnapshot` or planner projection writes nothing.
+Evaluate unused concepts against a valid future slot, not yesterday/today's
+already-past noon placeholder. Report selected proposals together with holds:
+`queue_full` can mean additional candidates exceeded remaining capacity, not
+that no eligible proposal exists. A proposal is not scheduled.
+
+Verify the actual clickable profile link and its existing approved attribution.
+An HTTP-only Meta link-shim interstitial is not proof of a broken consumer link;
+the permitted browser can establish the real final URL. Use existing QA/staff
+exclusions for controlled application browsing and retain their limits. Never
+submit a Production lead. Reuse unchanged-tree protected submission/mobile
+acceptance rather than re-provisioning QA. Read back actual viewport dimensions:
+an ignored override or unavailable screenshot is BLOCKED live visual evidence,
+not a phone-size PASS. Physical devices remain separate.
+
+Keep non-secret provider/owner/secret-store/scope/recovery references in the
+existing private handoff's access register. Official owner-managed stores and
+recovery routes remain primary; a retained secure-input receipt is not the sole
+owner credential store. Mark unavailable native controls precisely, never extract
+browser credentials or request an unlock while the owner is mobile.
+
 ### Source-bound migration and secure-input recovery
 
 Use the focused qualified-conversion receipt for the current sanctioned receiver
