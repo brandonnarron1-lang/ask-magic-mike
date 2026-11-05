@@ -13,7 +13,9 @@ vi.mock("@neondatabase/serverless", async () => {
   const db=await import("../support/qa-audit-postgres");
   return {neon:()=>({async query(sql:string, params?:unknown[]) {
     const rows=await db.localQuery.query(sql,params);
-    if(sql.includes("capture_public_lead_v4("))callbacks.committedAt=performance.now();
+    // Observe the actual outer transaction boundary, including the additive
+    // receipt wrapper. Its internal v4 call is not a separate driver query.
+    if(/public\.capture_public_lead_v[2-6]\(/.test(sql))callbacks.committedAt=performance.now();
     return rows;
   }})};
 });
@@ -63,10 +65,11 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("ordinary capture with 
     vi.stubEnv("LEAD_NOTIFICATION_TO", "mike@example.test"); vi.stubEnv("LEAD_NOTIFICATION_SECOND_OPERATOR_TO", "brandon@example.test"); vi.stubEnv("RESEND_FROM", "Our Town <sender@example.test>");
     vi.stubEnv("LEAD_ALERT_V6_QA_SESSION_IDS", ""); vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("outbound_forbidden"); }));
   }, 120000);
-  beforeEach(() => { callbacks.mode="healthy"; callbacks.pending=[]; provider.enqueue.mockClear(); });
+  beforeEach(() => { callbacks.mode="healthy"; callbacks.pending=[]; callbacks.committedAt=0; provider.enqueue.mockClear(); });
   afterAll(() => { stopDatabase(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
   it("healthy ordinary response precedes monitor completion; decline evidence is not missing consent", async () => {
     const result = await submit(); expect(result.response.status).toBe(200); expect(callbacks.pending).toHaveLength(1);
+    expect(callbacks.committedAt).toBeGreaterThan(0);
     expect(result.commitToResponseMs).toBeLessThan(100);
     expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(result.result.lead_id)} AND action LIKE 'lead.first_live_%'`)).toBe("0");
     const before = noBusinessEdits(); const start=performance.now(); await callbacks.pending[0]();
