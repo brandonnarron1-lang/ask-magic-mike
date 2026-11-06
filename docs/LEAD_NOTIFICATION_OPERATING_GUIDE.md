@@ -72,6 +72,18 @@ tests/persistence/launch-inquiry-postgres.test.ts --no-file-parallelism`.
 The existing owned harness runs real local PostgreSQL17, not Production18;
 provider transport is mocked. Keep opt-in skips separate from this proof.
 
+Scheduled digest SQL fixtures inject explicit eligible business instants; adding
+24 hours to the real clock does not make a before-8am Eastern invocation due.
+The November6,2026 regression covers the instant before the due boundary, one
+concurrent claim at the boundary, and held UNKNOWN without automatic replay.
+Keep real harness/timeout timers, existing DST tests and Production schedule
+unchanged. Preserve failed CI evidence; dependency-install delay and an assertion
+failure are different causes. A job-budget adjustment must retain all mandatory
+stages and test-level bounds and be sealed as changed source, not a waived gate.
+The required gate has35minutes, its acceptance-receipt wait is capped at40minutes,
+and the receipt job at45minutes. Acceptance still requires completed successful CI;
+timeout/failure remains a failed gate, never permission to publish a receipt.
+
 Remote Places remains OFF: the existing Production-only adapter needs verified
 same-account SKU entitlement/key restrictions, a global hard admission bound and
 content-use approval, not a free label or budget alert. Current official

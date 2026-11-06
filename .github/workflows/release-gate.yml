@@ -19,7 +19,9 @@ jobs:
   local-release-gate:
     name: local-release-gate
     runs-on: ubuntu-latest
-    timeout-minutes: 28
+    # Public standard runner; retain every test-level bound and mandatory stage.
+    # Observed apt font downloads consumed 6–8 minutes of the previous budget.
+    timeout-minutes: 35
 
     steps:
       - name: Checkout

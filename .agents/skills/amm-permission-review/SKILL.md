@@ -139,6 +139,13 @@ run affected built conversion, Home Value and seller/buyer suites with the owned
 isolated harness. Assert the exact optional-preference payload, not a weaker
 subset. Retain failed artifacts; do not relax confirmation or timing bounds.
 
+For scheduled-report SQL tests, inject deterministic activation/execution instants
+across the actual Eastern due boundary; wall-clock +24h can still be before 8am.
+Keep real harness/provider timers and concurrency/UNKNOWN assertions. Verify the
+pre-due no-op and due claim without changing live scheduling or sending a report.
+See `qualified-conversion-postgres` and `daily-digest` regressions (November6,2026);
+recheck the accepted scheduling contract if its business-time rules change.
+
 Briefly report: actual change; contact ready/one precise decision/restricted with
 reason; exact existing screen/action; real contact/outcome (none if none);
 local/pushed/merged/deployed/accepted separately; source-bound tests/limits;

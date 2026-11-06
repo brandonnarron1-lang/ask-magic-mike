@@ -25,10 +25,10 @@ describe("shared Next build acceptance ordering", () => {
     expect(waitMinutes+3).toBeLessThan(receiptMinutes);
     // Hosted run 40693373201 completed the test steps but hit 24 minutes during
     // finalization. Keep all three budgets finite and coherent, never waive CI.
-    expect(gateMinutes).toBe(28);
-    expect(receiptMinutes).toBe(35);
-    expect(attempts).toBe(120);
-    expect(script).toContain("Math.min(120,");
+    expect(gateMinutes).toBe(35);
+    expect(receiptMinutes).toBe(45);
+    expect(attempts).toBe(161);
+    expect(script).toContain("Math.min(161,");
     expect(script).toContain("Math.min(15_000,");
     expect(script).toContain('if (run.conclusion !== "success") throw new Error("receipt_release_gate_failed")');
     expect(script).toContain('throw new Error("receipt_release_gate_timeout")');
