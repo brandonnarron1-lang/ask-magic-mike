@@ -72,6 +72,14 @@ tests/persistence/launch-inquiry-postgres.test.ts --no-file-parallelism`.
 The existing owned harness runs real local PostgreSQL17, not Production18;
 provider transport is mocked. Keep opt-in skips separate from this proof.
 
+Migration preflight must inspect actual Neon roles rather than assume legacy
+`anon`/`authenticated` roles exist. The request-response migration always revokes
+PUBLIC and conditionally revokes any existing legacy browser roles, without
+creating them or changing owner defaults. The required hosted conversation stage
+also runs `public-response-role-grants-postgres.test.ts` for absent roles and
+inherited browser-role grants. Changed migration bytes require a new exact-source
+disposition; historical connected acceptance remains evidence only for its source.
+
 Scheduled digest SQL fixtures inject explicit eligible business instants; adding
 24 hours to the real clock does not make a before-8am Eastern invocation due.
 The November6,2026 regression covers the instant before the due boundary, one

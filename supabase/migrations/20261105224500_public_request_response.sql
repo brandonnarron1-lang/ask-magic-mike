@@ -225,7 +225,26 @@ END $$;
 
 REVOKE ALL ON FUNCTION public.request_receipt_permitted_v1(uuid,text,timestamptz),public.amm_guard_request_response_v1(),
  public.seed_request_responses_v1(uuid,uuid,text,timestamptz,jsonb),public.capture_public_lead_v6(jsonb,jsonb,jsonb,text,jsonb),
- public.request_public_appointment_v2(uuid,uuid,text,timestamptz,jsonb,jsonb),public.claim_request_response_v1(uuid,timestamptz),public.finish_request_response_v1(uuid,uuid,jsonb) FROM PUBLIC,anon,authenticated;
+ public.request_public_appointment_v2(uuid,uuid,text,timestamptz,jsonb,jsonb),public.claim_request_response_v1(uuid,timestamptz),public.finish_request_response_v1(uuid,uuid,jsonb) FROM PUBLIC;
+-- Legacy browser roles are not present in every canonical Neon deployment.
+-- Revoke their inherited rights when present; never create roles or change defaults.
+DO $legacy_roles$
+DECLARE legacy_role text; signature text;
+BEGIN
+ FOR legacy_role IN SELECT rolname FROM pg_catalog.pg_roles WHERE rolname IN ('anon','authenticated') LOOP
+  FOREACH signature IN ARRAY ARRAY[
+   'public.request_receipt_permitted_v1(uuid,text,timestamptz)',
+   'public.amm_guard_request_response_v1()',
+   'public.seed_request_responses_v1(uuid,uuid,text,timestamptz,jsonb)',
+   'public.capture_public_lead_v6(jsonb,jsonb,jsonb,text,jsonb)',
+   'public.request_public_appointment_v2(uuid,uuid,text,timestamptz,jsonb,jsonb)',
+   'public.claim_request_response_v1(uuid,timestamptz)',
+   'public.finish_request_response_v1(uuid,uuid,jsonb)'
+  ] LOOP
+   EXECUTE format('REVOKE ALL ON FUNCTION %s FROM %I',signature,legacy_role);
+  END LOOP;
+ END LOOP;
+END $legacy_roles$;
 GRANT EXECUTE ON FUNCTION public.request_receipt_permitted_v1(uuid,text,timestamptz),public.amm_guard_request_response_v1(),
  public.seed_request_responses_v1(uuid,uuid,text,timestamptz,jsonb),public.capture_public_lead_v6(jsonb,jsonb,jsonb,text,jsonb),
  public.request_public_appointment_v2(uuid,uuid,text,timestamptz,jsonb,jsonb),public.claim_request_response_v1(uuid,timestamptz),public.finish_request_response_v1(uuid,uuid,jsonb) TO service_role;

@@ -146,6 +146,14 @@ pre-due no-op and due claim without changing live scheduling or sending a report
 See `qualified-conversion-postgres` and `daily-digest` regressions (November6,2026);
 recheck the accepted scheduling contract if its business-time rules change.
 
+Before a Neon migration names legacy browser roles, inspect the actual role
+catalog read-only. Historical Supabase paths and synthetic harness roles do not
+prove those roles exist in Production. Revoke PUBLIC unconditionally; revoke
+optional legacy-role grants only if present, while preserving required runtime
+grants and owner defaults. Test absent and inherited-grant cases in the owned
+isolated harness. A changed migration checksum needs a new source disposition;
+never create Production roles or rewrite approved SQL in an executor to pass it.
+
 Briefly report: actual change; contact ready/one precise decision/restricted with
 reason; exact existing screen/action; real contact/outcome (none if none);
 local/pushed/merged/deployed/accepted separately; source-bound tests/limits;
