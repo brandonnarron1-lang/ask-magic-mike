@@ -113,7 +113,7 @@ test("genuine admin records all homepage choices together; baseline works and re
     await card.getByLabel("Public evidence URL",{exact:true}).fill("https://www.ourtownproperties.com/");
     await card.getByLabel("Exact final copy used",{exact:false}).fill("INTERNAL QA LOCAL ONLY. Synthetic homepage choices, not a consumer request.");
     await card.getByLabel("Approval reference",{exact:true}).fill("Synthetic catalog proof authority");
-    await card.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();await card.getByRole("button",{name:"Record observed proof",exact:true}).click();
+    await card.getByRole("checkbox").check();await card.getByRole("button",{name:"Record observed proof",exact:true}).click();
   }
   await record(urls.slice(0,1));await expect(page).toHaveURL(/publication_action=complete_choice_group_required/);expect(await effects()).toEqual(before);
   await record(urls);await expect(page).toHaveURL(/publication_action=proof_recorded/);

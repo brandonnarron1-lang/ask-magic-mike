@@ -57,9 +57,9 @@ test("expiry removes stale private UI and rejects its pending save against the r
  expect((await pool.query("SELECT revision FROM consumer_workspaces WHERE user_id=$1",[fixture.consumerUsers.alice])).rows[0].revision).toBe(1);expect(await counts()).toEqual(initial);
 });
 test("current-password deletion removes only the consumer account and has no outbound effect",async()=>{
- const page=bob.pages()[0];await page.getByText("Delete this consumer account",{exact:true}).click();await page.getByLabel("Confirm account password",{exact:true}).fill("not-the-password");await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();await page.getByRole("button",{name:"Delete my consumer account",exact:true}).click();
+ const page=bob.pages()[0];await page.getByText("Delete this consumer account",{exact:true}).click();await page.getByLabel("Confirm account password",{exact:true}).fill("not-the-password");await page.getByRole("checkbox").check();await page.getByRole("button",{name:"Delete my consumer account",exact:true}).click();
  await expect(page.getByRole("status")).toContainText("Password not confirmed. Nothing was deleted.");
- await page.getByLabel("Confirm account password",{exact:true}).fill(password);await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();await page.getByRole("button",{name:"Delete my consumer account",exact:true}).click();
+ await page.getByLabel("Confirm account password",{exact:true}).fill(password);await page.getByRole("checkbox").check();await page.getByRole("button",{name:"Delete my consumer account",exact:true}).click();
  await expect(page.getByRole("status")).toContainText("Consumer account deleted from the active workspace.");expect((await pool.query("SELECT count(*)::int n FROM consumer_users WHERE id=$1",[fixture.consumerUsers.bob])).rows[0].n).toBe(0);expect((await pool.query("SELECT count(*)::int n FROM consumer_users WHERE id=$1",[fixture.consumerUsers.alice])).rows[0].n).toBe(1);expect(await counts()).toEqual(initial);
 });
 test("signing out all consumer devices clears the local comparison and keeps inquiry state intact",async({page})=>{

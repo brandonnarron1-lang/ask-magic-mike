@@ -490,6 +490,8 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await address.focus(); await page.keyboard.type(ADDRESS); await page.keyboard.press("Tab");
   await expect(funnel(page).getByRole("button", { name: "Enter / edit address manually", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Unit / apartment (if applicable)")).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(funnel(page).getByRole("button", { name: "Continue", exact: true })).toBeFocused();
   await page.keyboard.press("Enter");
   const name = page.getByLabel("Your name", { exact: true });
@@ -503,6 +505,9 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await page.keyboard.press("End"); await page.keyboard.press("Tab");
   await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeFocused();
   await page.keyboard.press("Space"); await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeChecked();
+  await page.keyboard.press("Tab");
+  await expect(funnel(page).getByRole("checkbox", { name: /Email me a receipt/ })).toBeFocused();
+  await expect(funnel(page).getByRole("checkbox", { name: /Email me a receipt/ })).not.toBeChecked();
   await page.keyboard.press("Tab"); await expect(funnel(page).getByRole("button", { name: "Back", exact: true })).toBeFocused();
   await page.keyboard.press("Tab"); await expect(submit(page)).toBeFocused();
   await page.keyboard.press("Enter"); await assertSaved(page);

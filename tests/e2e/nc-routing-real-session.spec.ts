@@ -129,7 +129,7 @@ for (const width of [320,390,430,768,1440]) test(`bounded allocation rehearsal $
   const start=new Date(Date.now()+60*60*1000),end=new Date(start.getTime()+24*60*60*1000);
   await panel.getByLabel("Future inquiry cutoff",{exact:false}).fill(start.toISOString());
   await panel.getByLabel("Window ends",{exact:false}).fill(end.toISOString());
-  await panel.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).first().check();
+  await panel.getByRole("checkbox").first().check();
   await panel.getByLabel("Synthetic property state",{exact:true}).fill("NC");
   await panel.getByLabel("Synthetic property locality",{exact:true}).fill("Wilson");
   const button=panel.getByRole("button",{name:"Run no-effect rehearsal"});
