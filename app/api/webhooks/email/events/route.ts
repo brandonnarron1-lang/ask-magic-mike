@@ -164,10 +164,10 @@ async function recordResendEventAtomically(input: {
          FROM public.lead_notifications AS notification
         WHERE notification.provider = 'resend'
           AND (notification.provider_message_id = $2 OR (
-            notification.template_version='lead_alert_email_v6' AND notification.recipient_type='internal'
+            ((notification.template_version='lead_alert_email_v6' AND notification.recipient_type='internal') OR notification.template_version='request_response_v1')
             AND notification.status='processing' AND notification.provider_message_id IS NULL
             AND notification.first_provider_attempt_at IS NOT NULL AND notification.id=$11::uuid
-            AND lower(notification.private_intake_snapshot->>'recipient')=lower($12::text)))
+            AND lower(CASE WHEN notification.template_version='request_response_v1' THEN notification.private_response_snapshot->>'recipient' ELSE notification.private_intake_snapshot->>'recipient' END)=lower($12::text)))
         ORDER BY notification.created_at DESC, notification.id
         LIMIT 1
         FOR UPDATE OF notification
@@ -210,7 +210,7 @@ async function recordResendEventAtomically(input: {
        UPDATE public.lead_notifications AS notification
           SET status = CASE
                 WHEN $6::boolean THEN 'permanently_failed'
-                WHEN $8::boolean AND notification.template_version='lead_alert_email_v6' AND notification.status='processing' THEN 'sent'
+                WHEN $8::boolean AND notification.template_version IN ('lead_alert_email_v6','request_response_v1') AND notification.status='processing' THEN 'sent'
                 WHEN $8::boolean AND notification.error_code = 'resend_failed' THEN 'sent'
                 ELSE notification.status END,
               error_code = CASE
@@ -233,8 +233,8 @@ async function recordResendEventAtomically(input: {
                 ELSE notification.sent_at
               END,
               next_attempt_at = CASE WHEN $6::boolean OR $8::boolean THEN NULL ELSE notification.next_attempt_at END,
-              provider_message_id=CASE WHEN notification.template_version='lead_alert_email_v6' THEN coalesce(notification.provider_message_id,$2) ELSE notification.provider_message_id END,
-              provider_accepted_at=CASE WHEN notification.template_version='lead_alert_email_v6' THEN coalesce(notification.provider_accepted_at,$5::timestamptz) ELSE notification.provider_accepted_at END,
+              provider_message_id=CASE WHEN notification.template_version IN ('lead_alert_email_v6','request_response_v1') THEN coalesce(notification.provider_message_id,$2) ELSE notification.provider_message_id END,
+              provider_accepted_at=CASE WHEN notification.template_version IN ('lead_alert_email_v6','request_response_v1') THEN coalesce(notification.provider_accepted_at,$5::timestamptz) ELSE notification.provider_accepted_at END,
               updated_at = now(),
               metadata = COALESCE(notification.metadata, '{}'::jsonb) || $9::jsonb
                 || CASE WHEN $8::boolean AND notification.error_code = 'resend_failed'
@@ -254,7 +254,7 @@ async function recordResendEventAtomically(input: {
               updated_at = now()
          FROM matched_notification AS matched
         WHERE notification.id = matched.id
-          AND matched.template_version = 'lead_alert_email_v6'
+          AND matched.template_version IN ('lead_alert_email_v6','request_response_v1')
           AND $3::text = 'delivered'
           AND matched.previous_event_at > $5::timestamptz
           AND COALESCE(notification.metadata->>'provider_delivery_confirmed', 'false') <> 'true'
@@ -287,7 +287,7 @@ async function recordResendEventAtomically(input: {
           SET email_suppressed = true, updated_at = now()
          FROM matched_notification AS matched
         WHERE $10::boolean
-          AND NOT (matched.template_version='lead_alert_email_v6' AND matched.recipient_type='internal')
+          AND NOT (matched.template_version IN ('lead_alert_email_v6','request_response_v1') AND matched.recipient_type='internal')
           AND lead.id = matched.lead_id
           AND lead.email_suppressed = false
        RETURNING lead.id

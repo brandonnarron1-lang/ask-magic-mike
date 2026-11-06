@@ -252,7 +252,8 @@ test("ordinary saved-receipt UI passes its exact IDs to the shared appointment C
   await page.getByLabel("Property address (or provide a listing URL)").fill("101 Synthetic Fixture Road, Wilson NC");
   await review(page); await submit(page); await page.getByRole("button", { name: "Request a conversation", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Your appointment request has been received.", exact: true })).toBeVisible();
-  expect(capture.appointmentBodies).toEqual([{ lead_id: capture.lead, session_id: capture.attempts[0].key, request_surface: "buyer_page" }]);
+  expect(capture.appointmentBodies).toEqual([{ lead_id: capture.lead, session_id: capture.attempts[0].key, request_surface: "buyer_page",
+    preferences: { version: 1, channel: "no_preference", day: null, window: "no_preference", timezone: "America/New_York" } }]);
 });
 
 test("reviewed widget Selling Options does not treat a bare 202 as a saved inquiry", async ({ page }) => {

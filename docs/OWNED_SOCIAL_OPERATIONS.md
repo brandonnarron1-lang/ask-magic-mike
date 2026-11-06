@@ -1,10 +1,13 @@
 # Owned social operations
 
-## Qualified conversion candidate (November3; NOT released by this heading)
+## Qualified conversion contract — accepted PR322, November5
 
-Accepted PR320 remains authoritative via the authenticated resolver. Preserve
-local documentation commit25ee16e2; the following is new candidate behavior and
-must not be treated as already activated.
+PR322's corrected application and additive migration are released: reviewed tree
+be578af935338741ab7ccc5d19dc8ca146886493, merge0192402e. Resolve current Production
+with `pnpm release:authority:resolve`; final configuration/deployment and activation
+times belong in the authenticated receipt and focused private qualified-conversion
+handoff. Accepted code, configured bindings, runtime enablement and delivered email
+remain separate facts. Preserve local documentation ancestor25ee16e2.
 
 - Root PublicTrafficTracker owns one hydrated pathname view per document
   navigation. Existing PageTracker mounts are inert compatibility markers.
@@ -28,7 +31,7 @@ must not be treated as already activated.
   Suppressed/test/spam/internal-QA inquiries remain excluded; contact-permission
   refusal alone is not exclusion. No incompatible conversion rate is calculated.
 
-### Brandon daily digest candidate
+### Brandon daily digest
 
 Lead-independent operational_daily_reports is necessary: lead notifications and
 messaging plans require a real lead/assignment and must not be abused for a site
@@ -37,7 +40,7 @@ It pins the second-operator mailbox to an explicitly bound, verified, non-banned
 administrator, never Mike/BCC or a browser-selected recipient. Sender/transport
 and deterministic body freeze with the period; retry keys exclude template version.
 
-The proposed Vercel checks are12/13/14/15UTC; local-hour admission gives8a.m.
+The installed Vercel checks are12/13/14/15UTC; local-hour admission gives8a.m.
 Eastern in both DST seasons and later recovery opportunities. Posting slots and
 the Instagram scheduler are unchanged. The previous Eastern calendar day is
 midnight-inclusive/midnight-exclusive (23/24/25hours). The activation-day report
@@ -49,13 +52,19 @@ Failed/unknown reports are visible in Distribution; the cron returns503 on
 intervention. Verified Resend delivery callbacks are read separately; accepted
 email is not personal receipt. No independent missed-run monitor is claimed.
 
-Activation requires exact-source release, reviewed unapplied migration/grants,
+Activation requires exact-source release, verified applied migration/grants,
 current recipient binding, included delivery/cron capacity, collection-start
-and digest activation timestamps, then the enabled flag. The owner authorized
-one controlled Brandon acceptance email after those gates, not a Mike/customer
-test. No live write/send is authorized merely by committing this candidate.
+and digest activation timestamps, then the enabled flag and a verified deployment
+using those bindings. Do not infer enablement from this guide or backdate coverage.
+Use the first genuinely due scheduled report for acceptance; no reviewed immediate
+test-send mode exists. Activation on a local day makes the next local day's8a.m.
+the first normal opportunity, reporting the activation day with honest partial
+coverage. If not due, finish without a forced email, overnight wait, retained QA
+or new monitor. The enabled daily-digest GET is effectful, not a read-only smoke
+endpoint. Stable recipient/period identity and UNKNOWN history survive resumption;
+catch-up may cover different missed periods on one day.
 
-### Address and seller-review candidate
+### Address and seller-review contract
 
 Shared AddressEntry supports optional buyer-address naming without changing
 listing-URL-only/search-area serialization. Manual fallback, units, native
@@ -90,7 +99,7 @@ profile promise; no cash creatives are admitted to that policy by this change.
 
 ## Resume from accepted evidence, not a dated setup snapshot
 
-PR320's [authenticated acceptance receipt](https://github.com/brandonnarron1-lang/ask-magic-mike/releases/tag/amm-production-acceptance/dpl_27FwMnE2FS3TyFYZJy18sUnq3whG)
+PR320's [historical authenticated acceptance receipt](https://github.com/brandonnarron1-lang/ask-magic-mike/releases/tag/amm-production-acceptance/dpl_27FwMnE2FS3TyFYZJy18sUnq3whG)
 and [verified closeout](https://github.com/brandonnarron1-lang/ask-magic-mike/pull/320#issuecomment-6615051764)
 supersede the pre-release reserve state below. Its four additional concepts are
 released; eligibility, unused identity, current capacity and public media are
@@ -109,8 +118,9 @@ the social category is not Instagram-only or post-specific attribution.
 
 | Measure | Stored grain and limit |
 |---|---|
-| `page_view` | A `PageTracker` effect on a mounted page; no form UUID is supplied. It is not a unique visitor or deduplicated visit. |
-| `intake_started` | First native input/change per mounted logical form. An optional validated form UUID becomes `properties.funnel_session_id`; a distinct UUID is an intake identity, not a distinct person. Remounts can repeat events, including a retained pending-request identity. |
+| Traffic-v1 `page_view` | Root-owned hydrated pathname navigation; top-level and embedded contexts separate. Refresh counts; remount/StrictMode/query/hash-only changes do not. Legacy rows without `traffic_version=1` are historical events, not this denominator. |
+| Optional visit/browser estimates | Explicit analytics grant; per-tab visit30idle minutes and browser90days. Not exact people; absent identified-view coverage is UNKNOWN, not measured zero people. |
+| `intake_started` | First native input/change per mounted logical form, not per visitor. Versioned event UUID dedup and legacy form/session evidence are separate; remounts may represent another start. |
 | Durable inquiries | Accepted `leads` rows by server creation time with the existing test/suppression/spam exclusions. Same-key retries add none; genuine repeat inquiries remain separate. |
 | Recorded contacts | Distinct canonical contact IDs within the selected cohort. Retain unresolved links; never sum overlapping group-contact counts. |
 | Human/appointment outcomes | Actual recorded events for the defined inquiry cohort. Attempts, two-way contact, requested and confirmed appointments remain separate; an empty cohort supplies no success-rate denominator. |
@@ -135,6 +145,64 @@ and coarse automation classification do not guarantee complete bot/operator excl
 especially for unlinked events. Preserve that coverage limit in any traffic claim.
 Source/campaign dimensions are client-reported evidence, not proof of a click from
 a particular post; compute rates only for compatible populations and counting grains.
+
+Use the accepted `app/lib/persistence/neonTrafficReport.ts` aggregate for current
+traffic-v1 coverage. Its optional exact Instagram filter is not the older inquiry
+report's combined social category. Collection start controls coverage labels, not
+backfill. Preserve the original pilot window and explicit observation cutoff.
+
+### Bounded post-release acquisition pass
+
+Verified November5 on accepted PR322 treebe578af9; dated observations and safe
+invocations are in the existing private handoff. Take one activation-to-cutoff
+snapshot before controlled browsing. Keep the original pilot separate; optional
+identity absent means people/visit estimates UNKNOWN. A source-tagged event is
+not a verified click or person. A recorded route view need not be the first
+landing in a visit. Recorded route, acquisition source,
+inquiry type and notification channel are distinct; do not infer capture adapter
+from a campaign label. Minimum review facts are not a qualified purchase opportunity.
+
+Observe the complete authorized provider inventory once. Compare the saved
+permalink/account/caption to public profile/post evidence and native timestamps;
+provider `dueAt` is not publication time. Preserve native-used reservations and
+UNKNOWN outcomes. A pure `reconcileSnapshot` or planner projection writes nothing.
+Evaluate unused concepts against a valid future slot, not yesterday/today's
+already-past noon placeholder. Report selected proposals together with holds:
+`queue_full` can mean additional candidates exceeded remaining capacity, not
+that no eligible proposal exists. A proposal is not scheduled.
+
+Verify the actual clickable profile link and its existing approved attribution.
+An HTTP-only Meta link-shim interstitial is not proof of a broken consumer link;
+the permitted browser can establish the real final URL. Use existing QA/staff
+exclusions for controlled application browsing and retain their limits. Never
+submit a Production lead. Reuse unchanged-tree protected submission/mobile
+acceptance rather than re-provisioning QA. Read back actual viewport dimensions:
+an ignored override or unavailable screenshot is BLOCKED live visual evidence,
+not a phone-size PASS. Physical devices remain separate.
+
+Keep non-secret provider/owner/secret-store/scope/recovery references in the
+existing private handoff's access register. Official owner-managed stores and
+recovery routes remain primary; a retained secure-input receipt is not the sole
+owner credential store. Mark unavailable native controls precisely, never extract
+browser credentials or request an unlock while the owner is mobile.
+
+### Source-bound migration and secure-input recovery
+
+Use the focused qualified-conversion receipt for the current sanctioned receiver
+and exact identities; do not repeat completed setup or recover deleted QA. Verify
+non-secret save and physical binding, not pasted-text claims. Establish secure
+input and exact-resource cleanup before provisioning; local execution is not
+guaranteed through sleep.
+
+Inherited default grants survive a narrower GRANT. Test actual role behavior in
+isolated SQL; the correction revokes only the new ledger's service-role ACL before
+SELECT/INSERT/UPDATE, preserving global defaults. PostgreSQL18 stores NOT NULL
+constraints as `contype='n'`: verify those separately from keys/checks/FKs.
+Project catalogue `name` values to `text` before array aggregation when node-pg
+requires decoded `text[]`. A verifier failure must roll back; reconcile schema
+and ledger before any diagnosed retry. Never drop assertions or run destructive
+permission probes on Production.
+See [PostgreSQL18 notes](https://www.postgresql.org/docs/18/release-18.html).
 
 For public publication evidence, use the actual permalink/account/caption and
 native timestamp. Buffer `dueAt` is scheduled time, not actual publication time.
@@ -386,7 +454,7 @@ The v1 asset and its actual Facebook publication are retained, not overwritten.
 Private source paths stay private; exported images omit EXIF/GPS. Source/output
 hashes, 390px pixel checks and actual encoded video evidence remain distinct.
 
-## Prepared implementation
+## Historical prepared implementation — November1
 
 - `config/owned-social-content.json`: fourteen finished evergreen concepts, 42
   platform variants. The seven former backlog topics have actual matched media.
@@ -525,7 +593,9 @@ node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/social/run.mjs --can
 Slots are civil Eastern noon, converted per date including DST. Only unused
 content receives the next unoccupied permitted slot; old intents never move.
 The entire bounded catalogue is scanned and selection is channel-fair. Dry-run
-dates are proposals, not booked slots. Fourteen concepts are a finite library.
+dates are proposals, not booked slots. The accepted catalogue is finite; derive
+its current size/eligibility from accepted source and durable usage, not the
+historical fourteen-concept snapshot above. PR320 released concepts15–18.
 No infinite duplicate recycling or paid model fallback. Exhaustion must hold and
 notify the operator; it is not evidence of a replenishing autonomous operation.
 R2's source registry and its marketing=false grant remain unchanged. The social

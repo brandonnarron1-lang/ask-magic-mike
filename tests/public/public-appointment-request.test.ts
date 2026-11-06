@@ -107,11 +107,12 @@ describe("public appointment atomic persistence boundary", () => {
       followup_status: "created",
     });
     expect(calls).toHaveLength(1);
-    expect(calls[0].url).toContain("/rest/v1/rpc/request_public_appointment_v1");
+    expect(calls[0].url).toContain("/rest/v1/rpc/request_public_appointment_v2");
     expect(calls[0].body).toMatchObject({
-      p_lead_id: LEAD_ID,
-      p_session_id: SESSION_ID,
-      p_request_surface: "home_value_page",
+      p_lead: LEAD_ID,
+      p_session: SESSION_ID,
+      p_surface: "home_value_page",
+      p_preferences: { version: 1, channel: "no_preference", day: null, window: "no_preference", timezone: "America/New_York" },
     });
   });
 

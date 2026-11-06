@@ -14,6 +14,10 @@ vi.mock("../../app/lib/growth/lead-experiment-conversion",()=>({recordLeadExperi
 vi.mock("../../src/lib/operations/first-live-lead-monitor",async original=>({...await original<object>(),createFirstLiveLeadMonitor:()=>null}));
 vi.mock("../../app/lib/leadAlertService",async original=>({...await original<object>(),enqueueLeadNotifications:vi.fn(async()=>({internal:null}))}));
 const opted=process.env.AMM_QA_POSTGRES_TEST==="1";
+// Inject only the digest's business clock. Real timers and the SQL harness stay
+// real; wall-clock +24h is still ineligible when CI runs before 8am Eastern.
+const digestActivation="2026-11-05T16:27:32.953Z";
+const digestDue=new Date("2026-11-06T13:00:00.000Z");
 const seller={version:1,option:"cash-review",relationship:"owner",representation:"unknown",occupancy:"unknown"};
 function fixture(extra:Record<string,unknown>={}) {
  const key=randomUUID();return {funnel_type:"seller",lead_type:"seller_cash_offer",lead_source_surface:"seller_page",
@@ -84,10 +88,13 @@ describe.skipIf(!opted)("qualified conversion actual SQL, synthetic only",()=>{
  });
  it("claims one zero-lead-independent report under concurrent jobs and never replays unknown",async()=>{
   psql(`INSERT INTO lead_center_users(id,name,email,"emailVerified",role) VALUES('digest-fixture','Synthetic operator','operator@example.test',true,'administrator');`);
-  const now=new Date(Date.now()+86400000),activation=new Date().toISOString();
+  const now=digestDue,activation=digestActivation;
   const report=vi.fn(async(from:string,to:string)=>({coverage:"unavailable" as const,reason:"synthetic unavailable storage",from,to,generatedAt:null,collectionStartedAt:null,metrics:null}));
   const send=vi.fn(async()=>({ok:true as const,provider:"mock",providerMessageId:"synthetic-digest-1"}));
   const input={sql:localQuery,env:{OPERATOR_DAILY_DIGEST_USER_ID:"digest-fixture",LEAD_NOTIFICATION_SECOND_OPERATOR_TO:"operator@example.test",LEAD_NOTIFICATION_TO:"mike@example.test",OPERATOR_DAILY_DIGEST_ACTIVATED_AT:activation,RESEND_FROM:"Our Town Properties <sender@example.test>"},now,provider:{name:"mock",send},report};
+  expect(await runDailyDigest({...input,now:new Date(now.getTime()-1)})).toMatchObject({periodsConsidered:0,attempted:0});
+  expect(send).not.toHaveBeenCalled();
+  expect(psql("SELECT count(*) FROM operational_daily_reports WHERE recipient_user_id='digest-fixture'")).toBe("0");
   await Promise.all([runDailyDigest(input),runDailyDigest(input)]);expect(send).toHaveBeenCalledTimes(1);
   expect(send.mock.calls[0]).toBeDefined(); expect(psql("SELECT count(*) FROM operational_daily_reports WHERE status='accepted'")).toBe("1");
   expect(psql("SELECT count(*) FROM leads WHERE email='operator@example.test'")).toBe("0");
@@ -99,7 +106,7 @@ describe.skipIf(!opted)("qualified conversion actual SQL, synthetic only",()=>{
   psql(`INSERT INTO lead_center_users(id,name,email,"emailVerified",role) VALUES('digest-timeout','Synthetic operator','timeout@example.test',true,'administrator');`);
   const send=vi.fn(async()=>{throw new Error("simulated_lost_acknowledgement")});
   const input={sql:localQuery,env:{OPERATOR_DAILY_DIGEST_USER_ID:"digest-timeout",LEAD_NOTIFICATION_SECOND_OPERATOR_TO:"timeout@example.test",
-   OPERATOR_DAILY_DIGEST_ACTIVATED_AT:new Date().toISOString(),RESEND_FROM:"Our Town <sender@example.test>"},now:new Date(Date.now()+86400000),
+   OPERATOR_DAILY_DIGEST_ACTIVATED_AT:digestActivation,RESEND_FROM:"Our Town <sender@example.test>"},now:digestDue,
    provider:{name:"mock",send},report:async(from:string,to:string)=>({coverage:"unavailable" as const,reason:"synthetic unavailable",from,to,metrics:null,generatedAt:null,collectionStartedAt:null})};
   expect((await runDailyDigest(input)).interventionRequired).toBe(1);
   expect(psql("SELECT status||':'||attempt_count FROM operational_daily_reports WHERE recipient_user_id='digest-timeout'")).toBe("unknown:1");

@@ -2,6 +2,7 @@ import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { Pool } from "pg";
 import { expect, test } from "@playwright/test";
+import {captureFullPageEvidence} from "../support/capture-evidence";
 
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.AMM_CONSUMER_WORKSPACE_ACCEPTANCE !== "1", "Existing isolated PostgreSQL/Better Auth harness required");
 test.describe.configure({mode:"serial"});
@@ -45,7 +46,7 @@ for (const width of [320,390,430,768,1440]) test(`guest comparison, keyboard and
   const box = await button.boundingBox(); expect(box!.height).toBeGreaterThanOrEqual(44);
   const geometry = await page.evaluate(() => ({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,font:getComputedStyle(document.documentElement).fontSize}));
   expect(geometry.font).toBe("32px"); expect(geometry.scroll).toBeLessThanOrEqual(geometry.width+1);
-  await page.screenshot({path:path.join(output,`guest-${width}-root200.png`),fullPage:true});
+  await captureFullPageEvidence(page,path.join(output,`guest-${width}-root200.png`));
   expect(errors).toEqual([]);
 });
 

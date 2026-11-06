@@ -490,6 +490,8 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await address.focus(); await page.keyboard.type(ADDRESS); await page.keyboard.press("Tab");
   await expect(funnel(page).getByRole("button", { name: "Enter / edit address manually", exact: true })).toBeFocused();
   await page.keyboard.press("Tab");
+  await expect(page.getByLabel("Unit / apartment (if applicable)")).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(funnel(page).getByRole("button", { name: "Continue", exact: true })).toBeFocused();
   await page.keyboard.press("Enter");
   const name = page.getByLabel("Your name", { exact: true });
@@ -501,9 +503,12 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await expect(page.getByLabel("Phone (optional)", { exact: true })).toBeFocused();
   await page.keyboard.press("Tab"); await expect(page.getByLabel("Timeline", { exact: true })).toBeFocused();
   await page.keyboard.press("End"); await page.keyboard.press("Tab");
-  await expect(funnel(page).getByRole("checkbox")).toBeFocused();
-  await page.keyboard.press("Space"); await expect(funnel(page).getByRole("checkbox")).toBeChecked();
-  await page.keyboard.press("Tab"); await expect(funnel(page).getByRole("button", { name: "Back", exact: true })).toBeFocused();
+  await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeFocused();
+  await page.keyboard.press("Space"); await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeChecked();
+  await page.keyboard.press("Tab");
+  await expect(funnel(page).getByRole("checkbox", { name: /Email me a receipt/ })).toHaveCount(0);
+  await expect(funnel(page).getByText(/Email receipts are currently unavailable/)).toBeVisible();
+  await expect(funnel(page).getByRole("button", { name: "Back", exact: true })).toBeFocused();
   await page.keyboard.press("Tab"); await expect(submit(page)).toBeFocused();
   await page.keyboard.press("Enter"); await assertSaved(page);
   expect(captures.get(page)!.attempts[0].payload.consent).toBe(true);
@@ -549,11 +554,11 @@ test("Eventless DOM address/contact values survive health recheck, consent and t
     await expect(page.getByLabel("Email for your valuation follow-up", { exact: true })).toHaveValue(values.email);
     await expect(page.getByLabel("Phone (optional)", { exact: true })).toHaveValue(values.phone);
   };
-  await funnel(page).getByRole("checkbox").check();
+  await funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
   await expectNativeValues();
   await page.getByLabel("Timeline", { exact: true }).selectOption("Just planning");
   await expectNativeValues();
-  await expect(funnel(page).getByRole("checkbox")).toBeChecked();
+  await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeChecked();
   await expect(page.getByLabel("Timeline", { exact: true })).toHaveValue("Just planning");
   await submit(page).click();
   await expect(error(page)).toContainText("Review the updated address and email");
@@ -604,7 +609,7 @@ test("Native values without change events survive Edit address and are submitted
   await expect(page.getByLabel("Email for your valuation follow-up", { exact: true })).toHaveValue("native-values@example.test");
   await expect(page.getByLabel("Phone (optional)", { exact: true })).toHaveValue("+12025550188");
   await expect(page.getByLabel("Timeline", { exact: true })).toHaveValue("Just planning");
-  await expect(funnel(page).getByRole("checkbox")).toBeChecked();
+  await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeChecked();
   // A second eventless native value tests the submit path itself as well.
   await page.getByLabel("Email for your valuation follow-up", { exact: true }).evaluate(element => { (element as HTMLInputElement).value = "submitted-native@example.test"; });
   await submit(page).click(); await expect(error(page)).toContainText("Review the updated address and email");

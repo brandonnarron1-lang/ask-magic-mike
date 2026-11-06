@@ -44,6 +44,14 @@ function read(path: string) {
   return readFileSync(join(root, path), "utf8");
 }
 
+function businessCalls(calls: Array<[RequestInfo | URL, RequestInit?]>) {
+  for (const [url, init] of calls) if (String(url) === "/api/health/live") {
+    expect(init).toMatchObject({ method: "GET", cache: "no-store", redirect: "error", referrerPolicy: "no-referrer" });
+    expect(init).not.toHaveProperty("body");
+  }
+  return calls.filter(([url]) => String(url) !== "/api/health/live");
+}
+
 afterEach(() => {
   vi.useRealTimers();
   cleanup();
@@ -64,7 +72,7 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     await user.type(screen.getByLabelText(/Your real estate question/), "How do I buy?");
     await user.click(screen.getByRole("button",{name:"Send Question"}));
     expect(await screen.findByRole("link",{name:"Approved source"})).toHaveAttribute("href","https://www.askmagicmike.com/api/experience/v1");
-    expect(JSON.parse(String(fetchMock.mock.calls[0][1]?.body))).toMatchObject({knowledge_version:"amm.public-knowledge.v1"});
+    expect(JSON.parse(String(businessCalls(fetchMock.mock.calls)[0][1]?.body))).toMatchObject({knowledge_version:"amm.public-knowledge.v1"});
     const review = screen.getByRole("textbox",{name:/Question for local follow-up/});
     await user.clear(review);
     expect(review).toBeVisible();
@@ -72,7 +80,7 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     expect(review).toHaveValue("My corrected, user-reviewed question");
     expect(screen.getByLabelText("Email")).toHaveValue("");
     expect(screen.getByRole("checkbox",{name:/I agree that Our Town Properties/})).not.toBeChecked();
-    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(businessCalls(fetchMock.mock.calls)).toHaveLength(1);
   });
 
   it("cancels an in-flight answer without creating or submitting a handoff", async () => {
@@ -87,8 +95,8 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     await user.click(screen.getByRole("button",{name:"Stop answer"}));
     expect(await screen.findByRole("alert")).toHaveTextContent("No follow-up request was submitted");
     expect(screen.queryByRole("textbox",{name:/Question for local follow-up/})).not.toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledOnce();
-    expect(fetchMock.mock.calls[0][1]?.signal?.aborted).toBe(true);
+    expect(businessCalls(fetchMock.mock.calls)).toHaveLength(1);
+    expect(businessCalls(fetchMock.mock.calls)[0][1]?.signal?.aborted).toBe(true);
   });
 
   it("makes the skip link the first public-header control and points it at one focus target", () => {
@@ -165,7 +173,7 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     expect(screen.getByRole("heading", { name: "Want Mike's team to contact you?" })).toBeVisible();
     expect(screen.getByText(/Sending a question by itself does not create a contact lead/)).toBeVisible();
     expect(screen.queryByRole("button", { name: "Request a conversation" })).not.toBeInTheDocument();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(businessCalls(fetchMock.mock.calls)).toHaveLength(1);
     expect(fetchMock).not.toHaveBeenCalledWith("/api/leads", expect.anything());
     expect(vi.mocked(trackEvent).mock.calls.some(([event]) => event === "lead_created")).toBe(false);
   });
@@ -191,14 +199,14 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     await user.click(screen.getByRole("button", { name: "Request local follow-up" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(/email address or phone number/i);
     expect(screen.getByLabelText("Email")).toHaveFocus();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(businessCalls(fetchMock.mock.calls)).toHaveLength(1);
 
     await user.type(screen.getByLabelText("Email"), "qa@example.test");
     await user.click(screen.getByRole("button", { name: "Request local follow-up" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(/confirm contact permission/i);
     expect(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toHaveFocus();
     expect(screen.getByText(/Consent language version: amm_contact_v2 · Required/)).toBeVisible();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(businessCalls(fetchMock.mock.calls)).toHaveLength(1);
   });
 
   it("keeps the chat answer visible when an explicit follow-up save fails", async () => {

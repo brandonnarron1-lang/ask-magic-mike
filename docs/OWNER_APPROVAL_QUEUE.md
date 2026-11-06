@@ -1,6 +1,41 @@
 # Owner Approval Queue
 
-## November4 PR321 demonstrated migration correction — new source boundary
+Use `config/release-authority-policy.json` and `pnpm release:authority:resolve`
+before any Production effect. An implementation request is not an exact-tree
+release, migration, consumer-send or hosted-resource approval.
+
+## November5 mobile request/response continuation — implementation authorized
+
+Routine code, isolated tests, documentation and PR work are authorized on
+`codex/mobile-request-response-20261105`. Its final exact-source decision packet
+must separately cover the additive request/response migration, immutable protected
+Preview, app release and any new receipt/worker activation. No new QA venue or
+outbound effect is implicitly authorized; PR322's lifecycle is completed.
+Canonical request-contact consent remains manual-only. The new optional receipt
+checkbox records a separate inquiry-scoped acknowledgment purpose; preferences
+never amend it. Remote Places and automated carrier SMS remain held separately.
+
+## November5 PR322 exact corrected scope — exercised, not a new approval request
+
+The current owner disposition approved replacement PR322 head
+d361fea1413fd5d0bd89f6e399bd3ead857ce286/tree
+be578af935338741ab7ccc5d19dc8ca146886493 and corrected migration hash
+b955ab17e52b8ca6613b5e70096036210d0f61e378447fddd176d778d999004a.
+Protected acceptance, guarded additive migration, normal merge and same-tree
+release exercised that scope. Its ONE separate synthetic venue was used and
+fully retired; no unused replacement allowance remains.
+
+Four reviewed core bindings and Brandon-only digest activation have their
+independent recipient/sender/capacity/runtime checks. Read actual final status in
+the current private qualified-conversion receipt and authenticated resolver;
+source presence is not enablement or email delivery. Use the first genuinely due
+scheduled report, never an invented immediate send or backdated period.
+Do not ask again for this same scope, replay completed mutations, release PR321
+first, or transfer this approval to the separate post-release documentation tree.
+No consumer contact, recipient/provider/billing change, Google activation, cash
+advertising, allocation, carrier SMS or other-channel publication is included.
+
+## Historical November4 PR321 demonstrated migration correction — resolved by PR322
 
 The owner's exact PR321/one-migration/four-binding/digest authorization was
 received; do not ask for that same scope again. Protected acceptance completed
@@ -22,7 +57,7 @@ current tests and any missing protected venue authority. Email-plan/quota access
 is an independent digest-enablement dependency, not a reason to weaken grants
 or send a forced acceptance email. Runtime bindings/digest remain unactivated.
 
-## Qualified conversion — prepare one exact-source release decision
+## Historical qualified conversion preparation — superseded by PR322 disposition
 
 The attached November3 mandate authorizes implementation and intended Brandon
 daily operational email, including one controlled acceptance email after gates.

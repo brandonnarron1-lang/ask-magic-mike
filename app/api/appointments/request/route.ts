@@ -171,12 +171,19 @@ export async function POST(req: Request) {
     leadId: clean(input.lead_id),
     sessionId: clean(input.session_id),
     requestSurface,
+    preferences: input.preferences,
   });
 
   if (!result.ok) {
     const publicError =
       result.error === "appointment_request_not_found"
         ? "We could not verify that appointment request. Please submit the lead form again."
+        : result.error === "appointment_request_closed" || result.error === "appointment_request_session_expired"
+          ? "This saved request is closed or its public session has expired. No follow-up was reopened. Call Mike if you need help with a new request."
+        : result.error === "appointment_preferred_channel_missing"
+          ? "Choose a contact method you supplied with this inquiry, or choose no preference."
+        : result.error === "invalid_conversation_preferences"
+          ? "Check your optional contact preference and day. Times are in Eastern time."
         : result.error === "preview_data_disabled"
           ? PREVIEW_READ_ONLY_MESSAGE
           : result.error === "appointment_request_store_not_configured"
@@ -220,7 +227,7 @@ export async function POST(req: Request) {
     warning: result.warning,
     message:
       result.status === "already_requested"
-        ? "Your appointment request is already in. A team member will confirm the time and details."
-        : "Your appointment request has been received. A team member will confirm the time and details.",
+        ? "This request is already recorded. Its existing status and preferences are unchanged; no duplicate follow-up was created."
+        : "Your conversation request and preferences are saved for review. No time or appointment is confirmed.",
   });
 }

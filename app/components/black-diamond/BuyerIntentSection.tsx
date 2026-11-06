@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef, useState, type FormEvent } from "react";
 import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
-import { usePublicIntakeCapability } from "../../lib/publicIntakeCapability";
+import { usePublicIntakeReadiness } from "../../lib/publicIntakeCapability";
 import { usePublicIntakeRecovery } from "../../lib/client/publicIntakeRecovery";
 import { useIntakeEngagement } from "../../lib/client/useIntakeEngagement";
 import { buyerHasQaMarkers, buyerReviewFingerprint, IntakeReviewError, readBuyerForm, type BuyerFormSnapshot } from "../../lib/client/publicIntakeReview";
@@ -39,7 +39,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
     const overrides = { ...defaults, ...attributionOverrides };
     return typeof window === "undefined" ? { ...initialAttribution, ...overrides } : readAttribution(overrides);
   });
-  const intakeMode = usePublicIntakeCapability();
+  const { mode: intakeMode, receiptAvailable } = usePublicIntakeReadiness();
   const recovery = usePublicIntakeRecovery();
   const recordEngagement = useIntakeEngagement(attribution, preset, surface, recovery.key);
   const [kind, setKind] = useState<"specific" | "search">(initialInterest?.kind ?? "specific");
@@ -123,6 +123,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
       }),
       timeline: actual.timeline || undefined, question: actual.question,
       consent: actual.consent, consent_email: actual.consent && Boolean(actual.email),
+      receipt_email_requested: new FormData(event.currentTarget).get("receipt_email_requested") === "yes",
       consent_call: actual.consent && Boolean(actual.phone),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION, consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
       consent_source: surface + ":buyer-intake", website: actual.website,
@@ -184,7 +185,7 @@ export function BuyerIntentSection({ surface = "buyer_page", preset = "buyer", c
           </> : null}
           <TextAreaField name="buyer-question" label="What would be most helpful?" placeholder="Tell Mike what you are trying to decide." rows={4} maxLength={2000} className="sm:col-span-2" />
           <div className="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
-          <LeadConsentField />
+          <LeadConsentField receiptAvailable={buyer && receiptAvailable} />
           {review ? <section aria-label="Review your request" className="space-y-2 rounded-md border border-[#cda24a55] bg-black/30 p-4 text-sm leading-6 sm:col-span-2">
             <h3 ref={reviewRef} tabIndex={-1} className="font-semibold text-[#f4ead4]">Review your request</h3>
             {review.buyerInterest?.kind === "specific" ? review.buyerInterest.properties.map((property, index) => <div key={index} className="select-text break-words">

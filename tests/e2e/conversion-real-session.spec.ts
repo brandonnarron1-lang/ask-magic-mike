@@ -124,7 +124,7 @@ test("Real Home Value synthetic-QA UI rejects unmarked contact without POST, the
   await owner.getByRole("button",{name:"Continue",exact:true}).click();
   await owner.getByLabel("Your name",{exact:true}).fill("SYNTHETIC FIXTURE — NOT A CONSUMER");
   await owner.getByLabel("Email for your valuation follow-up").fill(email);
-  await owner.locator('[data-amm-step="contact"]').getByRole("checkbox").check();
+  await owner.locator('[data-amm-step="contact"]').getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
   await owner.getByRole("button",{name:"Request Valuation",exact:true}).click();
   await expect(owner.locator(".amm-home-value").getByRole("alert")).toContainText("Synthetic QA only: use an INTERNAL QA / DO NOT CONTACT name and an example.test email.");
   await expect(owner.getByLabel("Your name",{exact:true})).toHaveValue("SYNTHETIC FIXTURE — NOT A CONSUMER");
@@ -394,13 +394,13 @@ test("Appointment request, declared-zone schedule and stale cancellation use gen
   const appointment = panel(page, "Appointment operations");
   const create = actionForm(page, "Create appointment record");
   await expect(appointment).toContainText("no external calendar event is created");
-  await create.getByRole("checkbox").check();
+  await create.getByRole("checkbox", { name: /^Confirm this appointment request/ }).check();
   await create.getByRole("button", { name: "Create appointment record", exact: true }).click();
   await expect.poll(async () => (await sql("SELECT status FROM lead_appointments WHERE lead_id=$1", [fixture.leads.agent]))[0]?.status).toBe("requested");
   const schedule = actionForm(page, "Mark scheduled");
   await schedule.locator('[name="starts_at"]').fill("2026-11-01T01:30");
   await schedule.locator('[name="ends_at"]').fill("2026-11-01T02:30");
-  await schedule.getByRole("checkbox").check();
+  await schedule.getByRole("checkbox", { name: /^Confirm the actual appointment change/ }).check();
   await schedule.getByRole("button", { name: "Mark scheduled", exact: true }).click();
   await expect(schedule.getByRole("alert")).toContainText("occurs twice");
   await expect(schedule.locator('[name="starts_at"]')).toHaveValue("2026-11-01T01:30");
@@ -415,9 +415,9 @@ test("Appointment request, declared-zone schedule and stale cancellation use gen
   const cancel = actionForm(stalePage, "Mark canceled");
   const reason = "SYNTHETIC draft retained through conflict";
   await cancel.locator('[name="cancellation_reason"]').fill(reason);
-  await cancel.getByRole("checkbox").check();
+  await cancel.getByRole("checkbox", { name: /^Confirm the actual appointment change/ }).check();
   const confirm = actionForm(page, "Mark confirmed");
-  await confirm.getByRole("checkbox").check();
+  await confirm.getByRole("checkbox", { name: /^Confirm the person actually agreed/ }).check();
   await confirm.getByRole("button", { name: "Mark confirmed", exact: true }).click();
   await expect.poll(async () => (await sql("SELECT status FROM lead_appointments WHERE id=$1", [row.id]))[0].status).toBe("confirmed");
   await cancel.getByRole("button", { name: "Mark canceled", exact: true }).click();
@@ -427,9 +427,9 @@ test("Appointment request, declared-zone schedule and stale cancellation use gen
   await stalePage.screenshot({ path: "output/playwright/conversion-real-session-appointment-conflict-390.png", fullPage: true });
   await cancel.screenshot({ path: "output/playwright/conversion-appointment-conflict-panel-390.png" });
   await cancel.getByRole("button", { name: "Review latest record (keep draft)", exact: true }).click();
-  await expect(cancel.getByRole("checkbox")).not.toBeChecked();
+  await expect(cancel.getByRole("checkbox", { name: /^Confirm the actual appointment change/ })).not.toBeChecked();
   await expect(cancel.locator('[name="cancellation_reason"]')).toHaveValue(reason);
-  await cancel.getByRole("checkbox").check();
+  await cancel.getByRole("checkbox", { name: /^Confirm the actual appointment change/ }).check();
   await cancel.getByRole("button", { name: "Mark canceled", exact: true }).click();
   await expect.poll(async () => (await sql("SELECT status FROM lead_appointments WHERE id=$1", [row.id]))[0].status).toBe("canceled");
   expect((await sql("SELECT count(*)::int AS n FROM lead_appointments WHERE lead_id=$1", [fixture.leads.agent]))[0].n).toBe(1);

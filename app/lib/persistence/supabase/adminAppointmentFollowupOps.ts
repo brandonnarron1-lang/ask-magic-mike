@@ -1,5 +1,6 @@
 import { updateAdminLeadStatus, type AdminLeadStatus } from "../../adminLeadActions";
 import { buildLeadStalledSignals } from "../../adminLeadTimeline";
+import { parseConversationPreferences } from "../../conversationPreferences";
 import { assertDatabaseMutationAllowed } from "../../../../src/lib/preview-security";
 
 export const APPOINTMENT_STATUSES = [
@@ -46,6 +47,7 @@ export type AdminAppointmentRow = {
   cancellation_reason: string | null;
   created_at: string | null;
   updated_at: string | null;
+  request_preferences?: import("../../conversationPreferences").ConversationPreferences | null;
 };
 
 export type AdminFollowupTaskRow = {
@@ -219,6 +221,7 @@ function normalizeAppointment(row: Record<string, unknown>): AdminAppointmentRow
     location_label: text(row.location_label),
     meeting_url: text(row.meeting_url),
     requested_at: text(row.requested_at),
+    request_preferences: row.request_preferences ? parseConversationPreferences(row.request_preferences) : null,
     confirmed_at: text(row.confirmed_at),
     completed_at: text(row.completed_at),
     canceled_at: text(row.canceled_at),

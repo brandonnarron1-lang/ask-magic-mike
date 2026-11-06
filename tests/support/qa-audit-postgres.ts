@@ -15,7 +15,9 @@ export const acceptedMigration = "20260716043829_infra_02_atomic_lifecycle.sql";
 export const database = "amm_qa_upgrade";
 export const statements: Array<{ sql: string; params: unknown[] }> = [];
 let containerStarted = false;
-const nativeBin = "/opt/homebrew/opt/postgresql@17/bin";
+const postgresMajor = process.env.AMM_QA_POSTGRES_MAJOR || "17";
+if (!["17", "18"].includes(postgresMajor)) throw new Error("isolated_postgres_major_not_supported");
+const nativeBin = `/opt/homebrew/opt/postgresql@${postgresMajor}/bin`;
 let nativeDirectory: string | undefined;
 let nativePort = 5432;
 function connectionArgs(db: string) {
@@ -127,7 +129,7 @@ export async function startDatabase(options: { loopbackTcp?: boolean } = {}): Pr
   // their built-app transport refuses nonlocal DBs and all external fetches.
   execFileSync("docker", ["run", "-d", "--name", container, "--network", options.loopbackTcp ? "bridge" : "none", "--memory", "512m",
     ...(options.loopbackTcp ? ["-p", "127.0.0.1::5432"] : []),
-    "--label", "com.askmagicmike.purpose=qa-audit-isolated", "-e", "POSTGRES_HOST_AUTH_METHOD=trust", "postgres:17-alpine"]);
+    "--label", "com.askmagicmike.purpose=qa-audit-isolated", "-e", "POSTGRES_HOST_AUTH_METHOD=trust", `postgres:${postgresMajor}-alpine`]);
   containerStarted = true;
   const identity = JSON.parse(execFileSync("docker", ["inspect", container], { encoding: "utf8" }))[0];
   const ports = identity.HostConfig.PortBindings || {};
@@ -163,6 +165,7 @@ export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: bo
   const omitted = new Set(excluded);
   if (!includeRepair) for (const file of [migration, reliabilityMigration, addressCaptureMigration]) omitted.add(file);
   const predecessors: Readonly<Record<string, readonly string[]>> = {
+    "20261105224500_public_request_response.sql": [launchIntakeMigration, "20261103233000_traffic_daily_digest_seller_review.sql"],
     "20261103233000_traffic_daily_digest_seller_review.sql": [launchIntakeMigration],
     [launchIntakeMigration]: [addressCaptureMigration],
     "20261018163000_reviewed_handoff_operator.sql": [launchIntakeMigration, "20261017220000_bounded_intelligence_workers.sql"],

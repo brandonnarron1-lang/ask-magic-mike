@@ -3,6 +3,7 @@ import { checkAdminAuth, checkBearerSecret } from "../../../../../src/lib/admin/
 import { assertProviderDeliveryAllowed } from "../../../../../src/lib/preview-security";
 import { notificationRetryDeliveryReady, retryDueLeadAlertNotifications, processNewLaunchAlerts, readNewLaunchAlertHealth } from "../../../../lib/leadAlertService";
 import { launchAlertWorkerEnabled } from "../../../../lib/leadAlertLaunch";
+import { processRequestResponses } from "../../../../lib/requestResponseService";
 
 async function batchResponse(results: Awaited<ReturnType<typeof processNewLaunchAlerts>>) {
   return NextResponse.json({ ok: true, scope: "launch_v6", processed: results.length,
@@ -19,7 +20,9 @@ export async function GET(req: NextRequest) {
     const delivery = assertProviderDeliveryAllowed();
     if (!delivery.ok) return NextResponse.json({ ok: false, error: delivery.error }, { status: delivery.statusCode });
     if (!notificationRetryDeliveryReady()) return NextResponse.json({ ok: false, error: "notification_retry_delivery_not_ready", processed: 0 }, { status: 503 });
-    return batchResponse(await processNewLaunchAlerts());
+    const response = await batchResponse(await processNewLaunchAlerts());
+    await processRequestResponses();
+    return response;
   }
   const auth = checkAdminAuth(req);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });

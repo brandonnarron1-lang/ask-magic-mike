@@ -6,7 +6,7 @@ import { clearPendingHomeValueRequest, readPendingHomeValueRequest } from "../..
 import { PUBLIC_LEAD_SAVED_MESSAGE } from "../../app/lib/publicLeadReceipt";
 
 const fixture = vi.hoisted(() => ({ mode: "live" as "live" | "checking" | "read_only" | "synthetic_qa" }));
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => fixture.mode }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => fixture.mode, usePublicIntakeReadiness: () => ({ mode: fixture.mode, receiptAvailable: false }) }));
 const NAME = "SYNTHETIC FIXTURE | INTERNAL QA | DO NOT CONTACT";
 const EMAIL = "buyer-fixture@example.test";
 const PHONE = "+12025550194";

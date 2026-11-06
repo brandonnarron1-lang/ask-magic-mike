@@ -70,10 +70,10 @@ export function WidgetApp() {
       <div className="flex min-h-screen flex-col">
         <header className="border-b border-[#cda24a33] bg-[linear-gradient(135deg,#080808,rgba(34,198,210,.08))] px-4 py-4">
           <h1 className="text-xs font-bold uppercase tracking-[0.2em] text-[#e2c06f]">Ask Magic Mike</h1>
-          <p className="mt-1 text-sm text-[#d9ceb8]">Local guidance from Our Town Properties</p>
+          <p className="mt-1 text-sm text-[#d9ceb8]">Your next move, made clearer · Our Town Properties, Inc.</p>
           <div className="mt-3"><PublicMikeContact surface="widget" compact /></div>
         </header>
-        <nav className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] border-b border-[#cda24a24] bg-black" role="tablist" aria-label="Ask Magic Mike paths">
+        <nav className="grid grid-cols-2 gap-1 border-b border-[#cda24a24] bg-black p-2" role="tablist" aria-label="Ask Magic Mike paths">
           {[
             ["value", "Home Value Review"],
             ["buy", "Buying Help"],
@@ -100,7 +100,7 @@ export function WidgetApp() {
                 event.preventDefault();
                 if (selectTab(next)) document.getElementById(`widget-tab-${next}`)?.focus();
               }}
-              className={`min-h-12 min-w-0 px-2 py-3 text-xs font-bold uppercase tracking-[0.1em] [overflow-wrap:anywhere] transition ${
+              className={`min-h-12 min-w-0 rounded-xl px-2 py-3 text-sm font-semibold leading-5 [overflow-wrap:anywhere] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#22c6d2] ${
                 active === key ? "bg-[#cda24a] text-black" : "text-[#d9ceb8] hover:text-[#f4ead4]"
               }`}
             >

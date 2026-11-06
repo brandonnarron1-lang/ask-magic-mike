@@ -198,14 +198,17 @@ export class SupabasePostgrestAdapter implements ActivePersistenceBoundary {
   async requestAppointment(
     input: AppointmentIntent,
   ): Promise<AppointmentIntentResult> {
-    const result = await this.rpc("request_public_appointment_v1", {
-      p_lead_id: input.leadId,
-      p_session_id: input.sessionId,
-      p_request_surface: input.requestSurface || null,
-      p_requested_at: input.requestedAt,
+    const result = await this.rpc("request_public_appointment_v2", {
+      p_lead: input.leadId,
+      p_session: input.sessionId,
+      p_surface: input.requestSurface || null,
+      p_at: input.requestedAt,
+      p_preferences: input.preferences || { version: 1, channel: "no_preference", day: null, window: "no_preference", timezone: "America/New_York" },
+      p_draft: input.responseDraft || {},
     });
     if (result.ok !== true) {
-      return { ok: false, error: "appointment_request_not_found" };
+      return { ok: false, error: ["appointment_request_closed", "appointment_request_session_expired", "appointment_preferred_channel_missing"].includes(String(result.error))
+        ? result.error as "appointment_request_closed" | "appointment_request_session_expired" | "appointment_preferred_channel_missing" : "appointment_request_not_found" };
     }
     return {
       ok: true,

@@ -1,3 +1,4 @@
+import { conversationPreferenceLabel } from "./conversationPreferences";
 import type {
   AdminAppointmentRow,
   AdminFollowupTaskRow,
@@ -330,7 +331,7 @@ export function buildAdminTodayQueue(input: {
       dueAt: appointment.starts_at || appointment.requested_at, timezone: appointment.timezone || timezone,
       reasonCodes: [unscheduled ? "appointment_unscheduled" : "appointment_today"], evidenceReferences: [`appointment:${appointment.id}`],
       blockers, requiredPermission: "task:manage_assigned", recordVersion: appointment.updated_at || appointment.created_at || "unknown",
-      recommendedAction: unscheduled ? "Set verified appointment details." : "Review the lead timeline and prepare for the appointment.",
+      recommendedAction: unscheduled ? `${appointment.request_preferences ? `Requested: ${conversationPreferenceLabel(appointment.request_preferences)}. ` : ""}Review current contact permission before agreeing to a time.` : "Review the lead timeline and prepare for the appointment.",
     };
     const review = reviews.get(`${appointment.lead_id}:${actionKey}`);
     if (!review?.hidden) {

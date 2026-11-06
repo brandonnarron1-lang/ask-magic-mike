@@ -105,6 +105,7 @@ export type LeadPayload = {
   is_test?: boolean;
   consent?: boolean;
   consent_email?: boolean;
+  receipt_email_requested?: boolean;
   consent_call?: boolean;
   consent_sms?: boolean;
   consent_timestamp?: string | null;
@@ -189,6 +190,7 @@ export function normalizeLeadPayload(input: Record<string, unknown>): LeadPayloa
     is_test: isInternalQa,
     consent: input.consent === true,
     consent_email: input.consent_email === true,
+    ...(input.receipt_email_requested === true ? { receipt_email_requested: true } : {}),
     consent_call: input.consent_call === true,
     consent_sms: input.consent_sms === true,
     consent_timestamp: cleanOptional(input.consent_timestamp),

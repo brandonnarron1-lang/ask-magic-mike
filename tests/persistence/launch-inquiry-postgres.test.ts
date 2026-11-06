@@ -39,7 +39,7 @@ async function submit(body: Row, extraHeaders: Record<string, string> = {}) {
   const { POST } = await import("../../app/api/leads/route"); const start = statements.length;
   const response = await POST(new Request("https://www.askmagicmike.com/api/leads", { method: "POST", headers: {
     "Content-Type": "application/json", Origin: "https://www.askmagicmike.com", "Idempotency-Key": String(body.idempotency_key), ...extraHeaders }, body: JSON.stringify(body) }));
-  return { response, result: await response.json() as Row, capture: statements.slice(start).find(value => value.sql.includes("capture_public_lead_v4(")) };
+  return { response, result: await response.json() as Row, capture: statements.slice(start).find(value => /capture_public_lead_v[46]\(/.test(value.sql)) };
 }
 function rows(sql: string): Row[] { return JSON.parse(psql(`SELECT coalesce(jsonb_agg(q),'[]') FROM (${sql}) q;`)); }
 function allNotifications(id: unknown) { return rows(`SELECT * FROM lead_notifications WHERE lead_id=${literal(id)}::uuid ORDER BY recipient_reference`); }
@@ -50,8 +50,8 @@ function hashes(db: "amm_qa_upgrade" | "amm_qa_fresh" = "amm_qa_upgrade") {
   return psql("SELECT jsonb_build_object('v1',pg_get_functiondef('public.capture_public_lead_v1(jsonb,jsonb,jsonb,text)'::regprocedure),'v2',pg_get_functiondef('public.capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb)'::regprocedure),'v3',pg_get_functiondef('public.capture_public_lead_v3(jsonb,jsonb,jsonb,text,jsonb)'::regprocedure),'fingerprint',pg_get_functiondef('public.amm_public_lead_request_fingerprint(jsonb,jsonb)'::regprocedure));", db);
 }
 function originalEvidence() {
-  return psql(`SELECT jsonb_build_object('lead',(SELECT to_jsonb(l)-ARRAY['buyer_interest','inquiry_request_fingerprint'] FROM leads l WHERE id=${literal(legacy.lead_id)}::uuid),
-    'notifications',(SELECT jsonb_agg(to_jsonb(n)-ARRAY['private_intake_snapshot','first_provider_attempt_at','provider_accepted_at','launch_batch_lease_token','launch_batch_lease_until'] ORDER BY id) FROM lead_notifications n WHERE lead_id=${literal(legacy.lead_id)}::uuid));`);
+  return psql(`SELECT jsonb_build_object('lead',(SELECT to_jsonb(l)-ARRAY['buyer_interest','inquiry_request_fingerprint','seller_request'] FROM leads l WHERE id=${literal(legacy.lead_id)}::uuid),
+    'notifications',(SELECT jsonb_agg(to_jsonb(n)-ARRAY['private_intake_snapshot','first_provider_attempt_at','provider_accepted_at','launch_batch_lease_token','launch_batch_lease_until','private_response_snapshot','response_claim_token'] ORDER BY id) FROM lead_notifications n WHERE lead_id=${literal(legacy.lead_id)}::uuid));`);
 }
 function callback(id: unknown, recipient: string, type = "delivered", eventId = `synthetic_${randomUUID()}`, valid = true, occurredAt = new Date().toISOString()) {
   const when = new Date(); const raw = JSON.stringify({ type: `email.${type}`, created_at: occurredAt, data: {
@@ -67,6 +67,48 @@ function claim(id: unknown, initial = false, lease: string | null = null) {
 async function pending() { const result = await submit(fixture()); expect(result.response.status).toBe(200); return notifications(result.result.lead_id); }
 
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolated actual PostgreSQL", () => {
+  it("a signed early receipt callback reconciles UNKNOWN without a resend or later evidence overwrite", async () => {
+    vi.stubEnv("REQUEST_RECEIPTS_ENABLED", "true"); vi.stubEnv("REQUEST_RECEIPTS_ACTIVATED_AT", cutoff);
+    vi.stubEnv("REQUEST_RECEIPTS_REPLY_TO", "reply@example.test");
+    const body = fixture({ receipt_email_requested: true }); const saved = await submit(body);
+    const receipt = allNotifications(saved.result.lead_id).find(n => n.recipient_type === "customer")!;
+    expect(receipt).toBeDefined();
+    const claimed = rows(`SELECT * FROM claim_request_response_v1(${literal(receipt.id)},${literal(cutoff)})`)[0];
+    expect(claimed.provider).toBe("resend");
+    const { POST } = await import("../../app/api/webhooks/email/events/route");
+    const response = await POST(callback(receipt.id, String(body.email)));
+    expect(response.status).toBe(200);
+    const after = allNotifications(saved.result.lead_id).find(n => n.id === receipt.id)!;
+    expect(after.status).toBe("sent"); expect(after.metadata).toMatchObject({ provider_delivery_confirmed: true });
+    psql(`SELECT finish_request_response_v1(${literal(receipt.id)},${literal(claimed.response_claim_token)},'{"status":"processing","errorCode":"provider_acceptance_ambiguous"}');`);
+    const reconciled = allNotifications(saved.result.lead_id).find(n => n.id === receipt.id)!;
+    expect(reconciled.provider_message_id).toBe(`synthetic_message_${receipt.id}`);
+    expect(reconciled.status).toBe("sent");
+    expect(rows(`SELECT * FROM claim_request_response_v1(${literal(receipt.id)},${literal(cutoff)})`)).toEqual([]);
+    const openedAt = new Date(Date.now() + 1000).toISOString();
+    expect((await POST(callback(receipt.id, String(body.email), "opened", `opened_${randomUUID()}`, true, openedAt))).status).toBe(200);
+    // Cumulative older signed delivery must survive without regressing opened.
+    psql(`UPDATE lead_notifications SET metadata=metadata-'provider_delivery_confirmed' WHERE id=${literal(receipt.id)};`);
+    expect((await POST(callback(receipt.id, String(body.email), "delivered", `late_${randomUUID()}`, true, new Date().toISOString()))).status).toBe(200);
+    const late = allNotifications(saved.result.lead_id).find(n => n.id === receipt.id)!;
+    expect(late.metadata).toMatchObject({ provider_delivery_confirmed: true, provider_last_event: "opened" });
+  });
+  it("canonical capture commits explicit receipt purpose plus separate receipt intent without a third staff alert", async () => {
+    vi.stubEnv("REQUEST_RECEIPTS_ENABLED", "true"); vi.stubEnv("REQUEST_RECEIPTS_ACTIVATED_AT", cutoff);
+    vi.stubEnv("REQUEST_RECEIPTS_REPLY_TO", "reply@example.test");
+    const body = fixture({ receipt_email_requested: true });
+    const saved = await submit(body); expect(saved.response.status).toBe(200);
+    expect(notifications(saved.result.lead_id)).toHaveLength(2);
+    expect(allNotifications(saved.result.lead_id).filter(n => n.notification_type === "consumer_ack")).toHaveLength(1);
+    expect(psql(`SELECT state,consent_version FROM communication_permissions WHERE lead_id=${literal(saved.result.lead_id)} AND purpose='transactional_acknowledgment';`)).toBe("allowed|amm_request_receipt_email_v1");
+    const before = counts(); expect((await submit(body)).result.lead_id).toBe(saved.result.lead_id); expect(counts()).toBe(before);
+    const denied = await submit(fixture({ receipt_email_requested: true, consent: false, consent_email: false }));
+    expect(denied.response.status).toBe(200);
+    expect(allNotifications(denied.result.lead_id).filter(n => n.recipient_type === "customer")).toHaveLength(0);
+    const question = await submit(fixture({ funnel_type: "chat", buyer_interest: undefined, receipt_email_requested: true }));
+    expect(question.response.status).toBe(200); expect(notifications(question.result.lead_id)).toHaveLength(2);
+    expect(notifications(question.result.lead_id)[0].private_intake_snapshot).toMatchObject({ subject: expect.stringContaining("Question / Requested Follow-up") });
+  });
   beforeAll(async () => {
     await startDatabase(); install("amm_qa_upgrade", true, new Set([launchIntakeMigration]));
     vi.stubEnv("NODE_ENV", "development"); vi.stubEnv("VERCEL_ENV", "development");
@@ -78,7 +120,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolat
     vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("external_network_forbidden"); }));
     legacyBody = fixture({ buyer_interest: undefined }); legacy = (await submit(legacyBody)).result;
     expect(legacy.lead_id).toBeDefined(); predecessor = hashes(); oldEvidence = originalEvidence();
-    psql(migration); install("amm_qa_fresh", true);
+    psql(migration); psql(readFileSync("supabase/migrations/20261103233000_traffic_daily_digest_seller_review.sql", "utf8"));
+    psql(readFileSync("supabase/migrations/20261105224500_public_request_response.sql", "utf8")); install("amm_qa_fresh", true);
   }, 120000);
   beforeEach(() => {
     vi.stubEnv("LEAD_ALERT_V6_ENABLED", "true"); vi.stubEnv("LEAD_ALERT_V6_WORKER_ENABLED", "true"); vi.stubEnv("LEAD_ALERT_V6_CUTOFF", cutoff);

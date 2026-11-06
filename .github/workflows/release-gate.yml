@@ -19,7 +19,9 @@ jobs:
   local-release-gate:
     name: local-release-gate
     runs-on: ubuntu-latest
-    timeout-minutes: 28
+    # Public standard runner; retain every test-level bound and mandatory stage.
+    # Observed apt font downloads consumed 6–8 minutes of the previous budget.
+    timeout-minutes: 35
 
     steps:
       - name: Checkout
@@ -78,6 +80,11 @@ jobs:
       - name: Isolated PostgreSQL launch inquiry snapshots, per-recipient claims and signed callback recovery
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/launch-inquiry-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
+      - name: Isolated conversation preferences, terminal history, atomic intents and receipt fencing
+        run: |
+          AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/public-conversation-postgres.test.ts tests/persistence/public-response-role-grants-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+          AMM_QA_POSTGRES_TEST=1 AMM_QA_POSTGRES_MAJOR=18 pnpm exec vitest run tests/persistence/public-response-role-grants-postgres.test.ts --maxWorkers=1 --no-file-parallelism
+
       - name: Ordinary intake and first-live monitor (real isolated PostgreSQL, no sends)
         run: AMM_QA_POSTGRES_TEST=1 pnpm exec vitest run tests/persistence/first-live-intake-postgres.test.ts tests/persistence/today-ownership-postgres.test.ts --maxWorkers=1 --no-file-parallelism
 
@@ -125,6 +132,9 @@ jobs:
 
       - name: Built direct Call and Text mobile acceptance (local intercepted UI, no sends)
         run: AMM_PUBLIC_CONTACT_ACCEPTANCE=1 AMM_E2E_BUILT=1 AMM_E2E_OUTPUT_DIR=output/playwright/public-contact-mobile pnpm exec playwright test tests/e2e/public-contact-mobile.spec.ts --workers 1 --reporter=line
+
+      - name: Built mobile conversation preferences and same-request recovery (intercepted UI, no sends)
+        run: AMM_MOBILE_CONVERSATION_UI=1 AMM_E2E_BUILT=1 AMM_E2E_OUTPUT_DIR=output/playwright/mobile-conversation pnpm exec playwright test tests/e2e/mobile-conversation.spec.ts --workers 1 --reporter=line
 
       - name: Built cash-review and optional buyer address (local intercepted UI, no sends)
         run: AMM_QUALIFIED_CONVERSION_ACCEPTANCE=1 AMM_E2E_BUILT=1 pnpm exec playwright test tests/e2e/qualified-conversion.spec.ts --workers 1 --reporter=line
@@ -197,6 +207,7 @@ jobs:
             artifacts/*.json
             artifacts/*.md
             output/playwright/public-contact-mobile/*.png
+            output/playwright/mobile-conversation/*.png
             .amm-run/reference-session-acceptance/receipt.json
             .amm-run/reference-session-acceptance/conversion-receipt.json
             .amm-run/reference-session-acceptance/performance.json
@@ -209,12 +220,14 @@ jobs:
             .amm-run/acquisition-ci/screenshots/*.png
             .amm-run/consumer-workspace-ci/receipt.json
             .amm-run/consumer-workspace-ci/screenshots/*.png
+            .amm-run/consumer-workspace-ci/screenshots/*.capture.json
             .amm-run/consumer-account-ci/receipt.json
             .amm-run/consumer-account-ci/screenshots/*.png
             .amm-run/r2-lifecycle-ci/receipt.json
             .amm-run/r3-native-api-ci/receipt.json
             .amm-run/r2-lifecycle-ci/screenshots/*.png
             .amm-run/consumer-workspace-intake-ci/receipt.json
+            .amm-run/consumer-workspace-intake-ci/screenshots/*.capture.json
             .amm-run/acquisition-report/scale-*.json
             .amm-run/home-value-intake-ci/home-value-ui-receipt.json
             .amm-run/home-value-intake-ci/screenshots/*.png

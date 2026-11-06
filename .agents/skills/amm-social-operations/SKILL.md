@@ -6,7 +6,9 @@ description: Resume Ask Magic Mike campaigns, observe/reconcile queues, select u
 # Owned social operations
 
 Brandon is the sole product operator. Mike receives leads; do not recruit him for
-QA or impersonate him. Start with the focused private handoff under
+QA or impersonate him. An explicitly supplied current resume receipt takes
+precedence over a dated handoff; follow its bounded references first. Otherwise
+start with the focused private handoff under
 `.amm-run/home-value-lead-loop-20261029/next-agent-handoff.md`, current release
 policy, `config/owned-social-policy.json` and `docs/OWNED_SOCIAL_OPERATIONS.md`.
 
@@ -152,7 +154,7 @@ unrelated queue content. Check for an in-flight run before cancellation.
 
 ## Verification and handoff
 
-For a future traffic/digest release, inspect the actual accepted reader before
+For traffic/digest operation, inspect the actual accepted reader before
 reusing the old event-grain definition. Root navigation ownership and optional
 first-party identity must not double-count legacy mounts or create lead sessions.
 Consented browser/visit estimates are not people; unknown coverage is not zero.
@@ -165,11 +167,21 @@ does not mean a daily email is running. Remote Places allowance/budget alerts
 are not account-wide zero-spend proof. As-is intent does not mean cash review;
 retain the explicit request and do not invent a purchaser or closing promise.
 
+Find actual activation/configuration times and final accepted deployment in the
+focused handoff. First normal digest opportunity is8a.m. Eastern on the day after
+actual activation, covering the previous local day with honest partial coverage.
+When not due, finish without a forced email, observer or retained QA. No reviewed
+immediate-send mode exists; enabled digest GET can send and is not read-only.
+Preserve recipient/period identity, frozen body, bounded catch-up and UNKNOWN.
+Provider acceptance, server delivery and personal receipt are separate.
+
 For elapsed acquisition reads, follow the existing
 `docs/OWNED_SOCIAL_OPERATIONS.md#read-only-measurement-contract` and the current
-private handoff's exact safe SQL. The installed report covers inquiries/delivery,
-not all traffic. `page_view` has no form UUID; `intake_started` is once per mounted
-form with an optional provisional UUID, not once per visitor. HTTP202 alone is
+private handoff's exact safe SQL. Accepted traffic-v1 has root-owned pathname
+views, separate embedded context and optional consented visit/browser estimates;
+legacy PageTracker rows are not that denominator. The older inquiry report still
+combines social sources; use the traffic reader's exact Instagram filter only
+where supported. `intake_started` is once per mounted form, not per visitor. HTTP202 alone is
 not persistence. Keep stored event counts, distinct intake IDs, contacts and
 genuine visits separate; operating `sla_*_breached` rows are not traffic.
 Use existing authorized read-only aggregates with a fixed cutoff, schema/grant/RLS
@@ -177,10 +189,36 @@ checks and bounded transaction timeouts; do not request broad credentials.
 Explicit test/automation flags cannot guarantee exclusion of unlinked operator
 activity. No compatible denominator means no conversion rate.
 
+Preserve exact migration hashes and actual role regressions: a narrower GRANT
+does not revoke inherited default privileges. Follow the runbook's version-aware
+PostgreSQL catalogue/driver checks; reconcile rolled-back verifier failures before
+retry, never weaken assertions. Secure-input capability and exact-resource cleanup
+must exist before provisioning. An old Mac handoff does not establish unattended
+access or execution through sleep.
+
 Native publication time is not Buffer's scheduled `dueAt`. Verify the actual
 permalink/account/caption/time. Check disclosure in a full current UI snapshot,
 not absence from a diff; retain historical provider/native discrepancies without
 changing used identities or replaying an action.
+
+For a bounded post-release pass, snapshot activation-to-cutoff before controlled
+browsing and keep the pilot separate. Use the actual clickable profile URL and
+existing attribution, not caption text. A link-shim HTTP interstitial is not a
+proven consumer failure; independently permitted browser navigation can establish
+the final URL. Read actual viewport dimensions before claiming narrow-screen
+evidence; ignored overrides/unavailable screenshots are limits, not product bugs.
+Reuse unchanged-tree protected submission/mobile evidence; never create a lead
+to demonstrate the live path.
+
+A public route view is not necessarily an initial landing or distinct visit;
+retain that limit when optional identity or first-entry evidence is absent.
+
+Assess reserve with valid future-slot planning, not a stale noon placeholder.
+Report selected proposals and holds together: a planner's additional-candidate
+queue hold does not mean zero eligible reserve. Pure projection does not authorize
+CAS or create. Record only non-secret owner-managed access/custody/recovery
+references in the existing private handoff; tool presence is not authentication
+and an old native handoff is not unattended capability.
 
 Use mocked provider failures and a synthetic CAS store; normal CI needs no key or
 paid call. Run `tests/social/publisher.test.ts` and affected attribution contracts,

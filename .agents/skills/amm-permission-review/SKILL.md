@@ -107,6 +107,53 @@ Do not store changing live counts, account credentials or customer IDs here.
 
 ## Closeout
 
+### Request/receipt implementation boundary (verified locally November5, 2026)
+
+For optional conversation work, inspect `request_public_appointment_v2` and the
+focused `public-conversation-postgres` suite. Return existing appointment history
+before deciding a task; never clear terminal outcomes or recreate canceled/done
+obligations. Use the owned local harness with `LC_ALL=C LANG=C` on this Mac.
+Keep legacy-risk reproduction separate from corrected-function assertions.
+
+New request receipts use an explicit separate checkbox/purpose, not the manual
+consent projection. Read `docs/LEAD_NOTIFICATION_OPERATING_GUIDE.md` for the
+candidate's recipient matrix, cutoff, kill switches, immutable outbox and signed
+callback recovery. Check accepted source/activation before claiming it is live.
+An early callback can beat HTTP completion: preserve its provider evidence and
+do not reset UNKNOWN. Preferences, task completion and enrollment are not
+permission, an appointment, a send or device receipt. Recheck gates on resume;
+never replay older intake to obtain a new acknowledgment.
+
+When customer delivery is OFF, inspect the built form as well as worker flags.
+An opt-in control is not honest availability by itself. Use the existing no-store
+health boolean and explicit form prop to hide an unavailable receipt choice,
+without hiding manual contact permission or blocking otherwise usable intake.
+See `request-receipt-availability` unit and built `mobile-conversation` regressions
+(November5,2026). This advisory UI does not grant consent or prove provider delivery;
+recheck exact accepted source and current gates after any activation/kill-switch change.
+
+Adding a public checkbox or native field changes strict selectors, keyboard
+order and serialized request expectations. Scope consent selectors to public
+forms; preserve staff confirmations/account controls. Before final source freeze,
+run affected built conversion, Home Value and seller/buyer suites with the owned
+isolated harness. Assert the exact optional-preference payload, not a weaker
+subset. Retain failed artifacts; do not relax confirmation or timing bounds.
+
+For scheduled-report SQL tests, inject deterministic activation/execution instants
+across the actual Eastern due boundary; wall-clock +24h can still be before 8am.
+Keep real harness/provider timers and concurrency/UNKNOWN assertions. Verify the
+pre-due no-op and due claim without changing live scheduling or sending a report.
+See `qualified-conversion-postgres` and `daily-digest` regressions (November6,2026);
+recheck the accepted scheduling contract if its business-time rules change.
+
+Before a Neon migration names legacy browser roles, inspect the actual role
+catalog read-only. Historical Supabase paths and synthetic harness roles do not
+prove those roles exist in Production. Revoke PUBLIC unconditionally; revoke
+optional legacy-role grants only if present, while preserving required runtime
+grants and owner defaults. Test absent and inherited-grant cases in the owned
+isolated harness. A changed migration checksum needs a new source disposition;
+never create Production roles or rewrite approved SQL in an executor to pass it.
+
 Briefly report: actual change; contact ready/one precise decision/restricted with
 reason; exact existing screen/action; real contact/outcome (none if none);
 local/pushed/merged/deployed/accepted separately; source-bound tests/limits;

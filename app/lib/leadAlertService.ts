@@ -1,4 +1,5 @@
 import { assertProviderDeliveryAllowed } from "../../src/lib/preview-security";
+import { processRequestResponses } from "./requestResponseService";
 import { neon } from "@neondatabase/serverless";
 import { agentPushNotificationsEnabled, agentSmsNotificationsEnabled, emailNotificationsEnabled, productionNotificationDeliveryEnabled, normalizeUsSmsRecipient, notificationMode, safeRecipientReference, selectNotificationProvider } from "./leadNotificationProvider";
 import { emailProviderConfigurationReady, configuredEmailProvider } from "./emailProviderConfiguration";
@@ -103,7 +104,7 @@ async function deliver(
   options: { allowInitialInternalQa?: boolean } = {},
 ) {
   const current = await repo.findById(notification.id) || notification;
-  if (current.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) return current;
+  if ([LAUNCH_LEAD_ALERT_TEMPLATE_VERSION, "request_response_v1"].includes(current.template_version)) return current;
   if (current.status === "sent") return current;
   if (!["pending", "failed", "retry_scheduled"].includes(current.status) ||
     current.provider_message_id || (current.status === "pending" && current.attempt_count !== 0)) return current;
@@ -295,7 +296,7 @@ export async function retryLeadAlertNotification(
   const repo = notificationRepository();
   const current = await repo.findById(notificationId);
   if (!current || !["lead_alert", "consumer_ack"].includes(current.notification_type)) return null;
-  if (current.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) return current;
+  if ([LAUNCH_LEAD_ALERT_TEMPLATE_VERSION, "request_response_v1"].includes(current.template_version)) return current;
   if (!["pending", "failed", "retry_scheduled"].includes(current.status) ||
     current.provider_message_id || (current.status === "pending" && current.attempt_count !== 0)) return current;
   const input = await loadLeadAlertInput(current.lead_id, current.metadata);
@@ -408,6 +409,14 @@ export async function retryNotificationByType(
   }
   if (current.template_version === LAUNCH_LEAD_ALERT_TEMPLATE_VERSION) {
     return { ok: false, statusCode: 409, error: "launch_processor_required" };
+  }
+  if (current.template_version === "request_response_v1") {
+    if (!["pending", "retry_scheduled"].includes(current.status) || current.provider_message_id)
+      return { ok: false, statusCode: 409, error: "provider_reconciliation_required" };
+    const result = await processRequestResponses({ notificationId });
+    const readback = await repo.findById(notificationId);
+    return readback ? { ok: true, notification: readback, ...(result.processed ? {} : { warning: "request_response_held_or_not_due" }) }
+      : { ok: false, statusCode: 503, error: "notification_readback_unavailable" };
   }
   if (!["failed", "retry_scheduled"].includes(current.status)) {
     return { ok: false, statusCode: 409, error: "notification_not_retryable" };

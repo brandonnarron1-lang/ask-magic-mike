@@ -137,7 +137,10 @@ describe("private frozen v6", () => {
     expect(launchAlertWorkerEnabled({ LEAD_ALERT_V6_WORKER_ENABLED: "true" })).toBe(false);
     expect(launchAlertWorkerEnabled({ LEAD_ALERT_V6_WORKER_ENABLED: "true", LEAD_ALERT_V6_CUTOFF: cutoff })).toBe(true);
   });
-  it.each(["chat", "renter", "open_house", "appointment"] as const)("keeps %s on legacy v4", funnel_type => {
+  it("routes captured question follow-up through the two-recipient v6 boundary", () => {
+    expect(isLaunchIntake(normalizeLeadPayload({ ...base, funnel_type: "chat" }))).toBe(true);
+  });
+  it.each(["renter", "open_house", "appointment"] as const)("keeps %s on legacy v4", funnel_type => {
     expect(isLaunchIntake({ funnel_type })).toBe(false);
   });
   it("scopes launch to seller/Home Value/buyer and only normalized Home Value widgets", () => {

@@ -50,7 +50,7 @@ export function HomeValueFunnel({
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(attributionOverrides),
   );
-  const { mode: intakeMode, recheck: recheckAvailability } = usePublicIntakeReadiness();
+  const { mode: intakeMode, receiptAvailable, recheck: recheckAvailability } = usePublicIntakeReadiness();
   const intakeCanSave = intakeMode === "live" || intakeMode === "synthetic_qa";
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
@@ -73,6 +73,7 @@ export function HomeValueFunnel({
   const hasQaMarkers = qaMarkerText.includes("INTERNAL QA") && qaMarkerText.includes("DO NOT CONTACT");
   const [timeline, setTimeline] = useState(timelineOptions[1]);
   const [consent, setConsent] = useState(false);
+  const [receiptRequested, setReceiptRequested] = useState(false);
   const displayedReview = useRef("");
   const [formError, setFormError] = useState<{ message: string; field?: HomeValueField } | null>(null);
   const [leadMessage, setLeadMessage] = useState<string | null>(null);
@@ -158,6 +159,7 @@ export function HomeValueFunnel({
     // unrelated rerenders. Snapshot them to seed defaults when this step remounts.
     setName(values.name); setEmail(values.email); setPhone(values.phone);
     setTimeline(values.timeline); setConsent(values.consent);
+    setReceiptRequested(data.get("receipt_email_requested") === "yes");
     return values;
   }
 
@@ -275,6 +277,7 @@ export function HomeValueFunnel({
       widget_session_id: submissionId, idempotency_key: submissionId,
       ...(experimentLeadContext || {}),
       consent: actual.consent, consent_email: actual.consent && Boolean(clean(actual.email)),
+      receipt_email_requested: new FormData(event.currentTarget).get("receipt_email_requested") === "yes",
       consent_call: actual.consent && Boolean(clean(actual.phone)),
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT,
@@ -446,7 +449,7 @@ export function HomeValueFunnel({
               <option key={option}>{option}</option>
             ))}
           </SelectField>
-          <fieldset disabled={locked} className="min-w-0"><legend className="sr-only">Contact permission</legend><LeadConsentField checked={consent} onChange={setConsent} /></fieldset>
+          <fieldset disabled={locked} className="min-w-0"><legend className="sr-only">Contact permission</legend><LeadConsentField checked={consent} onChange={setConsent} receiptDefaultChecked={receiptRequested} receiptAvailable={receiptAvailable} /></fieldset>
           <div aria-label="Review before requesting valuation" className="space-y-2 rounded-md border border-[#cda24a55] bg-black/30 p-3 text-sm leading-6">
             <p className="font-semibold text-[#f4ead4]">Review your request</p>
             <p className="select-text break-words">Address: {address}</p>
@@ -493,7 +496,7 @@ export function HomeValueFunnel({
               </> : <>
                 <li>Mike reviews the address and timing you shared.</li>
                 <li>Our Town Properties follows up through your provided contact path.</li>
-                <li>You can request a conversation now if you want a faster handoff.</li>
+                <li>You can request a conversation and optionally share a preferred window.</li>
               </>}
             </ul>
           </div>

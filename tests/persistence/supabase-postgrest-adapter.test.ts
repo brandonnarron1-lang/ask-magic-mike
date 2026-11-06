@@ -75,7 +75,7 @@ describe("Supabase PostgREST persistence adapter", () => {
       followup_status: "existing",
     });
     expect(String(request.mock.calls[0][0])).toContain(
-      "/rest/v1/rpc/request_public_appointment_v1",
+      "/rest/v1/rpc/request_public_appointment_v2",
     );
   });
 

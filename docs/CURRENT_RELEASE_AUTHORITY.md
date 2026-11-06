@@ -1,6 +1,44 @@
 # Current Release Authority
 
-## November4 PR321 cutover hold — original application tree not released
+Current decisions use `config/release-authority-policy.json` and authenticated
+`pnpm release:authority:resolve`, never a candidate or historical paragraph.
+
+## November5 mobile request/response candidate — prepared, not released
+
+The separate `codex/mobile-request-response-20261105` branch preserves accepted
+PR322 plus the pushed maintenance ancestry e77693fb. It adds optional conversation
+preferences, atomic request/outbox handling and separately gated request receipts.
+Its new migration, exact-source protected acceptance and Production/runtime
+activation are NOT covered by PR322's consumed approval. The final source seal,
+focused evidence and single decision packet belong in the current private
+`mobile-request-response-20261105` handoff and review PR, not a predicted receipt.
+Existing traffic, digest, campaign and lead-alert runtime remain unchanged.
+
+## November5 PR322 accepted application — corrected continuation completed
+
+PR322's reviewed head d361fea1413fd5d0bd89f6e399bd3ead857ce286 and tree
+be578af935338741ab7ccc5d19dc8ca146886493 were merged normally as
+0192402e2198d9b6a2b68adcb042097b4aea682e. The corrected additive migration
+SHA256 b955ab17e52b8ca6613b5e70096036210d0f61e378447fddd176d778d999004a
+committed once after guarded postflight; the original PR321 was not released.
+New-tree protected acceptance and the actual-merge hosted gate passed.
+
+Use authenticated `pnpm release:authority:resolve` for the actual current
+deployment and its generated receipt, not a deployment ID frozen into this guide.
+Application acceptance and four-binding traffic/digest activation are distinct;
+their final runtime/coverage/due/delivery facts live in the focused private
+qualified-conversion handoff. There is no reviewed immediate digest test-send.
+QA was disconnected, revoked and deleted from active provider state, with its
+one-time cleanup task removed. Provider recovery retention is not physical purge.
+Do not repeat the consumed QA/release scope or reapply the migration.
+
+The dated PR321 hold and candidate sections below are historical. This separate
+documentation branch does not change the accepted application or authorize a
+new deployment. PR318 public contact/mobile and existing campaign protections
+remain required. Google/address-provider and unsupported cash-purchaser claims
+remain independently held.
+
+## Historical November4 PR321 cutover hold — original application tree not released
 
 The exact PR321 candidate passed its immutable protected Preview gate. Its
 Production cutover was rolled back before commit when the existing owner's
@@ -18,7 +56,7 @@ original hash approval and retired Preview do not cover the follow-up tree.
 Use the current private qualified-conversion handoff for final source and gates.
 No replacement hosted venue is implicitly authorized.
 
-## Qualified conversion continuation — new candidate, not accepted Production
+## Historical qualified conversion preparation — superseded by corrected PR322
 
 The November3 authenticated resolver still accepts PR320 merge8076de45,
 treec34baef1, deploymentdpl_27FwMnE2FS3TyFYZJy18sUnq3whG (25/25).

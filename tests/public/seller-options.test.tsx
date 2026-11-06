@@ -5,7 +5,7 @@ import SellPage from "../../app/sell/page";
 const SAVED_REVIEW = "Your request is stored for review. Your recorded contact choices still apply; no offer or appointment is confirmed.";
 
 const mode = vi.hoisted(() => ({ value: "live" }));
-vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => mode.value }));
+vi.mock("../../app/lib/publicIntakeCapability", () => ({ usePublicIntakeCapability: () => mode.value, usePublicIntakeReadiness: () => ({ mode: mode.value, receiptAvailable: false }) }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/sell" }));
 const calls: Array<{ body: string; key: string }> = [];
 let respond: (call: typeof calls[number]) => Response;

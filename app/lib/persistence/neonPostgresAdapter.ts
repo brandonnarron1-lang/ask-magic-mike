@@ -1,4 +1,5 @@
 import { neon } from "@neondatabase/serverless";
+import { EMPTY_CONVERSATION_PREFERENCES } from "../conversationPreferences";
 import type {
   ActivePersistenceBoundary,
   AdminAgentOperationsMutation,
@@ -87,7 +88,7 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
           assignment_status: replay.assignment_status === "assigned" ? "assigned" : replay.duplicate_of_lead_id ? "duplicate" : "unassigned", idempotent_replay: true };
       }
       if (input.internalNotification || structuredAddress || structuredInterest) {
-        const capture = input.lead.seller_request ? "capture_public_lead_v5" : inquiryContext || structuredInterest ? "capture_public_lead_v4"
+        const capture = input.internalNotification?.responseDraft ? "capture_public_lead_v6" : input.lead.seller_request ? "capture_public_lead_v5" : inquiryContext || structuredInterest ? "capture_public_lead_v4"
           : structuredAddress ? "capture_public_lead_v3" : "capture_public_lead_v2";
         const rows = await this.sql.query(
           `SELECT public.${capture}($1::jsonb, $2::jsonb, $3::jsonb, $4::text, $5::jsonb) AS result`,
@@ -95,7 +96,8 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
             input.notificationMode, JSON.stringify(input.internalNotification
               ? { template_version: input.internalNotification.templateVersion, metadata: input.internalNotification.metadata,
                   ...(inquiryContext ? { request_context: inquiryContext } : {}),
-                  ...(input.internalNotification.launchDraft ? { launch_draft: input.internalNotification.launchDraft } : {}) }
+                  ...(input.internalNotification.launchDraft ? { launch_draft: input.internalNotification.launchDraft } : {}),
+                  ...(input.internalNotification.responseDraft ? { response_draft: input.internalNotification.responseDraft } : {}) }
               : {})],
         ) as Array<Record<string, unknown>>;
         const result = rows[0]?.result;
@@ -220,13 +222,16 @@ export class NeonPostgresAdapter implements ActivePersistenceBoundary {
     } catch { throw new PersistenceUnavailableError("neon_enrichment_failed", 502); }
   }
   async requestAppointment(input: AppointmentIntent): Promise<AppointmentIntentResult> {
-    const result = await this.rpc("request_public_appointment_v1", [
+    const result = await this.rpc("request_public_appointment_v2", [
       input.leadId,
       input.sessionId,
       input.requestSurface || null,
       input.requestedAt,
+      JSON.stringify(input.preferences || EMPTY_CONVERSATION_PREFERENCES),
+      JSON.stringify(input.responseDraft || {}),
     ]);
-    if (result.ok !== true) return { ok: false, error: "appointment_request_not_found" };
+    if (result.ok !== true) return { ok: false, error: ["appointment_request_closed", "appointment_request_session_expired", "appointment_preferred_channel_missing"].includes(String(result.error))
+      ? result.error as "appointment_request_closed" | "appointment_request_session_expired" | "appointment_preferred_channel_missing" : "appointment_request_not_found" };
     if (typeof result.appointment_id !== "string" || typeof result.appointment_status !== "string") {
       throw new PersistenceUnavailableError("neon_appointment_response_invalid", 502);
     }

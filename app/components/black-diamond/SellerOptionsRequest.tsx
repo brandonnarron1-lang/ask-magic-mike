@@ -14,7 +14,7 @@ import { usePublicIntakeRecovery } from "../../lib/client/publicIntakeRecovery";
 import { conditionOptions, timelineOptions } from "../../lib/constants";
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import type { LeadSourceSurface } from "../../lib/leadPayload";
-import { usePublicIntakeCapability } from "../../lib/publicIntakeCapability";
+import { usePublicIntakeReadiness } from "../../lib/publicIntakeCapability";
 import { readSellerOptionsForm, SELLER_OPTIONS, sellerOptionsFingerprint, sellerOptionsQuestion, SellerOptionsInputError,
   type SellerOption, type SellerOptionsReview } from "../../lib/sellerOptions";
 
@@ -22,7 +22,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
   surface: LeadSourceSurface; compact: boolean; initialOption: SellerOption;
 }) {
   const [attribution] = useState(() => typeof window === "undefined" ? initialAttribution : readAttribution());
-  const mode = usePublicIntakeCapability();
+  const { mode, receiptAvailable } = usePublicIntakeReadiness();
   const recovery = usePublicIntakeRecovery();
   const recordEngagement = useIntakeEngagement(attribution, "seller", surface, recovery.key);
   const addressRef = useRef<HTMLInputElement>(null);
@@ -86,6 +86,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
       address_entry: actual.address, name: actual.name, email: actual.email, phone: actual.phone,
       condition: actual.condition || undefined, timeline: actual.timeline || undefined, question,
       consent: actual.consent, consent_email: actual.consent && Boolean(actual.email), consent_call: actual.consent && Boolean(actual.phone),
+      receipt_email_requested: new FormData(form).get("receipt_email_requested") === "yes",
       consent_language_text: LEAD_CONSENT_LANGUAGE_TEXT, consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
       consent_source: `${surface}:seller-intake`, website: actual.website, status: "new", assigned_agent_id: null,
       widget_session_id: recovery.key, idempotency_key: recovery.key, attribution };
@@ -125,7 +126,7 @@ export function SellerOptionsRequest({ surface, compact, initialOption }: {
         </div></details>
         <TextAreaField name="seller-context" label="Additional context (optional)" maxLength={2000} rows={3} className="sm:col-span-2" />
         <div className="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
-        <LeadConsentField />
+        <LeadConsentField receiptAvailable={receiptAvailable} />
         {review ? <section role="region" aria-label="Review your property request" className="space-y-2 rounded-md border border-[#cda24a55] p-4 text-sm leading-6 sm:col-span-2">
           <h3 ref={reviewRef} tabIndex={-1} className="font-semibold">Review your property request</h3>
           <p>{SELLER_OPTIONS[review.option]}</p><p className="select-text">{review.address.acceptedText}</p>

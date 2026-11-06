@@ -8,7 +8,7 @@ import type { LeadNotificationRecord } from "../../lib/leadNotificationTypes";
 import { retryLeadNotificationAction } from "./actions";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 import { readNewLaunchAlertHealth } from "../../lib/leadAlertService";
-import { launchNotificationStatus } from "../../lib/launchNotificationPresentation";
+import { launchNotificationStatus, notificationRecipientLabel } from "../../lib/launchNotificationPresentation";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -103,14 +103,14 @@ function NotificationCard({ notification }: { notification: LeadNotificationReco
       <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Recipient</dt>
-          <dd className="mt-1 text-[#f4ead4]">{notification.template_version === "lead_alert_email_v6" && ["mike", "brandon"].includes(String(notification.metadata.operator)) ? notification.metadata.operator === "mike" ? "Mike" : "Brandon" : notification.recipient_type}</dd>
+          <dd className="mt-1 text-[#f4ead4]">{notificationRecipientLabel(notification)}</dd>
         </div>
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Template</dt>
           <dd className="mt-1 text-[#f4ead4]">{notification.template_version}</dd>
         </div>
         <div>
-          <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">{notification.template_version === "lead_alert_email_v6" ? "Provider accepted" : "Sent"}</dt>
+          <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">{["lead_alert_email_v6", "request_response_v1"].includes(notification.template_version) ? "Provider accepted" : "Sent"}</dt>
           <dd className="mt-1 text-[#f4ead4]">{shortDate(notification.sent_at)}</dd>
         </div>
         <div>
@@ -143,6 +143,7 @@ function NotificationCard({ notification }: { notification: LeadNotificationReco
       ) : null}
 
       <RetryControl notification={notification} />
+      {notification.template_version === "request_response_v1" ? <p className="mt-3 text-sm text-[#d9ceb8]">Request-specific intent. <Link className="underline" href={`/admin/leads/${notification.lead_id}#appointment-review`}>Review the saved request</Link>. Retry preserves this identity and rechecks permission; ambiguous outcomes require provider reconciliation, not another send.</p> : null}
     </article>
   );
 }

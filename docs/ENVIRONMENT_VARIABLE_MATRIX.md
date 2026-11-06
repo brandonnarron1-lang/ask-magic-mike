@@ -3,6 +3,32 @@
 Values belong only in Vercel/hosting secret interfaces. This matrix records names
 and scope, never values.
 
+## Prepared request/response controls (not activated by source presence)
+
+- `REQUEST_RESPONSE_WORKER_ENABLED=false`: independent new outbox worker kill
+  switch within the existing notification cron; does not pause v6 staff emails.
+- `REQUEST_RECEIPTS_ENABLED=false`, `REQUEST_RECEIPTS_ACTIVATED_AT` (unset):
+  generation + dispatch require both, plus existing `CUSTOMER_EMAIL_ENABLED` at
+  dispatch. Use a truthful cutoff; inquiries created before it never enter this
+  scope even if they later request a conversation. No historical seeding job.
+- `REQUEST_RECEIPTS_REPLY_TO` (unset): verified monitored mailbox; no guessed
+  fallback to the sender. Sender/provider and Mike/Brandon destinations reuse
+  their existing approved bindings; no BCC on the new per-recipient intents.
+- New request receipts require an explicit `amm_request_receipt_email_v1`
+  purpose row from the separate unchecked first-party receipt choice AND current
+  retained request-email evidence. Recheck opt-out/denial/suppression on claim.
+  A preferred channel, manual permission projection or template edit cannot seed
+  or authorize a receipt. Signed legacy WordPress forms cannot claim the new copy.
+- `AGENT_PUSH_NOTIFICATIONS_ENABLED` retains its existing gate. The new atomic
+  capture wrapper can seed one intent per active subscription (bounded to ten),
+  and claims recheck activation/role. Physical enrollment/receipt are separate.
+- Leave `CONSUMER_ACKNOWLEDGMENT_ENABLED` OFF; the legacy path is not the new
+  worker. Leave carrier SMS, allocation and remote address predictions OFF.
+
+Deploy only after `20261105224500_public_request_response.sql` passes exact-source
+review/guarded migration and protected acceptance. Roll back application code only;
+retain all additive columns, consent, task, outbox and provider history.
+
 | Group | Variables | Scope | Required for |
 | --- | --- | --- | --- |
 | Canonical DB | `DATABASE_URL`, `DATABASE_ENV`, `PREVIEW_NEON_ENDPOINT_ID`, `PRODUCTION_NEON_ENDPOINT_ID` | server, Production/Preview separated; endpoint IDs are Preview-scoped attestation inputs | durable Neon capture and fail-closed Preview identity |
@@ -20,8 +46,8 @@ and scope, never values.
 | Legacy compatibility | `ALLOW_LEGACY_SUPABASE_FALLBACK`, `NEXT_PUBLIC_SUPABASE_*`, `SUPABASE_SERVICE_ROLE_KEY` | non-Production only | SUPERSEDED; forbidden as a Production fallback |
 | Optional address lookup candidate | `ADDRESS_LOOKUP_ENABLED`, `ADDRESS_GOOGLE_CONTENT_USE_APPROVED`, `GOOGLE_PLACES_API_KEY`, `ADDRESS_LOOKUP_SIGNING_SECRET` | server only; absent/false by default, never enabled in Preview | separately approved Places REST New lookup; manual entry requires none of these. Activation is not part of review publication. |
 | Address cost admission candidate | `ADDRESS_ZERO_SPEND_ADMISSION_APPROVED`, `ADDRESS_LOOKUP_DAILY_CALL_CAP`, `ADDRESS_LOOKUP_MONTHLY_CALL_CAP` | server only, held until current account-wide evidence; caps1–100/day and day–1000/32days | durable shared pre-dispatch limits include errors/abandonment; not a provider/account billing ceiling |
-| Daily operator digest candidate | `OPERATOR_DAILY_DIGEST_USER_ID`, `OPERATOR_DAILY_DIGEST_ACTIVATED_AT`, `OPERATOR_DAILY_DIGEST_ENABLED` | server only; disabled/absent until reviewed activation | pins verified administrator to existing second-operator mailbox, no Mike fallback/BCC; operational delivery table not a lead notification |
-| Traffic coverage candidate | `PUBLIC_TRAFFIC_COLLECTION_STARTED_AT` | server UTC activation timestamp, not a backdated claim | controls partial/complete measurement labels; optional browser storage still requires the existing analytics grant |
+| Daily operator digest (accepted PR322 contract) | `OPERATOR_DAILY_DIGEST_USER_ID`, `OPERATOR_DAILY_DIGEST_ACTIVATED_AT`, `OPERATOR_DAILY_DIGEST_ENABLED` | server only; actual enablement/time in private receipt and final deployment | verified administrator/existing second-operator mailbox only; first due scheduled report, no immediate send; no Mike fallback/BCC |
+| Traffic coverage (accepted PR322 contract) | `PUBLIC_TRAFFIC_COLLECTION_STARTED_AT` | server UTC collection timestamp, never backdated | partial/complete labels; optional browser storage still requires analytics grant; legacy events are not traffic-v1 visit estimates |
 
 Production and Preview must use different Neon branches/credentials. Preview
 mutation stays fail-closed unless `DATABASE_ENV=preview`, Vercel reports Preview,
