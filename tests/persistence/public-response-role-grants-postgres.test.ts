@@ -18,6 +18,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("request-response grant
   beforeAll(async () => {
     await startDatabase();
     install("amm_qa_upgrade", true, new Set([file]));
+    install("amm_qa_fresh", true, new Set([file]));
     expect(psql("SELECT current_setting('server_version_num')::int/10000")).toBe(process.env.AMM_QA_POSTGRES_MAJOR || "17");
   }, 120_000);
   afterAll(() => stopDatabase());
@@ -44,7 +45,6 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("request-response grant
 
   it("revokes existing browser-role inherited grants without changing owner defaults", () => {
     psql("ALTER ROLE amm_fixture_legacy_anon RENAME TO anon; ALTER ROLE amm_fixture_legacy_authenticated RENAME TO authenticated;");
-    install("amm_qa_fresh", true, new Set([file]));
     psql("ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon,authenticated;", "amm_qa_fresh");
     const defaults = psql("SELECT md5(string_agg(defaclacl::text,',' ORDER BY oid)) FROM pg_default_acl;", "amm_qa_fresh");
     psql(sql(), "amm_qa_fresh");
