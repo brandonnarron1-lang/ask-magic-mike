@@ -17,6 +17,7 @@ import { LeadConsentField } from "./LeadConsentField";
 import { LuxuryCard } from "./LuxuryCard";
 import { PUBLIC_KNOWLEDGE_VERSION, readPublicCitations, type PublicCitation } from "../../lib/groundedConciergeContract";
 import { AnswerFeedback } from "./AnswerFeedback";
+import { usePublicIntakeReadiness } from "../../lib/publicIntakeCapability";
 
 type Message = {
   role: "user" | "assistant";
@@ -34,6 +35,7 @@ type AskMikeChatPanelProps = {
 };
 
 export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskMikeChatPanelProps) {
+  const { receiptAvailable } = usePublicIntakeReadiness();
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(),
   );
@@ -464,7 +466,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             <LeadConsentField checked={followUpConsent} onChange={(checked) => {
               setFollowUpConsent(checked);
               if (followUpError) setFollowUpError(null);
-            }} required inputRef={followUpConsentRef} />
+            }} required inputRef={followUpConsentRef} receiptAvailable={receiptAvailable} />
             {followUpError ? (
               <div id="ask-follow-up-status" className="rounded-md border border-[#6e162680] bg-[#6e16261f] p-3 text-sm leading-6 text-[#ffcabd]" role="alert">
                 {followUpError}

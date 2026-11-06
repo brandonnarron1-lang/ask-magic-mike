@@ -506,9 +506,9 @@ test("Keyboard navigation preserves visible focus and saves only an intercepted 
   await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeFocused();
   await page.keyboard.press("Space"); await expect(funnel(page).getByRole("checkbox", { name: /I agree that Our Town Properties/ })).toBeChecked();
   await page.keyboard.press("Tab");
-  await expect(funnel(page).getByRole("checkbox", { name: /Email me a receipt/ })).toBeFocused();
-  await expect(funnel(page).getByRole("checkbox", { name: /Email me a receipt/ })).not.toBeChecked();
-  await page.keyboard.press("Tab"); await expect(funnel(page).getByRole("button", { name: "Back", exact: true })).toBeFocused();
+  await expect(funnel(page).getByRole("checkbox", { name: /Email me a receipt/ })).toHaveCount(0);
+  await expect(funnel(page).getByText(/Email receipts are currently unavailable/)).toBeVisible();
+  await expect(funnel(page).getByRole("button", { name: "Back", exact: true })).toBeFocused();
   await page.keyboard.press("Tab"); await expect(submit(page)).toBeFocused();
   await page.keyboard.press("Enter"); await assertSaved(page);
   expect(captures.get(page)!.attempts[0].payload.consent).toBe(true);

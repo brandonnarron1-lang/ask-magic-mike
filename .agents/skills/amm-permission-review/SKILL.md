@@ -124,6 +124,14 @@ do not reset UNKNOWN. Preferences, task completion and enrollment are not
 permission, an appointment, a send or device receipt. Recheck gates on resume;
 never replay older intake to obtain a new acknowledgment.
 
+When customer delivery is OFF, inspect the built form as well as worker flags.
+An opt-in control is not honest availability by itself. Use the existing no-store
+health boolean and explicit form prop to hide an unavailable receipt choice,
+without hiding manual contact permission or blocking otherwise usable intake.
+See `request-receipt-availability` unit and built `mobile-conversation` regressions
+(November5,2026). This advisory UI does not grant consent or prove provider delivery;
+recheck exact accepted source and current gates after any activation/kill-switch change.
+
 Adding a public checkbox or native field changes strict selectors, keyboard
 order and serialized request expectations. Scope consent selectors to public
 forms; preserve staff confirmations/account controls. Before final source freeze,

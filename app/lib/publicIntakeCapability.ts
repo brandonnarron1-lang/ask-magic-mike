@@ -22,12 +22,19 @@ export function readPublicIntakeCapability(value: unknown): PublicIntakeMode {
   return mode === "unknown" ? "read_only" : mode;
 }
 
+export function readRequestReceiptAvailability(value: unknown): boolean {
+  return readPublicIntakeReadiness(value) === "live" &&
+    (value as Record<string, unknown>).request_receipts_available === true;
+}
+
 /** Advisory UX only: neither a successful health check nor this hook authorizes a POST. */
 export function usePublicIntakeReadiness() {
   const [mode, setMode] = useState<PublicIntakeReadiness>("checking");
+  const [receiptAvailable, setReceiptAvailable] = useState(false);
   const [generation, setGeneration] = useState(0);
   const recheck = useCallback(() => {
     setMode("checking");
+    setReceiptAvailable(false);
     setGeneration(current => current + 1);
   }, []);
 
@@ -48,6 +55,7 @@ export function usePublicIntakeReadiness() {
       const version = ++requestVersion;
       const controller = new AbortController();
       setMode("checking");
+      setReceiptAvailable(false);
       const timeout = window.setTimeout(() => {
         controller.abort();
         if (!disposed && version === requestVersion) setMode("unknown");
@@ -65,10 +73,12 @@ export function usePublicIntakeReadiness() {
           signal: controller.signal,
         });
         const contentType = response.headers.get("content-type")?.split(";", 1)[0]?.trim();
-        const capability = response.ok && !response.redirected && contentType === "application/json"
-          ? readPublicIntakeReadiness(await response.json())
-          : "unknown";
-        if (!disposed && !controller.signal.aborted && version === requestVersion) setMode(capability);
+        const health = response.ok && !response.redirected && contentType === "application/json"
+          ? await response.json() : null;
+        if (!disposed && !controller.signal.aborted && version === requestVersion) {
+          setMode(readPublicIntakeReadiness(health));
+          setReceiptAvailable(readRequestReceiptAvailability(health));
+        }
       } catch {
         if (!disposed && !controller.signal.aborted && version === requestVersion) setMode("unknown");
       } finally {
@@ -92,7 +102,7 @@ export function usePublicIntakeReadiness() {
     };
   }, [generation]);
 
-  return { mode, recheck };
+  return { mode, receiptAvailable, recheck };
 }
 
 /** Compatibility for existing consumers: unknown remains closed, never live. */

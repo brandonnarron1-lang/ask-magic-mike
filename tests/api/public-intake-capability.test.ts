@@ -183,6 +183,22 @@ describe("explicit isolated real-session acceptance capability", () => {
 });
 
 describe("existing public health capability contract", () => {
+  it("keeps operator-only delivery separate and exposes only a boolean for ready customer receipts", async () => {
+    for (const [key, value] of Object.entries(production)) vi.stubEnv(key, value);
+    const values = { REQUEST_RESPONSE_WORKER_ENABLED: "true", REQUEST_RECEIPTS_ENABLED: "false",
+      REQUEST_RECEIPTS_ACTIVATED_AT: "2026-11-05T00:00:00.000Z", REQUEST_RECEIPTS_REPLY_TO: "reply@example.test",
+      CUSTOMER_EMAIL_ENABLED: "true", LEAD_NOTIFICATION_MODE: "production", LEAD_NOTIFICATION_PRODUCTION_ENABLED: "true",
+      EMAIL_ENABLED: "true", EMAIL_PROVIDER: "resend", RESEND_FROM: "Our Town <sender@example.test>", RESEND_API_KEY: "synthetic-not-a-key" };
+    for (const [key, value] of Object.entries(values)) vi.stubEnv(key, value);
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockRejectedValue(new Error("No provider I/O"));
+    try {
+      expect((await (await GET()).json()).request_receipts_available).toBe(false);
+      vi.stubEnv("REQUEST_RECEIPTS_ENABLED", "true");
+      const body = await (await GET()).json(); expect(body.request_receipts_available).toBe(true);
+      for (const secret of ["reply@example.test", "sender@example.test", "synthetic-not-a-key"]) expect(JSON.stringify(body)).not.toContain(secret);
+      expect(fetchSpy).not.toHaveBeenCalled();
+    } finally { fetchSpy.mockRestore(); }
+  });
   it("adds only the category to the no-store GET without I/O or identity disclosure", async () => {
     for (const key of ["DATABASE_ENV", "PREVIEW_NEON_ENDPOINT_ID", "PRODUCTION_NEON_ENDPOINT_ID", "PUBLIC_SITE_URL",
       "AMM_ISOLATED_SESSION_ACCEPTANCE", "AMM_QA_POSTGRES_TEST"]) {
@@ -198,7 +214,7 @@ describe("existing public health capability contract", () => {
       expect(body.public_intake).toBe("live");
       expect(Object.keys(body).sort()).toEqual([
         "ok", "service", "environment", "database_configured", "database_provider",
-        "notification_mode", "email_enabled", "public_intake", "checked_at",
+        "notification_mode", "email_enabled", "public_intake", "request_receipts_available", "checked_at",
       ].sort());
       expect(JSON.stringify(body)).not.toContain(productionEndpoint);
       expect(JSON.stringify(body)).not.toContain("fictional");

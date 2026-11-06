@@ -46,7 +46,8 @@ test("phone-only native capture, visible unit, optional preferences and ambiguou
   // markers deliberately suppress it; all transport remains intercepted.
   await page.getByLabel("Your name", { exact: true }).fill("Synthetic Local Fixture");
   await page.getByLabel("Phone (optional)", { exact: true }).fill("2025550107");
-  await expect(page.getByRole("checkbox", { name: /Email me a receipt/ })).not.toBeChecked();
+  await expect(page.getByRole("checkbox", { name: /Email me a receipt/ })).toHaveCount(0);
+  await expect(page.getByText(/Email receipts are currently unavailable/)).toBeVisible();
   await page.getByRole("button", { name: "Request Valuation", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Your request is in.", exact: true })).toBeVisible();
   await page.getByLabel("Preferred contact method").selectOption("phone");
@@ -68,6 +69,40 @@ test("200% text, keyboard and landscape have no overlay or horizontal overflow",
   await page.setViewportSize({ width: 844, height: 390 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(await page.locator("[data-public-mike-contact]").evaluate(e => getComputedStyle(e).position)).toBe("static");
+});
+test("actual local OFF health hides receipt choice; explicit ON advisory offers unchanged opt-in with fake capture", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const actual = await page.request.get("/api/health/live").then(r => r.json());
+  expect(actual.request_receipts_available).toBe(false);
+  await page.goto("/widget/v1");
+  await page.getByRole("combobox", { name: "Property address", exact: true }).fill("101 Synthetic Fixture Road, Wilson NC");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.getByRole("checkbox", { name: /Email me a receipt/ })).toHaveCount(0);
+  await expect(page.getByText(/Email receipts are currently unavailable/)).toBeVisible();
+  const dir = process.env.AMM_E2E_OUTPUT_DIR || "output/playwright/mobile-conversation"; mkdirSync(dir, { recursive: true });
+  await page.screenshot({ path: path.resolve(dir, "receipt-off-after-390.png"), fullPage: true });
+  // Explicit UI-only ON fixture. No provider configuration is enabled and every
+  // business mutation stays intercepted, just like the other UI acceptance.
+  await page.route("**/api/health/live", route => route.fulfill({ json: { ok: true, service: "ask-magic-mike", public_intake: "live", request_receipts_available: true } }));
+  await page.reload();
+  await page.getByRole("combobox", { name: "Property address", exact: true }).fill("101 Synthetic Fixture Road, Wilson NC");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByLabel("Your name", { exact: true }).fill("Synthetic Local Fixture");
+  await page.getByLabel("Email for your valuation follow-up", { exact: true }).fill("receipt@example.test");
+  await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
+  const choice = page.getByRole("checkbox", { name: /Email me a receipt/ });
+  await expect(choice).not.toBeChecked(); await choice.focus(); await page.keyboard.press("Space");
+  await expect(choice).toBeChecked();
+  await page.screenshot({ path: path.resolve(dir, "receipt-on-fixture-390.png"), fullPage: true });
+  let posted = false;
+  await page.route("**/api/leads", async route => {
+    const body = route.request().postDataJSON(); expect(body.receipt_email_requested).toBe(true); expect(body.consent_email).toBe(true);
+    posted = true; const correlation = randomUUID();
+    await route.fulfill({ headers: { "X-AMM-Correlation-Id": correlation }, json: { lead_id: randomUUID(), session_id: body.widget_session_id, duplicate_of_lead_id: null, correlation_id: correlation } });
+  });
+  await page.getByRole("button", { name: "Request Valuation", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Your request is in.", exact: true })).toBeVisible();
+  expect(posted).toBe(true);
 });
 for (const width of [320, 360, 390, 430]) test(`local mobile widget ${width}`, async ({ page }) => {
   await page.setViewportSize({ width, height: 844 });

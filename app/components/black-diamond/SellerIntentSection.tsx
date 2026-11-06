@@ -6,7 +6,7 @@ import { initialAttribution, readAttribution } from "../../lib/attribution";
 import { usePublicIntakeRecovery } from "../../lib/client/publicIntakeRecovery";
 import { conditionOptions, sellerPaths, timelineOptions } from "../../lib/constants";
 import { clean, type Attribution, type LeadSourceSurface } from "../../lib/leadPayload";
-import { usePublicIntakeCapability } from "../../lib/publicIntakeCapability";
+import { usePublicIntakeReadiness } from "../../lib/publicIntakeCapability";
 import type { PublicLeadOutcome } from "../../lib/publicLeadReceipt";
 import { LEAD_CONSENT_LANGUAGE_TEXT, LEAD_CONSENT_LANGUAGE_VERSION } from "../../lib/leadConsent";
 import { AppointmentRequestCTA } from "./AppointmentRequestCTA";
@@ -32,7 +32,7 @@ function LegacySellerIntentSection({ surface = "seller_page", compact = false }:
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(),
   );
-  const intakeMode = usePublicIntakeCapability();
+  const { mode: intakeMode, receiptAvailable } = usePublicIntakeReadiness();
   const recovery = usePublicIntakeRecovery();
   const [sellerMessage, setSellerMessage] = useState<string | null>(null);
   const [suppressAppointment, setSuppressAppointment] = useState(false);
@@ -176,7 +176,7 @@ function LegacySellerIntentSection({ surface = "seller_page", compact = false }:
         <div className="absolute -left-[10000px] h-px w-px overflow-hidden" aria-hidden="true">
           <label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label>
         </div>
-        <LeadConsentField />
+        <LeadConsentField receiptAvailable={receiptAvailable} />
         <button disabled={submitting || intakeMode === "checking"} aria-busy={submitting} className="amm-primary-button px-5 py-4 disabled:opacity-60 sm:col-span-2">
           {submitting ? "Sending" : "Send Seller Details"}
         </button>

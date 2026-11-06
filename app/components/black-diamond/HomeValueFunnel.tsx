@@ -50,7 +50,7 @@ export function HomeValueFunnel({
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(attributionOverrides),
   );
-  const { mode: intakeMode, recheck: recheckAvailability } = usePublicIntakeReadiness();
+  const { mode: intakeMode, receiptAvailable, recheck: recheckAvailability } = usePublicIntakeReadiness();
   const intakeCanSave = intakeMode === "live" || intakeMode === "synthetic_qa";
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
@@ -449,7 +449,7 @@ export function HomeValueFunnel({
               <option key={option}>{option}</option>
             ))}
           </SelectField>
-          <fieldset disabled={locked} className="min-w-0"><legend className="sr-only">Contact permission</legend><LeadConsentField checked={consent} onChange={setConsent} receiptDefaultChecked={receiptRequested} /></fieldset>
+          <fieldset disabled={locked} className="min-w-0"><legend className="sr-only">Contact permission</legend><LeadConsentField checked={consent} onChange={setConsent} receiptDefaultChecked={receiptRequested} receiptAvailable={receiptAvailable} /></fieldset>
           <div aria-label="Review before requesting valuation" className="space-y-2 rounded-md border border-[#cda24a55] bg-black/30 p-3 text-sm leading-6">
             <p className="font-semibold text-[#f4ead4]">Review your request</p>
             <p className="select-text break-words">Address: {address}</p>

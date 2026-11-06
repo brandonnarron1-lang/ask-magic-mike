@@ -33,6 +33,18 @@ capture transaction for that inquiry only. It never promotes existing
 retained canonical email evidence and current suppression/opt-out checks. Events
 and inquiries must be on/after the new activation cutoff; there is no history job.
 
+The receipt-availability correction exposes only `request_receipts_available` in
+the existing no-store public health GET. It is advisory, not permission or proof
+of delivery: the categorical intake mode must be live and all existing worker,
+receipt, customer-email, cutoff, sender/provider and Reply-To gates must be ready.
+Public forms hide the optional checkbox when false, missing, stale or unknown,
+and explain that a saved request is confirmed on the page. Manual contact consent
+and intake availability remain independent. Retained renter/open-house families
+do not advertise the new purpose. No new runtime flag or provider call is added.
+Recheck availability on app return; preserve authoritative outbox/dispatch checks.
+This correction needs its own exact-source disposition; it is not live merely
+because the earlier PR323 source received conditional approval.
+
 `request_response_v1` owns its immutable private body/destination, business-event
 key and claim token in the existing outbox. The existing cron invokes its bounded
 worker only with `REQUEST_RESPONSE_WORKER_ENABLED`; customer delivery additionally
