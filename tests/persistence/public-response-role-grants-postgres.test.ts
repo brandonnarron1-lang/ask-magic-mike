@@ -15,7 +15,11 @@ const signatures = [
 ];
 
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("request-response grants with optional legacy browser roles", () => {
-  beforeAll(async () => { await startDatabase(); install("amm_qa_upgrade", true, new Set([file])); }, 120_000);
+  beforeAll(async () => {
+    await startDatabase();
+    install("amm_qa_upgrade", true, new Set([file]));
+    expect(psql("SELECT current_setting('server_version_num')::int/10000")).toBe(process.env.AMM_QA_POSTGRES_MAJOR || "17");
+  }, 120_000);
   afterAll(() => stopDatabase());
 
   it("applies without creating missing browser roles and preserves predecessor capture, RLS and defaults", () => {

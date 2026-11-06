@@ -76,8 +76,10 @@ Migration preflight must inspect actual Neon roles rather than assume legacy
 `anon`/`authenticated` roles exist. The request-response migration always revokes
 PUBLIC and conditionally revokes any existing legacy browser roles, without
 creating them or changing owner defaults. The required hosted conversation stage
-also runs `public-response-role-grants-postgres.test.ts` for absent roles and
-inherited browser-role grants. Changed migration bytes require a new exact-source
+also runs `public-response-role-grants-postgres.test.ts` on PostgreSQL17 and18
+for absent roles and inherited browser-role grants, asserting the actual server
+major. Default harness major remains17; the explicit18 run uses the same isolated
+no-port container lifecycle. Changed migration bytes require a new exact-source
 disposition; historical connected acceptance remains evidence only for its source.
 
 Scheduled digest SQL fixtures inject explicit eligible business instants; adding
