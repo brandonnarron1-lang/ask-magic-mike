@@ -96,9 +96,17 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("bounded workers: owned
   });
   it("holds ambiguous expenditure after expiry/day boundaries and enforces the lifetime $10 cap", async () => {
     psql("UPDATE ai_budget_reservations SET expires_at=now()-interval '2 days',created_at=now()-interval '3 days' WHERE feature LIKE 'r2_evaluation_%'");
-    const budget = evaluationBudget(localQuery, { leadId, actor: principal.actor, phase: "fixed" });
+    // Keep all64 real production-wrapper/RPC calls and the default5s test bound.
+    // Four existing asynchronous psql lanes avoid serial Docker CLI startup;
+    // the real advisory-locked transaction must still enforce the shared cap.
+    const budget = evaluationBudget({query:async(sql,params=[])=>JSON.parse(await concurrent(
+      `SET ROLE service_role; SELECT coalesce(jsonb_agg(amm_rows),'[]') FROM (${bind(sql,params)}) amm_rows;`
+    ))}, { leadId, actor: principal.actor, phase: "fixed" });
     let authorized = 0;
-    for(let i=0;i<64;i++) if((await budget.reserve({key:`r2:fixed:synthetic:${String(i).padStart(4,'0')}`,model:"synthetic-model",maximumUsd:0.16})).authorized) authorized++;
+    for(let start=0;start<64;start+=4) {
+      const results=await Promise.all(Array.from({length:4},(_,offset)=>budget.reserve({key:`r2:fixed:synthetic:${String(start+offset).padStart(4,'0')}`,model:"synthetic-model",maximumUsd:0.16})));
+      authorized+=results.filter(result=>result.authorized).length;
+    }
     expect(authorized).toBe(60); // .0002 settled + .32 held + 60*.16 = 9.9202
     expect(snapshot()).toBe(baseline);
   });

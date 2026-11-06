@@ -220,12 +220,14 @@ jobs:
             .amm-run/acquisition-ci/screenshots/*.png
             .amm-run/consumer-workspace-ci/receipt.json
             .amm-run/consumer-workspace-ci/screenshots/*.png
+            .amm-run/consumer-workspace-ci/screenshots/*.capture.json
             .amm-run/consumer-account-ci/receipt.json
             .amm-run/consumer-account-ci/screenshots/*.png
             .amm-run/r2-lifecycle-ci/receipt.json
             .amm-run/r3-native-api-ci/receipt.json
             .amm-run/r2-lifecycle-ci/screenshots/*.png
             .amm-run/consumer-workspace-intake-ci/receipt.json
+            .amm-run/consumer-workspace-intake-ci/screenshots/*.capture.json
             .amm-run/acquisition-report/scale-*.json
             .amm-run/home-value-intake-ci/home-value-ui-receipt.json
             .amm-run/home-value-intake-ci/screenshots/*.png
