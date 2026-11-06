@@ -124,6 +124,13 @@ do not reset UNKNOWN. Preferences, task completion and enrollment are not
 permission, an appointment, a send or device receipt. Recheck gates on resume;
 never replay older intake to obtain a new acknowledgment.
 
+Adding a public checkbox or native field changes strict selectors, keyboard
+order and serialized request expectations. Scope consent selectors to public
+forms; preserve staff confirmations/account controls. Before final source freeze,
+run affected built conversion, Home Value and seller/buyer suites with the owned
+isolated harness. Assert the exact optional-preference payload, not a weaker
+subset. Retain failed artifacts; do not relax confirmation or timing bounds.
+
 Briefly report: actual change; contact ready/one precise decision/restricted with
 reason; exact existing screen/action; real contact/outcome (none if none);
 local/pushed/merged/deployed/accepted separately; source-bound tests/limits;
