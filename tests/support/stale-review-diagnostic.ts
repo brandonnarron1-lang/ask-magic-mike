@@ -77,7 +77,14 @@ export async function observeStaleReview(page: Page, leadId: string) {
     const state = window as typeof window & { __ammStaleReview?: unknown[]; __ammDiagRecord?: (event:unknown)=>Promise<void>; __ammStaleForm?: (event:unknown)=>void };
     state.__ammStaleReview = observations;
     const record = (event:unknown) => { if (observations.length < 500) observations.push(event); void state.__ammDiagRecord?.(event); };
-    state.__ammStaleForm = event => record({at:Date.now(),trigger:"form_effect",event});
+    state.__ammStaleForm = event => {
+      const item={at:Date.now(),trigger:"form_effect",event};
+      // Keep framework events in memory: no IPC, reads, waits or synchronization
+      // on the decoder/action queue's critical path. Flush only after assertions.
+      if (event && typeof event === "object" && "stage" in event && String(event.stage).startsWith("next_")) {
+        if(observations.length<500)observations.push(item);
+      } else record(item);
+    };
     const abort = AbortController.prototype.abort;
     AbortController.prototype.abort = function (...args) {
       record({at:Date.now(),trigger:"abort_controller",stack:new Error().stack});
