@@ -637,7 +637,7 @@ async function adminListAndDashboard() {
     list.ok &&
     list.text.includes("Ask Magic Mike") &&
     list.text.includes("Command Center") &&
-    list.text.includes("Lead inbox and routing readiness")
+    list.text.includes("Protected request inbox")
   )
     record("admin:leads", "pass", { http: list.status });
   else
