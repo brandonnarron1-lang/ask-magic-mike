@@ -276,7 +276,7 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build unchanged application bytes for isolated diagnosis
+      - name: Build sealed diagnostic source - not release acceptance
         run: pnpm run build
       - run: pnpm exec playwright install --with-deps chromium
       - name: Original serial suite and passive same-record boundary capture
