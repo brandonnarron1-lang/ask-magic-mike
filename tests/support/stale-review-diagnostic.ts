@@ -36,6 +36,25 @@ export async function observeStaleReview(page: Page, leadId: string) {
   const pending: Promise<unknown>[] = [];
   const requests = new WeakMap<Request, number>();
   let sequence = 0;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("Network.enable");
+  const streams = new Map<string, string>();
+  cdp.on("Network.responseReceived", event => {
+    if (new URL(event.response.url).pathname !== "/admin/today") return;
+    staleReviewNote("cdp_response_headers", { id:event.requestId,status:event.response.status,mime:event.response.mimeType,
+      metadata:Object.fromEntries(Object.entries(event.response.headers).filter(([name]) => ["content-type","cache-control","x-amm-diag-request"].includes(name.toLowerCase()))) });
+    streams.set(event.requestId, "");
+    void cdp.send("Network.streamResourceContent", { requestId:event.requestId }).then(({ bufferedData }) => {
+      const body = Buffer.from(bufferedData,"base64").toString("utf8");
+      streams.set(event.requestId,body+(streams.get(event.requestId)||""));
+    }).catch(error => staleReviewNote("cdp_stream_unavailable", { id:event.requestId,error:String(error) }));
+  });
+  cdp.on("Network.dataReceived", event => {
+    if (streams.has(event.requestId) && event.data) streams.set(event.requestId,(streams.get(event.requestId)||"")+Buffer.from(event.data,"base64").toString("utf8"));
+  });
+  cdp.on("Network.loadingFailed", event => {
+    if (streams.has(event.requestId)) staleReviewNote("cdp_loading_failed", { id:event.requestId,error:event.errorText,canceled:event.canceled,blocked:event.blockedReason });
+  });
   page.on("request", request => {
     const url = new URL(request.url());
     if (url.pathname !== "/admin/today") return;
@@ -56,6 +75,7 @@ export async function observeStaleReview(page: Page, leadId: string) {
   page.on("response", response => {
     const id = requests.get(response.request());
     if (!id) return;
+    staleReviewNote("response_headers", { id,status:response.status(),metadata:Object.fromEntries(Object.entries(response.headers()).filter(([name]) => ["content-type","cache-control","x-amm-diag-request"].includes(name))) });
     const work = (async () => {
       const body = await response.text();
       const headers = response.headers();
@@ -68,12 +88,22 @@ export async function observeStaleReview(page: Page, leadId: string) {
     pending.push(work);
   });
   page.on("pageerror", error => staleReviewNote("page_error", { message:error.message }));
-  page.on("console", message => { if (message.type() === "error" || message.type() === "warning") staleReviewNote("console", { type:message.type(),text:message.text() }); });
+  page.on("console", message => { if (message.type() === "error" || message.type() === "warning" || message.text() === "REFRESH FAILED") staleReviewNote("console", { type:message.type(),text:message.text() }); });
   await page.addInitScript(({ leadId }) => {
     const observations: unknown[] = [];
     let last = "";
     const state = window as typeof window & { __ammStaleReview?: unknown[] };
     state.__ammStaleReview = observations;
+    const abort = AbortController.prototype.abort;
+    AbortController.prototype.abort = function (...args) {
+      if (observations.length < 500) observations.push({at:Date.now(),trigger:"abort_controller",stack:new Error().stack});
+      return abort.apply(this,args);
+    };
+    const cancel = ReadableStream.prototype.cancel;
+    ReadableStream.prototype.cancel = function (...args) {
+      if (observations.length < 500) observations.push({at:Date.now(),trigger:"stream_cancel",stack:new Error().stack});
+      return cancel.apply(this,args);
+    };
     function snapshot(trigger: string) {
       const forms = Array.from(document.querySelectorAll("form")).flatMap((form, index) => {
         const input = (name: string) => form.querySelector<HTMLInputElement>(`input[name="${name}"]`);
@@ -104,6 +134,10 @@ export async function observeStaleReview(page: Page, leadId: string) {
       writeFileSync(join(directory,"stale-review-dom.json"),clean(JSON.stringify(events,null,2)),{mode:0o600});
       await page.screenshot({ path:join(directory,"stale-review-final.png"),fullPage:true });
     } catch (error) { staleReviewNote("dom_capture_failed", { error:String(error) }); }
-    finally { await Promise.allSettled(pending); }
+    finally {
+      await Promise.allSettled(pending);
+      writeFileSync(join(directory,"stale-review-rsc-stream.json"),clean(JSON.stringify([...streams].map(([id,body])=>({id,bytes:Buffer.byteLength(body),sha256:createHash("sha256").update(body).digest("hex"),serverForms:staleReviewServerInputs(body),build:body.match(/"b":"([^"]+)"/)?.[1]||null})),null,2)),{mode:0o600});
+      await cdp.detach();
+    }
   } };
 }
