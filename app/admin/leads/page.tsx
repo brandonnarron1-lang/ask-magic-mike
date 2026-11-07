@@ -359,7 +359,7 @@ export default async function AdminLeadsPage({
             </nav>
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-[#080808] p-3">
               <p className="text-xs text-[#8f8778]">
-                {page.total.toLocaleString()} authorized lead{page.total === 1 ? "" : "s"} · page {requestedPage}
+                {!inbox.configured || inbox.error ? "Counts unavailable — protected read incomplete" : `${page.total.toLocaleString()} authorized lead${page.total === 1 ? "" : "s"} · page ${requestedPage}`}
               </p>
               <form method="get" className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
                 <input type="hidden" name="filter" value={activeFilter} />

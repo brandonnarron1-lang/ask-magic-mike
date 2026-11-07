@@ -82,8 +82,11 @@ test("required SQL failure is unavailable, then genuine empty scope stays honest
   const page=await contexts.agent.newPage();await pool.query("ALTER TABLE public.lead_action_reviews RENAME TO command_desk_hidden_reviews");
   try{await page.goto("/admin/today");await expect(page.getByRole("heading",{name:"Queue unavailable",exact:true})).toBeVisible();await expect(page.getByText(/No measured counts are available/)).toBeVisible();await expect(page.locator("article")).toHaveCount(0);await page.screenshot({path:path.join(output,"command-desk-unavailable-390.png"),fullPage:true});}
   finally{await pool.query("ALTER TABLE public.command_desk_hidden_reviews RENAME TO lead_action_reviews");}
+  await pool.query("ALTER TABLE public.leads RENAME TO command_desk_hidden_leads");
+  try{await page.goto("/admin/leads");await expect(page.getByRole("heading",{name:"Inbox unavailable",exact:true})).toBeVisible();await expect(page.getByText("Counts unavailable — protected read incomplete",{exact:true})).toBeVisible();await expect(page.getByText(/0 authorized leads/)).toHaveCount(0);await page.screenshot({path:path.join(output,"protected-inbox-unavailable-390.png"),fullPage:true});}
+  finally{await pool.query("ALTER TABLE public.command_desk_hidden_leads RENAME TO leads");}
   await pool.query("UPDATE leads SET assigned_agent_id=NULL WHERE id=$1",[f.leads.agent]);
-  try{await page.reload();await expect(page.getByRole("heading",{name:"No open actions returned",exact:true})).toBeVisible();await expect(page.getByText(/No customer task has been invented/)).toBeVisible();await page.screenshot({path:path.join(output,"command-desk-empty-390.png"),fullPage:true});}
+  try{await page.goto("/admin/today");await expect(page.getByRole("heading",{name:"No open actions returned",exact:true})).toBeVisible();await expect(page.getByText(/No customer task has been invented/)).toBeVisible();await page.screenshot({path:path.join(output,"command-desk-empty-390.png"),fullPage:true});}
   finally{await pool.query("UPDATE leads SET assigned_agent_id=$1 WHERE id=$2",[f.agents.agent,f.leads.agent]);}
 });
 test("one existing internal task completes without creating response, ownership or delivery",async()=>{
