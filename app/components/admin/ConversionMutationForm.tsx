@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { isValidElement, useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 
 export type ConversionMutationResult =
@@ -124,6 +124,19 @@ export function ConversionMutationForm({
   const [busy, setBusy] = useState(false);
   const [uncertain, setUncertain] = useState(false);
   const [result, setResult] = useState<ConversionMutationResult | null>(null);
+  const trace = typeof window === "undefined" ? undefined : (window as typeof window & { __ammStaleForm?: (event:unknown)=>void }).__ammStaleForm;
+  if (trace) {
+    const fields: Array<{name:string;value:unknown}> = [];
+    const visit = (node:ReactNode) => {
+      if (Array.isArray(node)) { node.forEach(visit); return; }
+      if (!isValidElement(node)) return;
+      const props = node.props as {name?:string;value?:unknown;children?:ReactNode};
+      if (props.name && ["lead_id","action_id","record_version"].includes(props.name)) fields.push({name:props.name,value:props.value});
+      if (props.children) visit(props.children);
+    };
+    visit(children);
+    trace({stage:"render",component:statusId,fields,conflictVersion:conflictVersion.current,busy,uncertain});
+  }
 
   // RSC refreshes update hidden versions, but never replace the unsaved editable draft.
   useEffect(() => {
