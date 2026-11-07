@@ -62,6 +62,14 @@ const versionConflicts = new Set([
   "stale_followup_version", "concurrent_followup_update", "stale_action",
 ]);
 
+const successReturns = new Set([
+  "/admin/today?today_action=completed", "/admin/today?today_action=snoozed", "/admin/today?today_action=dismissed",
+]);
+/** Fixed private destinations only; never accept a client-supplied redirect. */
+export function conversionSuccessReturnTo(value: unknown): string | null {
+  return typeof value === "string" && successReturns.has(value) ? value : null;
+}
+
 type Editable = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 type DraftField = { name: string; value: string; checked?: boolean };
 
@@ -94,7 +102,7 @@ function restoreDraft(form: HTMLFormElement, draft: DraftField[]) {
 
 export function ConversionMutationForm({
   action, children, submitLabel, successMessage, confirmationLabel, className,
-  newActionLabel,
+  newActionLabel, successReturnTo,
 }: {
   action: (formData: FormData, responseMode: "inline") => Promise<ConversionMutationResult>;
   children: ReactNode;
@@ -103,6 +111,7 @@ export function ConversionMutationForm({
   confirmationLabel?: string;
   className?: string;
   newActionLabel?: string;
+  successReturnTo?: string;
 }) {
   const router = useRouter();
   const statusId = useId();
@@ -121,7 +130,13 @@ export function ConversionMutationForm({
     const form = formRef.current;
     if (!form) return;
     if (draft.current) restoreDraft(form, draft.current);
-    const version = form.querySelector<HTMLInputElement>('input[name="record_version"]')?.value || "";
+    const versionField = form.querySelector<HTMLInputElement>('input[name="record_version"]');
+    // A rejected request can leave a dirty DOM value even after React receives
+    // the same server version again. Read the refreshed server-rendered default,
+    // not that rejected value, and resynchronize only this concurrency field.
+    // The server still rechecks the actor, current record and expected version.
+    const version = versionField?.defaultValue || "";
+    if (versionField) versionField.value = version;
     if (conflictVersion.current !== null && version !== conflictVersion.current) {
       conflictVersion.current = null;
       token.current = null;
@@ -155,7 +170,14 @@ export function ConversionMutationForm({
       if (!saved.ok && versionConflicts.has(saved.error)) {
         conflictVersion.current = String(data.get("record_version") || "");
       }
-      if (saved.ok) router.refresh();
+      if (saved.ok) {
+        const destination=conversionSuccessReturnTo(successReturnTo);
+        if (destination) {
+          // Do not hide an unexpected audit/recovery warning behind a generic
+          // success notice. The confirmed state remains visible for review.
+          if (!saved.warning || ["snoozed", "dismissed"].includes(saved.warning)) window.location.assign(destination);
+        } else router.refresh();
+      }
     } catch {
       // A lost response is not evidence of failure. Replay only the captured request.
       setUncertain(true);

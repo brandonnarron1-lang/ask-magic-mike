@@ -63,7 +63,7 @@ test("Real sessions enforce four-role list/detail/report and direct API boundari
   for (const role of ["admin", "owner", "agent"]) {
     const page = await contexts[role].newPage();
     await page.goto("/admin/leads");
-    await expect(page.getByRole("heading", { name: "Lead inbox and routing readiness" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Protected request inbox" })).toBeVisible();
     await expect(page.getByText(`SYNTHETIC ${role === "admin" ? "AGENT" : role.toUpperCase()} DO NOT CONTACT`, { exact: true }).first()).toBeVisible();
     if (role !== "admin") await expect(page.getByText("SYNTHETIC OTHER DO NOT CONTACT", { exact: true })).toHaveCount(0);
     await page.goto(`/admin/leads/${f.leads[role === "admin" ? "agent" : role]}`);
@@ -176,6 +176,22 @@ test("Signed account/destination, phone binding, invalid signature and STOP prec
   expect((await sql("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
 });
 
+test("Today forged task version is refused without changing the task", async () => {
+  const page = await contexts.agent.newPage();
+  await page.goto("/admin/today");
+  const form = page.getByRole("form", { name: "Complete task", exact: true }).filter({
+    has: page.locator(`input[name="lead_id"][value="${f.leads.agent}"]`),
+  }).first();
+  await expect(form).toBeVisible();
+  const before = (await sql("SELECT status,updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0];
+  await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="forged-synthetic-version"; });
+  await form.getByRole("button", { name: "Complete task", exact: true }).click();
+  await expect(form.getByRole("alert")).toContainText("This action changed");
+  await expect(form.getByRole("button", { name: "Complete task", exact: true })).toBeDisabled();
+  expect((await sql("SELECT status,updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0]).toEqual(before);
+  await page.close();
+});
+
 test("Today real task completion/stale form, paginated timeline and 200% text remain scoped", async () => {
   const page = await contexts.agent.newPage();
   await page.goto(`/admin/leads/${f.leads.agent}`);
@@ -189,19 +205,32 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await expect(page.getByRole("heading", { name: "Your next step.", exact: true })).toBeVisible();
   const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Complete task", exact: true }) }).filter({ has: page.locator(`input[name="lead_id"][value="${f.leads.agent}"]`) }).first();
   await expect(form).toBeVisible();
-  await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="stale-synthetic-version"; });
-  await form.getByRole("button").click();
-  await expect(page).toHaveURL(/today_action=stale_action/);
+  const completedActionId=await form.locator('input[name="action_id"]').inputValue();
+  const renderedVersion = await form.locator('input[name="record_version"]').inputValue();
+  // Model a genuine concurrent database update, not a DOM mutation. Hidden
+  // input .value also changes its defaultValue; that is not a server snapshot.
+  const advancedVersion = (await sql("UPDATE tasks SET updated_at=clock_timestamp() WHERE lead_id=$1 AND category='followup:manual_callback' RETURNING updated_at::text", [f.leads.agent]))[0].updated_at;
+  expect(advancedVersion).not.toBe(renderedVersion);
+  await expect(form.locator('input[name="record_version"]')).toHaveValue(renderedVersion);
+  await form.getByRole("button",{name:"Complete task",exact:true}).click();
+  await expect(form.getByRole("alert")).toContainText("This action changed");
+  await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
   expect((await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("open");
-  await page.getByRole("button", { name: "Complete task", exact: true }).first().click();
+  await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();
+  const currentTaskVersion=(await sql("SELECT updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'",[f.leads.agent]))[0].updated_at;
+  await expect(form.locator('input[name="record_version"]')).toHaveValue(currentTaskVersion);
+  await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
+  await form.getByRole("button", { name: "Complete task", exact: true }).click();
+  await expect.poll(async()=>(await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("done");
   await expect(page).toHaveURL(/today_action=completed/);
-  expect((await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("done");
+  await expect(page.locator(`input[name="action_id"][value="${completedActionId}"]`)).toHaveCount(0);
+  await page.locator("summary").filter({hasText:/^More internal actions$/}).first().click();
   const snooze = page.locator("form").filter({has:page.getByRole("button",{name:"Snooze 24 hours",exact:true})}).first();
   await expect(snooze).toBeVisible();
   const reviewedLead = await snooze.locator('input[name="lead_id"]').inputValue();
   await snooze.getByRole("button").click();
   await expect(page).toHaveURL(/today_action=snoozed/);
-  expect((await sql("SELECT count(*)::int AS n FROM lead_action_reviews WHERE lead_id=$1 AND status='snoozed' AND actor_user_id=$2",[reviewedLead,f.ids.agent]))[0].n).toBe(1);
+  await expect.poll(async()=>(await sql("SELECT count(*)::int AS n FROM lead_action_reviews WHERE lead_id=$1 AND status='snoozed' AND actor_user_id=$2",[reviewedLead,f.ids.agent]))[0].n).toBe(1);
   for (const width of [320,390,768,1440]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);

@@ -82,7 +82,10 @@ describe("private staff feedback queue", () => {
     const select = await screen.findByLabelText("Classification");
     fireEvent.change(select, { target: { value: "stale_information" } });
     fireEvent.click(screen.getByRole("button", { name: "Save classification" }));
-    expect(await screen.findByRole("alert")).toHaveFocus(); expect(select).toHaveValue("stale_information");
+    const alert=await screen.findByRole("alert");
+    // Alert rendering precedes the component's focus effect under a loaded
+    // hosted runner. Keep the focus requirement; await that actual effect.
+    await waitFor(()=>expect(alert).toHaveFocus()); expect(select).toHaveValue("stale_information");
     expect(within(screen.getByRole("article")).getByRole("button", { name: "Create synthetic regression draft" })).not.toBeDisabled();
   });
 });

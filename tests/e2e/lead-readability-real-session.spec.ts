@@ -57,7 +57,7 @@ test.beforeAll(async({browser})=>{
   // The sign-in URL itself ends in returnTo=/admin/leads. A suffix regex
   // falsely passed before the authenticated navigation/session completed.
   await expect(page).toHaveURL(`${app.origin}/admin/leads`);
-  await expect(page.getByRole("heading",{level:1})).toHaveText("Lead inbox and routing readiness");
+  await expect(page.getByRole("heading",{level:1})).toHaveText("Protected request inbox");
   expect((await query('SELECT count(*)::int AS n FROM lead_center_sessions WHERE "userId"=$1',[fixture.ids.agent]))[0].n).toBeGreaterThan(0);
   await page.close();
   await query("UPDATE leads SET question_raw=$2,source='ourtownproperties',timeline_months=3 WHERE id=$1",[fixture.leads.agent,'Question: SYNTHETIC REQUEST — NOT A CONSUMER\nAttribution: {"source":"ourtownproperties","campaign":"synthetic"}']);
@@ -115,6 +115,10 @@ for(const width of [320,390,768,1440]) {
     expect(await overview.locator('a[href^="tel:"],a[href^="mailto:"],a[href^="sms:"]').count()).toBe(0);
     await expect(overview).toContainText("Our Town Properties website"); await expect(overview).not.toContainText("Attribution:");
     const call=overview.getByRole("button",{name:"Review & call"}); await expect(call).toBeEnabled();
+    const brief=page.getByRole("region",{name:"Operator action brief"});
+    await expect(brief.getByText("Review overdue task",{exact:true})).toBeVisible();
+    await expect(brief.locator("details")).not.toHaveAttribute("open","");
+    expect((await brief.locator("summary").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     for (const link of await page.getByRole("navigation", {name:"Command Center navigation"}).getByRole("link").all()) expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect((await call.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect((await call.boundingBox())!.y).toBeLessThan(width===320?1000:844);

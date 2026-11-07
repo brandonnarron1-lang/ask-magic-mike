@@ -15,7 +15,9 @@ const ncRouting = process.env.AMM_NC_ROUTING_ACCEPTANCE === "1";
 const homeValue = process.env.AMM_HOME_VALUE_ACCEPTANCE === "1";
 const launchIntake = process.env.AMM_LAUNCH_INTAKE_UI_ACCEPTANCE === "1";
 const acquisition = process.env.AMM_ACQUISITION_ACCEPTANCE === "1";
-const webAcquisition = process.env.AMM_WEB_ACQUISITION_ACCEPTANCE === "1";
+const commandDesk = process.env.AMM_COMMAND_DESK_ACCEPTANCE === "1";
+if(commandDesk && process.env.AMM_WEB_ACQUISITION_ACCEPTANCE==="1")throw new Error("exclusive_command_desk_selection_required");
+const webAcquisition = process.env.AMM_WEB_ACQUISITION_ACCEPTANCE === "1" || commandDesk;
 const consumerWorkspace = process.env.AMM_CONSUMER_WORKSPACE_ACCEPTANCE === "1";
 const consumerAccount = process.env.AMM_CONSUMER_ACCOUNT_ACCEPTANCE === "1";
 const concierge = process.env.AMM_CONCIERGE_HANDOFF_ACCEPTANCE === "1";
@@ -85,16 +87,16 @@ try {
       INSERT INTO lead_center_accounts(id,"accountId","providerId","userId",password) VALUES(${literal(randomUUID())},${literal(userId)},'credential',${literal(userId)},${literal(hash)});`);
   }
   for (const key of ["agent", "other"]) {
-    psql(`INSERT INTO agents(id,name,email,role,is_active,max_daily_leads,current_load,notification_phone,notification_sms,notification_email,availability) VALUES(${literal(agents[key])},${literal(`SYNTHETIC ${key.toUpperCase()}`)},${literal(`directory-${key}@example.test`)},'backup',true,100,0,${literal(phones[key])},true,true,'{"sun":[0,24],"mon":[0,24],"tue":[0,24],"wed":[0,24],"thu":[0,24],"fri":[0,24],"sat":[0,24]}');
-      INSERT INTO agent_operational_enrollment(agent_id,user_id,approved_at,approved_by,paused,email_enabled,sms_enabled,towns,intents,daily_cap,concurrent_cap,consent_at,consent_version,possession_verified_at,phone_fingerprint) VALUES(${literal(agents[key])},${literal(ids[key])},now(),${literal(ids.admin)},false,true,true,ARRAY['Wilson'],ARRAY['buyer'],100,20,now(),'staff_operational_sms_v1',now(),${literal(fingerprint(phones[key]))});`);
+    psql(`INSERT INTO agents(id,name,email,role,is_active,max_daily_leads,current_load,notification_phone,notification_sms,notification_email,availability) VALUES(${literal(agents[key])},${literal(`SYNTHETIC ${key.toUpperCase()}`)},${literal(`directory-${key}@example.test`)},'backup',true,100,0,${literal(phones[key])},true,true,'{"sun":[0,24],"mon":[0,24],"tue":[0,24],"wed":[0,24],"thu":[0,24],"fri":[0,24],"sat":[0,24]}');`);
+    if(!commandDesk)psql(`INSERT INTO agent_operational_enrollment(agent_id,user_id,approved_at,approved_by,paused,email_enabled,sms_enabled,towns,intents,daily_cap,concurrent_cap,consent_at,consent_version,possession_verified_at,phone_fingerprint) VALUES(${literal(agents[key])},${literal(ids[key])},now(),${literal(ids.admin)},false,true,true,ARRAY['Wilson'],ARRAY['buyer'],100,20,now(),'staff_operational_sms_v1',now(),${literal(fingerprint(phones[key]))});`);
   }
   for (const [key, lead] of Object.entries(leads)) {
     const session = randomUUID();
     psql(`INSERT INTO sessions(id) VALUES(${literal(session)}); INSERT INTO leads(id,session_id,first_name,last_name,email,phone,lead_type,primary_intent,city,state,source,is_test,communication_suppressed,assigned_agent_id,assigned_at) VALUES(${literal(lead)},${literal(session)},'SYNTHETIC',${literal(`${key.toUpperCase()} DO NOT CONTACT`)},${literal(`private-${key}@example.test`)},'+12025550199','buyer','buy','Wilson','NC','isolated_session_acceptance',false,false,${literal(agents[key] || agents.owner)},now());`);
   }
-  psql(`UPDATE lead_allocation_policy SET active=true,starts_at=now()-interval '5 minutes',version=version+1,approved_at=now(),approved_by=${literal(ids.admin)},fallback_agent_id=${literal(agents.owner)},mode='first_claim',max_fanout=2,daily_segment_budget=0,daily_estimated_cost_micros=0 WHERE id='staff_v1';`);
+  if(!commandDesk)psql(`UPDATE lead_allocation_policy SET active=true,starts_at=now()-interval '5 minutes',version=version+1,approved_at=now(),approved_by=${literal(ids.admin)},fallback_agent_id=${literal(agents.owner)},mode='first_claim',max_fanout=2,daily_segment_budget=0,daily_estimated_cost_micros=0 WHERE id='staff_v1';`);
   const offers = {};
-  for (const key of ["offer", "pass", "sms"]) {
+  for (const key of commandDesk ? [] : ["offer", "pass", "sms"]) {
     const version = Number(psql(`SELECT allocation_version FROM leads WHERE id=${literal(leads[key])};`));
     const created = JSON.parse(psql(`SELECT create_lead_allocation_offers_v1(${literal(leads[key])},${version},${literal(ids.admin)});`));
     if (!created.ok) throw new Error(`isolated_offer_seed_failed:${created.error}`);
@@ -131,6 +133,7 @@ try {
     ...(launchIntake ? { AMM_LAUNCH_INTAKE_UI_ACCEPTANCE: "1" } : {}),
     ...(acquisition ? { AMM_ACQUISITION_ACCEPTANCE: "1" } : {}),
     ...(webAcquisition ? { AMM_WEB_ACQUISITION_ACCEPTANCE: "1", AMM_WEB_QA_SESSION_ID: webQaSession, LEAD_ALERT_V6_QA_SESSION_IDS: webQaSession, LEAD_ALERT_V6_ENABLED: "true", LEAD_ALERT_V6_WORKER_ENABLED: "false", LEAD_ALERT_V6_CUTOFF: "2000-01-01T00:00:00.000Z", LEAD_NOTIFICATION_TO: "mike@example.test", LEAD_NOTIFICATION_SECOND_OPERATOR_TO: "brandon@example.test", RESEND_FROM: "Our Town <sender@example.test>" } : {}),
+    ...(commandDesk ? {AMM_COMMAND_DESK_ACCEPTANCE:"1",REQUEST_RESPONSE_WORKER_ENABLED:"false",REQUEST_RECEIPTS_ENABLED:"false"}:{}),
     ...(consumerWorkspace ? { AMM_CONSUMER_WORKSPACE_ACCEPTANCE: "1" } : {}),
     ...(consumerAccount ? { AMM_CONSUMER_ACCOUNT_ACCEPTANCE: "1",CONSUMER_WORKSPACE_ACCOUNTS_ENABLED:"true" } : {}),
     ...(concierge ? { AMM_CONCIERGE_HANDOFF_ACCEPTANCE: "1" } : {}),
@@ -151,12 +154,17 @@ try {
     AMM_E2E_TWILIO_TOKEN: authToken,
     NODE_OPTIONS: `--dns-result-order=ipv4first --import=${path.resolve("tests/support/isolated-neon-transport.mjs")}`,
   };
-  const suite = ncRouting ? "tests/e2e/nc-routing-real-session.spec.ts" : webAcquisition ? "tests/e2e/web-acquisition-real-session.spec.ts" : nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
+  const suite = commandDesk ? "tests/e2e/lead-command-desk-real-session.spec.ts" : ncRouting ? "tests/e2e/nc-routing-real-session.spec.ts" : webAcquisition ? "tests/e2e/web-acquisition-real-session.spec.ts" : nativeClient ? (nativeBinary?"tests/e2e/native-binary-flow.spec.ts":nativeDevice?"tests/e2e/native-device-flow.spec.ts":"tests/e2e/native-client-api.spec.ts") : lifecycle ? "tests/e2e/r2-source-feedback-real-session.spec.ts" : concierge ? "tests/e2e/concierge-handoff-real-session.spec.ts" : consumerAccount ? "tests/e2e/consumer-account-real-session.spec.ts" : consumerWorkspace ? "tests/e2e/consumer-workspace.spec.ts" : acquisition ? "tests/e2e/acquisition-real-session.spec.ts" : launchIntake ? "tests/e2e/launch-intake-ui.spec.ts" : homeValue ? "tests/e2e/home-value-intake-real-session.spec.ts" : readability ? "tests/e2e/lead-readability-real-session.spec.ts" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1"
     ? "tests/e2e/conversion-real-session.spec.ts" : "tests/e2e/reference-real-session.spec.ts";
-  const additionalSuites = webAcquisition ? ["tests/e2e/today-reliability-real-session.spec.ts", "tests/e2e/conversion-readiness-sharing.spec.ts", "tests/e2e/widget-preview-flow.spec.ts"] : [];
+  const additionalSuites = commandDesk ? [] : webAcquisition ? ["tests/e2e/today-reliability-real-session.spec.ts", "tests/e2e/conversion-readiness-sharing.spec.ts", "tests/e2e/widget-preview-flow.spec.ts"] : [];
   child = spawn("pnpm", ["exec", "playwright", "test", suite, ...additionalSuites, ...(artifactOverride ? ["--output",path.join(runDir,"test-results")] : []), ...(consumerAccount&&process.env.AMM_CONSUMER_ACCOUNT_SENTINEL==="1"?["--grep","sentinel: consumer account"]:[])], { env, stdio: "inherit" });
   const exit = await new Promise((resolve, reject) => { child.on("error", reject); child.on("exit", resolve); });
   const counts = JSON.parse(psql(`SELECT json_build_object('leads',count(*),'notifications',(SELECT count(*) FROM lead_notifications),'provider_ids',(SELECT count(*) FROM lead_notifications WHERE provider_message_id IS NOT NULL),'reservations',(SELECT count(*) FROM lead_allocation_send_reservations)) FROM leads;`));
+  if(commandDesk){
+    const safety=JSON.parse(psql("SELECT json_build_object('offers',(SELECT count(*) FROM lead_allocation_offers),'enrollments',(SELECT count(*) FROM agent_operational_enrollment),'activePolicy',(SELECT active FROM lead_allocation_policy WHERE id='staff_v1'))"));
+    if(safety.offers!==0||safety.enrollments!==0||safety.activePolicy||counts.reservations!==0||counts.provider_ids!==0)throw new Error("command_desk_no_effect_invariants_failed");
+    writeFileSync(path.join(runDir,"command-desk-no-effects.json"),JSON.stringify({at:new Date().toISOString(),status:"PASS",...safety,...counts,allocationRuntimeEnabled:false,workerEnabled:false,customerReceiptsEnabled:false,externalFetch:"denied",ProductionWrites:0},null,2),{mode:0o600});
+  }
   const receiptName = launchIntake ? "launch-intake-ui-receipt.json" : homeValue ? "home-value-ui-receipt.json" : process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? "conversion-receipt.json" : "receipt.json";
   const scope = homeValue || launchIntake
     ? `${env.AMM_E2E_BUILT === "1" ? "built-app" : "development-diagnostic"}-ui-intercepted-synthetic-lead-receipts-isolated-harness-not-intake-sql-proof`

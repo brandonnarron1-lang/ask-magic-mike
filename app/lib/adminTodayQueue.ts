@@ -1,4 +1,6 @@
 import { conversationPreferenceLabel } from "./conversationPreferences";
+import { isTerminalContactRecord } from "./manualContactReview";
+import { projectLeadSourceEvidence } from "./leadSourceEvidence";
 import type {
   AdminAppointmentRow,
   AdminFollowupTaskRow,
@@ -71,6 +73,17 @@ export type AdminTodayAction = {
   readOnly?: boolean;
   requestContext?: string;
   receivedAt?: string | null;
+  notificationEvidence?: { template:string|null; audience:string|null; channel:string|null; status:string|null };
+  facts?: {
+    owner: string;
+    location: string | null;
+    timelineMonths: number | null;
+    source: string | null;
+    captureSurface: string | null;
+    hasContact: boolean | null;
+    contactHeld: boolean;
+    firstHumanResponseAt: string | null;
+  };
 };
 
 export type AdminTodayQueueResult = {
@@ -95,7 +108,6 @@ type PermissionRow = Record<string, unknown>;
 type NotificationRow = Record<string, unknown>;
 type ReviewRow = Record<string, unknown>;
 
-const TERMINAL_STATUSES = new Set(["converted", "dead", "closed", "closed_won", "closed_lost", "spam"]);
 const ACTIVE_STATUSES = new Set(["assigned", "contacted", "qualified", "appointment_requested", "appointment_set", "nurture", "escalated"]);
 
 function text(value: unknown): string | null {
@@ -194,13 +206,14 @@ export function buildAdminTodayQueue(input: {
   const excludedTestRecords = input.leads.filter((lead) => bool(lead.is_test)).length;
   const leads = input.leads.filter((lead) =>
     !bool(lead.is_test)
-    && !TERMINAL_STATUSES.has((text(lead.status) || "new").toLowerCase()),
+    && !isTerminalContactRecord((text(lead.status) || "new").toLowerCase(), text(lead.conversion_stage)?.toLowerCase())
+    && !["no_follow_up", "do_not_contact"].includes(text(lead.closed_lost_reason)?.toLowerCase() || ""),
   );
   const leadMap = new Map(leads.map((lead) => [text(lead.id) || "", lead]));
   const items: AdminTodayAction[] = [];
   const nowMs = now.getTime();
   const localDate = new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
-  const isToday = (value: string | null) => Boolean(value && new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value)) === localDate);
+  const isToday = (value: string | null) => Boolean(value && Number.isFinite(time(value)) && new Intl.DateTimeFormat("en-CA", { timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date(value)) === localDate);
 
   const add = (inputAction: Omit<AdminTodayAction, "id" | "reviewVersion">) => {
     const review = reviews.get(`${inputAction.leadId}:${inputAction.actionKey}`);
@@ -214,6 +227,16 @@ export function buildAdminTodayQueue(input: {
       readOnly: ownership === "inherited" && !input.canViewUnassigned,
       requestContext: (text(lead.primary_intent) || text(lead.lead_type))?.replaceAll("_", " ") || "Request type not provided",
       receivedAt: text(lead.created_at),
+      facts: {
+        owner: text(lead.owner_name) || (effectiveOwner(lead) ? "Ownership recorded — name unavailable" : "Unassigned"),
+        location: text(lead.request_location) || text(lead.address_raw),
+        timelineMonths: lead.timeline_months === null || lead.timeline_months === undefined ? null : number(lead.timeline_months),
+        source: text(lead.source),
+        captureSurface: projectLeadSourceEvidence(lead).captureSurface.value,
+        hasContact: typeof lead.has_contact === "boolean" ? lead.has_contact : null,
+        contactHeld: bool(lead.communication_suppressed),
+        firstHumanResponseAt: text(lead.first_human_response_at),
+      },
       id: `${inputAction.leadId}:${inputAction.actionKey}`,
       reviewVersion: review?.version || 0,
     });
@@ -355,8 +378,9 @@ export function buildAdminTodayQueue(input: {
       priorityBucket: "notification_failure", dueAt: text(notification.next_attempt_at) || text(notification.updated_at), timezone,
       reasonCodes: [ambiguous ? "notification_provider_reconciliation" : stalePending ? "notification_pending_stale" : "notification_failed"], evidenceReferences: [`notification:${notificationId}`], blockers: [],
       requiredPermission: "notification:manage", recordVersion: text(notification.updated_at) || text(notification.created_at) || "unknown",
+      notificationEvidence: { template:text(notification.template_version),audience:text(notification.operator_label)||text(notification.recipient_type),channel:text(notification.channel),status },
       recommendedAction: ambiguous ? "Reconcile provider history before intervention; do not resend an ambiguous delivery."
-        : stalePending ? "Inspect the never-claimed intent and delivery configuration; scheduled recovery is not activated."
+        : stalePending ? "Inspect the never-claimed intent and current delivery configuration; this read does not activate recovery."
         : "Inspect provider evidence and retry policy before intervention.",
     });
   }
