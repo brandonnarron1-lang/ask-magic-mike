@@ -18,6 +18,11 @@ describe("desk uses existing fresh server-authorized internal actions",()=>{
    expect(m.task.mock.calls[0][0]).not.toHaveProperty("assigned_agent_id");
    expect(m.revalidate).toHaveBeenCalledWith("/admin/today");
  });
+ it("retains successful cache invalidation and redirect for the non-inline server form",async()=>{
+   const f=form();f.delete("response_mode");await expect(completeTodayTask(f)).rejects.toThrow("redirect:/admin/today?today_action=completed");
+   expect(m.revalidate).toHaveBeenCalledWith("/admin/today");expect(m.revalidate).toHaveBeenCalledWith("/admin/action-queue");
+   expect(m.revalidate).toHaveBeenCalledWith("/admin/leads");
+ });
  it.each([
    {items:[{...item,readOnly:true}],coverage:{state:"complete"}},
    {items:[{...item,blockers:["communication_suppressed"]}],coverage:{state:"complete"}},

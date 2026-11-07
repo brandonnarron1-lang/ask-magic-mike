@@ -189,6 +189,7 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await expect(page.getByRole("heading", { name: "Your next step.", exact: true })).toBeVisible();
   const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Complete task", exact: true }) }).filter({ has: page.locator(`input[name="lead_id"][value="${f.leads.agent}"]`) }).first();
   await expect(form).toBeVisible();
+  const completedActionId=await form.locator('input[name="action_id"]').inputValue();
   await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="stale-synthetic-version"; });
   await form.getByRole("button",{name:"Complete task",exact:true}).click();
   await expect(form.getByRole("alert")).toContainText("This action changed");
@@ -198,11 +199,14 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
   await form.getByRole("button", { name: "Complete task", exact: true }).click();
   await expect.poll(async()=>(await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("done");
+  await expect(page).toHaveURL(/today_action=completed/);
+  await expect(page.locator(`input[name="action_id"][value="${completedActionId}"]`)).toHaveCount(0);
   await page.locator("summary").filter({hasText:/^More internal actions$/}).first().click();
   const snooze = page.locator("form").filter({has:page.getByRole("button",{name:"Snooze 24 hours",exact:true})}).first();
   await expect(snooze).toBeVisible();
   const reviewedLead = await snooze.locator('input[name="lead_id"]').inputValue();
   await snooze.getByRole("button").click();
+  await expect(page).toHaveURL(/today_action=snoozed/);
   await expect.poll(async()=>(await sql("SELECT count(*)::int AS n FROM lead_action_reviews WHERE lead_id=$1 AND status='snoozed' AND actor_user_id=$2",[reviewedLead,f.ids.agent]))[0].n).toBe(1);
   for (const width of [320,390,768,1440]) {
     await page.setViewportSize({ width, height: 1000 });

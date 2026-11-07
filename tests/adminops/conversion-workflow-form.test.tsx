@@ -24,6 +24,13 @@ beforeEach(() => vi.clearAllMocks());
 afterEach(cleanup);
 
 describe("bounded inline conversion form", () => {
+  it("keeps an unexpected saved warning visible instead of taking a generic desk success return", async () => {
+    const action=vi.fn().mockResolvedValue({ok:true,warning:"synthetic_audit_review_required"});
+    render(<ConversionMutationForm action={action} submitLabel="Complete task" successMessage="Task saved" successReturnTo="/admin/today?today_action=completed">{fields()}</ConversionMutationForm>);
+    await userEvent.click(screen.getByRole("button",{name:"Complete task"}));
+    expect(await screen.findByRole("status")).toHaveTextContent("Saved with notice: synthetic audit review required");
+    expect(refresh).not.toHaveBeenCalled();
+  });
   it("keeps notes and dates on a rejected save without redirecting or claiming success", async () => {
     const action = vi.fn().mockResolvedValue({ ok: false, error: "invalid_followup_due_at" });
     render(form(action));

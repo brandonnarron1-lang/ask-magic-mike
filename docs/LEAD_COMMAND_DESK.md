@@ -11,8 +11,11 @@ then use an existing server-authorized internal action. Detail keeps the contact
 disclosure and fresh exact-destination checks. Opening a composer, completing a
 task, provider acceptance and a recorded human response are separate events.
 Rejected inline saves retain their explanation and version fence until the
-operator explicitly reviews the latest record; only successful saves invalidate
-the Today cache. The fresh server/SQL role, assignment and CAS checks are unchanged.
+operator explicitly reviews the latest record. Confirmed desk saves return to an
+allowlisted protected Today URL, replacing stale controls with a fresh page.
+Other conversion forms retain their existing refresh behavior. Rejected/UNKNOWN
+saves never take that success navigation. Fresh server/SQL role, assignment and
+CAS checks are unchanged.
 
 `/admin/leads` retains bounded inbox pagination and authenticated POST-body search.
 Changing a search clears prior results; aborted or late requests cannot replace

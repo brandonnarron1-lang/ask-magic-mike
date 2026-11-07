@@ -89,6 +89,7 @@ test("required SQL failure is unavailable, then genuine empty scope stays honest
 test("one existing internal task completes without creating response, ownership or delivery",async()=>{
   const page=await contexts.agent.newPage();await page.goto("/admin/today");const card=page.locator("article").filter({hasText:"Existing task overdue"}).first();
   const form=card.getByRole("form",{name:"Complete task",exact:true});
+  const completedActionId=await form.locator('input[name="action_id"]').inputValue();
   await form.locator('input[name="record_version"]').evaluate(el=>{(el as HTMLInputElement).value="stale-synthetic-version";});
   await form.getByRole("button",{name:"Complete task",exact:true}).click();await expect(form.getByRole("alert")).toContainText("This action changed");await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
   expect((await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("open");
@@ -97,12 +98,16 @@ test("one existing internal task completes without creating response, ownership 
   await expect.poll(async()=>(await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("done");
   const row=(await pool.query("SELECT assigned_agent_id,(SELECT count(*)::int FROM lead_response_milestones WHERE lead_id=leads.id) responses FROM leads WHERE id=$1",[f.leads.agent])).rows[0];
   expect(row.assigned_agent_id).toBe(f.agents.agent);expect(row.responses).toBe(0);await safety();
-  await expect(page.getByRole("button",{name:"Complete task",exact:true})).toHaveCount(0);
+  await expect(page).toHaveURL(/\/admin\/today\?today_action=completed$/);
+  // A button named Saved is not proof that the following RSC read completed.
+  // Wait for the old logical action itself to leave the rendered queue.
+  await expect(page.locator(`input[name="action_id"][value="${completedActionId}"]`)).toHaveCount(0);
   await page.locator("summary").filter({hasText:/^More internal actions$/}).first().click();
   const snooze=page.getByRole("form",{name:"Snooze 24 hours",exact:true}).first();await expect(snooze).toBeVisible();
   const version=(await pool.query("SELECT updated_at::text FROM leads WHERE id=$1",[f.leads.agent])).rows[0].updated_at;
   await expect(snooze.locator('input[name="record_version"]')).toHaveValue(version);expect(await snooze.locator('input[name="action_id"]').inputValue()).not.toContain(":task:");
   await snooze.getByRole("button",{name:"Snooze 24 hours",exact:true}).click();
+  await expect(page).toHaveURL(/\/admin\/today\?today_action=snoozed$/);
   await expect.poll(async()=>(await pool.query("SELECT count(*)::int n FROM lead_action_reviews WHERE lead_id=$1 AND actor_user_id=$2 AND status='snoozed'",[f.leads.agent,f.ids.agent])).rows[0].n).toBe(1);await safety();
 });
 test("expired real session returns to sign-in with the protected destination",async()=>{

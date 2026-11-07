@@ -4,9 +4,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { LeadSearchPanel } from "../../app/admin/leads/lead-search-panel";
 import Loading from "../../app/admin/today/loading";
 import ErrorBoundary from "../../app/admin/today/error";
+import { conversionSuccessReturnTo } from "../../app/components/admin/ConversionMutationForm";
 afterEach(()=>{cleanup();vi.unstubAllGlobals();});
 const result=(label:string)=>({ok:true,configured:true,page:{total:1},leads:[{id:"synthetic-record",primary_detail:label,contact_summary:"Synthetic private record",status:"new"}]});
 describe("command desk search and read boundaries",()=>{
+  it("allows only fixed protected success returns, never an external or guessed target",()=>{
+    expect(conversionSuccessReturnTo("/admin/today?today_action=completed")).toBe("/admin/today?today_action=completed");
+    for(const target of [undefined,"https://example.test","//example.test","/admin/today?email=synthetic@example.test","/api/operations/daily-digest","/admin/leads/guessed"])
+      expect(conversionSuccessReturnTo(target)).toBeNull();
+  });
   it("keeps terms in authenticated POST body, never the URL, and clears stale results on edit",async()=>{
     const fetch=vi.fn().mockResolvedValue({ok:true,json:async()=>result("Current result")});vi.stubGlobal("fetch",fetch);
     render(<LeadSearchPanel/>);fireEvent.change(screen.getByRole("textbox"),{target:{value:"synthetic query"}});fireEvent.click(screen.getByRole("button",{name:"Search"}));
