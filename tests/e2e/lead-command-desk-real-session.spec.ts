@@ -97,6 +97,7 @@ test("one existing internal task completes without creating response, ownership 
   await form.getByRole("button",{name:"Complete task",exact:true}).click();await expect(form.getByRole("alert")).toContainText("This action changed");await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
   expect((await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("open");
   await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
+  await expect(form.locator('input[name="record_version"]')).toHaveValue((await pool.query("SELECT updated_at::text FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].updated_at);
   await card.getByRole("button",{name:"Complete task",exact:true}).click();
   await expect.poll(async()=>(await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("done");
   const row=(await pool.query("SELECT assigned_agent_id,(SELECT count(*)::int FROM lead_response_milestones WHERE lead_id=leads.id) responses FROM leads WHERE id=$1",[f.leads.agent])).rows[0];

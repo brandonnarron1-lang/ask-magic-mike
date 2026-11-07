@@ -130,7 +130,13 @@ export function ConversionMutationForm({
     const form = formRef.current;
     if (!form) return;
     if (draft.current) restoreDraft(form, draft.current);
-    const version = form.querySelector<HTMLInputElement>('input[name="record_version"]')?.value || "";
+    const versionField = form.querySelector<HTMLInputElement>('input[name="record_version"]');
+    // A rejected request can leave a dirty DOM value even after React receives
+    // the same server version again. Read the refreshed server-rendered default,
+    // not that rejected value, and resynchronize only this concurrency field.
+    // The server still rechecks the actor, current record and expected version.
+    const version = versionField?.defaultValue || "";
+    if (versionField) versionField.value = version;
     if (conflictVersion.current !== null && version !== conflictVersion.current) {
       conflictVersion.current = null;
       token.current = null;

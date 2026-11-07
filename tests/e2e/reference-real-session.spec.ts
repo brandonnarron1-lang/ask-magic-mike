@@ -196,6 +196,8 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
   expect((await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("open");
   await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();
+  const currentTaskVersion=(await sql("SELECT updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'",[f.leads.agent]))[0].updated_at;
+  await expect(form.locator('input[name="record_version"]')).toHaveValue(currentTaskVersion);
   await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
   await form.getByRole("button", { name: "Complete task", exact: true }).click();
   await expect.poll(async()=>(await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("done");
