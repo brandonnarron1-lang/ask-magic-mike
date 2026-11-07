@@ -42,6 +42,13 @@ globalThis.fetch = async (input, init) => {
     const body = JSON.parse(rawBody);
     const execute = async ({ query, params }) => {
       const result = await client.query({ text: query, values: params, rowMode: "array", types: { getTypeParser: () => value => value } });
+      if (process.env.AMM_STALE_REVIEW_DIAGNOSTIC === "1" && /FROM public\.tasks t/.test(query)) {
+        const names = result.fields.map(field => field.name);
+        appendFileSync(path.join(artifactDirectory, "stale-review-server.jsonl"), `${JSON.stringify({
+          at: new Date().toISOString(), stage: "today_task_read", pid: process.pid,
+          rows: result.rows.map(row => Object.fromEntries(["id", "lead_id", "updated_at", "status"].map(name => [name, row[names.lastIndexOf(name)]]))),
+        })}\n`, { mode: 0o600 });
+      }
       return { rows: result.rows, fields: result.fields.map(field => ({ name: field.name, dataTypeID: field.dataTypeID })), rowCount: result.rowCount, command: result.command };
     };
     if (body.queries) {

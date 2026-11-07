@@ -7,6 +7,11 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      pr324_diagnostic:
+        description: "Isolated PR324 Linux diagnosis ONLY; not a release gate"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -17,6 +22,7 @@ concurrency:
 
 jobs:
   local-release-gate:
+    if: github.event_name != 'workflow_dispatch' || inputs.pr324_diagnostic != true
     name: local-release-gate
     runs-on: ubuntu-latest
     # Public standard runner; retain every test-level bound and mandatory stage.
@@ -250,3 +256,44 @@ jobs:
           CI_FAILURE_RETRY_SAFE: "true"
           CI_FAILURE_PRODUCTION_IMPACT: No production mutation occurred; the candidate is blocked from release
         run: node scripts/write-ci-failure-summary.mjs
+
+  pr324-stale-review-diagnostic:
+    name: PR324 passive Linux diagnosis - NOT release acceptance
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_diagnostic == true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build unchanged application bytes for isolated diagnosis
+        run: pnpm run build
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Original serial suite and passive same-record boundary capture
+        env:
+          AMM_QA_POSTGRES_TEST: '1'
+          AMM_STALE_REVIEW_DIAGNOSTIC: '1'
+          AMM_SESSION_ARTIFACT_DIR: .amm-run/pr324-linux-diagnostic
+        run: node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/amm/reference-session-acceptance.mjs
+      - name: Failure-safe sanitized evidence only - no traces or storage state
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr324-linux-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          path: |
+            .amm-run/pr324-linux-diagnostic/stale-review-*.json
+            .amm-run/pr324-linux-diagnostic/stale-review-*.jsonl
+            .amm-run/pr324-linux-diagnostic/stale-review-*.png
+            .amm-run/pr324-linux-diagnostic/receipt.json
+          if-no-files-found: warn

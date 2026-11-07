@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { Pool } from "pg";
 import twilio from "twilio";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import { observeStaleReview, staleReviewNote, staleReviewSql } from "../support/stale-review-diagnostic";
 
 // This suite cannot attach to an arbitrary server or inherit Production keys.
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1", "Run the isolated real-session acceptance command");
@@ -17,7 +18,11 @@ const apiPages: Record<string, Page> = {};
 const origin = `http://localhost:${process.env.AMM_E2E_PORT}`;
 const offerFor = (key: string, role = "agent") => f.offers[key].find(o => o.agent_id === f.agents[role])!;
 const commandCode = (key: string, role: string) => f.codes[key][f.offers[key].findIndex(o => o.agent_id === f.agents[role])];
-const sql = async (text: string, values: unknown[] = []) => (await pool.query(text, values)).rows;
+const sql = async (text: string, values: unknown[] = []) => {
+  const rows = (await pool.query(text, values)).rows;
+  staleReviewSql(text, values, rows);
+  return rows;
+};
 async function openTimeline(page: Page) {
   const summary=page.locator("summary").filter({hasText:/^Unified activity history$/});
   // Next navigation may preserve the native disclosure's open state.
@@ -41,6 +46,7 @@ async function inbound(body: string, role = "agent", overrides: Record<string, s
   return { response, data: await response.json(), sid };
 }
 test.beforeAll(async ({ browser }) => {
+  staleReviewNote("browser", { version:browser.version() });
   f = JSON.parse(readFileSync(process.env.AMM_E2E_FIXTURE_PATH!, "utf8"));
   pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 3 });
   for (const role of ["admin", "owner", "agent", "analyst", "other"]) {
@@ -194,6 +200,8 @@ test("Today forged task version is refused without changing the task", async () 
 
 test("Today real task completion/stale form, paginated timeline and 200% text remain scoped", async () => {
   const page = await contexts.agent.newPage();
+  const observation = await observeStaleReview(page, f.leads.agent);
+  try {
   await page.goto(`/admin/leads/${f.leads.agent}`);
   await openTimeline(page);
   await expect(page.getByRole("link", { name: "Older activity" })).toBeVisible();
@@ -207,10 +215,12 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await expect(form).toBeVisible();
   const completedActionId=await form.locator('input[name="action_id"]').inputValue();
   const renderedVersion = await form.locator('input[name="record_version"]').inputValue();
+  staleReviewNote("rendered_V1", { lead:f.leads.agent,action:completedActionId,version:renderedVersion });
   // Model a genuine concurrent database update, not a DOM mutation. Hidden
   // input .value also changes its defaultValue; that is not a server snapshot.
   const advancedVersion = (await sql("UPDATE tasks SET updated_at=clock_timestamp() WHERE lead_id=$1 AND category='followup:manual_callback' RETURNING updated_at::text", [f.leads.agent]))[0].updated_at;
   expect(advancedVersion).not.toBe(renderedVersion);
+  staleReviewNote("concurrent_SQL_V2", { lead:f.leads.agent,action:completedActionId,version:advancedVersion });
   await expect(form.locator('input[name="record_version"]')).toHaveValue(renderedVersion);
   await form.getByRole("button",{name:"Complete task",exact:true}).click();
   await expect(form.getByRole("alert")).toContainText("This action changed");
@@ -218,6 +228,7 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   expect((await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("open");
   await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();
   const currentTaskVersion=(await sql("SELECT updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'",[f.leads.agent]))[0].updated_at;
+  staleReviewNote("review_expected_V2", { lead:f.leads.agent,action:completedActionId,version:currentTaskVersion });
   await expect(form.locator('input[name="record_version"]')).toHaveValue(currentTaskVersion);
   await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
   await form.getByRole("button", { name: "Complete task", exact: true }).click();
@@ -239,6 +250,7 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await page.evaluate(() => { document.documentElement.style.fontSize="200%"; });
   expect(await page.evaluate(() => document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
   await page.screenshot({ path:"output/playwright/real-session-today-text-200.png",fullPage:true });
+  } finally { await observation.finish(); }
   await page.close();
 });
 

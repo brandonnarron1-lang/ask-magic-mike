@@ -3,7 +3,7 @@
 // credential venue. Five synthetic role identities; outbound providers held.
 import { spawn } from "node:child_process";
 import { createHash, createHmac, randomBytes, randomUUID } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { createServer } from "node:net";
 import { hashPassword } from "better-auth/crypto";
@@ -80,6 +80,16 @@ try {
   // that its sole host binding is loopback. Do not confuse those two boundaries.
   if (identity.database !== "amm_qa_upgrade" || identity.listenAddresses !== expectedListen || identity.leadsBeforeFixtures !== 0 || identity.nonSyntheticDirectory !== 0) throw new Error("isolated_synthetic_identity_failed");
   writeFileSync(path.join(runDir, "database-identity.json"), JSON.stringify({ ...identity, source: "fresh-initdb-or-owned-test-container; tracked schema only", externalFetch: "blocked by isolated transport", outbound: "disabled", at: new Date().toISOString() }, null, 2), { mode: 0o600 });
+  if (process.env.AMM_STALE_REVIEW_DIAGNOSTIC === "1") {
+    const postgres = JSON.parse(psql("SELECT json_build_object('version',version(),'timezone',current_setting('TimeZone'),'database',current_database())"));
+    writeFileSync(path.join(runDir, "stale-review-environment.json"), JSON.stringify({
+      at:new Date().toISOString(),source:process.env.GITHUB_SHA || "local",node:process.version,platform:process.platform,arch:process.arch,
+      timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,postgres,
+      databaseFingerprint:createHash("sha256").update(JSON.stringify(identity)).digest("hex"),
+      lockSha256:createHash("sha256").update(readFileSync("pnpm-lock.yaml")).digest("hex"),
+      buildId:readFileSync(".next/BUILD_ID","utf8").trim(),
+    },null,2),{mode:0o600});
+  }
   const hash = await hashPassword(password);
   const roles = { admin: "administrator", owner: "primary_lead_owner", agent: "approved_agent", analyst: "read_only_analyst", other: "approved_agent" };
   for (const [key, userId] of Object.entries(ids)) {
@@ -126,6 +136,7 @@ try {
   const env = {
     PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR,
     AMM_QA_POSTGRES_TEST: "1", AMM_ISOLATED_SESSION_ACCEPTANCE: "1", AMM_E2E_FIXTURE_PATH: fixturePath,
+    ...(process.env.AMM_STALE_REVIEW_DIAGNOSTIC === "1" ? { AMM_STALE_REVIEW_DIAGNOSTIC: "1" } : {}),
     ...(process.env.AMM_CONVERSION_SESSION_ACCEPTANCE === "1" ? { AMM_CONVERSION_SESSION_ACCEPTANCE: "1" } : {}),
     ...(readability ? { AMM_LEAD_READABILITY_ACCEPTANCE: "1" } : {}),
     ...(ncRouting ? { AMM_NC_ROUTING_ACCEPTANCE: "1" } : {}),
