@@ -10,6 +10,9 @@ inquiry. Open the protected request, review actual owner and current permission,
 then use an existing server-authorized internal action. Detail keeps the contact
 disclosure and fresh exact-destination checks. Opening a composer, completing a
 task, provider acceptance and a recorded human response are separate events.
+Rejected inline saves retain their explanation and version fence until the
+operator explicitly reviews the latest record; only successful saves invalidate
+the Today cache. The fresh server/SQL role, assignment and CAS checks are unchanged.
 
 `/admin/leads` retains bounded inbox pagination and authenticated POST-body search.
 Changing a search clears prior results; aborted or late requests cannot replace

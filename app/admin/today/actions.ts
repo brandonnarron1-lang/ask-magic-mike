@@ -13,8 +13,13 @@ function safeAction(value: unknown): "snoozed" | "dismissed" | null {
 }
 
 function finish(code: string, formData: FormData, responseMode?: "inline", ok = false): ConversionMutationResult {
-  revalidatePath("/admin/today");
-  revalidatePath("/admin/action-queue");
+  // A rejected inline save must retain its explanation and stale-version fence
+  // until the operator explicitly reviews the latest record. Refreshing here
+  // replaces its hidden version and can immediately erase the rejection.
+  if (ok) {
+    revalidatePath("/admin/today");
+    revalidatePath("/admin/action-queue");
+  }
   if (responseMode === "inline" && formData.get("response_mode") === "inline") {
     return ok ? { ok: true, ...(code === "completed" ? {} : { warning: code }) } : { ok: false, error: code };
   }

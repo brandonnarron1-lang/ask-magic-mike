@@ -63,7 +63,7 @@ test("Real sessions enforce four-role list/detail/report and direct API boundari
   for (const role of ["admin", "owner", "agent"]) {
     const page = await contexts[role].newPage();
     await page.goto("/admin/leads");
-    await expect(page.getByRole("heading", { name: "Lead inbox and routing readiness" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Protected request inbox" })).toBeVisible();
     await expect(page.getByText(`SYNTHETIC ${role === "admin" ? "AGENT" : role.toUpperCase()} DO NOT CONTACT`, { exact: true }).first()).toBeVisible();
     if (role !== "admin") await expect(page.getByText("SYNTHETIC OTHER DO NOT CONTACT", { exact: true })).toHaveCount(0);
     await page.goto(`/admin/leads/${f.leads[role === "admin" ? "agent" : role]}`);
@@ -190,18 +190,20 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Complete task", exact: true }) }).filter({ has: page.locator(`input[name="lead_id"][value="${f.leads.agent}"]`) }).first();
   await expect(form).toBeVisible();
   await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="stale-synthetic-version"; });
-  await form.getByRole("button").click();
-  await expect(page).toHaveURL(/today_action=stale_action/);
+  await form.getByRole("button",{name:"Complete task",exact:true}).click();
+  await expect(form.getByRole("alert")).toContainText("This action changed");
+  await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
   expect((await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("open");
-  await page.getByRole("button", { name: "Complete task", exact: true }).first().click();
-  await expect(page).toHaveURL(/today_action=completed/);
-  expect((await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("done");
+  await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();
+  await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
+  await form.getByRole("button", { name: "Complete task", exact: true }).click();
+  await expect.poll(async()=>(await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("done");
+  await page.locator("summary").filter({hasText:/^More internal actions$/}).first().click();
   const snooze = page.locator("form").filter({has:page.getByRole("button",{name:"Snooze 24 hours",exact:true})}).first();
   await expect(snooze).toBeVisible();
   const reviewedLead = await snooze.locator('input[name="lead_id"]').inputValue();
   await snooze.getByRole("button").click();
-  await expect(page).toHaveURL(/today_action=snoozed/);
-  expect((await sql("SELECT count(*)::int AS n FROM lead_action_reviews WHERE lead_id=$1 AND status='snoozed' AND actor_user_id=$2",[reviewedLead,f.ids.agent]))[0].n).toBe(1);
+  await expect.poll(async()=>(await sql("SELECT count(*)::int AS n FROM lead_action_reviews WHERE lead_id=$1 AND status='snoozed' AND actor_user_id=$2",[reviewedLead,f.ids.agent]))[0].n).toBe(1);
   for (const width of [320,390,768,1440]) {
     await page.setViewportSize({ width, height: 1000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);

@@ -1,8 +1,8 @@
 import {beforeEach,describe,expect,it,vi} from "vitest";
 import type {AdminTodayAction} from "../../app/lib/adminTodayQueue";
-const m=vi.hoisted(()=>({principal:vi.fn(),queue:vi.fn(),task:vi.fn(),review:vi.fn()}));
+const m=vi.hoisted(()=>({principal:vi.fn(),queue:vi.fn(),task:vi.fn(),review:vi.fn(),revalidate:vi.fn()}));
 vi.mock("next/navigation",()=>({redirect:vi.fn((v:string)=>{throw Error("redirect:"+v);})}));
-vi.mock("next/cache",()=>({revalidatePath:vi.fn()}));
+vi.mock("next/cache",()=>({revalidatePath:m.revalidate}));
 vi.mock("../../src/lib/admin/rbac-session",()=>({requireLeadCenterPermission:m.principal}));
 vi.mock("../../app/lib/adminTodayView",()=>({loadAdminTodayQueue:m.queue,mutateTodayActionReview:m.review}));
 vi.mock("../../app/lib/adminAppointmentFollowupOps",()=>({updateFollowupTask:m.task}));
@@ -16,6 +16,7 @@ describe("desk uses existing fresh server-authorized internal actions",()=>{
    expect(m.task).toHaveBeenCalledWith({leadId:"lead",taskId:"t",expectedUpdatedAt:item.recordVersion,action:"complete",actor:"lead_center:actual-user",idempotencyKey:"same-synthetic-intent"});
    expect(m.task.mock.calls[0][0]).not.toHaveProperty("priority");
    expect(m.task.mock.calls[0][0]).not.toHaveProperty("assigned_agent_id");
+   expect(m.revalidate).toHaveBeenCalledWith("/admin/today");
  });
  it.each([
    {items:[{...item,readOnly:true}],coverage:{state:"complete"}},
@@ -31,6 +32,7 @@ describe("desk uses existing fresh server-authorized internal actions",()=>{
      const f=form();f.set(key,value);expect((await completeTodayTask(f,"inline")).ok).toBe(false);
    }
    expect(m.task).not.toHaveBeenCalled();
+   expect(m.revalidate).not.toHaveBeenCalled();
  });
  it("checks current role for task completion even if the client fabricates an action",async()=>{
    m.principal.mockResolvedValue({userId:"reader",role:"read_only_analyst",agentId:null});

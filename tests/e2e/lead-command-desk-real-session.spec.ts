@@ -56,6 +56,15 @@ test("protected deep link, advisory-only assignment and actual owner survive rea
   await page.goto(`/admin/leads/${f.leads.agent}#contact-readiness`);await expect(page.locator("#contact-readiness")).toBeVisible();
   expect((await pool.query("SELECT assigned_agent_id FROM leads WHERE id=$1",[f.leads.agent])).rows[0].assigned_agent_id).toBe(f.agents.agent);await safety();
 });
+for(const width of [320,390,430,1440])test(`protected supporting inbox remains searchable and readable ${width}`,async()=>{
+  const page=await contexts.agent.newPage();await page.setViewportSize({width,height:1000});await page.goto("/admin/leads");
+  await expect(page.getByRole("heading",{name:"Protected request inbox",exact:true})).toBeVisible();
+  const open=page.getByRole("link",{name:"Review request & next step",exact:true}).first();await open.focus();await expect(open).toBeFocused();expect((await open.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  const geometry=await page.evaluate(()=>({width:document.documentElement.clientWidth,scroll:document.documentElement.scrollWidth,overflowing:[...document.querySelectorAll("body *")].filter(el=>el.getBoundingClientRect().right>document.documentElement.clientWidth+1).slice(0,8).map(el=>({tag:el.tagName,class:el.className}))}));
+  writeFileSync(path.join(output,`protected-inbox-${width}-geometry.json`),JSON.stringify(geometry),{mode:0o600});expect(geometry.scroll).toBeLessThanOrEqual(geometry.width+1);
+  await page.evaluate(()=>document.fonts.ready);await page.screenshot({path:path.join(output,`protected-inbox-${width}.png`),fullPage:true});
+  await page.getByRole("link",{name:"Spam / Test / Closed",exact:true}).click();await expect(page.getByRole("heading",{name:"No inquiries in this view",exact:true})).toBeVisible();await expect(page.getByRole("navigation",{name:"Lead status filters"})).toBeVisible();
+});
 test("inherited reader and wrong-role/wrong-owner boundaries remain server enforced",async()=>{
   const page=await contexts.agent.newPage();await page.goto("/admin/today?view=held");const card=page.locator("article").filter({hasText:"Inherited owner"}).first();
   await expect(card).toBeVisible();await expect(card.getByRole("button")).toHaveCount(0);await card.getByRole("link",{name:"Open request",exact:true}).click();
@@ -79,10 +88,22 @@ test("required SQL failure is unavailable, then genuine empty scope stays honest
 });
 test("one existing internal task completes without creating response, ownership or delivery",async()=>{
   const page=await contexts.agent.newPage();await page.goto("/admin/today");const card=page.locator("article").filter({hasText:"Existing task overdue"}).first();
+  const form=card.getByRole("form",{name:"Complete task",exact:true});
+  await form.locator('input[name="record_version"]').evaluate(el=>{(el as HTMLInputElement).value="stale-synthetic-version";});
+  await form.getByRole("button",{name:"Complete task",exact:true}).click();await expect(form.getByRole("alert")).toContainText("This action changed");await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
+  expect((await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("open");
+  await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
   await card.getByRole("button",{name:"Complete task",exact:true}).click();
   await expect.poll(async()=>(await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("done");
   const row=(await pool.query("SELECT assigned_agent_id,(SELECT count(*)::int FROM lead_response_milestones WHERE lead_id=leads.id) responses FROM leads WHERE id=$1",[f.leads.agent])).rows[0];
   expect(row.assigned_agent_id).toBe(f.agents.agent);expect(row.responses).toBe(0);await safety();
+  await expect(page.getByRole("button",{name:"Complete task",exact:true})).toHaveCount(0);
+  await page.locator("summary").filter({hasText:/^More internal actions$/}).first().click();
+  const snooze=page.getByRole("form",{name:"Snooze 24 hours",exact:true}).first();await expect(snooze).toBeVisible();
+  const version=(await pool.query("SELECT updated_at::text FROM leads WHERE id=$1",[f.leads.agent])).rows[0].updated_at;
+  await expect(snooze.locator('input[name="record_version"]')).toHaveValue(version);expect(await snooze.locator('input[name="action_id"]').inputValue()).not.toContain(":task:");
+  await snooze.getByRole("button",{name:"Snooze 24 hours",exact:true}).click();
+  await expect.poll(async()=>(await pool.query("SELECT count(*)::int n FROM lead_action_reviews WHERE lead_id=$1 AND actor_user_id=$2 AND status='snoozed'",[f.leads.agent,f.ids.agent])).rows[0].n).toBe(1);await safety();
 });
 test("expired real session returns to sign-in with the protected destination",async()=>{
   await pool.query('UPDATE lead_center_sessions SET "expiresAt"=now()-interval \'1 minute\' WHERE "userId"=$1',[f.ids.agent]);

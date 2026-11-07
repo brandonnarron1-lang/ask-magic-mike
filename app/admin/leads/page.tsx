@@ -361,16 +361,16 @@ export default async function AdminLeadsPage({
               <p className="text-xs text-[#8f8778]">
                 {page.total.toLocaleString()} authorized lead{page.total === 1 ? "" : "s"} · page {requestedPage}
               </p>
-              <form method="get" className="flex items-center gap-2">
+              <form method="get" className="flex min-w-0 max-w-full flex-wrap items-center gap-2">
                 <input type="hidden" name="filter" value={activeFilter} />
                 <label className="text-xs text-[#8f8778]" htmlFor="lead-sort">Sort</label>
-                <select id="lead-sort" name="sort" defaultValue={sort} className="rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-xs text-[#f4ead4]">
+                <select id="lead-sort" name="sort" defaultValue={sort} className="min-h-11 min-w-0 max-w-full flex-1 rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-xs text-[#f4ead4]">
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
                   <option value="priority">Legacy score (not command-desk priority)</option>
                   <option value="followup">Next follow-up</option>
                 </select>
-                <button className="rounded-md border border-[#cda24a44] px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#f0cf79]">Apply</button>
+                <button className="min-h-11 rounded-md border border-[#cda24a44] px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#f0cf79]">Apply</button>
               </form>
             </div>
             {inbox.leads.length ? inbox.leads.map((lead) => (
