@@ -60,7 +60,7 @@ export async function observeStaleReview(page: Page, leadId: string) {
       const body = await response.text();
       const headers = response.headers();
       staleReviewNote("response", { id, status: response.status(),
-        metadata: Object.fromEntries(["content-type","cache-control","vary","x-nextjs-cache","x-nextjs-stale-time"].map(name => [name,headers[name] || null])),
+        metadata: Object.fromEntries(["content-type","cache-control","vary","x-nextjs-cache","x-nextjs-stale-time","x-amm-diag-request"].map(name => [name,headers[name] || null])),
         bodySha256: createHash("sha256").update(body).digest("hex"), bytes: Buffer.byteLength(body),
         serverForms: staleReviewServerInputs(body), staleActionResult: /"error":"stale_action"/.test(body),
       });

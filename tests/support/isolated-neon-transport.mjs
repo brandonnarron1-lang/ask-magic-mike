@@ -4,6 +4,8 @@
 import { Pool } from "pg";
 import { appendFileSync } from "node:fs";
 import path from "node:path";
+import { AsyncLocalStorage } from "node:async_hooks";
+import { Server } from "node:http";
 const artifactDirectory = process.env.AMM_SESSION_ARTIFACT_DIR && path.resolve(process.env.AMM_SESSION_ARTIFACT_DIR);
 if (artifactDirectory && !artifactDirectory.startsWith(`${path.resolve(".amm-run")}${path.sep}`)) throw new Error("private_session_artifact_directory_required");
 const diagnosticPath = artifactDirectory ? path.join(artifactDirectory, "transport.log") : process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1"
@@ -14,6 +16,20 @@ const url = new URL(process.env.DATABASE_URL || "http://invalid");
 if (process.env.AMM_ISOLATED_SESSION_ACCEPTANCE !== "1" || process.env.VERCEL_ENV !== "development" ||
     url.hostname !== "localhost" || url.pathname !== "/amm_qa_upgrade" || url.username !== "postgres") {
   throw new Error("isolated_transport_refuses_non_test_database");
+}
+const requestContext = new AsyncLocalStorage();
+if (process.env.AMM_STALE_REVIEW_DIAGNOSTIC === "1") {
+  const emit = Server.prototype.emit;
+  let requestId = 0;
+  Server.prototype.emit = function (event, ...args) {
+    if (event !== "request") return emit.call(this, event, ...args);
+    const [request, response] = args;
+    const observation = { id: ++requestId, method: request.method,
+      path: new URL(request.url, "http://localhost").pathname,
+      rsc: request.headers.rsc === "1", action: Boolean(request.headers["next-action"]) };
+    response.setHeader("x-amm-diag-request", String(observation.id));
+    return requestContext.run(observation, () => emit.call(this, event, ...args));
+  };
 }
 const pool = new Pool({ connectionString: url.href, max: 4 });
 const originalFetch = globalThis.fetch;
@@ -45,7 +61,7 @@ globalThis.fetch = async (input, init) => {
       if (process.env.AMM_STALE_REVIEW_DIAGNOSTIC === "1" && /FROM public\.tasks t/.test(query)) {
         const names = result.fields.map(field => field.name);
         appendFileSync(path.join(artifactDirectory, "stale-review-server.jsonl"), `${JSON.stringify({
-          at: new Date().toISOString(), stage: "today_task_read", pid: process.pid,
+          at: new Date().toISOString(), stage: "today_task_read", pid: process.pid, request:requestContext.getStore() || null,
           rows: result.rows.map(row => Object.fromEntries(["id", "lead_id", "updated_at", "status"].map(name => [name, row[names.lastIndexOf(name)]]))),
         })}\n`, { mode: 0o600 });
       }
