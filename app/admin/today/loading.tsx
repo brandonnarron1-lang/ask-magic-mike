@@ -1,0 +1,3 @@
+export default function TodayLoading() {
+  return <main aria-busy="true" aria-label="Loading protected command desk" className="min-h-screen bg-[#050505] p-4 text-[#f7ecd5] sm:p-8"><div className="mx-auto max-w-6xl rounded-2xl border border-[#cda24a40] bg-[#100f0c] p-6"><p role="status" className="text-sm text-[#d8ceba]">Reading your authorized work…</p><h1 className="mt-4 font-serif text-4xl">Your next step.</h1><p className="mt-3 text-sm">Counts and actions appear only after the protected read completes.</p><div aria-hidden="true" className="mt-6 grid gap-3 sm:grid-cols-3">{[1,2,3].map(n=><div key={n} className="h-24 rounded-xl border border-white/10 bg-white/5"/>)}</div></div></main>;
+}

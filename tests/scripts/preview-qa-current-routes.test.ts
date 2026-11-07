@@ -23,11 +23,19 @@ describe("preview QA current route contract", () => {
     expect(source).toContain('dash.text.includes("Command Center")');
     expect(source).toContain('dash.text.includes("Your next step.")');
     expect(source).toContain('list.text.includes("Command Center")');
-    expect(source).toContain('list.text.includes("Lead inbox and routing readiness")');
+    expect(source).toContain('list.text.includes("Protected request inbox")');
     expect(source).not.toContain('dash.text.includes("Lead Center")');
     expect(source).not.toContain('list.text.includes("Lead Center")');
     expect(source).not.toContain('http("GET", "/api/admin/dashboard"');
     expect(source).not.toContain('http("GET", "/api/admin/leads?limit=5"');
+  });
+
+  it("checks the current rendered inbox heading rather than superseded copy", () => {
+    const inbox = readFileSync("app/admin/leads/page.tsx", "utf8");
+    const heading = /<h1\b[^>]*>([^<]+)<\/h1>/.exec(inbox)?.[1];
+    expect(heading).toBe("Protected request inbox");
+    expect(source).toContain(`list.text.includes("${heading}")`);
+    expect(source).not.toContain('list.text.includes("Lead inbox and routing readiness")');
   });
 
   it("binds Preview runtime identity to the reviewed source SHA", () => {

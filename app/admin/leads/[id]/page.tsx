@@ -21,10 +21,11 @@ import type {
   AppointmentStatus,
 } from "../../../lib/adminAppointmentFollowupOps";
 import { requireLeadCenterLeadPermission } from "../../../../src/lib/admin/rbac-session";
-import { hasLeadCenterPermission } from "../../../../src/lib/admin/rbac-policy";
+import { hasLeadCenterPermission, canAccessAssignedLead } from "../../../../src/lib/admin/rbac-policy";
 import { Phase6CopilotPanel } from "../../../../src/components/admin/phase6-copilot-panel";
 import { Phase7MessagingControlPanel } from "../../../../src/components/admin/phase7-messaging-control-panel";
 import { LeadQuickOverview } from "../../../components/admin/LeadQuickOverview";
+import { LeadOperatorBrief } from "../../../components/admin/LeadOperatorBrief";
 import { LeadContactDisclosure } from "../../../components/admin/LeadContactDisclosure";
 import { isTerminalContactRecord } from "../../../lib/manualContactReview";
 import { isPreviewRuntime } from "../../../../src/lib/preview-security";
@@ -634,11 +635,12 @@ export default async function AdminLeadDetailPage({
   const detail = await loadAdminLeadDetail(id, principal, { offset: timelineOffset, limit: 30 });
   if (detail.configured && !detail.lead && detail.error === "lead_not_found") notFound();
   const lead = detail.lead;
+  const canActOnCurrentLead = Boolean(lead && principal && canAccessAssignedLead(principal, lead.assigned_agent_id));
   const contactBlocked = Boolean(lead && (lead.is_test || lead.communication_suppressed || isTerminalContactRecord(lead.status, lead.conversion_stage)));
   // Contact holds are not a new prohibition on maintaining existing internal
   // records. Preserve canonical task/appointment transitions on closed leads.
-  const canMaintainRecords = Boolean(lead && canUpdateLead && !lead.is_test && !lead.communication_suppressed);
-  const canFollowThrough = canUpdateLead && !contactBlocked;
+  const canMaintainRecords = Boolean(lead && canUpdateLead && canActOnCurrentLead && !lead.is_test && !lead.communication_suppressed);
+  const canFollowThrough = canUpdateLead && canActOnCurrentLead && !contactBlocked;
   const dossier = lead && principal ? buildLeadQualificationDossier(lead) : null;
   // No new endpoint or mutation. Only administrators may inspect pool members;
   // assigned agents receive their scoped inquiry dossier, never another agent's roster.
@@ -696,7 +698,10 @@ export default async function AdminLeadDetailPage({
         ) : (
           <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
             <section className="min-w-0 space-y-5">
-              {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && !isPreviewRuntime()} status={lead.status}/> : null}
+              <div className="space-y-1">
+              <LeadOperatorBrief detail={detail} principal={principal}/>
+              {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && canActOnCurrentLead && !isPreviewRuntime()} status={lead.status}/> : null}
+              </div>
               {repeatInquiryReviewState(lead) !== "not_required" ? <section aria-label="Repeat inquiry review" className="mt-4 rounded-xl border border-[#cda24a55] bg-[#15120d] p-4 text-sm text-[#f4ead4]">
                 <h2 className="font-semibold text-[#e2c06f]">A separate request needs review</h2>
                 <p className="mt-2">This inquiry has its own request and consent evidence. The earlier contact relationship is not a direct assignment or permission to respond.</p>

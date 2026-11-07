@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 const ROUTES = [
   ["/admin/today", /Your next step\./i],
-  ["/admin/leads", /Lead inbox and routing readiness/i],
+  ["/admin/leads", /Protected request inbox/i],
   ["/admin/activity", /Authorized activity/i],
   ["/admin/reporting", /Analytics and reporting/i],
 ] as const;

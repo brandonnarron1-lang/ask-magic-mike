@@ -43,11 +43,16 @@ export async function loadNeonAdminTodayQueue(
               l.is_test, l.communication_suppressed, l.assigned_agent_id,
               l.assigned_at, l.last_contacted_at, l.next_follow_up_at,
               l.address_raw, l.first_name, l.last_name, l.primary_intent, l.lead_type,
+              l.conversion_stage, l.closed_lost_reason, l.timeline_months, l.source, l.source_detail,
+              COALESCE(NULLIF(l.buyer_interest->>'desired_area',''),l.address_raw) AS request_location,
+              (NULLIF(btrim(l.email),'') IS NOT NULL OR NULLIF(btrim(l.phone),'') IS NOT NULL) AS has_contact,
+              owner.name AS owner_name,
               COALESCE(l.assigned_agent_id, original.assigned_agent_id) AS inquiry_owner_agent_id,
               aa.id AS assignment_id, aa.status AS assignment_status,
               rm.first_human_response_at
          FROM public.leads l
          LEFT JOIN public.leads original ON original.id = l.duplicate_of_lead_id
+         LEFT JOIN public.agents owner ON owner.id=COALESCE(l.assigned_agent_id,original.assigned_agent_id)
          LEFT JOIN LATERAL (
            SELECT id, status
              FROM public.agent_assignments
@@ -86,7 +91,12 @@ export async function loadNeonAdminTodayQueue(
       ),
       sql.query(
         `SELECT n.id, n.lead_id, n.agent_id, n.status, n.next_attempt_at,
-                n.created_at, n.updated_at, n.attempt_count, n.provider_message_id
+                n.created_at, n.updated_at, n.attempt_count, n.provider_message_id,
+                n.template_version,n.channel,n.recipient_type,
+                CASE WHEN n.recipient_type='customer' THEN 'customer'
+                  WHEN n.recipient_reference='operator:mike' OR n.metadata->>'operator'='mike' THEN 'mike'
+                  WHEN n.recipient_reference='operator:brandon' OR n.metadata->>'operator'='brandon' THEN 'brandon'
+                  ELSE 'internal / not established' END AS operator_label
            FROM public.lead_notifications n
           WHERE n.lead_id = ANY($1::uuid[])
             AND n.status IN ('failed','retry_scheduled','permanently_failed','pending','processing')

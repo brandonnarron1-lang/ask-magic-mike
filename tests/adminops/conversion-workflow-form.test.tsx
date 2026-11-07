@@ -24,6 +24,13 @@ beforeEach(() => vi.clearAllMocks());
 afterEach(cleanup);
 
 describe("bounded inline conversion form", () => {
+  it("keeps an unexpected saved warning visible instead of taking a generic desk success return", async () => {
+    const action=vi.fn().mockResolvedValue({ok:true,warning:"synthetic_audit_review_required"});
+    render(<ConversionMutationForm action={action} submitLabel="Complete task" successMessage="Task saved" successReturnTo="/admin/today?today_action=completed">{fields()}</ConversionMutationForm>);
+    await userEvent.click(screen.getByRole("button",{name:"Complete task"}));
+    expect(await screen.findByRole("status")).toHaveTextContent("Saved with notice: synthetic audit review required");
+    expect(refresh).not.toHaveBeenCalled();
+  });
   it("keeps notes and dates on a rejected save without redirecting or claiming success", async () => {
     const action = vi.fn().mockResolvedValue({ ok: false, error: "invalid_followup_due_at" });
     render(form(action));
@@ -113,6 +120,28 @@ describe("bounded inline conversion form", () => {
     await userEvent.click(screen.getByRole("checkbox"));
     await userEvent.click(screen.getByRole("button", { name: "Save next task" }));
     expect(action.mock.calls[1][0].get("record_version")).toBe("version-2");
+    expect(action.mock.calls[1][0].get("idempotency_key")).not.toBe(action.mock.calls[0][0].get("idempotency_key"));
+  });
+
+  it("restores a rejected hidden version from refreshed server fields even when the record itself is unchanged", async () => {
+    const action = vi.fn().mockResolvedValueOnce({ ok: false, error: "stale_action" }).mockResolvedValueOnce({ ok: true });
+    const { container, rerender } = render(form(action, "version-1", "Confirm actual task"));
+    fireEvent.change(screen.getByLabelText("Safe note"), { target: { value: "Keep this private draft" } });
+    const version = container.querySelector<HTMLInputElement>('input[name="record_version"]')!;
+    version.value = "rejected-client-version";
+    await userEvent.click(screen.getByRole("checkbox"));
+    await userEvent.click(screen.getByRole("button", { name: "Save next task" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("This action changed");
+    expect(screen.getByRole("button", { name: "Save next task" })).toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: "Review latest record (keep draft)" }));
+    expect(refresh).toHaveBeenCalledOnce();
+    rerender(form(action, "version-1", "Confirm actual task"));
+    expect(version).toHaveValue("version-1");
+    expect(screen.getByLabelText("Safe note")).toHaveValue("Keep this private draft");
+    expect(screen.getByRole("checkbox")).not.toBeChecked();
+    await userEvent.click(screen.getByRole("checkbox"));
+    await userEvent.click(screen.getByRole("button", { name: "Save next task" }));
+    expect(action.mock.calls[1][0].get("record_version")).toBe("version-1");
     expect(action.mock.calls[1][0].get("idempotency_key")).not.toBe(action.mock.calls[0][0].get("idempotency_key"));
   });
 
