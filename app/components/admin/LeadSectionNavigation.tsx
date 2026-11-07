@@ -5,6 +5,7 @@ import { useEffect } from "react";
 const sections = new Set([
   "follow-up", "appointment-review", "activity", "property-evidence-review",
   "message-review", "next-action-review", "contact-review",
+  "contact-readiness", "qualification-review",
 ]);
 
 /** Reveal only existing lead panels. This changes presentation, never records. */

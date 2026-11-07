@@ -17,6 +17,8 @@ import {
   ADMIN_LEAD_INBOX_FILTERS,
 } from "../../lib/adminLeadInboxFilters";
 import { LeadSearchPanel } from "./lead-search-panel";
+import { leadOwnership } from "../../lib/leadOwnership";
+import { canAccessAssignedLead, hasLeadCenterPermission, type LeadCenterPrincipal } from "../../../src/lib/admin/rbac-policy";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -163,7 +165,7 @@ function EmptyState({ configured, error }: { configured: boolean; error?: string
       <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#e2c06f]">
         Lead inbox
       </p>
-      <h2 className="mt-3 font-serif text-3xl text-[#f4ead4]">No leads to review</h2>
+      <h2 className="mt-3 font-serif text-3xl text-[#f4ead4]">{error || !configured ? "Inbox unavailable" : "No inquiries in this view"}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-6 text-[#d9ceb8]">
         {configured
           ? error || "No lead rows were returned by the configured lead store."
@@ -173,7 +175,7 @@ function EmptyState({ configured, error }: { configured: boolean; error?: string
   );
 }
 
-function LeadCard({ lead }: { lead: AdminLeadView }) {
+function LeadCard({ lead, principal }: { lead: AdminLeadView; principal:LeadCenterPrincipal|null }) {
   const visibleAttribution = FIELD_LABELS.map(([key, label]) => ({
     key,
     label,
@@ -181,7 +183,7 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
   })).filter((item) => item.value);
 
   return (
-    <article className="rounded-lg border border-white/10 bg-[#0b0b0b] p-5">
+    <article className="min-w-0 rounded-2xl border border-[#cda24a33] bg-[#0b0b0b] p-4 [overflow-wrap:anywhere] sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#e2c06f]">
@@ -197,7 +199,7 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
           {!lead.is_test && lead.communication_suppressed ? <Badge>Suppressed</Badge> : null}
           <Badge>{lead.status}</Badge>
           {lead.stalled_signals.length ? <Badge>Stalled</Badge> : null}
-          {lead.routing_ready ? <Badge>Routing ready</Badge> : null}
+          {lead.routing_ready ? <Badge>Intake fields recorded — not routing eligibility</Badge> : null}
           {lead.assigned_agent_id ? <Badge>Assigned</Badge> : <Badge>Unassigned</Badge>}
         </div>
       </div>
@@ -217,10 +219,13 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
         </div>
         <div>
           <dt className="text-xs uppercase tracking-[0.14em] text-[#8f8778]">Agent</dt>
-          <dd className="mt-1 text-[#f4ead4]">{lead.assigned_agent_id || "Unassigned"}</dd>
+          <dd className="mt-1 text-[#f4ead4]">{leadOwnership(lead).label}</dd>
         </div>
       </dl>
 
+      <Link href={`/admin/leads/${lead.id}`} className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-[#d9af52] px-4 py-3 text-sm font-bold text-[#090909] focus-visible:outline-2 focus-visible:outline-cyan-200">Review request &amp; next step</Link>
+      <details className="mt-3">
+        <summary className="min-h-11 cursor-pointer py-3 text-sm text-[#e2c06f] focus-visible:outline-2 focus-visible:outline-cyan-200">Supporting context &amp; existing internal actions</summary>
       {lead.question || lead.notes || lead.condition ? (
         <div className="mt-5 grid gap-3 text-sm md:grid-cols-3">
           <p className="rounded-md border border-white/10 bg-white/[0.03] p-3 text-[#d9ceb8]">
@@ -255,7 +260,8 @@ function LeadCard({ lead }: { lead: AdminLeadView }) {
         ) : null}
       </div>
 
-      <LeadStatusActions lead={lead} />
+      {principal && hasLeadCenterPermission(principal.role,"lead:update_assigned") && canAccessAssignedLead(principal,lead.assigned_agent_id) ? <LeadStatusActions lead={lead}/> : <p className="mt-4 text-sm text-[#d9ceb8]">Read-only ownership scope. Current server permission is required for any change.</p>}
+      </details>
     </article>
   );
 }
@@ -286,18 +292,18 @@ export default async function AdminLeadsPage({
     `/admin/leads?filter=${filter}&sort=${sort}&page=${nextPage}`;
 
   return (
-    <main className="min-h-screen bg-[#050505] px-5 py-8 text-[#f4ead4]">
+    <main className="min-h-screen bg-[#050505] px-3 py-5 text-[#f4ead4] [overflow-wrap:anywhere] sm:px-5 sm:py-8">
       <div className="mx-auto max-w-6xl">
         <header className="mb-7 border-b border-[#cda24a33] pb-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#e2c06f]">
-                AdminOps
+                Ask Magic Mike · Protected inquiries
               </p>
-              <h1 className="mt-3 font-serif text-4xl">Lead inbox and routing readiness</h1>
+              <h1 className="mt-3 font-serif text-4xl">Protected request inbox</h1>
               <p className="mt-3 max-w-3xl text-sm leading-6 text-[#d9ceb8]">
-                Protected review of normalized Ask Magic Mike leads. Use this surface to inspect
-                contact fields, attribution, status, and assignment readiness before routing.
+                Find a saved request. Review its actual owner, current contact safeguards and
+                one next human step in protected detail. No routing is activated here.
               </p>
             </div>
             <nav className="flex flex-wrap gap-2" aria-label="Admin navigation">
@@ -308,10 +314,10 @@ export default async function AdminLeadsPage({
                 Reporting
               </Link>
               <Link
-                href="/admin/allocation"
+                href="/admin/today"
                 className="rounded-full border border-[#cda24a33] bg-[#0b0b0b] px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-[#d9ceb8]"
               >
-                Agent allocation
+                Command desk
               </Link>
               <Link
                 href="/admin/notifications"
@@ -334,9 +340,6 @@ export default async function AdminLeadsPage({
           ) : null}
         </header>
 
-        {!inbox.leads.length ? (
-          <div className="space-y-4"><LeadSearchPanel /><EmptyState configured={inbox.configured} error={inbox.error} /></div>
-        ) : (
           <section className="space-y-4">
             <LeadSearchPanel />
             <nav className="flex flex-wrap gap-2" aria-label="Lead status filters">
@@ -364,23 +367,22 @@ export default async function AdminLeadsPage({
                 <select id="lead-sort" name="sort" defaultValue={sort} className="rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-xs text-[#f4ead4]">
                   <option value="newest">Newest</option>
                   <option value="oldest">Oldest</option>
-                  <option value="priority">Priority score</option>
+                  <option value="priority">Legacy score (not command-desk priority)</option>
                   <option value="followup">Next follow-up</option>
                 </select>
                 <button className="rounded-md border border-[#cda24a44] px-3 py-2 text-xs font-bold uppercase tracking-[0.1em] text-[#f0cf79]">Apply</button>
               </form>
             </div>
             {inbox.leads.length ? inbox.leads.map((lead) => (
-              <LeadCard key={lead.id} lead={lead} />
+              <LeadCard key={lead.id} lead={lead} principal={principal}/>
             )) : (
-              <EmptyState configured={inbox.configured} error="No leads match this status filter." />
+              <EmptyState configured={inbox.configured} error={inbox.error} />
             )}
             <nav className="flex items-center justify-between" aria-label="Lead inbox pagination">
               {requestedPage > 1 ? <Link href={pageHref(requestedPage - 1)} className="text-sm text-[#f0cf79]">Previous page</Link> : <span />}
               {page.hasMore ? <Link href={pageHref(requestedPage + 1)} className="text-sm text-[#f0cf79]">Next page</Link> : <span />}
             </nav>
           </section>
-        )}
       </div>
     </main>
   );

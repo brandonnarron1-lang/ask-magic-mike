@@ -43,7 +43,7 @@ test.afterEach(async () => {
   for (const context of [agentContext, analystContext]) for (const page of context?.pages() || []) await page.close();
 });
 test("real inherited reader sees current inquiry but never gains mutation authority", async () => {
-  const page = await agentContext.newPage(); await page.goto("/admin/today");
+  const page = await agentContext.newPage(); await page.goto("/admin/today?view=held");
   const card = page.locator("article").filter({ hasText: "Inherited owner" }).first();
   await expect(card).toBeVisible(); await expect(card).toContainText("Read-only access");
   await expect(card.getByRole("button")).toHaveCount(0);

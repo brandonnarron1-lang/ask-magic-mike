@@ -40,7 +40,9 @@ describe("Today bounded-read presentation", () => {
   it("exposes inherited read-only context but no action form or false unassigned label", async () => {
     const queue = buildAdminTodayQueue({ leads: [{ id: "synthetic", status: "new", inquiry_owner_agent_id: "owner", primary_intent: "buy" }], tasks: [], appointments: [] });
     mocks.queue.mockResolvedValue(queue);
-    const html = renderToStaticMarkup(await Today({}));
+    const attention = renderToStaticMarkup(await Today({}));
+    expect(attention).not.toContain("Request details not provided");
+    const html = renderToStaticMarkup(await Today({ searchParams:Promise.resolve({ view:"held" }) }));
     expect(html).toContain("Inherited owner"); expect(html).toContain("Read-only access");
     expect(html).toContain("Request details not provided"); expect(html).toContain("Open request");
     expect(html).not.toContain("No assigned owner"); expect(html).not.toContain("Snooze 24 hours");

@@ -65,11 +65,11 @@ export function LeadContactActions({ leadId, blocked, canReview, requestLabel = 
       setAudit("Evaluation save could not be confirmed. Permission has not been amended; nothing was sent. Refresh the evidence before continuing.");
     } finally { auditPending.current = false; setAuditing(false); }
   }
-  if (blocked) return <p role="status" className="rounded-lg border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">Contact blocked. Test, suppressed and terminal records are for review only.</p>;
-  if (!canReview) return <p className="text-sm text-[#d9ceb8]">Read-only access. A currently authorized operator can handle follow-up; the assigned owner does not need to participate in testing.</p>;
+  if (blocked) return <p id="contact-readiness" role="status" className="rounded-lg border border-[#7f1d1d] bg-[#2a0909] p-3 text-sm text-[#ffd7d7]">Contact blocked. Test, suppressed and terminal records are for review only.</p>;
+  if (!canReview) return <p id="contact-readiness" className="text-sm text-[#d9ceb8]">Read-only access. A currently authorized operator can handle follow-up; the assigned owner does not need to participate in testing.</p>;
   const email = contactReadiness(review, "email"), phone = contactReadiness(review, "phone");
   const draft = prepareRequestReply(review, requestLabel);
-  return <section aria-label="Contact this lead" className="min-w-0 space-y-3">
+  return <section id="contact-readiness" aria-label="Contact this lead" className="min-w-0 space-y-3">
     <h3 className="font-semibold text-[#e2c06f]">Contact readiness</h3>
     <div className="grid grid-cols-2 gap-2">
       {(["email", "phone"] as const).map(channel => <button key={channel} type="button" disabled={!manualContactReviewTarget(review, channel)} onClick={() => { setSelected(channel); setConfirmed(false); }} className={`min-h-11 rounded-lg border border-[#d9af52]/45 px-3 py-3 text-sm font-bold ${channel === (email.ready ? "email" : "phone") ? "bg-[#d9af52] text-[#090909]" : "bg-transparent text-[#e2c06f]"} disabled:bg-transparent disabled:text-[#b9ae9d] focus-visible:outline-2 focus-visible:outline-cyan-300`}>{channel === "phone" ? "Review & call" : "Review & email"}</button>)}
