@@ -176,6 +176,22 @@ test("Signed account/destination, phone binding, invalid signature and STOP prec
   expect((await sql("SELECT count(*)::int AS n FROM lead_notifications WHERE provider_message_id IS NOT NULL"))[0].n).toBe(0);
 });
 
+test("Today forged task version is refused without changing the task", async () => {
+  const page = await contexts.agent.newPage();
+  await page.goto("/admin/today");
+  const form = page.getByRole("form", { name: "Complete task", exact: true }).filter({
+    has: page.locator(`input[name="lead_id"][value="${f.leads.agent}"]`),
+  }).first();
+  await expect(form).toBeVisible();
+  const before = (await sql("SELECT status,updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0];
+  await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="forged-synthetic-version"; });
+  await form.getByRole("button", { name: "Complete task", exact: true }).click();
+  await expect(form.getByRole("alert")).toContainText("This action changed");
+  await expect(form.getByRole("button", { name: "Complete task", exact: true })).toBeDisabled();
+  expect((await sql("SELECT status,updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0]).toEqual(before);
+  await page.close();
+});
+
 test("Today real task completion/stale form, paginated timeline and 200% text remain scoped", async () => {
   const page = await contexts.agent.newPage();
   await page.goto(`/admin/leads/${f.leads.agent}`);
@@ -190,7 +206,12 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   const form = page.locator("form").filter({ has: page.getByRole("button", { name: "Complete task", exact: true }) }).filter({ has: page.locator(`input[name="lead_id"][value="${f.leads.agent}"]`) }).first();
   await expect(form).toBeVisible();
   const completedActionId=await form.locator('input[name="action_id"]').inputValue();
-  await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="stale-synthetic-version"; });
+  const renderedVersion = await form.locator('input[name="record_version"]').inputValue();
+  // Model a genuine concurrent database update, not a DOM mutation. Hidden
+  // input .value also changes its defaultValue; that is not a server snapshot.
+  const advancedVersion = (await sql("UPDATE tasks SET updated_at=clock_timestamp() WHERE lead_id=$1 AND category='followup:manual_callback' RETURNING updated_at::text", [f.leads.agent]))[0].updated_at;
+  expect(advancedVersion).not.toBe(renderedVersion);
+  await expect(form.locator('input[name="record_version"]')).toHaveValue(renderedVersion);
   await form.getByRole("button",{name:"Complete task",exact:true}).click();
   await expect(form.getByRole("alert")).toContainText("This action changed");
   await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
