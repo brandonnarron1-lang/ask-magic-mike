@@ -276,6 +276,10 @@ jobs:
           node-version: '24'
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Version-pinned passive Next decoder and router observers - diagnosis only
+        env:
+          AMM_STALE_REVIEW_DIAGNOSTIC: '1'
+        run: node scripts/amm/pr324-next-diagnostic.mjs
       - name: Build sealed diagnostic source - not release acceptance
         run: pnpm run build
       - run: pnpm exec playwright install --with-deps chromium
