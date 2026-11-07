@@ -135,7 +135,7 @@ export function ConversionMutationForm({
       if (props.children) visit(props.children);
     };
     visit(children);
-    trace({stage:"render",component:statusId,fields,conflictVersion:conflictVersion.current,busy,uncertain});
+    trace({stage:"render",component:statusId,fields,busy,uncertain});
   }
 
   // RSC refreshes update hidden versions, but never replace the unsaved editable draft.
