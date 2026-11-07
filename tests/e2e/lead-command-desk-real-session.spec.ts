@@ -48,6 +48,10 @@ for(const width of [320,390,430,1440])test(`command desk real auth, keyboard and
 });
 test("protected deep link, advisory-only assignment and actual owner survive read",async()=>{
   const page=await contexts.admin.newPage();await page.goto(`/admin/leads/${f.leads.agent}`);
+  const brief=page.getByRole("region",{name:"Operator action brief"});
+  await expect(brief.locator("details")).not.toHaveAttribute("open","");
+  await brief.locator("summary").focus();await page.keyboard.press("Enter");
+  await expect(brief.locator("details")).toHaveAttribute("open","");
   await expect(page.getByRole("region",{name:"Operator action brief"})).toContainText("SYNTHETIC AGENT");
   await expect(page.getByRole("region",{name:"Operator action brief"})).toContainText("Not recorded");
   await page.getByText("Assignment readiness · ADVISORY ONLY",{exact:true}).click();

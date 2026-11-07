@@ -115,6 +115,10 @@ for(const width of [320,390,768,1440]) {
     expect(await overview.locator('a[href^="tel:"],a[href^="mailto:"],a[href^="sms:"]').count()).toBe(0);
     await expect(overview).toContainText("Our Town Properties website"); await expect(overview).not.toContainText("Attribution:");
     const call=overview.getByRole("button",{name:"Review & call"}); await expect(call).toBeEnabled();
+    const brief=page.getByRole("region",{name:"Operator action brief"});
+    await expect(brief.getByText("Review overdue task",{exact:true})).toBeVisible();
+    await expect(brief.locator("details")).not.toHaveAttribute("open","");
+    expect((await brief.locator("summary").boundingBox())!.height).toBeGreaterThanOrEqual(44);
     for (const link of await page.getByRole("navigation", {name:"Command Center navigation"}).getByRole("link").all()) expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect((await call.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect((await call.boundingBox())!.y).toBeLessThan(width===320?1000:844);

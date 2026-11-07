@@ -6,8 +6,11 @@ import { deskDate } from "../../lib/adminTodayDesk";
 export function LeadOperatorBrief({detail,principal}:{detail:AdminLeadDetailResult;principal:LeadCenterPrincipal|null}) {
   const brief=buildOperatorBrief(detail,principal);
   if(!brief)return null;
-  return <section aria-label="Operator action brief" className="min-w-0 rounded-2xl border border-[#cda24a66] bg-[linear-gradient(135deg,#1a150c,#0c0b09)] p-4 text-[#f7ecd5] sm:p-6 [overflow-wrap:anywhere]">
-    <p className="text-xs font-semibold uppercase tracking-[.16em] text-[#e2c06f]">Current responsibility · One next step</p>
+  const next=brief.held?"Contact held · Internal review":!brief.canMaintain?"Read-only record review":brief.overdue?"Review overdue task":brief.anchor==="follow-up"?"Review existing task":brief.anchor==="appointment-review"?"Review conversation request":"Review request & current permission";
+  return <section aria-label="Operator action brief" className="min-w-0 rounded-xl border border-[#cda24a66] bg-[linear-gradient(135deg,#1a150c,#0c0b09)] text-[#f7ecd5] [overflow-wrap:anywhere]">
+    <details>
+      <summary className="min-h-11 cursor-pointer px-3 py-2 text-sm font-semibold leading-6 text-[#e2c06f] outline-none focus-visible:ring-2 focus-visible:ring-cyan-200"><span className="sr-only">Next human step · Details · </span><span>{next}</span></summary>
+    <div className="border-t border-[#cda24a33] p-3 sm:p-5">
     <h2 className="mt-3 font-serif text-2xl leading-snug">{brief.recommendation}</h2>
     <dl className="mt-4 grid gap-4 text-sm sm:grid-cols-2">
       <div><dt className="text-xs text-[#c9bfad]">Actual owner</dt><dd className="mt-1">{brief.ownership.label}</dd></div>
@@ -17,5 +20,7 @@ export function LeadOperatorBrief({detail,principal}:{detail:AdminLeadDetailResu
     </dl>
     <a href={`#${brief.anchor}`} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-lg bg-[#d9af52] px-4 py-3 text-sm font-bold text-[#090909] outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-black">Review next step</a>
     <p className="mt-3 text-xs leading-5 text-[#c9bfad]">Nothing here contacts a consumer, changes ownership or creates a task. Task completion, app opening and receipt delivery are not evidence of a human response.</p>
+    </div>
+    </details>
   </section>;
 }
