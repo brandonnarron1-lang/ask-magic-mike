@@ -131,6 +131,14 @@ export function ConversionMutationForm({
     if (!form) return;
     if (draft.current) restoreDraft(form, draft.current);
     const versionField = form.querySelector<HTMLInputElement>('input[name="record_version"]');
+    // Passive, test-installed observer only; no state/timing/control changes.
+    const observer = (window as typeof window & { __ammStaleForm?: (event:unknown)=>void }).__ammStaleForm;
+    const observe = (stage:string) => observer?.({stage,component:statusId,
+      action:form.querySelector<HTMLInputElement>('input[name="action_id"]')?.value,
+      value:versionField?.value,defaultValue:versionField?.defaultValue,attribute:versionField?.getAttribute("value"),
+      conflictVersion:conflictVersion.current,saving:saving.current,uncertain,
+    });
+    observe("before");
     // A rejected request can leave a dirty DOM value even after React receives
     // the same server version again. Read the refreshed server-rendered default,
     // not that rejected value, and resynchronize only this concurrency field.
@@ -145,6 +153,7 @@ export function ConversionMutationForm({
       draft.current = readDraft(form);
       setResult(null);
     }
+    observe("after");
   }, [children]);
 
   function rememberDraft() {

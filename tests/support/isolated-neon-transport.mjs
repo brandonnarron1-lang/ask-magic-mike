@@ -6,6 +6,7 @@ import { appendFileSync } from "node:fs";
 import path from "node:path";
 import { AsyncLocalStorage } from "node:async_hooks";
 import { Server } from "node:http";
+import { gunzipSync, brotliDecompressSync, constants as zlibConstants } from "node:zlib";
 const artifactDirectory = process.env.AMM_SESSION_ARTIFACT_DIR && path.resolve(process.env.AMM_SESSION_ARTIFACT_DIR);
 if (artifactDirectory && !artifactDirectory.startsWith(`${path.resolve(".amm-run")}${path.sep}`)) throw new Error("private_session_artifact_directory_required");
 const diagnosticPath = artifactDirectory ? path.join(artifactDirectory, "transport.log") : process.env.AMM_LEAD_READABILITY_ACCEPTANCE === "1"
@@ -28,6 +29,37 @@ if (process.env.AMM_STALE_REVIEW_DIAGNOSTIC === "1") {
       path: new URL(request.url, "http://localhost").pathname,
       rsc: request.headers.rsc === "1", action: Boolean(request.headers["next-action"]) };
     response.setHeader("x-amm-diag-request", String(observation.id));
+    if (observation.path === "/admin/today" && observation.rsc) {
+      const chunks = [];
+      let bytes = 0;
+      const capture = chunk => {
+        if ((typeof chunk === "string" || chunk instanceof Uint8Array) && bytes < 512_000) {
+          const value=Buffer.from(chunk);chunks.push(value);bytes+=value.length;
+        }
+      };
+      const write = response.write;
+      const end = response.end;
+      response.write = function (chunk, ...rest) { capture(chunk); return write.call(this,chunk,...rest); };
+      response.end = function (chunk, ...rest) { capture(chunk); return end.call(this,chunk,...rest); };
+      let captured = false;
+      const flush = () => {
+        if (captured) return;
+        captured = true;
+        const raw = Buffer.concat(chunks);
+        let body = raw.toString("utf8");
+        try {
+          if (response.getHeader("content-encoding") === "gzip") body=gunzipSync(raw,{finishFlush:zlibConstants.Z_SYNC_FLUSH}).toString("utf8");
+          else if(response.getHeader("content-encoding")==="br")body=brotliDecompressSync(raw).toString("utf8");
+        } catch {}
+        const fields = [];
+        for (const m of body.matchAll(/"name":"(action_id|lead_id|record_version|review_version)"[^}]*?"value":("(?:\\.|[^"\\])*"|\d+)/g)) fields.push({name:m[1],value:JSON.parse(m[2])});
+        const root = body.split("\n").find(line => line.startsWith("0:"));
+        let shape = null;
+        try { const value = JSON.parse(root.slice(2)); shape = {build:value.b,patchLengths:value.f?.map(p=>p.length)}; } catch {}
+        appendFileSync(path.join(artifactDirectory,"stale-review-server-write.jsonl"),`${JSON.stringify({at:new Date().toISOString(),request:observation,status:response.statusCode,finished:response.writableFinished,bytes:Buffer.byteLength(body),shape,fields})}\n`,{mode:0o600});
+      };
+      response.once("finish",flush);response.once("close",flush);
+    }
     return requestContext.run(observation, () => emit.call(this, event, ...args));
   };
 }
