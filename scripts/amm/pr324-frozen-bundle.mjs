@@ -43,11 +43,13 @@ for(const mode of ['control','probe']) {
  const dir=path.join(root,'.amm-run',`frozen-${mode}`);mkdirSync(dir,{recursive:true});
  const source={at:new Date().toISOString(),kind:'RECONSTRUCTED a502; original compiled artifact unavailable',baseline,tree:git('rev-parse','HEAD^{tree}'),controller:process.env.GITHUB_SHA,buildId:readFileSync(path.join(root,'.next/BUILD_ID'),'utf8').trim(),node:process.version,platform:process.platform,arch:process.arch,os:readFileSync('/etc/os-release','utf8'),packages,lock:hash(readFileSync(path.join(root,'pnpm-lock.yaml'))),framework,bundles:before,mode,observerDifference:'same CDP attachment and existing a502 observers; conditional breakpoints active only in probe'};
  writeFileSync(path.join(dir,'frozen-source.json'),JSON.stringify(source,null,2));
+ console.log(JSON.stringify({stage:'frozen_baseline_seal',at:source.at,mode,baseline,tree:source.tree,controller:source.controller,buildId:source.buildId,packages,bundleCount:Object.keys(before).length,manifestSha256:hash(JSON.stringify(before)),frameworkUnpatched:true}));
  const result=spawnSync(process.execPath,['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON','scripts/amm/reference-session-acceptance.mjs'],{cwd:root,env:{PATH:process.env.PATH,HOME:process.env.HOME,CI:'true',GITHUB_SHA:baseline,AMM_QA_POSTGRES_TEST:'1',AMM_STALE_REVIEW_DIAGNOSTIC:'1',AMM_SESSION_ARTIFACT_DIR:`.amm-run/frozen-${mode}`,AMM_FROZEN_MODE:mode},stdio:'inherit',timeout:6*60*1000});
  const after=seal(),changed=Object.keys({...before,...after}).filter(k=>before[k]!==after[k]);
  const remaining=containerList().filter(x=>!containersBefore.includes(x));
  const row={at:new Date().toISOString(),mode,exit:result.status,signal:result.signal,error:result.error?.code||null,bundleHashesUnchanged:changed.length===0,changed,taskContainersRemaining:remaining};results.push(row);
  writeFileSync(path.join(dir,'frozen-result.json'),JSON.stringify(row,null,2));
+ console.log(JSON.stringify({stage:'frozen_run_result',...row}));
  if(changed.length||remaining.length||result.error)throw Error('immutable_or_cleanup_boundary_failed');
 }
 writeFileSync(path.join(root,'.amm-run/frozen-probe/frozen-pair.json'),JSON.stringify({at:new Date().toISOString(),results,productionEffects:0,providerCalls:0,reconstructionNotOriginal:true,releaseAcceptance:false},null,2));

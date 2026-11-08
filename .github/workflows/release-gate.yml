@@ -345,6 +345,8 @@ jobs:
         with:
           name: pr324-frozen-${{ github.run_id }}-${{ github.run_attempt }}
           retention-days: 7
+          # Only these explicit sanitized files; never upload hidden directories broadly.
+          include-hidden-files: true
           path: |
             frozen-baseline/.amm-run/frozen-*/stale-review-*.json
             frozen-baseline/.amm-run/frozen-*/stale-review-*.jsonl
