@@ -16,6 +16,10 @@ on:
         description: "One frozen reconstructed baseline: control plus runtime logpoints; NOT release acceptance"
         type: boolean
         default: false
+      pr324_collector_selftest:
+        description: "Linux collector fault/retention gate ONLY; no app build or acceptance"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -26,7 +30,7 @@ concurrency:
 
 jobs:
   local-release-gate:
-    if: github.event_name != 'workflow_dispatch' || (inputs.pr324_diagnostic != true && inputs.pr324_frozen != true)
+    if: github.event_name != 'workflow_dispatch' || (inputs.pr324_diagnostic != true && inputs.pr324_frozen != true && inputs.pr324_collector_selftest != true)
     name: local-release-gate
     runs-on: ubuntu-latest
     # Public standard runner; retain every test-level bound and mandatory stage.
@@ -263,7 +267,7 @@ jobs:
 
   pr324-stale-review-diagnostic:
     name: PR324 passive Linux diagnosis - NOT release acceptance
-    if: github.event_name == 'workflow_dispatch' && inputs.pr324_diagnostic == true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_diagnostic == true && inputs.pr324_collector_selftest != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -308,7 +312,7 @@ jobs:
 
   pr324-frozen-boundary:
     name: PR324 frozen bundle control and logpoints - NOT release acceptance
-    if: github.event_name == 'workflow_dispatch' && inputs.pr324_frozen == true && inputs.pr324_diagnostic != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_frozen == true && inputs.pr324_diagnostic != true && inputs.pr324_collector_selftest != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -353,4 +357,49 @@ jobs:
             frozen-baseline/.amm-run/frozen-*/stale-review-*.png
             frozen-baseline/.amm-run/frozen-*/frozen-*.json
             frozen-baseline/.amm-run/frozen-*/receipt.json
-          if-no-files-found: warn
+          if-no-files-found: error
+
+  pr324-collector-selftest:
+    name: PR324 collector Linux fault and retention gate - NOT app acceptance
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_collector_selftest == true && inputs.pr324_frozen != true && inputs.pr324_diagnostic != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: Existing collector regressions
+        run: node --test scripts/amm/pr324-frozen-logpoints.test.mjs
+      - name: Real synthetic browser and CPU-worker fault tests - no application
+        env:
+          AMM_COLLECTOR_SELFTEST: '1'
+        run: node scripts/amm/pr324-collector-selftest.mjs
+      - name: Exact required inventory, attempt, schemas and checksums
+        if: always()
+        run: node scripts/amm/pr324-collector-package.mjs output/pr324-collector
+      - name: Required sanitized collector evidence - no hidden tree or traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr324-collector-selftest-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            output/pr324-collector/collector-case-normal.json
+            output/pr324-collector/collector-case-assertion.json
+            output/pr324-collector/collector-case-target-closed.json
+            output/pr324-collector/collector-case-stalled-capture.json
+            output/pr324-collector/collector-case-stalled-mapping.json
+            output/pr324-collector/collector-selftest.json
+            output/pr324-collector/collector-package.json

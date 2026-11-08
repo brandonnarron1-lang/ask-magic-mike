@@ -3,6 +3,7 @@ import ts from 'typescript';
 import {createHash} from 'node:crypto';
 import {writeFileSync,readFileSync} from 'node:fs';
 import path from 'node:path';
+import {HostReceipt,mapOffThread} from './pr324-collector-runtime.mjs';
 const sha=s=>createHash('sha256').update(s).digest('hex');
 const isFn=n=>ts.isFunctionDeclaration(n)||ts.isFunctionExpression(n)||ts.isArrowFunction(n)||ts.isMethodDeclaration(n);
 const children=n=>{const rows=[];function visit(v){rows.push(v);ts.forEachChild(v,visit);}visit(n);return rows;};
@@ -108,15 +109,25 @@ export function mapScript(source) {
 
 export async function frozenObserver(page,lead) {
  const mode=process.env.AMM_FROZEN_MODE,dir=process.env.AMM_SESSION_ARTIFACT_DIR;
- if(!['control','probe'].includes(mode)||process.env.AMM_ISOLATED_SESSION_ACCEPTANCE!=='1'||process.env.VERCEL_ENV!=='development'||!dir)throw Error('isolated_frozen_browser_only');
+ if(!['baseline','control','probe'].includes(mode)||process.env.AMM_ISOLATED_SESSION_ACCEPTANCE!=='1'||process.env.VERCEL_ENV!=='development'||!dir)throw Error('isolated_frozen_browser_only');
  const build=readFileSync('.next/BUILD_ID','utf8').trim();
- const metadata={mode,build,created:new Date().toISOString(),maps:[],unresolved:[],pauses:[],network:[],captures:[],detach:null};
+ const host=new HostReceipt(path.join(dir,'frozen-logpoints.json'),{controller:process.env.AMM_COLLECTOR_CONTROLLER_HEAD||null,application:process.env.AMM_COLLECTOR_APPLICATION_HEAD||null,build,mode});
+ const metadata=Object.assign(host.state,{mode,build,maps:[],unresolved:[],pauses:[],network:[],captures:[],detach:null});host.persist();
+ let cdp,closing=false,mappingOpen=true,attachmentError;const pending=[],breakpoints=[],seen=new Set(),requests=new Set();
+ host.addStop('page',async()=>{if(!page.isClosed?.())await page.close?.();return {verified:page.isClosed?.()===true};});
+ const detach=async()=>{host.checkpoint('before_cdp_detach');if(!cdp)return {verified:true,notAttached:true};
+  if(metadata.detach?.verified)return {verified:true};
+  try{await cdp.detach();metadata.detach={at:new Date().toISOString(),attempted:true,verified:true};}
+  catch(error){metadata.detach={at:new Date().toISOString(),attempted:true,verified:false,closed:true,targetClosedVerified:page.isClosed?.()===true};host.error('cdp_detach',error);}
+  host.persist();return {verified:metadata.detach.verified||metadata.detach.targetClosedVerified===true};};
+ try{await host.run('attachment',async()=>{
  await page.addInitScript(({build})=>{
   const ids=new WeakMap();let next=0;
   globalThis.__ammFrozen={build,active:false,seq:0,events:[],overflow:0,errors:0,chunks:new WeakMap(),id:o=>{if(!o||(typeof o!=='object'&&typeof o!=='function'))return null;if(!ids.has(o))ids.set(o,++next);return ids.get(o);}};
   document.addEventListener('click',e=>{if(e.target instanceof Element&&e.target.closest('button')?.textContent==='Review latest record (keep draft)')globalThis.__ammFrozen.active=true;},{capture:true,passive:true});
  },{build});
- const cdp=await page.context().newCDPSession(page),pending=[],breakpoints=[],seen=new Set(),requests=new Set();let closing=false;
+ if(mode==='baseline'){metadata.noCDP=true;return;}
+ cdp=await page.context().newCDPSession(page);host.addStop('cdp',detach);
  cdp.on('Debugger.paused',event=>{
   // No pause is requested. Record unexpected pause and immediately resume;
   // any such event invalidates timing-neutral evidence for this run.
@@ -128,53 +139,55 @@ export async function frozenObserver(page,lead) {
  cdp.on('Network.loadingFinished',e=>{if(requests.has(e.requestId))metadata.network.push({event:'finished',id:e.requestId,t:e.timestamp,bytes:e.encodedDataLength});});
  cdp.on('Network.loadingFailed',e=>{if(requests.has(e.requestId))metadata.network.push({event:'failed',id:e.requestId,t:e.timestamp,error:e.errorText,canceled:e.canceled});});
  cdp.on('Debugger.scriptParsed',event=>{
-  if(closing)return;let url;try{url=new URL(event.url);}catch{return;}
+  if(closing||!mappingOpen)return;let url;try{url=new URL(event.url);}catch{return;}
   if(url.hostname!=='localhost'||!url.pathname.startsWith('/_next/static/')||!url.pathname.endsWith('.js')||seen.has(event.scriptId))return;
   seen.add(event.scriptId);
   pending.push((async()=>{
-   const {scriptSource}=await cdp.send('Debugger.getScriptSource',{scriptId:event.scriptId});
-   const mapped=mapScript(scriptSource),record={script:event.scriptId,path:url.pathname,sha256:sha(scriptSource),browserHash:event.hash,points:[],limitations:mapped.limitations};
+   host.checkpoint('before_script_mapping',{script:event.scriptId});
+   const {scriptSource}=await host.run('script_source',()=>cdp.send('Debugger.getScriptSource',{scriptId:event.scriptId}),1000);
+   if(!['Failed to fetch RSC payload for ','.discarded'].some(marker=>scriptSource.includes(marker)))return;
+   const mapped=await mapOffThread(scriptSource,host),record={script:event.scriptId,path:url.pathname,sha256:sha(scriptSource),browserHash:event.hash,points:[],limitations:mapped.limitations};
    metadata.maps.push(record);
    const occupied=new Set();
    for(const point of mapped.points){
     if(closing)break;
-    const start=mapped.file.getLineAndCharacterOfPosition(point.start),end=mapped.file.getLineAndCharacterOfPosition(point.end);
-    const possible=await cdp.send('Debugger.getPossibleBreakpoints',{start:{scriptId:event.scriptId,lineNumber:start.line,columnNumber:start.character},end:{scriptId:event.scriptId,lineNumber:end.line,columnNumber:end.character},restrictToFunction:false});
+    const start=point.startLocation,end=point.endLocation;
+    const possible=await host.run('resolve_site',()=>cdp.send('Debugger.getPossibleBreakpoints',{start:{scriptId:event.scriptId,lineNumber:start.line,columnNumber:start.character},end:{scriptId:event.scriptId,lineNumber:end.line,columnNumber:end.character},restrictToFunction:false}),750);
     const location=possible.locations[0];
     if(!location){metadata.unresolved.push({path:url.pathname,stage:point.stage,start});continue;}
     const key=`${location.lineNumber}:${location.columnNumber}`;
     if(occupied.has(key)){metadata.unresolved.push({path:url.pathname,stage:point.stage,reason:'collapsed executable location',location});continue;}
     occupied.add(key);
-    const actual=mapped.file.getPositionOfLineAndCharacter(location.lineNumber,location.columnNumber||0);
-    if(actual<point.start||actual>=point.end){metadata.unresolved.push({stage:point.stage,reason:'executable point outside mapped AST range'});continue;}
-    const p={stage:point.stage,requested:start,actual:location,excerpt:scriptSource.slice(Math.max(0,actual-80),Math.min(scriptSource.length,actual+180)),fields:point.fields,active:mode==='probe'};
+    const inRange=(location.lineNumber>start.line||location.lineNumber===start.line&&location.columnNumber>=start.character)&&(location.lineNumber<end.line||location.lineNumber===end.line&&location.columnNumber<end.character);
+    if(!inRange){metadata.unresolved.push({stage:point.stage,reason:'executable point outside mapped AST range'});continue;}
+    const p={stage:point.stage,requested:start,actual:location,fields:point.fields,active:mode==='probe'};
     record.points.push(p);
     if(mode==='probe'){
      const condition=`(()=>{try{const b=globalThis.__ammFrozen;if(!b||!b.active)return false;${point.setup}if(b.events.length<2048)b.events.push({q:++b.seq,t:performance.now(),stage:${JSON.stringify(point.stage)},v:${point.fields}});else b.overflow++;}catch(e){if(globalThis.__ammFrozen)globalThis.__ammFrozen.errors++;}return false})()`;
-     const result=await cdp.send('Debugger.setBreakpoint',{location,condition});
+     const result=await host.run('install_site',()=>cdp.send('Debugger.setBreakpoint',{location,condition}),750);
      breakpoints.push(result.breakpointId);p.resolved=result.actualLocation;
-     if(result.actualLocation.lineNumber!==location.lineNumber||result.actualLocation.columnNumber!==location.columnNumber){await cdp.send('Debugger.removeBreakpoint',{breakpointId:result.breakpointId});p.active=false;metadata.unresolved.push({stage:point.stage,reason:'resolved location changed; removed',requested:location,actual:result.actualLocation});}
+     if(result.actualLocation.lineNumber!==location.lineNumber||result.actualLocation.columnNumber!==location.columnNumber){await host.run('remove_relocated_site',()=>cdp.send('Debugger.removeBreakpoint',{breakpointId:result.breakpointId}),750);p.active=false;metadata.unresolved.push({stage:point.stage,reason:'resolved location changed; removed',requested:location,actual:result.actualLocation});}
     }
    }
-  })().catch(e=>metadata.unresolved.push({script:event.scriptId,error:String(e).slice(0,300)})));
+  })().catch(error=>{metadata.unresolved.push({script:event.scriptId,error:'mapping_failed'});host.error('mapping',error);}));
  });
  await cdp.send('Network.enable');
  await cdp.send('Debugger.enable');
+ },2000);}catch(error){attachmentError=error;host.error('attachment',error);}
  const capture=async()=>{
+  host.checkpoint('before_capture');
   try{
-   const snapshot=await page.evaluate(()=>{const b=globalThis.__ammFrozen;return b?{build:b.build,active:b.active,events:b.events,overflow:b.overflow,errors:b.errors}:null;});
+   const snapshot=await host.run('capture',()=>page.evaluate(()=>{const b=globalThis.__ammFrozen;return b?{build:b.build,active:b.active,events:b.events,overflow:b.overflow,errors:b.errors}:null;}),1000);
    metadata.captures.push({at:new Date().toISOString(),snapshot});
-  }catch(e){metadata.unresolved.push({capture:String(e).slice(0,200)});}
+  }catch(error){metadata.unresolved.push({capture:'browser_memory_unavailable'});host.error('capture',error);}finally{host.persist();}
  };
- return {capture,prepare:async()=>{await Promise.allSettled(pending);metadata.prepared={at:new Date().toISOString(),scripts:metadata.maps.length,breakpoints:breakpoints.length};},finish:async()=>{
-  closing=true;
-  try{await capture();
-   for(const breakpointId of breakpoints)await cdp.send('Debugger.removeBreakpoint',{breakpointId}).catch(()=>{});
-   try{await cdp.detach();metadata.detach={at:new Date().toISOString(),removedBreakpoints:breakpoints.length};}
-   catch(error){metadata.detach={at:new Date().toISOString(),closed:true,error:String(error).slice(0,200)};}
-  }finally{
-   // A closed page must not erase the mapping/pause/error evidence or mask the assertion.
-   writeFileSync(path.join(dir,'frozen-logpoints.json'),JSON.stringify(metadata,null,2),{mode:0o600});
-  }
- }};
+ return {capture,recordPrimary:(status,reason)=>host.primary(status,reason),prepare:async()=>{
+  mappingOpen=false;if(attachmentError)throw attachmentError;
+  await host.run('prepare',()=>Promise.allSettled(pending),5000);
+  metadata.prepared={at:new Date().toISOString(),scripts:metadata.maps.length,breakpoints:breakpoints.length};host.persist();
+ },finish:()=>host.finish(async()=>{
+  closing=true;mappingOpen=false;await capture();
+  for(const breakpointId of breakpoints)try{await host.run('remove_site',()=>cdp.send('Debugger.removeBreakpoint',{breakpointId}),400);}catch(error){host.error('remove_site',error);}
+  await detach();
+ })};
 }
