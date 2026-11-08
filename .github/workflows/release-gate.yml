@@ -380,7 +380,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
       - name: Existing collector regressions
-        run: node --test scripts/amm/pr324-frozen-logpoints.test.mjs
+        run: node --test scripts/amm/pr324-frozen-logpoints.test.mjs scripts/amm/pr324-collector-package.test.mjs
       - name: Real synthetic browser and CPU-worker fault tests - no application
         env:
           AMM_COLLECTOR_SELFTEST: '1'

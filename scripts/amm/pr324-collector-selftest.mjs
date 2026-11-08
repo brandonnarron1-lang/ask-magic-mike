@@ -44,7 +44,7 @@ for(const name of cases){
   const primaryPreserved=host.state.primary?.reason===({normal:'normal_completion',assertion:'INTENTIONAL_ASSERTION','target-closed':'INTENTIONAL_TARGET_CLOSURE','stalled-capture':'INTENTIONAL_STALLED_CAPTURE','stalled-mapping':'INTENTIONAL_STALLED_MAPPING'})[name];
   const workers=host.state.cleanup.filter(r=>r.name.startsWith('map_worker_'));
   const faultObserved=name==='stalled-mapping'?host.state.events.some(e=>e.phase==='worker_cpu_stall_entered')&&host.state.operations.some(o=>o.phase==='map_worker'&&o.status==='deadline'):name==='stalled-capture'?host.state.operations.some(o=>o.phase==='capture'&&o.status==='deadline'):true;
-  const passed=initialReceiptRetained&&primaryPreserved&&faultObserved&&exited&&(!browser||!browser.isConnected())&&elapsedMs<10000&&host.state.cleanup.every(r=>r.verified);
+  const passed=initialReceiptRetained&&primaryPreserved&&faultObserved&&host.state.pendingStopped===true&&exited&&(!browser||!browser.isConnected())&&elapsedMs<10000&&host.state.cleanup.every(r=>r.verified);
   host.state.verification={passed,initialReceiptRetained,primaryPreserved,faultObserved,browserProcessExited:exited,exitCode,browserDisconnected:!browser||!browser.isConnected(),elapsedMs,caseBudgetMs:10000,workersStopped:workers.every(r=>r.verified)};host.persist();
   outcomes.push({case:name,passed,elapsedMs});
  }

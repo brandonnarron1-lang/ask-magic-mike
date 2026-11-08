@@ -7,7 +7,7 @@ export class CollectorDeadline extends Error {
 const code=error=>String(error?.code||error?.name||'collector_error').replace(/[^A-Za-z0-9_-]/g,'').slice(0,60);
 export class HostReceipt {
  constructor(file,identity){
-  this.file=file;this.stops=new Map();this.finalization=null;
+  this.file=file;this.stops=new Map();this.pending=new Set();this.finalization=null;
   this.state={schema:'amm.pr324.collector.v1',identity,createdAt:new Date().toISOString(),phase:'before_attachment',primary:null,operations:[],errors:[],events:[{phase:'before_attachment',at:new Date().toISOString()}],cleanup:[],finished:false};
   this.persist(); // Must precede every browser/protocol await.
  }
@@ -20,6 +20,7 @@ export class HostReceipt {
   const record={phase,budgetMs,startedAt:new Date().toISOString(),status:'pending'};this.state.operations.push(record);this.checkpoint('before_'+phase);
   const abort=new AbortController();let timer;
   const pending=Promise.resolve().then(()=>work(abort.signal));
+  this.pending.add(pending);pending.then(()=>this.pending.delete(pending),()=>this.pending.delete(pending));
   // Observe late rejection, but do not let work outlive a deadline: cancel below
   // terminates workers or closes the task-owned browser target/protocol session.
   pending.catch(()=>{});
@@ -42,7 +43,11 @@ export class HostReceipt {
   this.checkpoint('before_finalize');
   this.finalization=(async()=>{
    try{await this.run('finalize',work,4000);}catch(error){this.error('finalize',error);}
-   finally{await this.cancel();this.state.finished=true;this.checkpoint('finished');}
+   finally{await this.cancel();let timer;
+    try{await Promise.race([Promise.allSettled([...this.pending]),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new CollectorDeadline('pending_drain')),1000);})]);this.state.pendingStopped=this.pending.size===0;}
+    catch(error){this.state.pendingStopped=false;this.error('pending_drain',error);}
+    finally{clearTimeout(timer);this.state.finished=true;this.checkpoint('finished');}
+   }
    return this.state;
   })();return this.finalization;
  }
