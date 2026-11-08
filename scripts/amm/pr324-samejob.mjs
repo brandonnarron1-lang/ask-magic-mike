@@ -4,6 +4,7 @@ import {execFileSync,spawn} from 'node:child_process';
 import {readFileSync,writeFileSync,readdirSync,mkdirSync,statSync,statfsSync,copyFileSync,chmodSync,existsSync,openSync,closeSync,rmSync} from 'node:fs';
 import path from 'node:path';
 import {sealDiagnostic} from './pr324-samejob-package.mjs';
+import {ownedProcessRows,trialEvidenceIssue} from './pr324-samejob-evidence.mjs';
 const appHead='a5021cc6dc66ab26420d1127554e66c022a08670',appTree='6c7e37a288b14b385cc6bb2a11b7496884908081';
 const action=process.argv[2],root=path.resolve(process.argv[3]||'frozen-baseline'),out=path.resolve('output/pr324-samejob');
 const hash=v=>createHash('sha256').update(v).digest('hex'),git=(cwd,...args)=>execFileSync('git',args,{cwd,encoding:'utf8'}).trim();
@@ -26,8 +27,7 @@ function copyAndCheck(manifest,dest){
  return {status:'PASS',mode:(statSync(dest).mode&511).toString(8),files:readback.length,manifestSha256:hash(JSON.stringify(readback))};
 }
 function containerRows(){return execFileSync('docker',['ps','-a','--filter','label=com.askmagicmike.purpose=qa-audit-isolated','--format','{{.ID}} {{.Names}}'],{encoding:'utf8'}).trim().split('\n').filter(Boolean).map(line=>{const [id,name]=line.split(' ');return {id,name};});}
-function processes(){const rows=[];for(const id of readdirSync('/proc').filter(n=>/^\d+$/.test(n))){try{const text=readFileSync(`/proc/${id}/stat`,'utf8'),at=text.lastIndexOf(')'),bits=text.slice(at+2).split(' ');rows.push({pid:Number(id),parent:Number(bits[1]),state:bits[0],started:bits[19]});}catch{}}return rows;}
-function descendants(pid){const rows=processes(),ids=new Set([pid]);let changed=true;while(changed){changed=false;for(const row of rows)if(ids.has(row.parent)&&!ids.has(row.pid)){ids.add(row.pid);changed=true;}}return rows.filter(r=>ids.has(r.pid));}
+function processes(){const rows=[];for(const id of readdirSync('/proc').filter(n=>/^\d+$/.test(n))){try{const text=readFileSync(`/proc/${id}/stat`,'utf8'),at=text.lastIndexOf(')'),bits=text.slice(at+2).split(' ');rows.push({pid:Number(id),parent:Number(bits[1]),group:Number(bits[2]),session:Number(bits[3]),state:bits[0],started:bits[19]});}catch{}}return rows;}
 const readJson=(p,fallback)=>{try{return JSON.parse(readFileSync(p,'utf8'));}catch{return fallback;}};
 const jsonl=p=>{try{return readFileSync(p,'utf8').trim().split('\n').filter(Boolean).map(x=>JSON.parse(x));}catch{return [];}};
 
@@ -56,11 +56,12 @@ if(action==='preflight'){
  if(packages.next!=='15.5.26'||packages.react!=='19.2.6'||packages['@playwright/test']!=='1.60.0'||hash(readFileSync(path.join(root,'pnpm-lock.yaml')))!=='ddb18027b6d7e1a46b619675c6a69e0b06c827d1bfb7170e05f85c456f76600f')throw Error('recorded_baseline_dependencies_required');
  Object.assign(source,{status:'PASS',build:{id:readFileSync(path.join(root,'.next/BUILD_ID'),'utf8').trim(),manifestSha256:manifestHash},packages,browserVersion,node:process.version,platform:process.platform,arch:process.arch,runner:readFileSync('/etc/os-release','utf8').split('\n').find(l=>l.startsWith('PRETTY_NAME=')),lockSha256:hash(readFileSync(path.join(root,'pnpm-lock.yaml'))),framework,runtime:{AMM_STALE_REVIEW_DIAGNOSTIC:'1',AMM_E2E_BUILT:'1',DATABASE_ENV:'fresh owned Docker PostgreSQL17/loopback',externalFetch:'blocked',providerSends:false,fixtureIdentities:'fresh equivalent random synthetic identities/ports each trial',baselineNewCDPLayer:false}});save('source',source);
  save('integrity',{status:'PASS',files:manifest,manifestSha256:manifestHash,sealedCopy:sealed,separateReadback:readback,sameJobOnly:true,durableCompiledRetention:'NOT ESTABLISHED',trials:[]});
- const {adaptSpec,adaptObserver,adaptRunner,expectationList,classifyTrial}=await import('./pr324-samejob-adapter.mjs');
+ const {adaptSpec,adaptObserver,adaptRunner,adaptPlaywrightModule,playwrightModules,expectationList,classifyTrial}=await import('./pr324-samejob-adapter.mjs');
  const spec=path.join(root,'tests/e2e/reference-real-session.spec.ts'),original=readFileSync(spec,'utf8');writeFileSync(spec,adaptSpec(original));
  const helper=path.join(root,'tests/support/stale-review-diagnostic.ts');writeFileSync(helper,adaptObserver(readFileSync(helper,'utf8')));
  const runner=path.join(root,'scripts/amm/reference-session-acceptance.mjs');writeFileSync(runner,adaptRunner(readFileSync(runner,'utf8')));
  for(const name of ['pr324-samejob-runtime.mjs','pr324-samejob-reporter.mjs','pr324-frozen-logpoints.mjs','pr324-collector-runtime.mjs','pr324-collector-worker.mjs'])copyFileSync(path.resolve('scripts/amm',name),path.join(root,'tests/support',name));
+ for(const name of playwrightModules)writeFileSync(path.join(root,'tests/support',name+'.ts'),adaptPlaywrightModule(name,readFileSync(path.resolve('scripts/amm',name+'.mjs'),'utf8')));
  copyFileSync(path.resolve('scripts/amm/pr324-samejob-validation.spec.ts'),path.join(root,'tests/e2e/pr324-samejob-validation.spec.ts'));
  source.adapter={expectations:expectationList(original).length,preserved:true,phaseRecords:'Node-only API-phase checkpoints; not assumed timing-neutral',closedCollectorReused:'162eee2f core files, not rerun standalone selftests'};save('source',source);
 
@@ -71,17 +72,17 @@ if(action==='preflight'){
   const stdout=openSync(path.join(dir,'private-process.log'),'w',0o600);
   const child=spawn(process.execPath,['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON','scripts/amm/reference-session-acceptance.mjs'],{cwd:root,detached:true,env:{PATH:process.env.PATH,HOME:process.env.HOME,CI:'true',GITHUB_SHA:appHead,AMM_QA_POSTGRES_TEST:'1',AMM_STALE_REVIEW_DIAGNOSTIC:'1',AMM_SESSION_ARTIFACT_DIR:`.amm-run/samejob-${mode}`,AMM_SAME_JOB_MODE:mode,AMM_FROZEN_MODE:mode==='validation'||mode==='probe'?'probe':'control',AMM_COLLECTOR_CONTROLLER_HEAD:identity.controller},stdio:['ignore',stdout,stdout]});
   let monitorCount=0,monitorMs=0;
-  const track=()=>{const start=performance.now();for(const p of descendants(child.pid))tracked.set(p.pid,p);monitorCount++;monitorMs+=performance.now()-start;};track();const interval=setInterval(track,1000);
+  const track=()=>{const start=performance.now();for(const p of ownedProcessRows(processes(),child.pid,tracked))tracked.set(p.pid,p);monitorCount++;monitorMs+=performance.now()-start;};track();const interval=setInterval(track,1000);
   let timedOut=false;const timer=setTimeout(()=>{timedOut=true;track();try{process.kill(-child.pid,'SIGTERM');}catch{}},180000);
   const forced=setTimeout(()=>{track();try{process.kill(-child.pid,'SIGKILL');}catch{}},185000);
-  const exit=await new Promise(resolve=>{child.once('error',()=>resolve(null));child.once('exit',resolve);});clearInterval(interval);clearTimeout(timer);clearTimeout(forced);closeSync(stdout);
+  const exit=await new Promise(resolve=>{child.once('error',()=>resolve(null));child.once('exit',resolve);});clearInterval(interval);clearTimeout(timer);clearTimeout(forced);closeSync(stdout);track();
   for(const row of [...tracked.values()].reverse()){const current=processes().find(p=>p.pid===row.pid&&p.started===row.started&&p.state!=='Z');if(current)try{process.kill(row.pid,'SIGKILL');}catch{}}
-  let remaining=processes().filter(p=>tracked.get(p.pid)?.started===p.started&&p.state!=='Z');
-  const reapDeadline=Date.now()+1000;while(remaining.length&&Date.now()<reapDeadline){await new Promise(resolve=>setTimeout(resolve,25));remaining=processes().filter(p=>tracked.get(p.pid)?.started===p.started&&p.state!=='Z');}
+  let remaining=ownedProcessRows(processes(),child.pid,tracked);
+  const reapDeadline=Date.now()+1000;while(remaining.length&&Date.now()<reapDeadline){for(const row of remaining){tracked.set(row.pid,row);try{process.kill(row.pid,'SIGKILL');}catch{}}await new Promise(resolve=>setTimeout(resolve,25));remaining=ownedProcessRows(processes(),child.pid,tracked);}
   const newContainers=containerRows().filter(r=>!beforeContainers.some(b=>b.id===r.id));
   for(const item of newContainers){if(!/^amm-qa-audit-[0-9a-f-]{36}$/.test(item.name))throw Error('unknown_task_container');execFileSync('docker',['rm','-f','-v',item.id],{stdio:'ignore'});}
   const containersAfter=containerRows().filter(r=>!beforeContainers.some(b=>b.id===r.id));
-  const cleanup=load('cleanup');cleanup.trials.push({mode,status:remaining.length===0&&containersAfter.length===0?'PASS':'FAIL',trackedProcessCount:tracked.size,runningTaskProcessesRemaining:remaining.map(p=>p.pid),taskContainersRemaining:containersAfter,exactFallbackContainerRemovals:newContainers,monitor:{count:monitorCount,totalMs:monitorMs,limitation:'same host-only process metadata footprint across trials; not assumed neutral'}});cleanup.status=cleanup.trials.every(t=>t.status==='PASS')?'PASS':'FAIL';save('cleanup',cleanup);
+  const cleanup=load('cleanup');cleanup.trials.push({mode,status:remaining.length===0&&containersAfter.length===0?'PASS':'FAIL',scope:'tracked PID/start identities plus detached task session/process group',trackedProcessCount:tracked.size,runningTaskProcessesRemaining:remaining.map(p=>p.pid),taskContainersRemaining:containersAfter,exactFallbackContainerRemovals:newContainers,monitor:{count:monitorCount,totalMs:monitorMs,limitation:'not assumed timing-neutral; a new separate session orphaned between samples may be unobserved, so not universal process-absence proof'}});cleanup.status=cleanup.trials.every(t=>t.status==='PASS')?'PASS':'FAIL';save('cleanup',cleanup);
   if(cleanup.status!=='PASS')throw Error('task_cleanup_failed');
   const after=buildFiles(),integrity=load('integrity'),frameworkUnchanged=Object.entries(framework).every(([f,digest])=>hash(readFileSync(path.join(root,f)))===digest);
   integrity.trials.push({mode,beforeSha256:hash(JSON.stringify(before)),afterSha256:hash(JSON.stringify(after)),unchanged:JSON.stringify(after)===JSON.stringify(manifest),frameworkUnchanged});save('integrity',integrity);if(JSON.stringify(after)!==JSON.stringify(manifest)||!frameworkUnchanged||hash(readFileSync(path.join(root,'pnpm-lock.yaml')))!==source.lockSha256)throw Error('post_trial_build_drift');
@@ -96,7 +97,8 @@ if(action==='preflight'){
   const writes=jsonl(path.join(dir,'stale-review-server-write.jsonl')).filter(x=>x.request?.path==='/admin/today'&&x.fields?.some(f=>f.lead_id===phases.versions?.rendered_V1?.lead)).slice(-3);
   const compactCollector=collector?{mode:collector.mode,build:collector.build,maps:collector.maps,unresolved:collector.unresolved,pauses:collector.pauses,network:collector.network,captures:collector.captures,primary:collector.primary,errors:collector.errors,finished:collector.finished,pendingStopped:collector.pendingStopped,detach:collector.detach,omittedHostBookkeeping:true}:null;
   const observations=load('observations');observations.trials.push({mode,notes,writes,forms:dom.filter(e=>e.forms?.length).slice(-3),collector:compactCollector});observations.status='COMPLETE';save('observations',observations);
-  if(result.status==='missing'||phases.pending&&!host)throw Error('mandatory_trial_evidence_missing');
+  const evidenceIssue=trialEvidenceIssue(result);if(evidenceIssue||phases.pending&&!host)throw Error(evidenceIssue||'mandatory_trial_evidence_missing');
+  if(['HARNESS_STARTUP_FAILURE','TRIAL_EVIDENCE_MISSING','ORIGINAL_CASE_NOT_EXECUTED'].includes(classification))throw Error('application_trial_not_executed');
   console.log(JSON.stringify({mode,classification,counts:{passed:result.results.filter(r=>r.status==='passed').length,failed:result.results.filter(r=>['failed','timedOut'].includes(r.status)).length,notRun:result.results.filter(r=>r.status==='skipped').length},cleanup:'PASS',hashes:'PASS'}));return {...row,collector};
  }
  const baseline=await trial('baseline');

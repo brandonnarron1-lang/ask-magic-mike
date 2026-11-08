@@ -2,6 +2,7 @@
 import {readFileSync,writeFileSync,readdirSync,statSync} from 'node:fs';
 import path from 'node:path';import {pathToFileURL} from 'node:url';
 import {hash} from './pr324-collector-package.mjs';
+import {trialEvidenceIssue} from './pr324-samejob-evidence.mjs';
 export const required=['diagnostic-source.json','diagnostic-integrity.json','diagnostic-phases.json','diagnostic-trials.json','diagnostic-observations.json','diagnostic-cleanup.json'];
 export const byteLimit=200*1024;
 export function sealDiagnostic(dir,identity){
@@ -18,6 +19,7 @@ export function verifyDiagnostic(dir,identity){
   const body=readFileSync(path.join(dir,row.file)),v=JSON.parse(body);bytes+=body.length;
   if(body.length===0||body.length!==row.bytes||hash(body)!==row.sha256||v.schema!==`amm.pr324.samejob-${row.file.slice(11,-5)}.v1`||JSON.stringify(v.identity)!==JSON.stringify(identity)||!v.status)throw Error('diagnostic_schema_checksum_invalid');
   if(index===0&&(!v.application||!v.controller))throw Error('diagnostic_source_missing');
+  if(row.file==='diagnostic-trials.json')for(const trial of v.trials||[]){const issue=trialEvidenceIssue(trial.result);if(issue)throw Error(issue);}
  }
  if(bytes>byteLimit)throw Error('diagnostic_export_byte_limit');
  return {status:'PASS',identity,files:7,checksums:6,bytes,byteLimit,manifestSha256:hash(readFileSync(path.join(dir,'diagnostic-package.json')))};

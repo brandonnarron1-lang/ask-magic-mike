@@ -1,9 +1,11 @@
 // Test/runner adapters only, applied AFTER the a502 application compilation.
 import ts from 'typescript';
+import {trialEvidenceIssue} from './pr324-samejob-evidence.mjs';
+export {trialEvidenceIssue,ownedProcessRows} from './pr324-samejob-evidence.mjs';
 export function replaceOnce(body,needle,value){if(body.split(needle).length!==2)throw Error('adapter_anchor_mismatch');return body.replace(needle,value);}
 export function expectationList(body){const file=ts.createSourceFile('spec.ts',body,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS),rows=[];function visit(n){if(ts.isCallExpression(n)&&n.expression.getText(file).startsWith('expect'))rows.push(n.getText(file).replace(/\s+/g,''));ts.forEachChild(n,visit);}visit(file);return rows;}
 export function adaptSpec(original){
- let body='import { samePhase, samePrimary } from "../support/pr324-samejob-runtime.mjs";\n'+original;
+ let body='import { samePhase, samePrimary } from "../support/pr324-samejob-runtime.ts";\n'+original;
  body=replaceOnce(body,'  const observation = await observeStaleReview(page, f.leads.agent);','  const observation = await observeStaleReview(page, f.leads.agent);\n  samePhase("case6_started");');
  for(const [needle,phase] of [
   ['  await page.goto(`/admin/leads/${f.leads.agent}`);','detail_navigation'],
@@ -20,7 +22,7 @@ export function adaptSpec(original){
  return body;
 }
 export function adaptObserver(original){
- let body='import { sameStart, sameNote, sameFinish } from "./pr324-samejob-runtime.mjs";\n'+original;
+ let body='import { sameStart, sameNote, sameFinish } from "./pr324-samejob-runtime.ts";\n'+original;
  body=replaceOnce(body,'export function staleReviewNote(stage: string, value: unknown) {','export function staleReviewNote(stage: string, value: unknown) {\n  sameNote(stage,value);');
  body=replaceOnce(body,'  const pending: Promise<unknown>[] = [];','  const attached = await sameStart(page, leadId);\n  const pending: Promise<unknown>[] = [];');
  body=replaceOnce(body,'  return { finish: async () => {','  return { prepare: attached.prepare, capture: attached.capture, finish: () => sameFinish(attached, async () => {');
@@ -33,9 +35,22 @@ export function adaptRunner(original){
  body=replaceOnce(body,'["exec", "playwright", "test", suite,','["exec", "playwright", "test", suite, "--reporter", path.resolve("tests/support/pr324-samejob-reporter.mjs"),');
  return body;
 }
+// Playwright's CommonJS test loader must not require native ESM containing
+// import.meta. Only controller-side test copies are adapted; native worker/core
+// .mjs files and every compiled application byte remain unchanged.
+export const playwrightModules=['pr324-samejob-runtime','pr324-frozen-logpoints','pr324-collector-runtime'];
+export function adaptPlaywrightModule(name,original){
+ if(!playwrightModules.includes(name))throw Error('unknown_playwright_module');
+ let body=original.replaceAll('./pr324-frozen-logpoints.mjs','./pr324-frozen-logpoints.ts').replaceAll('./pr324-collector-runtime.mjs','./pr324-collector-runtime.ts');
+ if(name==='pr324-collector-runtime')body=replaceOnce(body,"new URL('./pr324-collector-worker.mjs',import.meta.url)","require.resolve('./pr324-collector-worker.mjs')");
+ return body;
+}
 export function classifyTrial(result,phases,dom){
+ if(trialEvidenceIssue(result))return 'TRIAL_EVIDENCE_MISSING';
+ if(result.globalErrors?.length||result.results.length===0)return 'HARNESS_STARTUP_FAILURE';
  const failure=result?.results?.find(r=>r.test.startsWith('Today real task completion/stale form'));
- if(!failure||failure.status==='passed')return 'ORIGINAL_FAILURE_NOT_REPRODUCED';
+ if(!failure||['skipped','interrupted'].includes(failure.status))return 'ORIGINAL_CASE_NOT_EXECUTED';
+ if(failure.status==='passed')return 'ORIGINAL_FAILURE_NOT_REPRODUCED';
  if(failure.status==='timedOut'||failure.errorSignature==='TEST_TIMEOUT_60000')return 'DIFFERENT_TIMEOUT';
  const a=phases?.versions?.rendered_V1,b=phases?.versions?.concurrent_SQL_V2,c=phases?.versions?.review_expected_V2;
  const form=dom?.flatMap(e=>e.forms||[]).filter(f=>f.action===a?.action&&f.lead===a?.lead).at(-1);

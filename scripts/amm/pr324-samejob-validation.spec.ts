@@ -2,7 +2,7 @@
 import {readFileSync} from 'node:fs';
 import {expect,test} from '@playwright/test';
 import {observeStaleReview} from '../../tests/support/stale-review-diagnostic';
-import {samePhase,samePrimary} from '../../tests/support/pr324-samejob-runtime.mjs';
+import {samePhase,samePrimary} from '../../tests/support/pr324-samejob-runtime.ts';
 test.skip(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE!=='1'||process.env.AMM_SAME_JOB_MODE!=='validation','same-job isolated probe validation only');
 test('Independent synthetic refresh validates minimal runtime logpoints',async({browser})=>{
  const fixture=JSON.parse(readFileSync(process.env.AMM_E2E_FIXTURE_PATH!,'utf8'));
