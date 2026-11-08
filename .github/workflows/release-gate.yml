@@ -13,7 +13,7 @@ on:
         type: boolean
         default: false
       pr324_frozen:
-        description: "One frozen reconstructed baseline: control plus runtime logpoints; NOT release acceptance"
+        description: "One same-job sealed build and gated trials; sanitized evidence ONLY, NOT release acceptance"
         type: boolean
         default: false
       pr324_collector_selftest:
@@ -311,7 +311,7 @@ jobs:
           if-no-files-found: warn
 
   pr324-frozen-boundary:
-    name: PR324 frozen bundle control and logpoints - NOT release acceptance
+    name: PR324 same-job sealed build and gated reproduction - NOT release acceptance
     if: github.event_name == 'workflow_dispatch' && inputs.pr324_frozen == true && inputs.pr324_diagnostic != true && inputs.pr324_collector_selftest != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -331,32 +331,45 @@ jobs:
           version: 10.30.3
       - uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '24.22.2'
           cache: pnpm
+      - name: Source and Linux disk admission before dependency/build work
+        run: node scripts/amm/pr324-samejob.mjs preflight frozen-baseline
       - name: Install exact baseline dependencies - no framework observers
         working-directory: frozen-baseline
         run: pnpm install --frozen-lockfile
+      - name: Same-version controller dependencies and fresh prebuild admission
+        run: |
+          ln -s "$GITHUB_WORKSPACE/frozen-baseline/node_modules" "$GITHUB_WORKSPACE/node_modules"
+          node scripts/amm/pr324-samejob.mjs checkpoint frozen-baseline before_build
+          node --test scripts/amm/pr324-samejob-adapter.test.mjs
       - name: Reconstruct a502 once - not the retained original artifact
         working-directory: frozen-baseline
         run: pnpm run build
       - working-directory: frozen-baseline
         run: pnpm exec playwright install --with-deps chromium
-      - name: Same emitted bytes, fresh fixtures, one control and one logpoint replay
-        run: node scripts/amm/pr324-frozen-bundle.mjs frozen-baseline
-      - name: Sanitized frozen evidence only - no trace, session or raw payload
+      - name: One sealed build, same-job readback and gated original failure trials
+        run: node scripts/amm/pr324-samejob.mjs run frozen-baseline
+      - name: Failure-safe exact diagnostic inventory and checksums
+        id: diagnostic_evidence
         if: always()
+        run: |
+          node scripts/amm/pr324-samejob.mjs finalize frozen-baseline
+          node scripts/amm/pr324-samejob-package.mjs output/pr324-samejob
+      - name: Sanitized frozen evidence only - no trace, session or raw payload
+        if: always() && steps.diagnostic_evidence.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: pr324-frozen-${{ github.run_id }}-${{ github.run_attempt }}
+          name: pr324-samejob-${{ github.run_id }}-${{ github.run_attempt }}
           retention-days: 7
-          # Only these explicit sanitized files; never upload hidden directories broadly.
-          include-hidden-files: true
           path: |
-            frozen-baseline/.amm-run/frozen-*/stale-review-*.json
-            frozen-baseline/.amm-run/frozen-*/stale-review-*.jsonl
-            frozen-baseline/.amm-run/frozen-*/stale-review-*.png
-            frozen-baseline/.amm-run/frozen-*/frozen-*.json
-            frozen-baseline/.amm-run/frozen-*/receipt.json
+            output/pr324-samejob/diagnostic-source.json
+            output/pr324-samejob/diagnostic-integrity.json
+            output/pr324-samejob/diagnostic-phases.json
+            output/pr324-samejob/diagnostic-trials.json
+            output/pr324-samejob/diagnostic-observations.json
+            output/pr324-samejob/diagnostic-cleanup.json
+            output/pr324-samejob/diagnostic-package.json
           if-no-files-found: error
 
   pr324-collector-selftest:
