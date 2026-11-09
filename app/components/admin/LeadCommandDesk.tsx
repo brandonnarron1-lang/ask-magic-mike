@@ -10,10 +10,10 @@ const labels = { attention:"Needs attention", overdue:"Overdue tasks", delivery:
 const focus = "outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
 function TaskControls({ request, principal, complete }: { request:DeskRequest; principal:LeadCenterPrincipal|null; complete:boolean }) {
   const item=request.primary;
-  if (!complete || request.held || !principal || !hasLeadCenterPermission(principal.role,item.requiredPermission)) return null;
+  if (!complete || request.held || item.readOnly || !principal || !hasLeadCenterPermission(principal.role,item.requiredPermission)) return null;
   const hidden=<><input type="hidden" name="action_id" value={item.id}/><input type="hidden" name="lead_id" value={item.leadId}/><input type="hidden" name="record_version" value={item.recordVersion}/><input type="hidden" name="review_version" value={item.reviewVersion}/></>;
   return <div className="mt-4 border-t border-white/10 pt-4">
-    {item.actionKind==="complete_task" && !item.blockers.length ? <ConversionMutationForm key={item.id} action={completeTodayTask} successReturnTo="/admin/today?today_action=completed" submitLabel="Complete task" successMessage="Internal task completed. No message, human-response milestone or appointment was recorded." className="mb-3">{hidden}</ConversionMutationForm> : null}
+    {item.actionKind==="complete_task" && !item.blockers.length ? <ConversionMutationForm key={item.id} action={completeTodayTask} conflictRecovery={item.taskId ? {kind:"today_task",taskId:item.taskId} : undefined} successReturnTo="/admin/today?today_action=completed" submitLabel="Complete task" successMessage="Internal task completed. No message, human-response milestone or appointment was recorded." className="mb-3">{hidden}</ConversionMutationForm> : null}
     <details><summary className={`min-h-11 cursor-pointer py-3 text-sm text-[#e2c06f] ${focus}`}>More internal actions</summary>
       <div className="grid gap-3 sm:grid-cols-2">
         <ConversionMutationForm key={`snooze:${item.id}`} action={reviewTodayAction} successReturnTo="/admin/today?today_action=snoozed" submitLabel="Snooze 24 hours" successMessage="This existing action is snoozed for one day. No consumer action occurred." className="rounded-lg border border-white/10 p-3">{hidden}<input type="hidden" name="review_status" value="snoozed"/></ConversionMutationForm>
@@ -71,11 +71,13 @@ function RequestCard({ request, index, queue, principal, complete }: { request:D
     <TaskControls request={request} principal={principal} complete={complete}/>
   </article>;
 }
-export function LeadCommandDesk({ queue,principal,filter="attention",page=1,notice }: { queue:AdminTodayQueueResult; principal:LeadCenterPrincipal|null; filter?:DeskFilter; page?:number; notice?:string|null }) {
+export function LeadCommandDesk({ queue,principal,filter="attention",page=1,notice,reviewTask }: { queue:AdminTodayQueueResult; principal:LeadCenterPrincipal|null; filter?:DeskFilter; page?:number; notice?:string|null; reviewTask?:string }) {
   const desk=buildTodayDesk(queue), readable=queue.configured&&!queue.error&&Number.isFinite(Date.parse(queue.generatedAt))&&["complete","limited"].includes(queue.coverage?.state||""), limited=queue.coverage?.state==="limited";
   const matching=readable?deskRequests(desk.requests,filter):[], complete=readable&&queue.coverage?.state==="complete";
   const currentPage=Math.min(Math.max(1,page),Math.max(1,Math.ceil(matching.length/DESK_PAGE_SIZE)));
   const offset=(currentPage-1)*DESK_PAGE_SIZE,requests=matching.slice(offset,offset+DESK_PAGE_SIZE);
+  const reviewItem=readable ? queue.items.find(item=>item.taskId===reviewTask) : undefined;
+  const reviewRequest=reviewItem ? buildTodayDesk({...queue,items:[reviewItem]}).requests[0] : undefined;
   return <main className="min-h-screen bg-[#050505] px-3 py-5 text-[#f7ecd5] [overflow-wrap:anywhere] sm:px-6 sm:py-8">
     <div className="mx-auto max-w-6xl">
       <header className="rounded-2xl border border-[#cda24a40] bg-[radial-gradient(ellipse_at_top_right,#cda24a12,transparent_60%),linear-gradient(120deg,#17140e,#080807)] p-4 sm:p-8">
@@ -91,6 +93,14 @@ export function LeadCommandDesk({ queue,principal,filter="attention",page=1,noti
         </nav>
       </header>
       {notice?<p role="status" className="mt-4 rounded-lg border border-cyan-200/30 bg-cyan-200/5 p-3 text-sm text-cyan-100">{notice}</p>:null}
+      {reviewTask ? <section aria-labelledby="fresh-task-heading" className="mt-5 space-y-3 rounded-2xl border border-cyan-200/30 p-3 sm:p-5">
+        <h2 id="fresh-task-heading" className="font-serif text-2xl">Fresh task review</h2>
+        <p className="text-sm leading-6 text-[#d8ceba]">Read from your current authorized queue. Opening this page saves nothing. Review current ownership and permission before acting again; the original rejected page is still unsafe to submit.</p>
+        {reviewItem && reviewRequest ? <>
+          <p className="break-words text-xs text-[#c9bfad]">Current task version: <code>{reviewItem.recordVersion}</code>. {reviewRequest.held || reviewItem.readOnly || reviewItem.blockers.length || !complete ? "Held / read-only — completion unavailable." : "Open task — explicit completion still rechecks current permission, ownership and version."}</p>
+          <RequestCard request={{...reviewRequest,primary:reviewItem}} index={0} queue={queue} principal={principal} complete={complete}/>
+        </> : <p role="status" className="text-sm leading-6 text-[#ffbdc8]">Task unavailable in your current authorized queue. It may be completed, canceled, missing, terminal, reassigned or inaccessible. No completion was recorded by this review. Do not use the old form.</p>}
+      </section> : null}
       {queue.error?<p role="alert" className="mt-4 rounded-lg border border-[#b7374d66] bg-[#35141b] p-3 text-sm text-[#ffbdc8]">Queue unavailable. Protected data could not be read completely. No action was changed.</p>:null}
       {!readable||limited?<p role="status" className="mt-4 text-sm leading-6 text-[#c9bfad]">{!readable?"Queue unavailable. No measured counts are available; this does not mean there is no work.":`Limited results: ${queue.coverage?.leadCount} recent authorized open requests. The ${queue.coverage?.limitedBy.join(", ")} query reached its limit. Counts describe returned inquiries only; queue mutations are held.`}</p>:<details className="mt-2 text-xs leading-5 text-[#c9bfad]"><summary className={`min-h-11 cursor-pointer py-3 ${focus}`}>{queue.coverage?.leadCount ?? 0} open requests read · Scope &amp; count definitions</summary><p>One card per inquiry in this bounded authorized read (maximum 1,000). Counts overlap by filter, not distinct people. Completed, terminal and dismissed work is not included; tests are excluded.</p></details>}
       <details className="mt-2 max-w-xl rounded-xl border border-white/15 bg-[#0d0d0c] px-4"><summary className={`min-h-11 cursor-pointer py-3 font-semibold ${focus}`}>Find a request</summary><div className="mb-4"><LeadSearchPanel/></div></details>

@@ -1,7 +1,8 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConversionMutationForm, type ConversionMutationResult } from "../../app/components/admin/ConversionMutationForm";
+import { todayTaskReviewHref, todayTaskReviewId } from "../../app/lib/todayTaskReview";
 
 const { refresh } = vi.hoisted(() => ({ refresh: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
@@ -22,6 +23,74 @@ function form(action: (data: FormData, mode: "inline") => Promise<ConversionMuta
 
 beforeEach(() => vi.clearAllMocks());
 afterEach(cleanup);
+
+const taskId = "11111111-1111-4111-8111-111111111111";
+function taskForm(action: (data: FormData, mode: "inline") => Promise<ConversionMutationResult>, version="version-1", id=taskId) {
+  return <ConversionMutationForm action={action} submitLabel="Complete task" successMessage="Internal task completed" conflictRecovery={{kind:"today_task",taskId:id}}>
+    <input type="hidden" name="lead_id" value="lead-1"/><input type="hidden" name="action_id" value={`lead-1:task:${id}`}/><input type="hidden" name="record_version" value={version}/>
+  </ConversionMutationForm>;
+}
+
+describe("draftless Today fresh-document recovery",()=>{
+  it("survives an injected no-progress refresh and fences the old form even after newer props",async()=>{
+    const action=vi.fn().mockResolvedValue({ok:false,error:"stale_action"});
+    const {rerender}=render(taskForm(action));
+    await userEvent.click(screen.getByRole("button",{name:"Complete task"}));
+    expect(await screen.findByRole("alert")).toHaveTextContent("This task changed. Nothing was saved.");
+    const link=screen.getByRole("link",{name:"Review latest task (opens in new tab)"});
+    expect(link).toHaveAttribute("href",`/admin/today?review_task=${taskId}`);
+    expect(link).toHaveAttribute("target","_blank");expect(link).toHaveAttribute("rel","noopener noreferrer");
+    refresh(); // Injected fault: no RSC/props progress, not the historical cause.
+    expect(screen.getByRole("button",{name:"Complete task"})).toBeDisabled();
+    rerender(taskForm(action,"version-2"));
+    expect(screen.getByRole("button",{name:"Complete task"})).toBeDisabled();
+    fireEvent.submit(screen.getByRole("form",{name:"Complete task"}));
+    expect(action).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("alert")).toHaveTextContent("Nothing was saved");
+    expect(screen.queryByRole("button",{name:/keep draft/})).not.toBeInTheDocument();
+    link.focus();expect(link).toHaveFocus();
+  });
+  it("neither navigation failure nor a clicked link claims success or unlocks the rejected request",async()=>{
+    const action=vi.fn().mockResolvedValue({ok:false,error:"stale_followup_version"});render(taskForm(action));
+    await userEvent.click(screen.getByRole("button",{name:"Complete task"}));
+    const link=await screen.findByRole("link");
+    link.addEventListener("click",e=>e.preventDefault()); // failed/blocked navigation
+    await userEvent.click(link);
+    expect(refresh).not.toHaveBeenCalled();expect(action).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button",{name:"Complete task"})).toBeDisabled();
+    expect(screen.queryByRole("button",{name:"Saved"})).not.toBeInTheDocument();
+  });
+  it("keeps sibling drafts and UNKNOWN payloads untouched; never offers fresh review for UNKNOWN",async()=>{
+    const complete=vi.fn().mockResolvedValue({ok:false,error:"stale_action"});
+    const unknown=vi.fn().mockRejectedValueOnce(Error("lost response")).mockResolvedValue({ok:true});
+    render(<>{taskForm(complete)}{form(unknown)}</>);
+    fireEvent.change(screen.getByLabelText("Safe note"),{target:{value:"Unsaved private note"}});
+    await userEvent.click(screen.getByRole("button",{name:"Save next task"}));
+    await screen.findByRole("button",{name:"Retry same request"});
+    await userEvent.click(screen.getByRole("button",{name:"Complete task"}));
+    const link=await screen.findByRole("link");link.addEventListener("click",e=>e.preventDefault());await userEvent.click(link);
+    expect(screen.getByLabelText("Safe note")).toHaveValue("Unsaved private note");
+    expect(screen.getByLabelText("Safe note")).toBeDisabled();
+    expect(within(screen.getByRole("form",{name:"Save next task"})).queryByRole("link")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button",{name:"Retry same request"}));
+    expect(unknown.mock.calls[1][0]).toBe(unknown.mock.calls[0][0]);
+  });
+  it("preserves the exact request and token for an UNKNOWN task outcome",async()=>{
+    const action=vi.fn().mockRejectedValueOnce(Error("lost")).mockResolvedValue({ok:false,error:"conversion_transaction_unavailable"});render(taskForm(action));
+    await userEvent.click(screen.getByRole("button",{name:"Complete task"}));
+    await screen.findByRole("button",{name:"Retry same request"});expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button",{name:"Retry same request"}));
+    expect(action.mock.calls[1][0]).toBe(action.mock.calls[0][0]);expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+  it.each(["https://evil.test","//evil.test",`${taskId}?email=private@example.test`,"../admin","",null,[]])("rejects a non-identity destination: %s",value=>{
+    expect(todayTaskReviewId(value)).toBeNull();expect(todayTaskReviewHref(value)).toBeNull();
+  });
+  it("fails closed for invalid task identity without a redirect fallback",async()=>{
+    const action=vi.fn().mockResolvedValue({ok:false,error:"stale_action"});render(taskForm(action,"version-1","//evil.test"));
+    await userEvent.click(screen.getByRole("button",{name:"Complete task"}));await screen.findByRole("alert");
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();expect(screen.getByText(/Fresh task review is unavailable/)).toBeVisible();
+  });
+});
 
 describe("bounded inline conversion form", () => {
   it("keeps an unexpected saved warning visible instead of taking a generic desk success return", async () => {

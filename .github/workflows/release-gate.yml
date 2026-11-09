@@ -18,7 +18,9 @@ concurrency:
 jobs:
   local-release-gate:
     name: local-release-gate
-    runs-on: ubuntu-latest
+    # Keep the locked Playwright 1.60.0 dependency installer on its supported OS.
+    # ubuntu-latest selected 26.04 and failed before browser acceptance (42629007479).
+    runs-on: ubuntu-24.04
     # Public standard runner; retain every test-level bound and mandatory stage.
     # Observed apt font downloads consumed 6–8 minutes of the previous budget.
     timeout-minutes: 35
@@ -145,6 +147,9 @@ jobs:
       - name: Built application real-session and signed HTTP-to-SQL acceptance
         run: pnpm run test:reference:sessions
 
+      - name: Built command desk fresh-document recovery and current-permission reads (isolated SQL, no sends)
+        run: AMM_COMMAND_DESK_ACCEPTANCE=1 AMM_SESSION_ARTIFACT_DIR=.amm-run/task-fresh-review-ci pnpm run test:reference:sessions
+
       - name: Built application conversion journey and responsive acceptance
         run: AMM_CONVERSION_SESSION_ACCEPTANCE=1 pnpm run test:reference:sessions
 
@@ -208,6 +213,10 @@ jobs:
             artifacts/*.md
             output/playwright/public-contact-mobile/*.png
             output/playwright/mobile-conversation/*.png
+            output/playwright/task-fresh-review-*.png
+            .amm-run/task-fresh-review-ci/receipt.json
+            .amm-run/task-fresh-review-ci/command-desk-no-effects.json
+            .amm-run/task-fresh-review-ci/screenshots/*.png
             .amm-run/reference-session-acceptance/receipt.json
             .amm-run/reference-session-acceptance/conversion-receipt.json
             .amm-run/reference-session-acceptance/performance.json

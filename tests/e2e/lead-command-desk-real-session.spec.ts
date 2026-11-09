@@ -93,16 +93,42 @@ test("required SQL failure is unavailable, then genuine empty scope stays honest
   try{await page.goto("/admin/today");await expect(page.getByRole("heading",{name:"No open actions returned",exact:true})).toBeVisible();await expect(page.getByText(/No customer task has been invented/)).toBeVisible();await page.screenshot({path:path.join(output,"command-desk-empty-390.png"),fullPage:true});}
   finally{await pool.query("UPDATE leads SET assigned_agent_id=$1 WHERE id=$2",[f.agents.agent,f.leads.agent]);}
 });
+test("fresh task reads honor changed assignment, permission, suppression, terminal and missing/completed records",async()=>{
+  const task=(await pool.query("SELECT id FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].id;
+  const page=await contexts.agent.newPage();
+  const cases=[
+    ["UPDATE leads SET assigned_agent_id=$2 WHERE id=$1",[f.leads.agent,f.agents.other],"UPDATE leads SET assigned_agent_id=$2 WHERE id=$1",[f.leads.agent,f.agents.agent]],
+    ["UPDATE communication_permissions SET state='denied' WHERE lead_id=$1",[f.leads.agent],"UPDATE communication_permissions SET state='allowed' WHERE lead_id=$1",[f.leads.agent]],
+    ["UPDATE leads SET communication_suppressed=true WHERE id=$1",[f.leads.agent],"UPDATE leads SET communication_suppressed=false WHERE id=$1",[f.leads.agent]],
+    ["UPDATE leads SET conversion_stage='disqualified' WHERE id=$1",[f.leads.agent],"UPDATE leads SET conversion_stage=NULL WHERE id=$1",[f.leads.agent]],
+    ["UPDATE leads SET closed_lost_reason='no_follow_up' WHERE id=$1",[f.leads.agent],"UPDATE leads SET closed_lost_reason=NULL WHERE id=$1",[f.leads.agent]],
+    ["UPDATE tasks SET status='done' WHERE id=$1",[task],"UPDATE tasks SET status='open' WHERE id=$1",[task]],
+    ["UPDATE tasks SET status='cancelled' WHERE id=$1",[task],"UPDATE tasks SET status='open' WHERE id=$1",[task]],
+  ] as const;
+  for(const [change,args,restore,values] of cases){
+    await pool.query(change,[...args]);
+    try{
+      const before=(await pool.query("SELECT (SELECT count(*)::int FROM audit_logs) audit,(SELECT count(*)::int FROM lead_notifications) notifications")).rows[0];
+      await page.goto(`/admin/today?review_task=${task}`);
+      const review=page.getByRole("region",{name:"Fresh task review",exact:true});await expect(review).toBeVisible();
+      await expect(review.getByRole("button",{name:"Complete task",exact:true})).toHaveCount(0);
+      expect((await pool.query("SELECT (SELECT count(*)::int FROM audit_logs) audit,(SELECT count(*)::int FROM lead_notifications) notifications")).rows[0]).toEqual(before);
+    }finally{await pool.query(restore,[...values]);}
+  }
+  await page.goto(`/admin/today?review_task=${randomUUID()}`);await expect(page.getByRole("region",{name:"Fresh task review"})).toContainText("Task unavailable in your current authorized queue");await safety();
+});
 test("one existing internal task completes without creating response, ownership or delivery",async()=>{
-  const page=await contexts.agent.newPage();await page.goto("/admin/today");const card=page.locator("article").filter({hasText:"Existing task overdue"}).first();
+  let page=await contexts.agent.newPage();await page.goto("/admin/today");const card=page.locator("article").filter({hasText:"Existing task overdue"}).first();
   const form=card.getByRole("form",{name:"Complete task",exact:true});
   const completedActionId=await form.locator('input[name="action_id"]').inputValue();
   await form.locator('input[name="record_version"]').evaluate(el=>{(el as HTMLInputElement).value="stale-synthetic-version";});
-  await form.getByRole("button",{name:"Complete task",exact:true}).click();await expect(form.getByRole("alert")).toContainText("This action changed");await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
+  await form.getByRole("button",{name:"Complete task",exact:true}).click();await expect(form.getByRole("alert")).toContainText("This task changed");await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
   expect((await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("open");
-  await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
-  await expect(form.locator('input[name="record_version"]')).toHaveValue((await pool.query("SELECT updated_at::text FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].updated_at);
-  await card.getByRole("button",{name:"Complete task",exact:true}).click();
+  const original=page;const next=contexts.agent.waitForEvent("page");await form.getByRole("link",{name:"Review latest task (opens in new tab)",exact:true}).click();page=await next;
+  const fresh=page.getByRole("region",{name:"Fresh task review",exact:true}).getByRole("form",{name:"Complete task",exact:true}).filter({has:page.locator(`input[name="action_id"][value="${completedActionId}"]`)});
+  await expect(fresh.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
+  await expect(fresh.locator('input[name="record_version"]')).toHaveValue((await pool.query("SELECT updated_at::text FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].updated_at);
+  await fresh.getByRole("button",{name:"Complete task",exact:true}).click();await original.close();
   await expect.poll(async()=>(await pool.query("SELECT status FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].status).toBe("done");
   const row=(await pool.query("SELECT assigned_agent_id,(SELECT count(*)::int FROM lead_response_milestones WHERE lead_id=leads.id) responses FROM leads WHERE id=$1",[f.leads.agent])).rows[0];
   expect(row.assigned_agent_id).toBe(f.agents.agent);expect(row.responses).toBe(0);await safety();
@@ -122,4 +148,7 @@ test("expired real session returns to sign-in with the protected destination",as
   await pool.query('UPDATE lead_center_sessions SET "expiresAt"=now()-interval \'1 minute\' WHERE "userId"=$1',[f.ids.agent]);
   const page=await contexts.agent.newPage();await page.goto(`/admin/leads/${f.leads.agent}`);await expect(page).toHaveURL(/lead-center-login.*returnTo=/);
   expect(decodeURIComponent(page.url())).toContain(`/admin/leads/${f.leads.agent}`);expect(await page.content()).not.toContain("private-agent@example.test");
+  const task=(await pool.query("SELECT id FROM tasks WHERE lead_id=$1 AND title LIKE 'SYNTHETIC follow-up%'",[f.leads.agent])).rows[0].id;
+  await page.goto(`/admin/today?review_task=${task}`);await expect(page).toHaveURL(/lead-center-login.*returnTo=/);
+  expect(decodeURIComponent(page.url())).toContain(`/admin/today?review_task=${task}`);expect(await page.content()).not.toContain("private-agent@example.test");
 });

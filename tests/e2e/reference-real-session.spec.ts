@@ -186,14 +186,14 @@ test("Today forged task version is refused without changing the task", async () 
   const before = (await sql("SELECT status,updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0];
   await form.locator('input[name="record_version"]').evaluate(el => { (el as HTMLInputElement).value="forged-synthetic-version"; });
   await form.getByRole("button", { name: "Complete task", exact: true }).click();
-  await expect(form.getByRole("alert")).toContainText("This action changed");
+  await expect(form.getByRole("alert")).toContainText("This task changed");
   await expect(form.getByRole("button", { name: "Complete task", exact: true })).toBeDisabled();
   expect((await sql("SELECT status,updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0]).toEqual(before);
   await page.close();
 });
 
 test("Today real task completion/stale form, paginated timeline and 200% text remain scoped", async () => {
-  const page = await contexts.agent.newPage();
+  let page = await contexts.agent.newPage();
   await page.goto(`/admin/leads/${f.leads.agent}`);
   await openTimeline(page);
   await expect(page.getByRole("link", { name: "Older activity" })).toBeVisible();
@@ -207,23 +207,61 @@ test("Today real task completion/stale form, paginated timeline and 200% text re
   await expect(form).toBeVisible();
   const completedActionId=await form.locator('input[name="action_id"]').inputValue();
   const renderedVersion = await form.locator('input[name="record_version"]').inputValue();
+  const historyBeforeConflict=(await sql("SELECT count(*)::int n FROM audit_logs WHERE resource_id=$1",[f.leads.agent]))[0].n;
   // Model a genuine concurrent database update, not a DOM mutation. Hidden
   // input .value also changes its defaultValue; that is not a server snapshot.
   const advancedVersion = (await sql("UPDATE tasks SET updated_at=clock_timestamp() WHERE lead_id=$1 AND category='followup:manual_callback' RETURNING updated_at::text", [f.leads.agent]))[0].updated_at;
   expect(advancedVersion).not.toBe(renderedVersion);
   await expect(form.locator('input[name="record_version"]')).toHaveValue(renderedVersion);
   await form.getByRole("button",{name:"Complete task",exact:true}).click();
-  await expect(form.getByRole("alert")).toContainText("This action changed");
+  await expect(form.getByRole("alert")).toContainText("This task changed. Nothing was saved.");
   await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
   expect((await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("open");
-  await form.getByRole("button",{name:"Review latest record (keep draft)",exact:true}).click();
+  expect((await sql("SELECT count(*)::int n FROM audit_logs WHERE resource_id=$1",[f.leads.agent]))[0].n).toBe(historyBeforeConflict);
+  // Injected no-progress soft-refresh fault, NOT a reproduction of the unknown
+  // framework cause. A fresh document must not depend on this RSC path.
+  await page.route("**/admin/today**",route=>route.request().method()==="GET" && route.request().headers()["rsc"]==="1" ? route.abort("failed") : route.continue());
+  const originalPage=page;
+  const recovery=form.getByRole("link",{name:"Review latest task (opens in new tab)",exact:true});
+  const taskId=completedActionId.split(":task:")[1];
+  await expect(recovery).toHaveAttribute("href",`/admin/today?review_task=${taskId}`);
+  await expect(recovery).toHaveAttribute("rel","noopener noreferrer");
+  const auditCount=async()=>(await sql("SELECT count(*)::int n FROM audit_logs WHERE resource_id=$1",[f.leads.agent]))[0].n;
+  const beforeReview=await auditCount();
+  const freshPagePromise=contexts.agent.waitForEvent("page");await recovery.focus();await expect(recovery).toBeFocused();await recovery.press("Enter");
+  page=await freshPagePromise;
+  const review=page.getByRole("region",{name:"Fresh task review",exact:true});
+  let freshForm=review.getByRole("form",{name:"Complete task",exact:true}).filter({has:page.locator(`input[name="action_id"][value="${completedActionId}"]`)});
+  await expect(freshForm).toHaveCount(1);
   const currentTaskVersion=(await sql("SELECT updated_at::text FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'",[f.leads.agent]))[0].updated_at;
-  await expect(form.locator('input[name="record_version"]')).toHaveValue(currentTaskVersion);
-  await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
-  await form.getByRole("button", { name: "Complete task", exact: true }).click();
+  await expect(freshForm.locator('input[name="record_version"]')).toHaveValue(currentTaskVersion);
+  await expect(review).toContainText(`Current task version: ${currentTaskVersion}`);
+  await expect(freshForm.getByRole("button",{name:"Complete task",exact:true})).toBeEnabled();
+  expect(await auditCount()).toBe(beforeReview); // navigation is read-only
+  await expect(form.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
+  const v3=(await sql("UPDATE tasks SET updated_at=clock_timestamp() WHERE id=$1 RETURNING updated_at::text",[taskId]))[0].updated_at;
+  expect(v3).not.toBe(currentTaskVersion);
+  await freshForm.getByRole("button",{name:"Complete task",exact:true}).click();
+  await expect(freshForm.getByRole("alert")).toContainText("Nothing was saved");
+  await expect(freshForm.getByRole("button",{name:"Complete task",exact:true})).toBeDisabled();
+  expect(await auditCount()).toBe(beforeReview);
+  const v3PagePromise=contexts.agent.waitForEvent("page");await freshForm.getByRole("link",{name:"Review latest task (opens in new tab)",exact:true}).click();
+  const v2Page=page;page=await v3PagePromise;
+  freshForm=page.getByRole("region",{name:"Fresh task review",exact:true}).getByRole("form",{name:"Complete task",exact:true}).filter({has:page.locator(`input[name="action_id"][value="${completedActionId}"]`)});
+  await expect(freshForm.locator('input[name="record_version"]')).toHaveValue(v3);
+  for(const width of [320,390,430,1440]){
+    await page.setViewportSize({width,height:1000});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);
+    await freshForm.getByRole("button",{name:"Complete task",exact:true}).focus();await expect(freshForm.getByRole("button",{name:"Complete task",exact:true})).toBeFocused();
+    await page.screenshot({path:`output/playwright/task-fresh-review-${width}.png`,fullPage:true});
+  }
+  await freshForm.getByRole("button", { name: "Complete task", exact: true }).click();
   await expect.poll(async()=>(await sql("SELECT status FROM tasks WHERE lead_id=$1 AND category='followup:manual_callback'", [f.leads.agent]))[0].status).toBe("done");
   await expect(page).toHaveURL(/today_action=completed/);
   await expect(page.locator(`input[name="action_id"][value="${completedActionId}"]`)).toHaveCount(0);
+  expect(await auditCount()).toBe(beforeReview+1);
+  await form.evaluate(element=>(element as HTMLFormElement).requestSubmit());
+  expect(await auditCount()).toBe(beforeReview+1); // original fence cannot duplicate
+  await originalPage.close();await v2Page.close();
   await page.locator("summary").filter({hasText:/^More internal actions$/}).first().click();
   const snooze = page.locator("form").filter({has:page.getByRole("button",{name:"Snooze 24 hours",exact:true})}).first();
   await expect(snooze).toBeVisible();
