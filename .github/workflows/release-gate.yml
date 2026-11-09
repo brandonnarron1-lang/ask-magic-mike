@@ -18,7 +18,9 @@ concurrency:
 jobs:
   local-release-gate:
     name: local-release-gate
-    runs-on: ubuntu-latest
+    # Keep the locked Playwright 1.60.0 dependency installer on its supported OS.
+    # ubuntu-latest selected 26.04 and failed before browser acceptance (42629007479).
+    runs-on: ubuntu-24.04
     # Public standard runner; retain every test-level bound and mandatory stage.
     # Observed apt font downloads consumed 6–8 minutes of the previous budget.
     timeout-minutes: 35
