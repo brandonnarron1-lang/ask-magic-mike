@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { createHash, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { acceptedFunction, bind, concurrent, install, literal, localQuery, migration, psql, startDatabase, statements, stopDatabase } from "../support/qa-audit-postgres";
+import { acceptedFunction, bind, concurrent, duplicateCohortMigration, install, literal, localQuery, migration, psql, startDatabase, statements, stopDatabase } from "../support/qa-audit-postgres";
 import { NeonPostgresAdapter } from "../../app/lib/persistence/neonPostgresAdapter";
 import { normalizeLeadPayload } from "../../app/lib/leadPayload";
 import { FirstLiveLeadMonitor } from "../../src/lib/operations/first-live-lead-monitor";
@@ -72,6 +72,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("automatic QA evidence:
     psql(repair);
     expect(counts()).toBe(before);
     psql(readFileSync("supabase/migrations/20261004020000_public_lead_notification_reliability.sql", "utf8"));
+    // Upgrade and fresh install must include the same prospective v1 successor.
+    psql(readFileSync(`supabase/migrations/${duplicateCohortMigration}`, "utf8"));
     expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(existing.lead_id)} AND action='lead.qa_suppressed';`)).toBe("0");
     // Preserve this fixture but make monitor tests scoped to newly captured QA.
     psql(`UPDATE source_attribution SET utm_source='internal_qa_fixture',utm_medium='qa' WHERE session_id=${literal(old.session.id)};`);

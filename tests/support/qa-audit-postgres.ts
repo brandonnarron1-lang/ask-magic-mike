@@ -8,6 +8,7 @@ import { randomUUID } from "node:crypto";
 // No URL, credentials, exposed port, network, remote link or provider required.
 export const container = `amm-qa-audit-${randomUUID()}`;
 export const migration = "20261003203000_atomic_qa_capture_evidence.sql";
+export const duplicateCohortMigration = "20261109173000_duplicate_parent_qa_cohort.sql";
 export const reliabilityMigration = "20261004020000_public_lead_notification_reliability.sql";
 export const addressCaptureMigration = "20261013140000_structured_address_capture.sql";
 export const launchIntakeMigration = "20261013190000_launch_inquiry_delivery.sql";
@@ -165,6 +166,7 @@ export function install(db: "amm_qa_upgrade" | "amm_qa_fresh", includeRepair: bo
   const omitted = new Set(excluded);
   if (!includeRepair) for (const file of [migration, reliabilityMigration, addressCaptureMigration]) omitted.add(file);
   const predecessors: Readonly<Record<string, readonly string[]>> = {
+    [duplicateCohortMigration]: [migration],
     "20261105224500_public_request_response.sql": [launchIntakeMigration, "20261103233000_traffic_daily_digest_seller_review.sql"],
     "20261103233000_traffic_daily_digest_seller_review.sql": [launchIntakeMigration],
     [launchIntakeMigration]: [addressCaptureMigration],
