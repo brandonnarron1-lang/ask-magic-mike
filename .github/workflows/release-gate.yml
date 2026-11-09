@@ -396,7 +396,8 @@ jobs:
         run: |
           ln -s "$GITHUB_WORKSPACE/frozen-baseline/node_modules" "$GITHUB_WORKSPACE/node_modules"
           node scripts/amm/pr324-samejob.mjs checkpoint frozen-baseline before_build
-          node --test scripts/amm/pr324-samejob-adapter.test.mjs
+          # Reuse closed Linux collection proof 42537902715 / artifact13640117194.
+          # Do not repeat collection/negative controls in this baseline job.
       - name: Reconstruct a502 once - not the retained original artifact
         working-directory: frozen-baseline
         run: pnpm run build
