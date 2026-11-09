@@ -24,8 +24,8 @@ test('runner adapter forwards controller and application separately, validation 
  assert.ok(adapted.includes('pr324-samejob-validation.spec.ts'));assert.ok(adapted.includes('pr324-samejob-reporter.mjs'));
 });
 const result=(status='failed',errorSignature='EXPECT_TO_HAVE_VALUE')=>({results:[{test:'Today real task completion/stale form, paginated timeline and 200% text remain scoped',status,errorSignature}]});
-const phases={primary:{code:'V2_ASSERTION_FAILED'},versions:{rendered_V1:{lead:'synthetic-lead',action:'synthetic-action',version:'v1'},concurrent_SQL_V2:{lead:'synthetic-lead',action:'synthetic-action',version:'v2'},review_expected_V2:{version:'v2'}}};
-const dom=[{forms:[{lead:'synthetic-lead',action:'synthetic-action',value:'v1',submitDisabled:true}]}];
+const phases={primary:{code:'V2_ASSERTION_FAILED'},versions:{rendered_V1:{lead:'synthetic-lead',action:'synthetic-action',version:'v1'},concurrent_SQL_V2:{lead:'synthetic-lead',action:'synthetic-action',version:'v2'},review_expected_V2:{lead:'synthetic-lead',action:'synthetic-action',version:'v2'}}};
+const dom=[{at:1,trigger:'review_click',forms:[{label:'Complete task',lead:'synthetic-lead',action:'synthetic-action',value:'v1',submitDisabled:true}]}];
 test('classifies only correlated SQL-V2, fenced client-V1 expectation failure as original',()=>{assert.equal(classifyTrial(result(),phases,dom),'ORIGINAL_FAILURE_REPRODUCED');assert.equal(classifyTrial(result(),phases,[]),'OTHER_FAILURE');});
 test('pass, different timeout and mismatched identity cannot admit the next trial',()=>{
  assert.equal(classifyTrial(result('passed',null),phases,dom),'ORIGINAL_FAILURE_NOT_REPRODUCED');

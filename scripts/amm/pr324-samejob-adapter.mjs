@@ -45,14 +45,62 @@ export function adaptPlaywrightModule(name,original){
  if(name==='pr324-collector-runtime')body=replaceOnce(body,"new URL('./pr324-collector-worker.mjs',import.meta.url)","require.resolve('./pr324-collector-worker.mjs')");
  return body;
 }
-export function classifyTrial(result,phases,dom){
- if(trialEvidenceIssue(result))return 'TRIAL_EVIDENCE_MISSING';
- if(result.globalErrors?.length||result.results.length===0)return 'HARNESS_STARTUP_FAILURE';
- const failure=result?.results?.find(r=>r.test.startsWith('Today real task completion/stale form'));
- if(!failure||['skipped','interrupted'].includes(failure.status))return 'ORIGINAL_CASE_NOT_EXECUTED';
- if(failure.status==='passed')return 'ORIGINAL_FAILURE_NOT_REPRODUCED';
- if(failure.status==='timedOut'||failure.errorSignature==='TEST_TIMEOUT_60000')return 'DIFFERENT_TIMEOUT';
+const textIdentity=value=>typeof value==='string'&&value.trim().length>0;
+// Order is the observer's order, never a version/state-based search backward.
+// Empty form snapshots are significant: the target may have disappeared.
+export function completionSnapshot(dom,identity){
+ const reject=reason=>({reason,snapshotIndex:null,matchCount:0,identity});
+ if(!identity||identity.label!=='Complete task'||!textIdentity(identity.lead)||!textIdentity(identity.action))return reject('COMPLETION_RECORD_IDENTITY_MISSING');
+ if(!Array.isArray(dom)||dom.length===0)return reject('SNAPSHOT_CONTEXT_MISSING');
+ let latest=null,previousAt=-Infinity;
+ for(const [index,event] of dom.entries()){
+  if(!event||typeof event!=='object')return reject('SNAPSHOT_CONTEXT_INVALID');
+  if(!Object.hasOwn(event,'forms'))continue;
+  if(!Array.isArray(event.forms)||!Number.isFinite(event.at)||!textIdentity(event.trigger))return reject('SNAPSHOT_CONTEXT_INVALID');
+  if(event.at<previousAt)return reject('SNAPSHOT_ORDER_INVALID');
+  previousAt=event.at;latest={event,index};
+ }
+ if(!latest)return reject('SNAPSHOT_CONTEXT_MISSING');
+ const selection={snapshotIndex:latest.index,observedAt:latest.event.at,trigger:latest.event.trigger,matchCount:0,identity};
+ const forms=latest.event.forms;
+ if(forms.some(form=>!form||!textIdentity(form.label)||!textIdentity(form.lead)||!textIdentity(form.action)))return {...selection,reason:'SNAPSHOT_FORM_IDENTITY_MISSING'};
+ const matches=forms.filter(form=>form.label==='Complete task'&&form.lead===identity.lead&&form.action===identity.action);
+ selection.matchCount=matches.length;
+ if(matches.length>1)return {...selection,reason:'COMPLETE_TASK_FORM_AMBIGUOUS'};
+ if(matches.length===0){
+  const sameRecord=forms.some(form=>form.lead===identity.lead&&form.action===identity.action);
+  return {...selection,reason:sameRecord?'COMPLETE_TASK_LABEL_MISMATCH':forms.some(form=>form.label==='Complete task')?'COMPLETE_TASK_IDENTITY_MISMATCH':'COMPLETE_TASK_FORM_MISSING'};
+ }
+ const form=matches[0];return {...selection,reason:null,form:{label:form.label,lead:form.lead,action:form.action,value:form.value,submitDisabled:form.submitDisabled}};
+}
+export function classifyTrialDetails(result,phases,dom){
+ const answer=(classification,reason,selection)=>({classification,reason,...(selection?{selection}:{})});
+ const issue=trialEvidenceIssue(result);if(issue)return answer('TRIAL_EVIDENCE_MISSING',issue);
+ if(result.globalErrors?.length||result.results.length===0)return answer('HARNESS_STARTUP_FAILURE','GLOBAL_STARTUP_FAILURE');
+ const failures=result.results.filter(row=>row&&typeof row.test==='string'&&row.test.startsWith('Today real task completion/stale form'));
+ if(failures.length!==1)return answer('ORIGINAL_CASE_NOT_EXECUTED',failures.length?'ORIGINAL_CASE_AMBIGUOUS':'ORIGINAL_CASE_MISSING');
+ const failure=failures[0];
+ if(['skipped','interrupted'].includes(failure.status))return answer('ORIGINAL_CASE_NOT_EXECUTED','ORIGINAL_CASE_'+failure.status.toUpperCase());
+ if(failure.status==='passed')return answer('ORIGINAL_FAILURE_NOT_REPRODUCED','ORIGINAL_CASE_PASSED');
+ if(failure.status==='timedOut'||failure.errorSignature==='TEST_TIMEOUT_60000')return answer('DIFFERENT_TIMEOUT','CASE_TIMEOUT_NOT_ORIGINAL_ASSERTION');
+ if(failure.status!=='failed')return answer('OTHER_FAILURE','ORIGINAL_CASE_NOT_FAILED');
+ if(failure.errorSignature!=='EXPECT_TO_HAVE_VALUE'||phases?.primary?.code!=='V2_ASSERTION_FAILED')return answer('OTHER_FAILURE','ORIGINAL_VERSION_ASSERTION_NOT_PROVEN');
  const a=phases?.versions?.rendered_V1,b=phases?.versions?.concurrent_SQL_V2,c=phases?.versions?.review_expected_V2;
- const form=dom?.flatMap(e=>e.forms||[]).filter(f=>f.action===a?.action&&f.lead===a?.lead).at(-1);
- return failure.errorSignature==='EXPECT_TO_HAVE_VALUE'&&phases.primary?.code==='V2_ASSERTION_FAILED'&&a&&b&&c&&a.lead===b.lead&&a.action===b.action&&b.version===c.version&&a.version!==b.version&&form?.value===a.version&&form.submitDisabled===true?'ORIGINAL_FAILURE_REPRODUCED':'OTHER_FAILURE';
+ if([a,b,c].some(record=>!record||!textIdentity(record.lead)||!textIdentity(record.action)))return answer('OTHER_FAILURE','COMPLETION_RECORD_IDENTITY_MISSING');
+ if([b,c].some(record=>record.lead!==a.lead||record.action!==a.action))return answer('OTHER_FAILURE','COMPLETION_RECORD_IDENTITY_MISMATCH');
+ const selection=completionSnapshot(dom,{label:'Complete task',lead:a.lead,action:a.action});
+ if(selection.reason)return answer('OTHER_FAILURE',selection.reason,selection);
+ if([a,b,c].some(record=>!textIdentity(record.version)))return answer('OTHER_FAILURE','VERSION_EVIDENCE_MISSING',selection);
+ if(a.version===b.version||b.version!==c.version)return answer('OTHER_FAILURE','VERSION_CORRELATION_FAILED',selection);
+ if(selection.form.value!==a.version)return answer('OTHER_FAILURE','COMPLETION_NOT_RECORDED_V1',selection);
+ if(selection.form.submitDisabled!==true)return answer('OTHER_FAILURE','COMPLETION_NOT_DISABLED',selection);
+ return answer('ORIGINAL_FAILURE_REPRODUCED','UNIQUE_COMPLETE_TASK_SQL_V2_CLIENT_V1',selection);
+}
+// Preserve the existing string/status API used by admission callers.
+export function classifyTrial(result,phases,dom){return classifyTrialDetails(result,phases,dom).classification;}
+// Bounded export must retain the final snapshot even when the target disappears.
+export function formSnapshotEvidence(dom){
+ const snapshots=Array.isArray(dom)?dom.filter(event=>event&&typeof event==='object'&&Object.hasOwn(event,'forms')):[];
+ const forms=snapshots.slice(-3);
+ return {forms,snapshotContext:{scope:'ordered DOM form snapshots including empty',totalSnapshots:snapshots.length,retainedSnapshots:forms.length,omittedEarlier:snapshots.length-forms.length,latestIncluded:snapshots.length>0,emptySnapshotsRetained:true}};
 }
