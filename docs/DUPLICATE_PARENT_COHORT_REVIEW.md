@@ -54,6 +54,14 @@ new explicitly admitted venue, if required. No consumed PR325 QA allowance is
 reused. The ordinary app remains compatible with the unchanged RPC signature;
 application rollback does not remove this database behavior.
 
+The historical v2 migration has an exact legacy-v1 fingerprint prerequisite.
+Do not replay that migration against a later v1 function or weaken its guard.
+The isolated function-only recovery rehearsal restores the historical
+predecessor, installs v2, then reapplies the current cohort successor, asserting
+both exact hashes and unchanged rows. That is fixture recovery evidence, not
+authorization for Production replay; future database recovery must explicitly
+review the complete dependency chain and use the guarded procedure.
+
 ## Explicit exclusions
 
 No historical duplicate is unheld or relinked. No contacts are split, consent

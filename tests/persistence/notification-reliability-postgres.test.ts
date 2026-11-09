@@ -5,7 +5,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { NextRequest } from "next/server";
 import { Webhook } from "svix";
 import type { NotificationProvider } from "../../app/lib/leadNotificationTypes";
-import { bind, concurrent, install, literal, localQuery, psql, reliabilityMigration, startDatabase, statements, stopDatabase } from "../support/qa-audit-postgres";
+import { bind, concurrent, duplicateCohortMigration, install, literal, localQuery, migration, psql, reliabilityMigration, startDatabase, statements, stopDatabase } from "../support/qa-audit-postgres";
 
 vi.mock("@neondatabase/serverless", async () => { const local = await import("../support/qa-audit-postgres"); return { neon: () => local.localQuery }; });
 vi.mock("../../src/lib/security/rate-limit", async (original) => ({ ...await original<object>(), checkRateLimit: vi.fn(async () => ({ allowed: true, durable: true, remaining: 50, resetAt: Date.now() + 60_000 })) }));
@@ -354,13 +354,28 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("PR279 successor: real 
   it("fresh/upgrade, conditional Neon roles, server-only ACL, v1 compatibility and function-only rollback preserve repaired invariant/history", () => {
     install("amm_qa_fresh", true);
     const v1Hash = "SELECT encode(sha256(convert_to(pg_get_functiondef('capture_public_lead_v1(jsonb,jsonb,jsonb,text)'::regprocedure),'UTF8')),'hex');";
-    expect(psql(v1Hash)).toBe("df6ff62de38467617eaf2c0e8a39f0d7cbdb527d0066ae370587b3003fa78130"); expect(psql(v1Hash, "amm_qa_fresh")).toBe(psql(v1Hash));
+    // Current full installations include the prospective QA-cohort successor.
+    // Its separate regression pins both the predecessor and successor bytes.
+    const currentV1Hash = "dd3ef93926874c8acfe96cc2e495b13a78648565ca297c5fb7c0390f88f67354";
+    expect(psql(v1Hash)).toBe(currentV1Hash); expect(psql(v1Hash, "amm_qa_fresh")).toBe(psql(v1Hash));
+    // Historical v2 installation intentionally rejects a later v1 fingerprint.
+    // Rehearse its actual predecessor -> v2 -> current successor chain, not a
+    // weakened installer guard or a Production replay. These fixtures are owned.
+    const restoreV2AndCurrentCohort = () => {
+      const rows = tableCounts();
+      psql(readFileSync(`supabase/migrations/${migration}`, "utf8"));
+      expect(psql(v1Hash)).toBe("df6ff62de38467617eaf2c0e8a39f0d7cbdb527d0066ae370587b3003fa78130");
+      psql(source);
+      psql(readFileSync(`supabase/migrations/${duplicateCohortMigration}`, "utf8"));
+      expect(psql(v1Hash)).toBe(currentV1Hash);
+      expect(tableCounts()).toBe(rows);
+    };
     psql("ALTER ROLE anon RENAME TO synthetic_anon; ALTER ROLE authenticated RENAME TO synthetic_authenticated;");
-    try { psql(source); } finally { psql("ALTER ROLE synthetic_anon RENAME TO anon; ALTER ROLE synthetic_authenticated RENAME TO authenticated;"); }
+    try { restoreV2AndCurrentCohort(); } finally { psql("ALTER ROLE synthetic_anon RENAME TO anon; ALTER ROLE synthetic_authenticated RENAME TO authenticated;"); }
     expect(psql("SELECT has_function_privilege('anon','capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb)','EXECUTE'),has_function_privilege('authenticated','capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb)','EXECUTE'),has_function_privilege('service_role','capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb)','EXECUTE');")).toBe("f|f|t");
-    const before = tableCounts(); psql("DROP FUNCTION capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb);"); expect(tableCounts()).toBe(before); expect(psql(v1Hash)).toBe("df6ff62de38467617eaf2c0e8a39f0d7cbdb527d0066ae370587b3003fa78130");
+    const before = tableCounts(); psql("DROP FUNCTION capture_public_lead_v2(jsonb,jsonb,jsonb,text,jsonb);"); expect(tableCounts()).toBe(before); expect(psql(v1Hash)).toBe(currentV1Hash);
     const compatible = JSON.parse(psql(`${captureSql(cloneInput(), "v1")};`)); expect(psql(`SELECT count(*) FROM audit_logs WHERE resource_id=${literal(compatible.lead_id)} AND action='lead.qa_suppressed';`)).toBe("1");
-    const retained = tableCounts(); psql(source); expect(tableCounts()).toBe(retained);
+    const retained = tableCounts(); restoreV2AndCurrentCohort(); expect(tableCounts()).toBe(retained);
     console.info("Isolated reliability receipt", { migration: reliabilityMigration, migrationSourceSha256: createHash("sha256").update(source).digest("hex"), externalProviderCalls: 0, productionWrites: 0 });
   // Complete tracked-schema installation plus role/rollback psql processes,
   // not an application-response SLA. Hosted Docker measured 5,112ms against

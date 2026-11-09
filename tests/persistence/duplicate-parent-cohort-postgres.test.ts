@@ -48,6 +48,8 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("duplicate cohort: actu
   beforeAll(async () => {
     await startDatabase();
     install("amm_qa_upgrade", true, new Set([duplicateCohortMigration]));
+    const definitionHash = "SELECT encode(sha256(convert_to(pg_get_functiondef('capture_public_lead_v1(jsonb,jsonb,jsonb,text)'::regprocedure),'UTF8')),'hex')";
+    expect(psql(definitionHash)).toBe("df6ff62de38467617eaf2c0e8a39f0d7cbdb527d0066ae370587b3003fa78130");
     // No legacy assignment or provider effect is needed to prove parent selection.
     psql("UPDATE agents SET is_active=false");
     parent = capture(fixture(true, shared)).lead_id;
@@ -55,6 +57,7 @@ describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("duplicate cohort: actu
     expect(JSON.parse(row(historicalHeld)).duplicate_of_lead_id).toBe(parent); // genuine negative control on accepted v1
     const before = counts(), history = [row(parent), row(historicalHeld)], acl = privileges();
     psql(correction);
+    expect(psql(definitionHash)).toBe("dd3ef93926874c8acfe96cc2e495b13a78648565ca297c5fb7c0390f88f67354");
     expect(counts()).toBe(before);
     expect([row(parent), row(historicalHeld)]).toEqual(history);
     expect(privileges()).toBe(acl);
