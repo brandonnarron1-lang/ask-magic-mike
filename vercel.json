@@ -1,6 +1,7 @@
 {
   "git": {
     "deploymentEnabled": {
+      "codex/qa-parent-duplicate-boundary-20261109": false,
       "codex/today-task-fresh-review-20261109": false,
       "codex/lead-command-desk-20261106": false,
       "codex/pr323-receipt-availability-20261105": false,
