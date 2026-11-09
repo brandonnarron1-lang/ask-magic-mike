@@ -1,6 +1,7 @@
 // Test/runner adapters only, applied AFTER the a502 application compilation.
 import ts from 'typescript';
 import {trialEvidenceIssue} from './pr324-samejob-evidence.mjs';
+import {finalCaptureCheck} from './pr324-final-capture.mjs';
 export {trialEvidenceIssue,ownedProcessRows} from './pr324-samejob-evidence.mjs';
 export function replaceOnce(body,needle,value){if(body.split(needle).length!==2)throw Error('adapter_anchor_mismatch');return body.replace(needle,value);}
 export function expectationList(body){const file=ts.createSourceFile('spec.ts',body,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS),rows=[];function visit(n){if(ts.isCallExpression(n)&&n.expression.getText(file).startsWith('expect'))rows.push(n.getText(file).replace(/\s+/g,''));ts.forEachChild(n,visit);}visit(file);return rows;}
@@ -16,8 +17,8 @@ export function adaptSpec(original){
  ])body=replaceOnce(body,needle,`  samePhase(${JSON.stringify(phase)});\n`+needle);
  body=replaceOnce(body,'  const completedActionId=await form.locator(\'input[name="action_id"]\').inputValue();','  if(process.env.AMM_SAME_JOB_MODE!=="baseline") await observation.prepare?.();\n  const completedActionId=await form.locator(\'input[name="action_id"]\').inputValue();');
  const version='  await expect(form.locator(\'input[name="record_version"]\')).toHaveValue(currentTaskVersion);';
- body=replaceOnce(body,version,'  samePhase("await_v2_assertion");\n  try {\n'+version+'\n  } catch(error) { samePrimary("FAIL","V2_ASSERTION_FAILED"); throw error; }\n  samePhase("v2_assertion_passed");\n  await observation.capture?.();');
- body=replaceOnce(body,'  } finally { await observation.finish(); }','  samePrimary("PASS","CASE6_COMPLETE");\n  } catch(error) { samePrimary("FAIL","OTHER_CASE6_FAILURE"); throw error; } finally { await observation.finish(); }');
+ body=replaceOnce(body,version,'  samePhase("await_v2_assertion");\n  try {\n'+version+'\n  } catch(error) { samePrimary("FAIL","V2_ASSERTION_FAILED"); await observation.captureFinal?.("VERSION_ASSERTION_FAILED").catch(()=>{}); throw error; }\n  samePhase("v2_assertion_passed");\n  await observation.captureFinal?.("VERSION_ASSERTION_PASSED").catch(()=>{});\n  await observation.capture?.();');
+ body=replaceOnce(body,'  } finally { await observation.finish(); }','  samePrimary("PASS","CASE6_COMPLETE");\n  } catch(error) { samePrimary("FAIL","OTHER_CASE6_FAILURE"); await observation.captureFinal?.("OTHER_CASE6_FAILURE").catch(()=>{}); throw error; } finally { await observation.finish(); }');
  if(JSON.stringify(expectationList(original))!==JSON.stringify(expectationList(body)))throw Error('original_expectations_changed');
  return body;
 }
@@ -25,12 +26,12 @@ export function adaptObserver(original){
  let body='import { sameStart, sameNote, sameFinish } from "./pr324-samejob-runtime.ts";\n'+original;
  body=replaceOnce(body,'export function staleReviewNote(stage: string, value: unknown) {','export function staleReviewNote(stage: string, value: unknown) {\n  sameNote(stage,value);');
  body=replaceOnce(body,'  const pending: Promise<unknown>[] = [];','  const attached = await sameStart(page, leadId);\n  const pending: Promise<unknown>[] = [];');
- body=replaceOnce(body,'  return { finish: async () => {','  return { prepare: attached.prepare, capture: attached.capture, finish: () => sameFinish(attached, async () => {');
+ body=replaceOnce(body,'  return { finish: async () => {','  return { prepare: attached.prepare, capture: attached.capture, captureFinal: attached.captureFinal, finish: () => sameFinish(attached, async () => {');
  body=replaceOnce(body,'  } };','  }) };');
  return body;
 }
 export function adaptRunner(original){
- let body=replaceOnce(original,'    PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR,','    PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR,\n    AMM_SAME_JOB_MODE: process.env.AMM_SAME_JOB_MODE, AMM_FROZEN_MODE:process.env.AMM_FROZEN_MODE,\n    AMM_COLLECTOR_CONTROLLER_HEAD:process.env.AMM_COLLECTOR_CONTROLLER_HEAD, AMM_COLLECTOR_APPLICATION_HEAD:process.env.GITHUB_SHA,');
+ let body=replaceOnce(original,'    PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR,','    PATH: process.env.PATH, HOME: process.env.HOME, TMPDIR: process.env.TMPDIR,\n    AMM_SAME_JOB_MODE: process.env.AMM_SAME_JOB_MODE, AMM_FROZEN_MODE:process.env.AMM_FROZEN_MODE,\n    AMM_DIAGNOSTIC_TRIAL_ID:process.env.AMM_DIAGNOSTIC_TRIAL_ID,\n    AMM_COLLECTOR_CONTROLLER_HEAD:process.env.AMM_COLLECTOR_CONTROLLER_HEAD, AMM_COLLECTOR_APPLICATION_HEAD:process.env.GITHUB_SHA,');
  body=replaceOnce(body,'  const suite = commandDesk ?', '  const suite = process.env.AMM_SAME_JOB_MODE === "validation" ? "tests/e2e/pr324-samejob-validation.spec.ts" : commandDesk ?');
  body=replaceOnce(body,'["exec", "playwright", "test", suite,','["exec", "playwright", "test", suite, "--reporter", path.resolve("tests/support/pr324-samejob-reporter.mjs"),');
  return body;
@@ -38,10 +39,10 @@ export function adaptRunner(original){
 // Playwright's CommonJS test loader must not require native ESM containing
 // import.meta. Only controller-side test copies are adapted; native worker/core
 // .mjs files and every compiled application byte remain unchanged.
-export const playwrightModules=['pr324-samejob-runtime','pr324-frozen-logpoints','pr324-collector-runtime'];
+export const playwrightModules=['pr324-samejob-runtime','pr324-frozen-logpoints','pr324-collector-runtime','pr324-final-capture'];
 export function adaptPlaywrightModule(name,original){
  if(!playwrightModules.includes(name))throw Error('unknown_playwright_module');
- let body=original.replaceAll('./pr324-frozen-logpoints.mjs','./pr324-frozen-logpoints.ts').replaceAll('./pr324-collector-runtime.mjs','./pr324-collector-runtime.ts');
+ let body=original.replaceAll('./pr324-frozen-logpoints.mjs','./pr324-frozen-logpoints.ts').replaceAll('./pr324-collector-runtime.mjs','./pr324-collector-runtime.ts').replaceAll('./pr324-final-capture.mjs','./pr324-final-capture.ts');
  if(name==='pr324-collector-runtime')body=replaceOnce(body,"new URL('./pr324-collector-worker.mjs',import.meta.url)","require.resolve('./pr324-collector-worker.mjs')");
  return body;
 }
@@ -98,6 +99,13 @@ export function classifyTrialDetails(result,phases,dom){
 }
 // Preserve the existing string/status API used by admission callers.
 export function classifyTrial(result,phases,dom){return classifyTrialDetails(result,phases,dom).classification;}
+export function classifyFinalTrial(result,phases,expected){
+ const finalCapture=phases?.finalCapture,admission=finalCaptureCheck(finalCapture,expected);
+ const details=classifyTrialDetails(result,phases,admission.status==='PASS'?[finalCapture.snapshot]:[]);
+ if(admission.status!=='PASS'&&details.classification==='OTHER_FAILURE'&&details.reason==='SNAPSHOT_CONTEXT_MISSING')details.reason=admission.reason;
+ if(details.classification==='ORIGINAL_FAILURE_REPRODUCED'&&finalCapture.boundary!=='VERSION_ASSERTION_FAILED')return {classification:'OTHER_FAILURE',reason:'FINAL_CAPTURE_WRONG_BOUNDARY',finalCaptureAdmission:{status:'FAIL',reason:'FINAL_CAPTURE_WRONG_BOUNDARY'}};
+ return {...details,finalCaptureAdmission:admission};
+}
 // Bounded export must retain the final snapshot even when the target disappears.
 export function formSnapshotEvidence(dom){
  const snapshots=Array.isArray(dom)?dom.filter(event=>event&&typeof event==='object'&&Object.hasOwn(event,'forms')):[];

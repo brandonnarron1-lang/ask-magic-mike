@@ -1,8 +1,11 @@
-// Node-only phase records; baseline adds NO new browser/CDP/init-script observer.
+// Node phase records; no new baseline CDP/init-script layer. The explicit
+// post-assertion DOM read is separately retained before teardown.
 import {writeFileSync} from 'node:fs';
+import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {HostReceipt} from './pr324-collector-runtime.mjs';
 import {frozenObserver} from './pr324-frozen-logpoints.mjs';
+import {createFinalCapture} from './pr324-final-capture.mjs';
 const dir=process.env.AMM_SESSION_ARTIFACT_DIR;
 const state={schema:'amm.pr324.samejob-trial-phase.v1',mode:process.env.AMM_SAME_JOB_MODE,events:[],primary:null,lastCompleted:null,pending:null,versions:{}};
 let active;
@@ -15,6 +18,8 @@ export function sameNote(stage,value){
 }
 export async function sameStart(page,lead){
  if(process.env.AMM_ISOLATED_SESSION_ACCEPTANCE!=='1'||process.env.VERCEL_ENV!=='development'||!dir)throw Error('isolated_samejob_only');
+ state.captureIdentity={trialId:process.env.AMM_DIAGNOSTIC_TRIAL_ID,pageId:randomUUID(),lead};
+ state.finalCapture={status:'UNAVAILABLE',reason:'ASSERTION_BOUNDARY_NOT_REACHED'};
  samePhase('observer_start');
  if(process.env.AMM_SAME_JOB_MODE==='baseline'){
   const host=new HostReceipt(path.join(dir,'samejob-host.json'),{mode:'baseline',newCDP:false});
@@ -25,6 +30,8 @@ export async function sameStart(page,lead){
   active={...observer,host:new HostReceipt(path.join(dir,'samejob-host.json'),{mode:process.env.AMM_SAME_JOB_MODE,newCDP:true})};
   active.host.addStop('page',async()=>{if(!page.isClosed())await page.close();return {verified:page.isClosed()};});
  }
+ const finalCapture=createFinalCapture(page,state.captureIdentity,active.host,record=>{state.finalCapture=record;save();});
+ active.captureFinal=boundary=>finalCapture({action:state.versions.rendered_V1?.action,boundary});
  samePhase('observer_ready');return active;
 }
 export async function sameFinish(observer,legacyFinish){

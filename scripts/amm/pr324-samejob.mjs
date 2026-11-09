@@ -56,11 +56,11 @@ if(action==='preflight'){
  if(packages.next!=='15.5.26'||packages.react!=='19.2.6'||packages['@playwright/test']!=='1.60.0'||hash(readFileSync(path.join(root,'pnpm-lock.yaml')))!=='ddb18027b6d7e1a46b619675c6a69e0b06c827d1bfb7170e05f85c456f76600f')throw Error('recorded_baseline_dependencies_required');
  Object.assign(source,{status:'PASS',build:{id:readFileSync(path.join(root,'.next/BUILD_ID'),'utf8').trim(),manifestSha256:manifestHash},packages,browserVersion,node:process.version,platform:process.platform,arch:process.arch,runner:readFileSync('/etc/os-release','utf8').split('\n').find(l=>l.startsWith('PRETTY_NAME=')),lockSha256:hash(readFileSync(path.join(root,'pnpm-lock.yaml'))),framework,runtime:{AMM_STALE_REVIEW_DIAGNOSTIC:'1',AMM_E2E_BUILT:'1',DATABASE_ENV:'fresh owned Docker PostgreSQL17/loopback',externalFetch:'blocked',providerSends:false,fixtureIdentities:'fresh equivalent random synthetic identities/ports each trial',baselineNewCDPLayer:false}});save('source',source);
  save('integrity',{status:'PASS',files:manifest,manifestSha256:manifestHash,sealedCopy:sealed,separateReadback:readback,sameJobOnly:true,durableCompiledRetention:'NOT ESTABLISHED',trials:[]});
- const {adaptSpec,adaptObserver,adaptRunner,adaptPlaywrightModule,playwrightModules,expectationList,classifyTrialDetails,formSnapshotEvidence}=await import('./pr324-samejob-adapter.mjs');
+ const {adaptSpec,adaptObserver,adaptRunner,adaptPlaywrightModule,playwrightModules,expectationList,classifyFinalTrial,formSnapshotEvidence}=await import('./pr324-samejob-adapter.mjs');
  const spec=path.join(root,'tests/e2e/reference-real-session.spec.ts'),original=readFileSync(spec,'utf8');writeFileSync(spec,adaptSpec(original));
  const helper=path.join(root,'tests/support/stale-review-diagnostic.ts');writeFileSync(helper,adaptObserver(readFileSync(helper,'utf8')));
  const runner=path.join(root,'scripts/amm/reference-session-acceptance.mjs');writeFileSync(runner,adaptRunner(readFileSync(runner,'utf8')));
- for(const name of ['pr324-samejob-runtime.mjs','pr324-samejob-reporter.mjs','pr324-frozen-logpoints.mjs','pr324-collector-runtime.mjs','pr324-collector-worker.mjs'])copyFileSync(path.resolve('scripts/amm',name),path.join(root,'tests/support',name));
+ for(const name of ['pr324-samejob-runtime.mjs','pr324-samejob-reporter.mjs','pr324-frozen-logpoints.mjs','pr324-collector-runtime.mjs','pr324-collector-worker.mjs','pr324-final-capture.mjs'])copyFileSync(path.resolve('scripts/amm',name),path.join(root,'tests/support',name));
  for(const name of playwrightModules)writeFileSync(path.join(root,'tests/support',name+'.ts'),adaptPlaywrightModule(name,readFileSync(path.resolve('scripts/amm',name+'.mjs'),'utf8')));
  copyFileSync(path.resolve('scripts/amm/pr324-samejob-validation.spec.ts'),path.join(root,'tests/e2e/pr324-samejob-validation.spec.ts'));
  source.adapter={expectations:expectationList(original).length,preserved:true,phaseRecords:'Node-only API-phase checkpoints; not assumed timing-neutral',closedCollectorReused:'162eee2f core files, not rerun standalone selftests'};save('source',source);
@@ -70,7 +70,8 @@ if(action==='preflight'){
   phase('trial_'+mode);const before=buildFiles();if(JSON.stringify(before)!==JSON.stringify(manifest))throw Error('pre_trial_build_drift');
   const dir=path.join(root,'.amm-run',`samejob-${mode}`);mkdirSync(dir,{recursive:true,mode:0o700});const beforeContainers=containerRows(),tracked=new Map();
   const stdout=openSync(path.join(dir,'private-process.log'),'w',0o600);
-  const child=spawn(process.execPath,['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON','scripts/amm/reference-session-acceptance.mjs'],{cwd:root,detached:true,env:{PATH:process.env.PATH,HOME:process.env.HOME,CI:'true',GITHUB_SHA:appHead,AMM_QA_POSTGRES_TEST:'1',AMM_STALE_REVIEW_DIAGNOSTIC:'1',AMM_SESSION_ARTIFACT_DIR:`.amm-run/samejob-${mode}`,AMM_SAME_JOB_MODE:mode,AMM_FROZEN_MODE:mode==='validation'||mode==='probe'?'probe':'control',AMM_COLLECTOR_CONTROLLER_HEAD:identity.controller},stdio:['ignore',stdout,stdout]});
+  const trialId=`${identity.runId}-${identity.attempt}-${mode}`;
+  const child=spawn(process.execPath,['--disable-warning=MODULE_TYPELESS_PACKAGE_JSON','scripts/amm/reference-session-acceptance.mjs'],{cwd:root,detached:true,env:{PATH:process.env.PATH,HOME:process.env.HOME,CI:'true',GITHUB_SHA:appHead,AMM_QA_POSTGRES_TEST:'1',AMM_STALE_REVIEW_DIAGNOSTIC:'1',AMM_SESSION_ARTIFACT_DIR:`.amm-run/samejob-${mode}`,AMM_SAME_JOB_MODE:mode,AMM_DIAGNOSTIC_TRIAL_ID:trialId,AMM_FROZEN_MODE:mode==='validation'||mode==='probe'?'probe':'control',AMM_COLLECTOR_CONTROLLER_HEAD:identity.controller},stdio:['ignore',stdout,stdout]});
   let monitorCount=0,monitorMs=0;
   const track=()=>{const start=performance.now();for(const p of ownedProcessRows(processes(),child.pid,tracked))tracked.set(p.pid,p);monitorCount++;monitorMs+=performance.now()-start;};track();const interval=setInterval(track,1000);
   let timedOut=false;const timer=setTimeout(()=>{timedOut=true;track();try{process.kill(-child.pid,'SIGTERM');}catch{}},180000);
@@ -87,7 +88,7 @@ if(action==='preflight'){
   const after=buildFiles(),integrity=load('integrity'),frameworkUnchanged=Object.entries(framework).every(([f,digest])=>hash(readFileSync(path.join(root,f)))===digest);
   integrity.trials.push({mode,beforeSha256:hash(JSON.stringify(before)),afterSha256:hash(JSON.stringify(after)),unchanged:JSON.stringify(after)===JSON.stringify(manifest),frameworkUnchanged});save('integrity',integrity);if(JSON.stringify(after)!==JSON.stringify(manifest)||!frameworkUnchanged||hash(readFileSync(path.join(root,'pnpm-lock.yaml')))!==source.lockSha256)throw Error('post_trial_build_drift');
   const result=readJson(path.join(dir,'samejob-result.json'),{status:'missing',results:[]}),phases=readJson(path.join(dir,'samejob-phases.json'),{}),dom=readJson(path.join(dir,'stale-review-dom.json'),[]),host=readJson(path.join(dir,'samejob-host.json'),null),collector=readJson(path.join(dir,'frozen-logpoints.json'),null);
-  const classificationDetails=mode==='validation'?{classification:'VALIDATION',reason:'SEPARATE_RUNTIME_COVERAGE_VALIDATION'}:timedOut?{classification:'DIFFERENT_TIMEOUT',reason:'OUTER_HARNESS_DEADLINE'}:classifyTrialDetails(result,phases,dom);
+  const classificationDetails=mode==='validation'?{classification:'VALIDATION',reason:'SEPARATE_RUNTIME_COVERAGE_VALIDATION'}:timedOut?{classification:'DIFFERENT_TIMEOUT',reason:'OUTER_HARNESS_DEADLINE'}:classifyFinalTrial(result,phases,{trialId,pageId:phases.captureIdentity?.pageId,lead:phases.versions?.rendered_V1?.lead,action:phases.versions?.rendered_V1?.action});
   const classification=classificationDetails.classification;
   const harness=readJson(path.join(dir,'receipt.json'),null);
   const collectorHealthy=host?.finished===true&&host?.pendingStopped===true&&host.errors.length===0&&(mode==='baseline'||collector?.finished===true&&collector?.pendingStopped===true&&collector.errors.length===0&&collector.unresolved.length===0&&collector.pauses.length===0);
@@ -97,13 +98,13 @@ if(action==='preflight'){
   const notes=log.filter(x=>['rendered_V1','concurrent_SQL_V2','review_expected_V2','request','response_headers','request_failed'].includes(x.stage)).slice(-20);
   const writes=jsonl(path.join(dir,'stale-review-server-write.jsonl')).filter(x=>x.request?.path==='/admin/today'&&x.fields?.some(f=>f.lead_id===phases.versions?.rendered_V1?.lead)).slice(-3);
   const compactCollector=collector?{mode:collector.mode,build:collector.build,maps:collector.maps,unresolved:collector.unresolved,pauses:collector.pauses,network:collector.network,captures:collector.captures,primary:collector.primary,errors:collector.errors,finished:collector.finished,pendingStopped:collector.pendingStopped,detach:collector.detach,omittedHostBookkeeping:true}:null;
-  const observations=load('observations');observations.trials.push({mode,notes,writes,...formSnapshotEvidence(dom),collector:compactCollector});observations.status='COMPLETE';save('observations',observations);
+  const observations=load('observations');observations.trials.push({mode,notes,writes,...formSnapshotEvidence(dom),finalCapture:phases.finalCapture||{status:'UNAVAILABLE',reason:'FINAL_CAPTURE_NOT_RETAINED'},collector:compactCollector});observations.status='COMPLETE';save('observations',observations);
   const evidenceIssue=trialEvidenceIssue(result);if(evidenceIssue||phases.pending&&!host)throw Error(evidenceIssue||'mandatory_trial_evidence_missing');
   if(['HARNESS_STARTUP_FAILURE','TRIAL_EVIDENCE_MISSING','ORIGINAL_CASE_NOT_EXECUTED'].includes(classification))throw Error('application_trial_not_executed');
   console.log(JSON.stringify({mode,classification,counts:{passed:result.results.filter(r=>r.status==='passed').length,failed:result.results.filter(r=>['failed','timedOut'].includes(r.status)).length,notRun:result.results.filter(r=>r.status==='skipped').length},cleanup:'PASS',hashes:'PASS'}));return {...row,collector};
  }
  const baseline=await trial('baseline');
- if(baseline?.classification==='ORIGINAL_FAILURE_REPRODUCED'&&baseline.collectorHealthy){
+ if(baseline?.classification==='ORIGINAL_FAILURE_REPRODUCED'&&baseline.classificationDetails.finalCaptureAdmission.status==='PASS'&&baseline.collectorHealthy){
   const validation=await trial('validation'),collector=validation?.collector;
   const captures=collector?.captures?.map(c=>c.snapshot).filter(Boolean)||[];
   const hits=captures.flatMap(c=>c.events||[]).map(e=>e.stage);
@@ -111,7 +112,7 @@ if(action==='preflight'){
   const buildMatch=collector?.maps?.every(m=>manifest.some(r=>r[0]===m.path.replace('/_next/','.next/')&&r[1]===m.sha256));
   const coverage=validation?.result.status==='passed'&&validation.collectorHealthy&&collector&&collector.pauses.length===0&&collector.unresolved.length===0&&captures.every(c=>c.errors===0&&c.overflow===0)&&['flight_root_settled','queue_before_resolve'].every(s=>hits.includes(s)&&mapped.some(p=>p.stage===s&&p.active))&&buildMatch;
   const phases=load('phases');phases.probeValidation={status:coverage?'PASS':'INCONCLUSIVE',actualHits:hits,loadedBuildHashesMatch:buildMatch||false,limitations:'Scalar build/action markers; no lazy model traversal. Stream-to-request association must be evaluated, never inferred from absent unvalidated logs.'};save('phases',phases);
-  if(coverage){const control=await trial('control');if(control?.classification==='ORIGINAL_FAILURE_REPRODUCED'&&control.collectorHealthy)await trial('probe');}
+  if(coverage){const control=await trial('control');if(control?.classification==='ORIGINAL_FAILURE_REPRODUCED'&&control.classificationDetails.finalCaptureAdmission.status==='PASS'&&control.collectorHealthy)await trial('probe');}
  }
  phase('samejob_finished',{baselineClassification:baseline?.classification||'NOT RUN'});
  // Retain only during this job. No archive, upload, cache or cross-job replay.

@@ -64,7 +64,7 @@ test('real Playwright collection reproduces the native-ESM failure and lists bot
  try{
   for(const name of ['package.json','playwright.config.ts','tsconfig.json'])write(name,get(name));
   symlinkSync(path.resolve('node_modules'),path.join(dir,'node_modules'),'dir');
-  for(const name of ['pr324-samejob-runtime','pr324-frozen-logpoints','pr324-collector-runtime','pr324-collector-worker'])write('tests/support/'+name+'.mjs',readFileSync('scripts/amm/'+name+'.mjs','utf8'));
+  for(const name of ['pr324-samejob-runtime','pr324-frozen-logpoints','pr324-collector-runtime','pr324-collector-worker','pr324-final-capture'])write('tests/support/'+name+'.mjs',readFileSync('scripts/amm/'+name+'.mjs','utf8'));
   const original=get('tests/e2e/reference-real-session.spec.ts'),spec=adaptSpec(original),helper=adaptObserver(get('tests/support/stale-review-diagnostic.ts')),validationSpec=readFileSync('scripts/amm/pr324-samejob-validation.spec.ts','utf8');
   outcome.expected={reference:titles(original).map(title=>({file:'reference-real-session.spec.ts',title,project:'chromium'})),validation:titles(validationSpec).map(title=>({file:'pr324-samejob-validation.spec.ts',title,project:'chromium'}))};
   assert.deepEqual(titles(spec),titles(original));assert.deepEqual(expectationList(guarded(spec)),expectationList(original));assert.ok(spec.includes('test.describe.configure({ mode: "serial" })'));
