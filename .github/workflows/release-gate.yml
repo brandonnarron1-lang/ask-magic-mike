@@ -20,6 +20,10 @@ on:
         description: "Linux collector fault/retention gate ONLY; no app build or acceptance"
         type: boolean
         default: false
+      pr324_collection_only:
+        description: "Linux source collection/error-retention preflight ONLY; no build/browser/DB/app execution"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -30,7 +34,7 @@ concurrency:
 
 jobs:
   local-release-gate:
-    if: github.event_name != 'workflow_dispatch' || (inputs.pr324_diagnostic != true && inputs.pr324_frozen != true && inputs.pr324_collector_selftest != true)
+    if: github.event_name != 'workflow_dispatch' || (inputs.pr324_diagnostic != true && inputs.pr324_frozen != true && inputs.pr324_collector_selftest != true && inputs.pr324_collection_only != true)
     name: local-release-gate
     runs-on: ubuntu-latest
     # Public standard runner; retain every test-level bound and mandatory stage.
@@ -267,7 +271,7 @@ jobs:
 
   pr324-stale-review-diagnostic:
     name: PR324 passive Linux diagnosis - NOT release acceptance
-    if: github.event_name == 'workflow_dispatch' && inputs.pr324_diagnostic == true && inputs.pr324_collector_selftest != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_diagnostic == true && inputs.pr324_collector_selftest != true && inputs.pr324_collection_only != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -310,9 +314,59 @@ jobs:
             .amm-run/pr324-linux-diagnostic/receipt.json
           if-no-files-found: warn
 
+  pr324-collection-only:
+    name: PR324 Linux collection-only preflight - ZERO application execution
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_collection_only == true && inputs.pr324_frozen != true && inputs.pr324_diagnostic != true && inputs.pr324_collector_selftest != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.2'
+          cache: pnpm
+      - name: Source-only fixture, disk admission and initial receipts
+        run: node scripts/amm/pr324-collection-evidence.mjs init
+      - name: Locked controller dependencies without lifecycle scripts or browser download
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Requested adapter check ONLY - no build/browser/database/server
+        run: |
+          node scripts/amm/pr324-collection-evidence.mjs init
+          node scripts/amm/pr324-collection-evidence.mjs run
+      - name: Failure-safe bounded collection receipt inventory
+        id: collection_evidence
+        if: always()
+        run: node scripts/amm/pr324-collection-evidence.mjs finalize
+      - name: Independently gate child exits, safe startup error and ordered inventories
+        if: always() && steps.collection_evidence.outcome == 'success'
+        run: node scripts/amm/pr324-collection-evidence.mjs gate
+      - name: Sanitized collection-only receipts - no build, trace or session
+        if: always() && steps.collection_evidence.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr324-collection-only-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            output/pr324-collection/collection-source.json
+            output/pr324-collection/collection-outcomes.json
+            output/pr324-collection/collection-checks.json
+            output/pr324-collection/collection-cleanup.json
+            output/pr324-collection/collection-package.json
+
   pr324-frozen-boundary:
     name: PR324 same-job sealed build and gated reproduction - NOT release acceptance
-    if: github.event_name == 'workflow_dispatch' && inputs.pr324_frozen == true && inputs.pr324_diagnostic != true && inputs.pr324_collector_selftest != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_frozen == true && inputs.pr324_diagnostic != true && inputs.pr324_collector_selftest != true && inputs.pr324_collection_only != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -374,7 +428,7 @@ jobs:
 
   pr324-collector-selftest:
     name: PR324 collector Linux fault and retention gate - NOT app acceptance
-    if: github.event_name == 'workflow_dispatch' && inputs.pr324_collector_selftest == true && inputs.pr324_frozen != true && inputs.pr324_diagnostic != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
+    if: github.event_name == 'workflow_dispatch' && inputs.pr324_collector_selftest == true && inputs.pr324_frozen != true && inputs.pr324_diagnostic != true && inputs.pr324_collection_only != true && github.ref == 'refs/heads/codex/pr324-linux-stale-review-20261107'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     permissions:
