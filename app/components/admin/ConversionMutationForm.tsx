@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { todayTaskReviewHref } from "../../lib/todayTaskReview";
 
 export type ConversionMutationResult =
   | { ok: true; warning?: string }
@@ -102,7 +103,7 @@ function restoreDraft(form: HTMLFormElement, draft: DraftField[]) {
 
 export function ConversionMutationForm({
   action, children, submitLabel, successMessage, confirmationLabel, className,
-  newActionLabel, successReturnTo,
+  newActionLabel, successReturnTo, conflictRecovery,
 }: {
   action: (formData: FormData, responseMode: "inline") => Promise<ConversionMutationResult>;
   children: ReactNode;
@@ -112,6 +113,8 @@ export function ConversionMutationForm({
   className?: string;
   newActionLabel?: string;
   successReturnTo?: string;
+  /** Only draftless Today task completion opts into fresh-document recovery. */
+  conflictRecovery?: { kind: "today_task"; taskId: string };
 }) {
   const router = useRouter();
   const statusId = useId();
@@ -124,12 +127,17 @@ export function ConversionMutationForm({
   const [busy, setBusy] = useState(false);
   const [uncertain, setUncertain] = useState(false);
   const [result, setResult] = useState<ConversionMutationResult | null>(null);
+  const freshTaskReview = conflictRecovery?.kind === "today_task";
+  const freshReviewHref = freshTaskReview ? todayTaskReviewHref(conflictRecovery.taskId) : null;
 
   // RSC refreshes update hidden versions, but never replace the unsaved editable draft.
   useEffect(() => {
     const form = formRef.current;
     if (!form) return;
     if (draft.current) restoreDraft(form, draft.current);
+    // This rejected document remains fenced even if another soft navigation
+    // supplies newer children. Only a separate, freshly authorized read may act.
+    if (freshTaskReview && conflictVersion.current !== null) return;
     const versionField = form.querySelector<HTMLInputElement>('input[name="record_version"]');
     // A rejected request can leave a dirty DOM value even after React receives
     // the same server version again. Read the refreshed server-rendered default,
@@ -145,7 +153,7 @@ export function ConversionMutationForm({
       draft.current = readDraft(form);
       setResult(null);
     }
-  }, [children]);
+  }, [children, freshTaskReview]);
 
   function rememberDraft() {
     if (formRef.current) draft.current = readDraft(formRef.current);
@@ -206,6 +214,7 @@ export function ConversionMutationForm({
     ? "Save outcome not confirmed. Your draft is kept on this page. Retry the same request to check its result; do not start a duplicate action."
     : result?.ok
       ? result.warning ? `Saved with notice: ${messages[result.warning] || result.warning.replaceAll("_", " ")}` : successMessage
+      : conflict && freshTaskReview ? "This task changed. Nothing was saved. Open the latest record to review it before completing the task."
       : result ? `Not saved: ${messages[result.error] || result.error.replaceAll("_", " ")}. Your draft is kept on this page.` : "";
 
   return (
@@ -222,9 +231,12 @@ export function ConversionMutationForm({
           {busy ? "Saving…" : result?.ok ? "Saved" : submitLabel}
         </button>
       </fieldset>
-      <p className="mt-2 break-words text-xs leading-5 text-[#b9b09f]">Drafts stay in this page's memory only; leaving or reloading discards them. Date/time fields use the timezone declared in this form. Missing or repeated daylight-saving times are rejected.</p>
+      <p className="mt-2 break-words text-xs leading-5 text-[#b9b09f]">{freshTaskReview ? "Internal task only; completion is not contact or an appointment. Fresh review opens separately, leaving this page's other entries and unresolved saves untouched." : "Drafts stay in this page's memory only; leaving or reloading discards them. Date/time fields use the timezone declared in this form. Missing or repeated daylight-saving times are rejected."}</p>
       <p id={statusId} role={result && !result.ok || uncertain ? "alert" : "status"} aria-live={result && !result.ok || uncertain ? "assertive" : "polite"} aria-atomic="true" className={`mt-3 break-words text-sm leading-6 ${result && !result.ok || uncertain ? "text-[#ffb1bd]" : "text-cyan-100"}`}>{message}</p>
-      {conflict ? (
+      {conflict && !uncertain && freshTaskReview ? (
+        freshReviewHref ? <a href={freshReviewHref} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md border border-cyan-300/35 px-3 py-2 text-center text-sm text-cyan-100 outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">Review latest task (opens in new tab)</a>
+          : <p className="mt-3 text-sm text-[#ffb1bd]">Fresh task review is unavailable. Open Today separately from the protected navigation; this rejected form remains disabled.</p>
+      ) : conflict && !uncertain ? (
         <button type="button" onClick={() => router.refresh()} className="mt-3 min-h-11 w-full rounded-md border border-cyan-300/35 px-3 py-2 text-sm text-cyan-100 outline-none focus-visible:ring-2 focus-visible:ring-cyan-300">Review latest record (keep draft)</button>
       ) : null}
       {uncertain ? (

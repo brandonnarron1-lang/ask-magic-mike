@@ -15,6 +15,27 @@ const task=(id="task",leadId="one",status="open",due="2026-11-06T17:30:00Z")=>no
 const queue=(leads=[lead()],tasks:ReturnType<typeof task>[]=[])=>
   buildAdminTodayQueue({leads,tasks,appointments:[],now,permissions:leads.map(l=>({lead_id:l.id,channel:"email",purpose:"manual_one_to_one",state:"allowed"}))});
 describe("operator_action_v1 on existing authorized queue",()=>{
+  it("fresh review binds the exact task even when another action is primary; exposes current owner/version without saving",()=>{
+    const id="11111111-1111-4111-8111-111111111111";
+    const q=queue([lead()],[task(id)]);
+    const html=renderToStaticMarkup(<LeadCommandDesk queue={q} principal={principal} reviewTask={id}/>);
+    expect(html).toContain("Fresh task review");expect(html).toContain("Current task version:");
+    expect(html).toContain("SYNTHETIC OPERATOR");expect(html).toContain("Opening this page saves nothing");
+    expect(html).toContain(`one:task:${id}`);
+    expect(html).not.toContain("Internal task completed.");
+  });
+  it.each(["invalid","22222222-2222-4222-8222-222222222222"])("missing/inaccessible task review is not actionable or a successful completion: %s",id=>{
+    const html=renderToStaticMarkup(<LeadCommandDesk queue={queue([],[])} principal={principal} reviewTask={id}/>);
+    expect(html).toContain("Task unavailable in your current authorized queue");expect(html).not.toContain("Complete task");
+  });
+  it.each([
+    {communication_suppressed:true}, {conversion_stage:"disqualified"}, {closed_lost_reason:"no_follow_up"},
+  ])("fresh task review preserves held/terminal truth: %o",patch=>{
+    const id="11111111-1111-4111-8111-111111111111";
+    const html=renderToStaticMarkup(<LeadCommandDesk queue={queue([lead("one",patch)],[task(id)])} principal={principal} filter="held" reviewTask={id}/>);
+    expect(html).not.toContain("Complete task");
+    expect(html).toMatch(/Held \/ read-only|Task unavailable in your current authorized queue/);
+  });
   it("groups existing actions by inquiry and makes a real overdue task primary",()=>{
     const q=queue([lead()],[task()]);
     expect(q.items.length).toBeGreaterThan(1);

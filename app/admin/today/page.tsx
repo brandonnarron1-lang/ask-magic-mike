@@ -2,6 +2,7 @@ import { loadAdminTodayQueue } from "../../lib/adminTodayView";
 import { requireLeadCenterPermission } from "../../../src/lib/admin/rbac-session";
 import { LeadCommandDesk } from "../../components/admin/LeadCommandDesk";
 import { deskFilter, deskPage } from "../../lib/adminTodayDesk";
+import { todayTaskReviewId } from "../../lib/todayTaskReview";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -15,10 +16,11 @@ const notices: Record<string,string> = {
   dismissal_reason_required: "Enter a brief reason before dismissing an action.",
 };
 export default async function AdminTodayPage({ searchParams }: {
-  searchParams?: Promise<{ view?: string; page?: string; today_action?: string }>;
+  searchParams?: Promise<{ view?: string; page?: string; today_action?: string; review_task?: string }>;
 }) {
   const principal = await requireLeadCenterPermission("lead:view_assigned");
-  const [queue,params] = await Promise.all([loadAdminTodayQueue(principal), searchParams || Promise.resolve({} as {view?:string;page?:string;today_action?:string})]);
+  const [queue,params] = await Promise.all([loadAdminTodayQueue(principal), searchParams || Promise.resolve({} as {view?:string;page?:string;today_action?:string;review_task?:string})]);
   return <LeadCommandDesk queue={queue} principal={principal} filter={deskFilter(params.view)} page={deskPage(params.page)}
+    reviewTask={params.review_task === undefined ? undefined : todayTaskReviewId(params.review_task) || "invalid"}
     notice={params.today_action ? notices[params.today_action] || "Action not confirmed. Review the current record." : null}/>;
 }
