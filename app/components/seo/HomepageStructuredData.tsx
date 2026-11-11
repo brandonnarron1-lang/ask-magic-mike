@@ -1,26 +1,16 @@
 import { siteConfig } from "@/lib/site-config";
 import { serializeJsonLd } from "@/lib/security/json-ld";
+import { mikeIdentity, mikeIdentityNodes } from "../../lib/mikeIdentity";
 
 export function HomepageStructuredData() {
   const siteUrl = siteConfig.canonicalSiteUrl;
-  const organizationId = `${siteUrl}/#organization`;
+  const organizationId = mikeIdentity.organizationId;
   const websiteId = `${siteUrl}/#website`;
   const webpageId = `${siteUrl}/#webpage`;
   const graph = {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "Organization",
-        "@id": organizationId,
-        name: siteConfig.parentBrandName,
-        url: siteConfig.parentBrandUrl,
-        logo: {
-          "@type": "ImageObject",
-          url: `${siteUrl}/brand/black-diamond/our-town-logo.png`,
-          width: 343,
-          height: 145,
-        },
-      },
+      ...mikeIdentityNodes(),
       {
         "@type": "WebSite",
         "@id": websiteId,
@@ -28,6 +18,7 @@ export function HomepageStructuredData() {
         name: siteConfig.brandName,
         description: "Local real estate guidance and lead intake from Our Town Properties in Wilson, North Carolina.",
         publisher: { "@id": organizationId },
+        about: { "@id": mikeIdentity.personId },
         inLanguage: "en-US",
       },
       {
@@ -37,7 +28,7 @@ export function HomepageStructuredData() {
         name: "Ask Magic Mike | Wilson, NC Real Estate Guidance",
         description: "Local home value guidance, seller strategy, and real estate answers from Mike Eatmon and Our Town Properties in Wilson, North Carolina.",
         isPartOf: { "@id": websiteId },
-        about: { "@id": organizationId },
+        about: [{ "@id": mikeIdentity.personId }, { "@id": organizationId }],
         inLanguage: "en-US",
       },
     ],
