@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/site-config";
 const SITE_URL = siteConfig.canonicalSiteUrl;
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return [
+  const existingPages = [
     ["/", 1],
     ["/home-value", 0.85],
     ["/sell", 0.8],
@@ -21,4 +21,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "weekly" as const,
     priority: priority as number,
   }));
+  return [
+    ...existingPages,
+    {
+      url: `${SITE_URL}/mike-eatmon`,
+      lastModified: "2026-11-11",
+      changeFrequency: "monthly",
+      priority: 0.65,
+    },
+  ];
 }

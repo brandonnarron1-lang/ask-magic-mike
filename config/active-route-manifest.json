@@ -108,6 +108,7 @@
     "/lead-center-password-help",
     "/lead-center-set-password",
     "/manifest.webmanifest",
+    "/mike-eatmon",
     "/my",
     "/my/account",
     "/open-house/[propertyOrId]",
@@ -134,7 +135,7 @@
   ],
   "required": {
     "public": [
-      "/", "/my", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
+      "/", "/mike-eatmon", "/my", "/home-value", "/value", "/sell", "/we-buy-houses", "/ask", "/buy", "/rent", "/open-house/[propertyOrId]", "/thank-you",
       "/privacy", "/terms", "/accessibility", "/contact", "/go/[code]", "/go/open-house/[reference]", "/plan", "/phone-alerts/install/[token]", "/phone-alerts/install/[token]/manifest.webmanifest", "/phone-alerts/setup", "/phone-alerts/setup/claim",
       "/widget", "/widget/v1", "/widget-preview", "/embed/ask",
       "/integrations/ourtownproperties", "/robots.txt", "/sitemap.xml", "/social-preview"

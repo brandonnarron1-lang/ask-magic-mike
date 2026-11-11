@@ -62,7 +62,7 @@ describe("Phase 9.5 search-authority route wiring", () => {
 
   it("publishes visible-aligned homepage organization and website JSON-LD without disputed contact facts", () => {
     const source = read("app/components/seo/HomepageStructuredData.tsx");
-    expect(source).toContain('"@type": "Organization"');
+    expect(read("app/lib/mikeIdentity.ts")).toContain('"@type": "Organization"');
     expect(source).toContain('"@type": "WebSite"');
     expect(source).toContain('"@type": "WebPage"');
     expect(source).toContain('type="application/ld+json"');
