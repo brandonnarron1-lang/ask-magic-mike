@@ -109,8 +109,8 @@ export function BlackDiamondShell() {
 export function Footer() {
   return (
     <footer className="border-t border-[#cda24a2e] bg-[#050505] px-5 py-10 sm:px-8 lg:px-10">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 text-sm text-[#d9ceb8] [overflow-wrap:anywhere] md:grid-cols-[1fr_auto]">
-        <div>
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 text-sm text-[#d9ceb8] [overflow-wrap:anywhere] lg:grid-cols-[minmax(0,1.15fr)_minmax(0,.85fr)]">
+        <div className="min-w-0">
           <p className="font-semibold text-[#f4ead4]">{siteConfig.parentBrandName}</p>
           <div className="my-4"><PublicMikeContact surface="public_footer" /></div>
           <p>Brokerage office: <a className="inline-flex min-h-11 items-center text-[#e2c06f] underline" href="tel:+12522437700">{siteConfig.officePhoneDisplay}</a></p>
@@ -119,7 +119,7 @@ export function Footer() {
             Ask Magic Mike provides general real estate guidance and lead intake for Our Town Properties. Property-specific pricing, listing strategy, agency relationships, and legal or financial decisions should be confirmed directly with a licensed professional.
           </p>
         </div>
-        <nav aria-label="Footer" className="flex flex-wrap gap-3 md:justify-end">
+        <nav aria-label="Footer" className="flex min-w-0 flex-wrap content-start items-start gap-3 lg:justify-end">
           <Link href="/home-value" className="text-[#e2c06f] hover:text-[#f4ead4]">Home Value</Link>
           <Link href="/sell" className="text-[#e2c06f] hover:text-[#f4ead4]">Sell</Link>
           <Link href="/buy" className="text-[#e2c06f] hover:text-[#f4ead4]">Buy</Link>

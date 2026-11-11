@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { installNoWriteInterception } from "./no-write-preview-interception";
 
 // Public rendering only: the existing interception refuses all application writes.
-for (const width of [320, 390, 768, 1440]) {
+for (const width of [320, 390, 768, 1024, 1440]) {
   test(`Mike profile retains its portrait and identity at ${width}px`, async ({ page }) => {
     const capture = await installNoWriteInterception(page);
     await page.setViewportSize({ width, height: 900 });
@@ -20,6 +20,14 @@ for (const width of [320, 390, 768, 1440]) {
     expect(nodes.find((node) => node["@type"] === "ProfilePage")?.mainEntity).toEqual({ "@id": "https://www.ourtownproperties.com/agents/mike-eatmon/#person" });
     expect(new Set(nodes.map((node) => node["@id"])).size).toBe(nodes.length);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width + 1);
+    // A page can have zero overflow while its footer contact column collapses
+    // to single-character lines. Keep the contact panel and call action readable.
+    const footerContact = page.locator("footer").getByRole("complementary", { name: "Contact Magic Mike" });
+    const footerContactBox = await footerContact.boundingBox();
+    const footerCallBox = await footerContact.getByRole("link", { name: /^Call Magic Mike at/ }).boundingBox();
+    expect(footerContactBox?.width).toBeGreaterThanOrEqual(Math.min(300, width - 64));
+    expect(footerCallBox?.width).toBeGreaterThanOrEqual(150);
+    expect(footerCallBox?.height).toBeLessThanOrEqual(72);
     mkdirSync("output/playwright/mike-identity", { recursive: true });
     await page.screenshot({ path: `output/playwright/mike-identity/profile-${width}.png`, fullPage: true });
     if (width === 390) {
