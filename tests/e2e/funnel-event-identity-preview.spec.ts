@@ -190,7 +190,7 @@ for (const viewport of viewports) {
     await page.getByLabel("Phone").fill("2525550103");
     await page.getByRole("checkbox", { name: /I agree that Our Town Properties/ }).check();
     await page.getByRole("button", { name: "Request local follow-up" }).click();
-    await expect(page.getByText("INTERNAL QA — intercepted before durable storage.")).toBeVisible();
+    await expect(page.getByText("Your request is stored for review.",{exact:true})).toBeVisible();
     await expect.poll(() => capture.leads.length).toBe(4);
     const askLead = capture.leads.at(-1) as JsonRecord;
     expect(askLead.consent).toBe(true);

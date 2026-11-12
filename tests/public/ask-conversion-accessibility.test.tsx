@@ -110,7 +110,7 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
   });
   it.each([{review_only:true},{review_only:undefined},{review_only:false,duplicate_of_lead_id:"never-display-this-id"}])("keeps held/unknown saved outcomes neutral: %j",async outcome=>{
     const user=userEvent.setup();
-    vi.stubGlobal("fetch",vi.fn(async(url:RequestInfo|URL)=>new Response(JSON.stringify(String(url)==="/api/leads" ? {lead_id:"synthetic-id",...outcome}:{}))));
+    vi.stubGlobal("fetch",vi.fn(async(url:RequestInfo|URL)=>new Response(JSON.stringify(String(url)==="/api/leads" ? {lead_id:"synthetic-id",message:"INTERNAL QA — intercepted before durable storage.",...outcome}:{}))));
     render(<AskMikeChatPanel/>);
     await user.click(screen.getByRole("button",{name:"Request a person"}));
     await user.type(screen.getByLabelText("Phone"),"2525550199");
@@ -119,6 +119,7 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     expect(await screen.findByText("Your request is stored for review.")).toBeVisible();
     expect(screen.queryByRole("button",{name:"Request a conversation"})).not.toBeInTheDocument();
     expect(document.body.textContent).not.toContain("never-display-this-id");
+    expect(document.body.textContent).not.toContain("intercepted before durable storage");
   });
   it("shows approved sources and lets the visitor correct the handoff without submitting", async () => {
     const user = userEvent.setup();
