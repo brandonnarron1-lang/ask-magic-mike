@@ -60,6 +60,67 @@ afterEach(() => {
 });
 
 describe("Ask Mike conversion clarity and keyboard access", () => {
+  it("opens immediate manual intake, reuses the typed request and asks for permission without an AI call", async()=>{
+    const user=userEvent.setup();
+    const fetchMock=vi.fn(async(_input:RequestInfo|URL,_init?:RequestInit)=>new Response("{}",{status:503}));
+    vi.stubGlobal("fetch",fetchMock);
+    render(<AskMikeChatPanel/>);
+    await user.type(screen.getByLabelText(/Your real estate question/),"Please have a person discuss my selling options.");
+    await user.click(screen.getByRole("button",{name:"Request a person"}));
+    expect(screen.getByLabelText(/Question for local follow-up/)).toHaveValue("Please have a person discuss my selling options.");
+    await waitFor(()=>expect(screen.getByLabelText(/Question for local follow-up/)).toHaveFocus());
+    expect(businessCalls(fetchMock.mock.calls)).toHaveLength(0);
+    expect(screen.getByRole("checkbox",{name:/I agree that Our Town Properties/})).not.toBeChecked();
+    await user.click(screen.getByRole("button",{name:"Request local follow-up"}));
+    expect(await screen.findByRole("alert")).toHaveTextContent("email address or phone number");
+    expect(businessCalls(fetchMock.mock.calls)).toHaveLength(0);
+  });
+  it("AI failure leaves manual intake usable and never claims a save",async()=>{
+    const user=userEvent.setup();
+    vi.stubGlobal("fetch",vi.fn(async()=>new Response("{}",{status:503})));
+    render(<AskMikeChatPanel/>);
+    await user.type(screen.getByLabelText(/Your real estate question/),"Please help");
+    await user.click(screen.getByRole("button",{name:"Send Question"}));
+    expect(await screen.findByRole("alert")).toHaveTextContent("answer did not come through");
+    await user.click(screen.getByRole("button",{name:"Request a person"}));
+    expect(screen.getByLabelText(/Question for local follow-up/)).toBeVisible();
+    expect(screen.queryByText(/Your request is saved/)).not.toBeInTheDocument();
+  });
+  it("freezes an uncertain request and reopens/retries the identical body and key only",async()=>{
+    const user=userEvent.setup(), bodies:string[]=[], keys:unknown[]=[];
+    vi.stubGlobal("fetch",vi.fn(async(url:RequestInfo|URL,init?:RequestInit)=>{
+      if(String(url)!=="/api/leads") return new Response("{}",{status:503});
+      bodies.push(String(init?.body));keys.push((init?.headers as Record<string,string>)["Idempotency-Key"]);
+      return bodies.length===1 ? new Response("{}",{status:500}) : new Response(JSON.stringify({lead_id:"synthetic-id",session_id:"synthetic-session",review_only:false}));
+    }));
+    render(<AskMikeChatPanel/>);
+    await user.click(screen.getByRole("button",{name:"Request a person"}));
+    await user.type(screen.getByLabelText("Email"),"synthetic@example.test");
+    await user.click(screen.getByRole("checkbox",{name:/I agree that Our Town Properties/}));
+    const send=screen.getByRole("button",{name:"Request local follow-up"});
+    fireEvent.click(send); fireEvent.click(send);
+    expect(await screen.findByRole("alert")).toHaveTextContent("outcome is not confirmed");
+    expect(bodies).toHaveLength(1);
+    expect(screen.getByLabelText("Email")).toBeDisabled();
+    await user.click(screen.getByRole("button",{name:"Request a person"}));
+    await user.click(screen.getByRole("button",{name:"Retry identical follow-up request"}));
+    expect(await screen.findByText(/Your request is saved/)).toBeVisible();
+    expect(bodies).toHaveLength(2);expect(bodies[1]).toBe(bodies[0]);expect(keys[1]).toBe(keys[0]);
+    expect(screen.getByRole("button",{name:"Request a conversation"})).toBeVisible();
+  });
+  it.each([{review_only:true},{review_only:undefined},{review_only:false,duplicate_of_lead_id:"never-display-this-id"}])("keeps held/unknown saved outcomes neutral: %j",async outcome=>{
+    const user=userEvent.setup();
+    vi.stubGlobal("fetch",vi.fn(async(url:RequestInfo|URL)=>new Response(JSON.stringify(String(url)==="/api/leads" ? {lead_id:"synthetic-id",message:"INTERNAL QA — intercepted before durable storage.",...outcome}:{}))));
+    render(<AskMikeChatPanel/>);
+    await user.click(screen.getByRole("button",{name:"Request a person"}));
+    await user.type(screen.getByLabelText("Phone"),"2525550199");
+    await user.click(screen.getByRole("checkbox",{name:/I agree that Our Town Properties/}));
+    await user.click(screen.getByRole("button",{name:"Request local follow-up"}));
+    expect(await screen.findByText("Your request is stored for review.")).toBeVisible();
+    expect(screen.queryByRole("button",{name:"Request a conversation"})).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("never-display-this-id");
+    expect(document.body.textContent).not.toContain("intercepted before durable storage");
+  });
   it("shows approved sources and lets the visitor correct the handoff without submitting", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => new Response(JSON.stringify({
@@ -278,6 +339,7 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
         const payload = JSON.parse(String(init?.body)) as Record<string, unknown>;
         return new Response(JSON.stringify({
           lead_id: "qa_intercepted_chat_lead",
+          review_only: replay,
           session_id: payload.widget_session_id,
         }), {
           status: 200,
@@ -301,7 +363,10 @@ describe("Ask Mike conversion clarity and keyboard access", () => {
     await user.type(screen.getByLabelText("Phone"), "252-555-0199");
     await user.click(screen.getByRole("checkbox", { name: /I agree that Our Town Properties/ }));
     await user.click(screen.getByRole("button", { name: "Request local follow-up" }));
-    expect(await screen.findByRole("button", { name: "Request a conversation" })).toBeVisible();
+    if (replay) {
+      expect(await screen.findByText("Your request is stored for review.")).toBeVisible();
+      expect(screen.queryByRole("button", {name:"Request a conversation"})).not.toBeInTheDocument();
+    } else expect(await screen.findByRole("button", { name: "Request a conversation" })).toBeVisible();
     await waitFor(() => {
       expect(
         vi.mocked(trackEvent).mock.calls.some(([event]) => event === "lead_created"),

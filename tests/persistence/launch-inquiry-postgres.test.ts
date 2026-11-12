@@ -67,6 +67,37 @@ function claim(id: unknown, initial = false, lease: string | null = null) {
 async function pending() { const result = await submit(fixture()); expect(result.response.status).toBe(200); return notifications(result.result.lead_id); }
 
 describe.runIf(process.env.AMM_QA_POSTGRES_TEST === "1")("launch inquiry: isolated actual PostgreSQL", () => {
+  it("person request retains server-owned review evidence once, with original recipients and no new queue", async()=>{
+    const {reviewTarget}=await import("../../app/lib/humanReviewPolicy");
+    const body=fixture({funnel_type:"chat",lead_source_surface:"ask_page",buyer_interest:undefined,
+      question:"Please have a person review my real estate request.",created_at:"2000-01-01T00:00:00Z",
+      human_review:{acceptedAt:"2000-01-01T00:00:00Z",targetAt:"2000-01-01T00:00:00Z",policyVersion:"forged"}});
+    const before=Date.now(), saved=await submit(body), end=Date.now();
+    expect(saved.response.status).toBe(200);expect(saved.result.review_only).toBe(false);
+    const envelopes=notifications(saved.result.lead_id);
+    expect(envelopes.map(n=>n.recipient_reference).sort()).toEqual(["operator:brandon","operator:mike"]);
+    const primary=envelopes.find(n=>n.recipient_reference==="operator:mike")!;
+    const objective=(primary.metadata as Row).human_review as Row;
+    expect(objective).toMatchObject({policyVersion:"amm.human-review.v1",timezone:"America/New_York"});
+    expect(Date.parse(String(objective.acceptedAt))).toBeGreaterThanOrEqual(before);
+    expect(Date.parse(String(objective.acceptedAt))).toBeLessThanOrEqual(end);
+    expect(objective.targetAt).toBe(reviewTarget(String(objective.acceptedAt)));
+    const snapshot=counts(), identity=JSON.stringify(envelopes), owner=lead(saved.result.lead_id).assigned_agent_id;
+    const replay=await submit(body);
+    expect(replay.response.status).toBe(200);expect(replay.result.review_only).toBe(true);
+    expect(replay.result.lead_id).toBe(saved.result.lead_id);
+    expect(counts()).toBe(snapshot);expect(JSON.stringify(notifications(saved.result.lead_id))).toBe(identity);
+    expect(lead(saved.result.lead_id).assigned_agent_id).toBe(owner);expect(provider.send).not.toHaveBeenCalled();
+    const {loadNeonAdminLeadDetail}=await import("../../app/lib/persistence/neonAdminLeadView");
+    const admin={userId:"synthetic-admin",role:"administrator" as const,agentId:null,email:"synthetic-admin@example.test",name:"SYNTHETIC ADMIN"};
+    const detail=await loadNeonAdminLeadDetail(String(saved.result.lead_id),admin);
+    expect(detail.humanReview).toEqual(objective);
+    const denied=await loadNeonAdminLeadDetail(String(saved.result.lead_id),{...admin,userId:"synthetic-other",role:"approved_agent",agentId:randomUUID()});
+    expect(denied.lead).toBeNull();expect(denied.humanReview).toBeUndefined();
+    const {loadNeonAdminTodayQueue}=await import("../../app/lib/persistence/neonAdminTodayView");
+    const queue=await loadNeonAdminTodayQueue(admin);
+    expect(queue.items.find(i=>i.leadId===saved.result.lead_id)?.humanReview).toEqual(objective);
+  });
   it("a signed early receipt callback reconciles UNKNOWN without a resend or later evidence overwrite", async () => {
     vi.stubEnv("REQUEST_RECEIPTS_ENABLED", "true"); vi.stubEnv("REQUEST_RECEIPTS_ACTIVATED_AT", cutoff);
     vi.stubEnv("REQUEST_RECEIPTS_REPLY_TO", "reply@example.test");
