@@ -199,7 +199,7 @@ describe("existing public health capability contract", () => {
       expect(fetchSpy).not.toHaveBeenCalled();
     } finally { fetchSpy.mockRestore(); }
   });
-  it("adds only the category to the no-store GET without I/O or identity disclosure", async () => {
+  it("adds the category and server review-policy DTO to the no-store GET without I/O or identity disclosure", async () => {
     for (const key of ["DATABASE_ENV", "PREVIEW_NEON_ENDPOINT_ID", "PRODUCTION_NEON_ENDPOINT_ID", "PUBLIC_SITE_URL",
       "AMM_ISOLATED_SESSION_ACCEPTANCE", "AMM_QA_POSTGRES_TEST"]) {
       vi.stubEnv(key, undefined);
@@ -214,8 +214,11 @@ describe("existing public health capability contract", () => {
       expect(body.public_intake).toBe("live");
       expect(Object.keys(body).sort()).toEqual([
         "ok", "service", "environment", "database_configured", "database_provider",
-        "notification_mode", "email_enabled", "public_intake", "request_receipts_available", "checked_at",
+        "notification_mode", "email_enabled", "public_intake", "request_receipts_available", "human_review", "checked_at",
       ].sort());
+      expect(Object.keys(body.human_review).sort()).toEqual(["version","timezone","normalHours","message","observedAt"].sort());
+      expect(body.human_review).toMatchObject({version:"amm.human-review.v1",timezone:"America/New_York",normalHours:"Daily 8 a.m.–8 p.m. Eastern, subject to coverage exceptions."});
+      expect(Date.parse(body.human_review.observedAt)).toBeLessThanOrEqual(Date.now());
       expect(JSON.stringify(body)).not.toContain(productionEndpoint);
       expect(JSON.stringify(body)).not.toContain("fictional");
       expect(fetchSpy).not.toHaveBeenCalled();

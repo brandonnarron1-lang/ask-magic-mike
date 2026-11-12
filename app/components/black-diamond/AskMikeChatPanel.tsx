@@ -32,10 +32,11 @@ type Message = {
 type AskMikeChatPanelProps = {
   surface?: LeadSourceSurface;
   compact?: boolean;
+  personRequest?: number;
 };
 
-export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskMikeChatPanelProps) {
-  const { receiptAvailable } = usePublicIntakeReadiness();
+export function AskMikeChatPanel({ surface = "ask_page", compact = false, personRequest = 0 }: AskMikeChatPanelProps) {
+  const { receiptAvailable, humanReview } = usePublicIntakeReadiness();
   const [attribution] = useState<Attribution>(() =>
     typeof window === "undefined" ? initialAttribution : readAttribution(),
   );
@@ -54,6 +55,11 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
   const [followUpSubmitting, setFollowUpSubmitting] = useState(false);
   const [followUpError, setFollowUpError] = useState<string | null>(null);
   const [followUpMessage, setFollowUpMessage] = useState<string | null>(null);
+  const [reviewOnly, setReviewOnly] = useState(true);
+  const [followUpLocked, setFollowUpLocked] = useState(false);
+  const frozenFollowUp = useRef<string | null>(null);
+  const requestTextRef = useRef<HTMLTextAreaElement>(null);
+  const focusPersonRef = useRef(false);
   const leadCaptureInFlightRef = useRef(false);
   const answerRequestRef = useRef<AbortController | null>(null);
   const followUpEmailRef = useRef<HTMLInputElement>(null);
@@ -63,6 +69,28 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     leadId: null,
     sessionId: null,
   });
+
+  function requestPerson() {
+    // A request for a human interrupts this answer, not a real staff-join signal.
+    answerRequestRef.current?.abort();
+    answerRequestRef.current = null;
+    setSubmitting(false);
+    focusPersonRef.current = !requestTextRef.current;
+    requestTextRef.current?.focus();
+    setAnsweredQuestion(current => current ?? (input.trim() || lastMessage || "I would like to speak with the team about my real estate request."));
+    setChatError(null);
+  }
+  useEffect(() => {
+    if (focusPersonRef.current && requestTextRef.current) {
+      focusPersonRef.current = false;
+      requestTextRef.current.focus();
+    }
+  }, [answeredQuestion]);
+  useEffect(() => {
+    if (personRequest > 0) requestPerson();
+    // A parent gesture opens this existing form, never starts a save.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [personRequest]);
 
   useEffect(() => {
     setChatSessionId(tryCreateBrowserSubmissionId());
@@ -137,7 +165,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           answerId:data.answerId,revision:data.revision,currentSourceValidity:data.currentSourceValidity,
         },
       ]);
-      setAnsweredQuestion(trimmed);
+      setAnsweredQuestion(current => frozenFollowUp.current ? current : current ?? trimmed);
       if(data.answerId){try{const prior=JSON.parse(sessionStorage.getItem("amm-r2-answer-receipts")||"[]");sessionStorage.setItem("amm-r2-answer-receipts",JSON.stringify([...(Array.isArray(prior)?prior:[]),data.answerId].slice(-3)));}catch{/* Feedback acknowledgment is still server-saved. */}}
     } catch {
       if (!controller.signal.aborted) setChatError("The assistant's answer did not come through. You can retry, or use the home-value form for local follow-up.");
@@ -172,7 +200,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
     setFollowUpMessage(null);
 
     if (!answeredQuestion?.trim()) {
-      setFollowUpError("Ask a question first so Mike can review the right context.");
+      setFollowUpError("Briefly describe what you would like the team to help with.");
       return;
     }
     if (!email && !phone) {
@@ -213,14 +241,8 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
       consent_language_version: LEAD_CONSENT_LANGUAGE_VERSION,
     }, { sessionId: chatSessionId });
 
-    try {
-      const leadRes = await fetch("/api/leads", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Idempotency-Key": chatSessionId,
-        },
-        body: JSON.stringify({
+    if (!frozenFollowUp.current) {
+      frozenFollowUp.current = JSON.stringify({
           funnel_type: "chat",
           lead_source_surface: surface,
           name: clean(followUpName) || undefined,
@@ -241,13 +263,22 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
           consent_source: `${surface}:ask-follow-up`,
           website: clean(formData.get("website")),
           attribution,
-        }),
+        });
+      setFollowUpLocked(true);
+    }
+    try {
+      const leadRes = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Idempotency-Key": chatSessionId },
+        body: frozenFollowUp.current,
       });
       const leadData = (await leadRes.json()) as {
         lead_id?: string | null;
         session_id?: string | null;
         message?: string;
         error?: string;
+        review_only?: boolean;
+        duplicate_of_lead_id?: string | null;
       };
       if (!leadRes.ok) throw new Error(publicLeadErrorMessage(leadData.error));
       if (!leadData.lead_id) throw new Error();
@@ -270,10 +301,9 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         leadId: leadData.lead_id,
         sessionId: leadData.session_id || chatSessionId,
       });
-      setFollowUpMessage(
-        leadData.message ||
-          "Your follow-up request is stored. Mike or the approved team can now review your question and contact details.",
-      );
+      const held = leadData.review_only !== false || Boolean(leadData.duplicate_of_lead_id);
+      setReviewOnly(held);
+      setFollowUpMessage(held ? "Your request is stored for review." : "Your request is saved. You can add your preferred time for a conversation with the team. A requested time is not a confirmed appointment.");
       trackEvent("thank_you_viewed", attribution, {
         funnel_name: "ask_mike_chat",
         lead_source_surface: surface,
@@ -284,7 +314,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         lead_source_surface: surface,
         step_name: "contact_follow_up",
       }, { sessionId: chatSessionId });
-      setFollowUpError(publicLeadErrorMessage(error instanceof Error ? error.message : undefined));
+      setFollowUpError(`${publicLeadErrorMessage(error instanceof Error ? error.message : undefined)} The outcome is not confirmed. Retry the identical request; do not submit a new inquiry.`);
     } finally {
       setFollowUpSubmitting(false);
       leadCaptureInFlightRef.current = false;
@@ -296,7 +326,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
       id="ask-mike"
       className={`min-w-0 [overflow-wrap:anywhere] [&_.amm-form-field]:p-[12px] bg-[radial-gradient(circle_at_top_right,rgba(34,198,210,.14),transparent_32%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025))] ${compact ? "p-[16px]" : "p-[20px] sm:p-[28px]"}`}
     >
-      <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">Ask Mike</p>
+      <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#22c6d2]">Ask Magic Mike</p>
       <h2 className="mt-3 font-serif text-3xl leading-tight text-[#f4ead4]">
         Start with the real estate question on your mind.
       </h2>
@@ -304,13 +334,19 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
         <div className="flex flex-wrap items-center gap-3 border-b border-white/10 pb-4">
           <Image src="/brand/black-diamond/our-town-logo.png" alt="Our Town Properties" width={96} height={41} className="h-auto w-20" />
           <div>
-            <p className="font-semibold text-[#f4ead4]">AI assistant for Mike's team</p>
-            <p className="text-xs text-[#22c6d2]">Our Town Properties · not Mike personally</p>
+            <p className="font-semibold text-[#f4ead4]">AI assistant for Our Town Properties, Inc.</p>
+            <p className="text-xs text-[#22c6d2]">Not Mike personally · not a licensed broker</p>
           </div>
         </div>
         <div className="py-5 text-sm leading-6 text-[#d9ceb8]">
           Ask about home-value strategy, timing, preparation, property features, and the objective criteria you choose. Property-specific guidance creates a follow-up path instead of inventing market facts.
         </div>
+        <button type="button" onClick={requestPerson} aria-controls="ask-person-request" className="amm-primary-button mt-4 min-h-11 w-full px-4 py-3 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#22c6d2]">{surface === "widget" ? "Open person-request form" : "Request a person"}</button>
+        <details className="mt-3 text-sm leading-6 text-[#d9ceb8]">
+          <summary className="min-h-11 cursor-pointer py-2">When can a person review my request?</summary>
+          {humanReview ? <><p>{humanReview.normalHours}</p><p>{humanReview.message}</p></> : <p>Current human-review hours could not be verified. You can still request follow-up; no immediate human connection is confirmed.</p>}
+          <p>This assistant can help at any hour. A request is not live staff chat, a guaranteed response time or a calendar booking.</p>
+        </details>
         <div className="grid gap-2">
           {starterPrompts.map((prompt) => (
             <button
@@ -403,6 +439,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
 
         {answeredQuestion !== null && !leadReference.leadId ? (
           <form
+            id="ask-person-request"
             noValidate
             onSubmit={submitFollowUp}
             className="mt-5 space-y-4 rounded-lg border border-[#cda24a33] bg-[#cda24a0d] p-[16px]"
@@ -415,9 +452,11 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
                 Enter at least one contact method and confirm permission. This separate request creates the contact lead and lead alert.
               </p>
             </div>
+            <fieldset disabled={followUpLocked} className="min-w-0 space-y-4">
+            <legend className="sr-only">Review your request and contact permission</legend>
             <label className="block text-sm font-semibold">
               Question for local follow-up
-              <textarea value={answeredQuestion} onChange={(event) => setAnsweredQuestion(event.target.value)} maxLength={2_000} rows={4} className="amm-form-field mt-2 w-full" required />
+              <textarea ref={requestTextRef} value={answeredQuestion} onChange={(event) => setAnsweredQuestion(event.target.value)} maxLength={2_000} rows={4} className="amm-form-field mt-2 w-full" required />
               <span className="mt-2 block font-normal text-[#d9ceb8]">Review or correct your question. Only this text and the contact details you enter are submitted when you request follow-up. The assistant's answer is not a verified property fact.</span>
             </label>
             <TextField
@@ -467,6 +506,8 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
               setFollowUpConsent(checked);
               if (followUpError) setFollowUpError(null);
             }} required inputRef={followUpConsentRef} receiptAvailable={receiptAvailable} />
+            </fieldset>
+            {followUpLocked ? <p className="text-sm leading-6">This request and its permission are fixed for safe retry. No second inquiry is created by opening this panel again.</p> : null}
             {followUpError ? (
               <div id="ask-follow-up-status" className="rounded-md border border-[#6e162680] bg-[#6e16261f] p-3 text-sm leading-6 text-[#ffcabd]" role="alert">
                 {followUpError}
@@ -478,7 +519,7 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
               aria-busy={followUpSubmitting}
               className="amm-primary-button w-full px-5 py-3 disabled:opacity-60"
             >
-              {followUpSubmitting ? "Saving follow-up request" : "Request local follow-up"}
+              {followUpSubmitting ? "Saving follow-up request" : followUpLocked ? "Retry identical follow-up request" : "Request local follow-up"}
             </button>
           </form>
         ) : null}
@@ -488,14 +529,14 @@ export function AskMikeChatPanel({ surface = "ask_page", compact = false }: AskM
             <div className="rounded-md border border-[#cda24a55] bg-[#cda24a14] p-4 text-sm leading-6 text-[#f4ead4]" role="status" aria-live="polite">
               {followUpMessage}
             </div>
-            <AppointmentRequestCTA
+            {!reviewOnly ? <AppointmentRequestCTA
               leadId={leadReference.leadId}
               sessionId={leadReference.sessionId}
               requestSurface={surface}
               funnelName="ask_mike_chat"
               attribution={attribution}
               compact
-            />
+            /> : null}
           </div>
         ) : null}
       </div>

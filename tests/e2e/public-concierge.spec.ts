@@ -16,7 +16,7 @@ for(const width of [320,390,430,768,1440]) test(`${built?"compiled native Origin
     return route.continue(); // Real app and handler; no canned answers/Origin rewrite.
   });
   await page.setViewportSize({width,height:1000});await page.goto("/ask");
-  await expect(page.getByText("AI assistant for Mike's team",{exact:true})).toBeVisible();
+  await expect(page.getByText("AI assistant for Our Town Properties, Inc.",{exact:true})).toBeVisible();
   await page.getByRole("textbox",{name:/Your real estate question/}).fill("How do I buy a home?");
   const response=page.waitForResponse(r=>new URL(r.url()).pathname==="/api/chat/message");
   await page.getByRole("button",{name:"Send Question",exact:true}).press("Enter");

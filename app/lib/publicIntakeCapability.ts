@@ -31,10 +31,12 @@ export function readRequestReceiptAvailability(value: unknown): boolean {
 export function usePublicIntakeReadiness() {
   const [mode, setMode] = useState<PublicIntakeReadiness>("checking");
   const [receiptAvailable, setReceiptAvailable] = useState(false);
+  const [humanReview, setHumanReview] = useState<{normalHours:string;message:string}|null>(null);
   const [generation, setGeneration] = useState(0);
   const recheck = useCallback(() => {
     setMode("checking");
     setReceiptAvailable(false);
+    setHumanReview(null);
     setGeneration(current => current + 1);
   }, []);
 
@@ -56,6 +58,7 @@ export function usePublicIntakeReadiness() {
       const controller = new AbortController();
       setMode("checking");
       setReceiptAvailable(false);
+      setHumanReview(null);
       const timeout = window.setTimeout(() => {
         controller.abort();
         if (!disposed && version === requestVersion) setMode("unknown");
@@ -78,6 +81,10 @@ export function usePublicIntakeReadiness() {
         if (!disposed && !controller.signal.aborted && version === requestVersion) {
           setMode(readPublicIntakeReadiness(health));
           setReceiptAvailable(readRequestReceiptAvailability(health));
+          const review = health?.human_review;
+          if (review?.timezone === "America/New_York" && typeof review.normalHours === "string" && typeof review.message === "string") {
+            setHumanReview({normalHours:review.normalHours.slice(0,200),message:review.message.slice(0,400)});
+          }
         }
       } catch {
         if (!disposed && !controller.signal.aborted && version === requestVersion) setMode("unknown");
@@ -102,7 +109,7 @@ export function usePublicIntakeReadiness() {
     };
   }, [generation]);
 
-  return { mode, receiptAvailable, recheck };
+  return { mode, receiptAvailable, humanReview, recheck };
 }
 
 /** Compatibility for existing consumers: unknown remains closed, never live. */

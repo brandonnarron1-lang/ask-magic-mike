@@ -5,6 +5,7 @@ import { hasLeadCenterPermission, type LeadCenterPrincipal } from "../../../src/
 import { completeTodayTask, reviewTodayAction } from "../../admin/today/actions";
 import { LeadSearchPanel } from "../../admin/leads/lead-search-panel";
 import { ConversionMutationForm } from "./ConversionMutationForm";
+import { HumanReviewObjective } from "./HumanReviewObjective";
 
 const labels = { attention:"Needs attention", overdue:"Overdue tasks", delivery:"Delivery exceptions", waiting:"Waiting on human", held:"Held / read-only" };
 const focus = "outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-black";
@@ -55,6 +56,7 @@ function RequestCard({ request, index, queue, principal, complete }: { request:D
       <div><dt className="text-xs text-[#b5aa97]">Contact readiness</dt><dd className="mt-1">{request.held?"Contact not available from this desk":"Fresh permission review in protected detail"}</dd></div>
       <div><dt className="text-xs text-[#b5aa97]">Existing action due</dt><dd className="mt-1">{item.taskId || item.appointmentId ? deskDate(item.dueAt,item.timezone) : "No task due time recorded"}</dd></div>
     </dl>
+    <HumanReviewObjective value={item.humanReview} now={queue.generatedAt} held={request.held}/>
     <details className="mt-3 text-sm"><summary className={`min-h-11 cursor-pointer py-3 text-[#c9bfad] ${focus}`}>Facts, timestamps &amp; evidence</summary>
       <dl className="grid gap-3 rounded-lg border border-white/10 p-3 sm:grid-cols-2">
         {[

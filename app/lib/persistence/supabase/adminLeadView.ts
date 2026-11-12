@@ -135,6 +135,7 @@ export type AdminLeadDetailResult = {
   aiDrafts?: AdminAiDraftReviewRow[];
   timelinePage?: AdminLeadTimelinePage;
   sourceEvidence?: LeadSourceEvidence;
+  humanReview?: unknown;
   error?: string;
 };
 

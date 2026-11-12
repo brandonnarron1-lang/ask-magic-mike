@@ -107,6 +107,21 @@ Do not store changing live counts, account credentials or customer IDs here.
 
 ## Closeout
 
+### Concierge handoff and covered-time review
+
+Use the existing chat follow-up capture, primary internal intent metadata and
+conversation-request handler; anonymous answers are not contactable inquiries.
+For covered-time objectives, read `humanReviewPolicy.ts` and the saved policy
+evidence, not a browser clock or a newly calculated deadline for old records.
+Missing/unsupported policy evidence stays unknown. Review coverage is not staff
+presence, contact permission or calendar availability; do not delay existing
+alerts overnight. See `docs/CONCIERGE_REVIEW_CONTRACT.md` for the candidate contract.
+
+After an uncertain save, preserve the exact body and request identity. Opening
+the person-request panel again is not a new business event. Replays/holds use
+neutral confirmation and do not advertise an actionable appointment handoff.
+Keep current ownership and restriction checks authoritative on every later action.
+
 ### Request/receipt implementation boundary (verified locally November5, 2026)
 
 For optional conversation work, inspect `request_public_appointment_v2` and the
