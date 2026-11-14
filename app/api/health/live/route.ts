@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { releaseRuntimeHeaders } from "@/lib/release/runtime-evidence";
 import { publicIntakeCapability } from "@/lib/public-intake-capability";
 import { requestReceiptAvailable } from "../../../lib/requestReceiptAvailability";
+import { publicReviewPolicy } from "../../../lib/humanReviewPolicy";
 
 export async function GET() {
   const intake = publicIntakeCapability();
@@ -15,6 +16,7 @@ export async function GET() {
     email_enabled: process.env.EMAIL_ENABLED === "true" || process.env.AGENT_NOTIFICATIONS_ENABLED === "true",
     public_intake: intake,
     request_receipts_available: intake === "live" && requestReceiptAvailable(),
+    human_review: publicReviewPolicy(),
     checked_at: new Date().toISOString(),
   }, { headers: { "Cache-Control": "no-store", ...releaseRuntimeHeaders() } });
 }

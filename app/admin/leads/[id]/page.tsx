@@ -29,6 +29,7 @@ import { LeadOperatorBrief } from "../../../components/admin/LeadOperatorBrief";
 import { LeadContactDisclosure } from "../../../components/admin/LeadContactDisclosure";
 import { isTerminalContactRecord } from "../../../lib/manualContactReview";
 import { isPreviewRuntime } from "../../../../src/lib/preview-security";
+import { HumanReviewObjective } from "../../../components/admin/HumanReviewObjective";
 import { ConversionMutationForm } from "../../../components/admin/ConversionMutationForm";
 import { presentLead, leadSubtype } from "../../../lib/leadPresentation";
 import { leadOwnership } from "../../../lib/leadOwnership";
@@ -716,6 +717,7 @@ export default async function AdminLeadDetailPage({
                 </> : <p className="mt-2">A supervisor must directly assign and review this inquiry before any response. Inherited access remains read-only.</p>}
               </section> : null}
               {dossier ? <LeadQualificationPanel dossier={dossier} simulation={simulation}/> : null}
+              <HumanReviewObjective value={detail.humanReview} now={new Date().toISOString()} held={contactBlocked}/>
               {lead.seller_request ? <section className="mt-5 rounded-xl border border-[#cda24a55] p-4 text-sm leading-6" aria-label="Seller review context">
                 <h2 className="font-semibold text-[#e2c06f]">Requested seller review · {lead.seller_request.option}</h2>
                 <p>Client-reported relationship: {lead.seller_request.relationship}. Representation: {lead.seller_request.representation}. Occupancy: {lead.seller_request.occupancy}.</p>

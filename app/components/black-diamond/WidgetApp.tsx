@@ -16,6 +16,8 @@ type Tab = "value" | "buy" | "ask" | "sell";
 
 export function WidgetApp() {
   const [active, setActive] = useState<Tab>("value");
+  const [askVisited, setAskVisited] = useState(false);
+  const [personRequest, setPersonRequest] = useState(0);
   const [fullFormQuery, setFullFormQuery] = useState(() => widgetFullFormQuery(""));
   const [pending, setPending] = useState(false);
   const attributionOverrides = useMemo<Partial<Attribution>>(() => {
@@ -61,6 +63,7 @@ export function WidgetApp() {
     // Check synchronously too; a second gesture must not beat a React commit.
     if (readPendingHomeValueRequest() && tab !== active) { setPending(true); return false; }
     setActive(tab);
+    if (tab === "ask") setAskVisited(true);
     return true;
   }
 
@@ -72,6 +75,9 @@ export function WidgetApp() {
           <h1 className="text-xs font-bold uppercase tracking-[0.2em] text-[#e2c06f]">Ask Magic Mike</h1>
           <p className="mt-1 text-sm text-[#d9ceb8]">Your next move, made clearer · Our Town Properties, Inc.</p>
           <div className="mt-3"><PublicMikeContact surface="widget" compact /></div>
+          <button type="button" disabled={pending && active !== "ask"} onClick={() => {
+            if (selectTab("ask")) setPersonRequest(value => value + 1);
+          }} className="amm-primary-button mt-3 min-h-11 w-full px-4 py-3 disabled:opacity-60">Request a person</button>
         </header>
         <nav className="grid grid-cols-2 gap-1 border-b border-[#cda24a24] bg-black p-2" role="tablist" aria-label="Ask Magic Mike paths">
           {[
@@ -113,7 +119,7 @@ export function WidgetApp() {
             <HomeValueFunnel surface="widget" compact attributionOverrides={attributionOverrides} />
           ) : null}
           {active === "buy" ? <BuyerIntentSection surface="widget" compact attributionOverrides={attributionOverrides} /> : null}
-          {active === "ask" ? <AskMikeChatPanel surface="widget" compact /> : null}
+          {askVisited ? <div hidden={active !== "ask"}><AskMikeChatPanel surface="widget" compact personRequest={personRequest}/></div> : null}
           {active === "sell" ? <SellerIntentSection surface="widget" compact variant="options" initialOption="compare" /> : null}
         </div>
         <footer className="border-t border-[#cda24a24] px-4 py-3 text-sm text-[#d9ceb8]">

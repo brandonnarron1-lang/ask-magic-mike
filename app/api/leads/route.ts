@@ -1,5 +1,6 @@
 import { after, NextResponse } from "next/server";
 import { requestResponseDraft } from "../../lib/requestResponseTemplates";
+import { newReviewObjective } from "../../lib/humanReviewPolicy";
 import { createHash } from "node:crypto";
 import { normalizeLeadPayload, type LeadPayload } from "../../lib/leadPayload";
 import { publicAttributionUrl } from "../../lib/attributionPrivacy";
@@ -478,6 +479,9 @@ async function insertLead(
       ...(launch ? { launchDraft: prepareLaunchAlertDraft({ payload, sessionId, receivedAt, sourceLabel: routing.sourceLabel }) } : {}),
       metadata: { source_label: routing.sourceLabel, intent_label: routing.intentLabel,
         score: score.score, score_grade: score.grade, is_test: payload.is_test === true,
+        // Atomic capture retains this server-acceptance instant after validation.
+        // It is outside the request fingerprint and never amended on a replay.
+        ...(payload.funnel_type === "chat" ? { human_review: newReviewObjective(new Date().toISOString()) } : {}),
         correlation_id: correlationId },
     },
   });
@@ -837,6 +841,7 @@ export async function POST(req: Request) {
         lead_id: persistedLead.lead_id,
         session_id: persistedLead.session_id,
         duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
+        review_only: true,
       },
       200,
       { "X-AMM-Idempotent-Replay": "1" },
@@ -950,5 +955,6 @@ export async function POST(req: Request) {
     lead_id: persistedLead.lead_id,
     session_id: persistedLead.session_id,
     duplicate_of_lead_id: persistedLead.duplicate_of_lead_id ?? null,
+    review_only: Boolean(payload.is_test || persistedLead.duplicate_of_lead_id),
   });
 }

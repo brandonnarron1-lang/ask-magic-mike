@@ -50,6 +50,10 @@ export async function loadNeonAdminTodayQueue(
               COALESCE(l.assigned_agent_id, original.assigned_agent_id) AS inquiry_owner_agent_id,
               aa.id AS assignment_id, aa.status AS assignment_status,
               rm.first_human_response_at
+              ,(SELECT n.metadata->'human_review' FROM public.lead_notifications n
+                WHERE n.lead_id=l.id AND n.notification_type='lead_alert'
+                  AND n.metadata ? 'human_review'
+                ORDER BY n.created_at,n.id LIMIT 1) AS human_review
          FROM public.leads l
          LEFT JOIN public.leads original ON original.id = l.duplicate_of_lead_id
          LEFT JOIN public.agents owner ON owner.id=COALESCE(l.assigned_agent_id,original.assigned_agent_id)

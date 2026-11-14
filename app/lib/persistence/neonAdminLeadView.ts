@@ -301,7 +301,10 @@ export async function loadNeonAdminLeadDetail(
       return { configured: true, lead: null, timeline: [], appointments: [], followupTasks: [], outcomes: [], firstResponse: null, error: "lead_not_found" };
     }
     const leadRows = await sql.query(
-      `${LEAD_SELECT} WHERE l.id = $1::uuid${scoped ? " AND (l.assigned_agent_id=$2::uuid OR (l.assigned_agent_id IS NULL AND EXISTS(SELECT 1 FROM public.leads original WHERE original.id=l.duplicate_of_lead_id AND original.assigned_agent_id=$2::uuid)))" : ""} LIMIT 1`,
+      `${LEAD_SELECT.replace("SELECT l.*,", `SELECT l.*,
+        (SELECT n.metadata->'human_review' FROM public.lead_notifications n
+          WHERE n.lead_id=l.id AND n.notification_type='lead_alert' AND n.metadata ? 'human_review'
+          ORDER BY n.created_at,n.id LIMIT 1) AS human_review,`)} WHERE l.id = $1::uuid${scoped ? " AND (l.assigned_agent_id=$2::uuid OR (l.assigned_agent_id IS NULL AND EXISTS(SELECT 1 FROM public.leads original WHERE original.id=l.duplicate_of_lead_id AND original.assigned_agent_id=$2::uuid)))" : ""} LIMIT 1`,
       scoped ? [leadId, principal?.agentId] : [leadId],
     ) as Array<Record<string, unknown>>;
     if (!leadRows[0]) {
@@ -360,6 +363,7 @@ export async function loadNeonAdminLeadDetail(
       timeline: timelinePage.events,
       timelinePage,
       sourceEvidence: projectLeadSourceEvidence(leadRows[0], timelineSources.incompleteSources.includes("notifications") ? undefined : timelineSources.rows.notifications),
+      humanReview: leadRows[0].human_review,
       appointments,
       followupTasks,
       outcomes,

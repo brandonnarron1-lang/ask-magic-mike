@@ -36,6 +36,7 @@ test("active Ask Mike flow keeps chat anonymous until explicit consented follow-
       body: JSON.stringify({
         ok: true,
         lead_id: "qa_intercepted_chat_lead",
+        review_only: false,
         session_id: "qa_intercepted_chat_session",
       }),
     });
@@ -129,6 +130,7 @@ test("Ask Mike failed explicit follow-up retry reuses the conversation submissio
       body: JSON.stringify({
         ok: true,
         lead_id: "qa_retry_chat_lead",
+        review_only: false,
         session_id: "qa_retry_chat_session",
       }),
     });
@@ -161,7 +163,7 @@ test("Ask Mike failed explicit follow-up retry reuses the conversation submissio
   const originalSubmissionId = leadPayloads[0].widget_session_id;
   expect(typeof originalSubmissionId).toBe("string");
 
-  await page.getByRole("button", { name: "Request local follow-up" }).click();
+  await page.getByRole("button", { name: "Retry identical follow-up request" }).click();
   await expect(page.getByRole("button", { name: "Request a conversation" })).toBeVisible();
   expect(leadPayloads).toHaveLength(2);
   expect(leadPayloads[1].widget_session_id).toBe(originalSubmissionId);

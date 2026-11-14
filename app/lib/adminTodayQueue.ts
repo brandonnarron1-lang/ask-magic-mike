@@ -73,6 +73,7 @@ export type AdminTodayAction = {
   readOnly?: boolean;
   requestContext?: string;
   receivedAt?: string | null;
+  humanReview?: unknown;
   notificationEvidence?: { template:string|null; audience:string|null; channel:string|null; status:string|null };
   facts?: {
     owner: string;
@@ -227,6 +228,7 @@ export function buildAdminTodayQueue(input: {
       readOnly: ownership === "inherited" && !input.canViewUnassigned,
       requestContext: (text(lead.primary_intent) || text(lead.lead_type))?.replaceAll("_", " ") || "Request type not provided",
       receivedAt: text(lead.created_at),
+      humanReview: lead.human_review,
       facts: {
         owner: text(lead.owner_name) || (effectiveOwner(lead) ? "Ownership recorded — name unavailable" : "Unassigned"),
         location: text(lead.request_location) || text(lead.address_raw),

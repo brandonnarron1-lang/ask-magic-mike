@@ -31,7 +31,8 @@ test("reviewed question reaches canonical test capture once; answer does not bec
     const response=page.waitForResponse(r=>new URL(r.url()).pathname==="/api/leads"&&r.request().method()==="POST");
     await page.getByRole("button",{name:"Request local follow-up",exact:true}).click();
     expect((await response).status()).toBe(200);
-    await expect(page.getByRole("button",{name:"Request a conversation",exact:true})).toBeVisible();
+    await expect(page.getByText("Your request is stored for review.",{exact:true})).toBeVisible();
+    await expect(page.getByRole("button",{name:"Request a conversation",exact:true})).toHaveCount(0); // QA remains held, not an actionable handoff.
     const records=(await pool.query("SELECT is_test,communication_suppressed,email_suppressed,sms_suppressed,consent_email,consent_call,consent_sms,question_raw FROM leads WHERE email=$1",["r2-concierge@example.test"])).rows;
     expect(records).toHaveLength(1);
     // This actual chat contract retains the explicitly checked email evidence;
