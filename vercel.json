@@ -1,6 +1,7 @@
 {
   "git": {
     "deploymentEnabled": {
+      "codex/mobile-response-hardening-20261114": false,
       "codex/concierge-covered-review-20261111": false,
       "codex/today-task-fresh-review-20261109": false,
       "codex/lead-command-desk-20261106": false,

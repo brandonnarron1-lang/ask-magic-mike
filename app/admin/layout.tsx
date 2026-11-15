@@ -56,7 +56,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               <Link
                 key={href}
                 href={href}
-                className="inline-flex min-h-11 items-center rounded-full border border-white/10 bg-white/[.03] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.11em] text-[#b9ae9d] transition hover:border-[#cda24a66] hover:text-[#f0cf79]"
+                className="inline-flex min-h-11 items-center rounded-full border border-white/10 bg-white/[.03] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.11em] text-[#b9ae9d] outline-none transition hover:border-[#cda24a66] hover:text-[#f0cf79] focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
               >
                 {label}
               </Link>

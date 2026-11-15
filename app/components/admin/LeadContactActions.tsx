@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { manualContactReviewTarget, type ManualContactReview } from "../../lib/manualContactReview";
 import { useInvalidateContactDisclosure } from "./LeadContactDisclosure";
 import { contactReadiness, prepareRequestReply, preparedReplyUri } from "../../lib/contactReadiness";
@@ -13,27 +13,65 @@ export function LeadContactActions({ leadId, blocked, canReview, requestLabel = 
   const [busy, setBusy] = useState(false);
   const [audit, setAudit] = useState("");
   const [auditing, setAuditing] = useState(false);
+  const [permissionLoading, setPermissionLoading] = useState(true);
+  const [permissionRetry, setPermissionRetry] = useState(false);
+  const heading = useRef<HTMLHeadingElement>(null);
+  const opener = useRef<HTMLButtonElement | null>(null);
+  const selectionEpoch = useRef(0);
+  const nativePending = useRef(false);
+  const preparationId = useId();
   const auditPending = useRef(false);
   const invalidateDisclosure = useInvalidateContactDisclosure();
-  const requestScope = useRef({ active: false });
+  const requestScope = useRef({ active: false, reading: false });
   useEffect(() => {
-    const scope = { active: !blocked && canReview };
+    const scope = { active: !blocked && canReview, reading: true };
     requestScope.current = scope;
     setReview({}); setSelected(null); setConfirmed(false); setAudit("");
+    selectionEpoch.current++; nativePending.current = false;
+    setBusy(false); setPermissionLoading(true); setPermissionRetry(false);
     if (!scope.active) return;
-    readPermission(leadId).then(value => { if (scope.active) { setReview(value); setState("Review the request before contacting this person."); } }).catch(error => { if (scope.active) { setReview({}); setSelected(null); setConfirmed(false); if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); setState("Contact permission could not be verified. No contact action is available."); } });
+    readPermission(leadId).then(value => { if (scope.active) { setReview(value); setState("Review the request before contacting this person."); } }).catch(error => { if (scope.active) { setReview({}); setSelected(null); setConfirmed(false); setPermissionRetry(true); if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); setState("Contact permission could not be verified. No contact action is available."); } }).finally(() => { scope.reading = false; if (scope.active) setPermissionLoading(false); });
     return () => { scope.active = false; };
     // The endpoint always reads the current role/ownership and stored consent.
   }, [leadId, blocked, canReview, invalidateDisclosure]);
 
-  async function openNativeContact() {
-    if (!selected || !confirmed || busy) return;
-    const expectedTarget = manualContactReviewTarget(review, selected);
+  async function retryPermission() {
     const scope = requestScope.current;
-    setBusy(true);
+    if (!scope.active || scope.reading || !permissionRetry) return;
+    scope.reading = true; setPermissionLoading(true);
+    setState("Checking current contact permission. No request or evaluation is being saved.");
     try {
       const fresh = await readPermission(leadId);
       if (!scope.active) return;
+      setReview(fresh); setPermissionRetry(false);
+      setState("Review the request before contacting this person.");
+      heading.current?.focus();
+    } catch (error) {
+      if (!scope.active) return;
+      setReview({}); setPermissionRetry(true);
+      if (error instanceof ContactAccessDenied) invalidateDisclosure?.();
+      setState("Contact permission could not be verified. No contact action is available.");
+    } finally { scope.reading = false; if (scope.active) setPermissionLoading(false); }
+  }
+
+  function cancelPreparation() {
+    selectionEpoch.current++; nativePending.current = false;
+    setSelected(null); setConfirmed(false); setBusy(false);
+    setState("Contact preparation canceled. No completed contact was recorded.");
+    if (opener.current?.isConnected && !opener.current.disabled) opener.current.focus();
+    else heading.current?.focus();
+  }
+
+  async function openNativeContact() {
+    if (!selected || !confirmed || busy || nativePending.current) return;
+    const expectedTarget = manualContactReviewTarget(review, selected);
+    const scope = requestScope.current;
+    const epoch = ++selectionEpoch.current;
+    nativePending.current = true;
+    setBusy(true);
+    try {
+      const fresh = await readPermission(leadId);
+      if (!scope.active || epoch !== selectionEpoch.current) return;
       setReview(fresh);
       const target = manualContactReviewTarget(fresh, selected);
       if (!target || target !== expectedTarget) { setSelected(null); setConfirmed(false); setState("Permission changed or is unavailable. No contact action was opened."); return; }
@@ -42,11 +80,13 @@ export function LeadContactActions({ leadId, blocked, canReview, requestLabel = 
         const draft = prepareRequestReply(fresh, requestLabel);
         window.location.assign(preparedReplyUri(target, draft));
       } else window.location.assign(target);
-    } catch (error) { if (!scope.active) return; setReview({}); setSelected(null); setConfirmed(false); if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); setState("Contact permission could not be verified. Nothing was opened."); }
-    finally { setBusy(false); }
+    } catch (error) { if (!scope.active) return; if (error instanceof ContactAccessDenied) invalidateDisclosure?.(); if (epoch !== selectionEpoch.current) return; setReview({}); setSelected(null); setConfirmed(false); setPermissionRetry(true); setState("Contact permission could not be verified. Nothing was opened."); }
+    finally { if (epoch === selectionEpoch.current) { nativePending.current = false; setBusy(false); } }
   }
   async function recordEvaluation() {
     if (auditPending.current || !review.operator?.canRecordEvaluation) return;
+    selectionEpoch.current++; nativePending.current = false;
+    setSelected(null); setConfirmed(false); setBusy(false);
     auditPending.current = true; setAuditing(true); setAudit("Saving the evaluation to the audit…");
     const scope = requestScope.current;
     try {
@@ -61,6 +101,7 @@ export function LeadContactActions({ leadId, blocked, canReview, requestLabel = 
     } catch (error) {
       if (!scope.active) return;
       setSelected(null); setConfirmed(false); setReview({});
+      setPermissionRetry(true);
       if (error instanceof ContactAccessDenied) invalidateDisclosure?.();
       setAudit("Evaluation save could not be confirmed. Permission has not been amended; nothing was sent. Refresh the evidence before continuing.");
     } finally { auditPending.current = false; setAuditing(false); }
@@ -70,19 +111,20 @@ export function LeadContactActions({ leadId, blocked, canReview, requestLabel = 
   const email = contactReadiness(review, "email"), phone = contactReadiness(review, "phone");
   const draft = prepareRequestReply(review, requestLabel);
   return <section id="contact-readiness" aria-label="Contact this lead" className="min-w-0 space-y-3">
-    <h3 className="font-semibold text-[#e2c06f]">Contact readiness</h3>
+    <h3 ref={heading} tabIndex={-1} className="font-semibold text-[#e2c06f] outline-none focus-visible:ring-2 focus-visible:ring-cyan-200">Contact readiness</h3>
     <div className="grid grid-cols-2 gap-2">
-      {(["email", "phone"] as const).map(channel => <button key={channel} type="button" disabled={!manualContactReviewTarget(review, channel)} onClick={() => { setSelected(channel); setConfirmed(false); }} className={`min-h-11 rounded-lg border border-[#d9af52]/45 px-3 py-3 text-sm font-bold ${channel === (email.ready ? "email" : "phone") ? "bg-[#d9af52] text-[#090909]" : "bg-transparent text-[#e2c06f]"} disabled:bg-transparent disabled:text-[#b9ae9d] focus-visible:outline-2 focus-visible:outline-cyan-300`}>{channel === "phone" ? "Review & call" : "Review & email"}</button>)}
+      {(["email", "phone"] as const).map(channel => <button key={channel} type="button" disabled={!manualContactReviewTarget(review, channel)} aria-expanded={selected === channel} aria-controls={selected === channel ? preparationId : undefined} onClick={event => { selectionEpoch.current++; nativePending.current = false; setBusy(false); opener.current = event.currentTarget; setSelected(channel); setConfirmed(false); }} className={`min-h-11 rounded-lg border border-[#d9af52]/45 px-3 py-3 text-sm font-bold ${channel === (email.ready ? "email" : "phone") ? "bg-[#d9af52] text-[#090909]" : "bg-transparent text-[#e2c06f]"} disabled:bg-transparent disabled:text-[#b9ae9d] focus-visible:outline-2 focus-visible:outline-cyan-300`}>{channel === "phone" ? "Review & call" : "Review & email"}</button>)}
     </div>
     {review.operator ? <p className="break-words text-sm text-[#d9ceb8]">Operating as {review.operator.name}. Reply about this request only.</p> : null}
     {review.ok ? <dl className="grid min-w-0 gap-2 text-sm sm:grid-cols-2">{([["Email",email],["Phone",phone]] as const).map(([label,value])=><div key={label} className="min-w-0"><dt className="font-semibold">{label} — {value.label}</dt><dd className="mt-1 leading-5 text-[#d9ceb8] [overflow-wrap:anywhere]">{value.reason}</dd></div>)}</dl> : null}
     <p role="status" className="text-sm leading-5 text-[#d9ceb8]">{state}</p>
+    {permissionRetry ? <button type="button" disabled={permissionLoading} onClick={retryPermission} className="min-h-11 rounded-lg border border-[#d9af52]/45 px-3 py-2 text-sm font-semibold text-[#e2c06f] focus-visible:outline-2 focus-visible:outline-cyan-300 disabled:opacity-60">{permissionLoading ? "Checking permission…" : "Retry permission check"}</button> : null}
     {review.ok && !email.ready && !phone.ready ? <p className="text-sm leading-5 text-[#d9ceb8]">Contact remains restricted. Internal qualification and the existing review task can continue. The evidence below explains what is missing; this screen does not grant consent.</p> : null}
-    {selected ? <div className="rounded-lg border border-[#d9af52]/45 p-3">
+    {selected ? <div id={preparationId} className="rounded-lg border border-[#d9af52]/45 p-3">
       <p className="break-words text-sm font-semibold">{selected === "phone" ? review.manualContact?.phone : review.manualContact?.email}</p>
       {selected === "email" ? <label className="mt-3 block text-sm">Prepared reply — unsent<textarea readOnly value={draft.body} rows={6} className="mt-2 w-full min-w-0 rounded-lg border border-[#d9af52]/40 bg-[#080a0b] p-3 text-sm leading-6 [overflow-wrap:anywhere]"/></label> : null}
       <label className="my-3 flex min-h-11 items-start gap-3 text-sm leading-5"><input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} className="mt-1 h-4 w-4 shrink-0"/>I reviewed the request and contact permission. Open my {selected === "phone" ? "dialer" : "email app"}; do not record completed contact.</label>
-      <div className="flex flex-wrap gap-2"><button type="button" disabled={!confirmed || busy} onClick={openNativeContact} className="min-h-11 rounded-lg bg-[#d9af52] px-4 py-2 text-sm font-bold text-[#090909] disabled:opacity-50">{busy ? "Checking…" : selected === "phone" ? "Open dialer" : "Open email app"}</button><button type="button" onClick={() => { setSelected(null); setConfirmed(false); }} className="min-h-11 px-4 text-sm">Cancel</button></div>
+      <div className="flex flex-wrap gap-2"><button type="button" disabled={!confirmed || busy} onClick={openNativeContact} className="min-h-11 rounded-lg bg-[#d9af52] px-4 py-2 text-sm font-bold text-[#090909] disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-cyan-300">{busy ? "Checking…" : selected === "phone" ? "Open dialer" : "Open email app"}</button><button type="button" onClick={cancelPreparation} className="min-h-11 px-4 text-sm focus-visible:outline-2 focus-visible:outline-cyan-300">Cancel</button></div>
     </div> : null}
     <details className="min-w-0 border-t border-white/10 pt-2 text-sm"><summary className="min-h-11 cursor-pointer py-3 text-[#e2c06f] focus-visible:outline-2 focus-visible:outline-cyan-300">Permission evidence and audit</summary>
       <div className="space-y-2 break-words text-[#d9ceb8] [overflow-wrap:anywhere]">

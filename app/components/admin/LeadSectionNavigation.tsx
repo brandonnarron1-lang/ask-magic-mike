@@ -35,7 +35,7 @@ export function LeadSectionNavigation({ leadId, isTest }: { leadId: string; isTe
 
   return <nav aria-label="Lead next steps" className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-[#e2c06f]">
     {[["follow-up", isTest ? "Review tasks" : "Log result / next task"], ["appointment-review", "Appointments"], ["activity", "History"]].map(([id, label]) =>
-      <a key={id} className="inline-flex min-h-11 items-center py-2 underline" href={`#${id}`} onClick={event => {
+      <a key={id} className="inline-flex min-h-11 items-center rounded-sm py-2 underline outline-none focus-visible:ring-2 focus-visible:ring-cyan-200 focus-visible:ring-offset-2 focus-visible:ring-offset-black" href={`#${id}`} onClick={event => {
         if (event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) revealLeadSection(id);
       }}>{label}</a>)}
   </nav>;

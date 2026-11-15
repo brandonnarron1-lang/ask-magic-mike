@@ -78,4 +78,12 @@ describe.skipIf(!enabled)('manual request readiness — real isolated PostgreSQL
     const id=await fixture();psql(`UPDATE leads SET communication_suppressed=true WHERE id=${literal(id)}`);
     const c=await context(id);expect(evaluateLeadCommunicationPermission(c.lead,c.permissions,{channel:'email',purpose:'manual_one_to_one',humanApproved:true}).code).toBe('suppressed');
   });
+  it.each(['no_follow_up','do_not_contact'])('a saved %s reason fences native contact even on an open legacy lifecycle',async reason=>{
+    const id=await fixture();psql(`UPDATE leads SET closed_lost_reason=${literal(reason)} WHERE id=${literal(id)}`);
+    const before=businessCounts(),c=await context(id);
+    expect(c.contact.terminal).toBe(true);
+    expect(c.contact.evidence.email.eligible).toBe(true); // Consent does not clear a separate lifecycle restriction.
+    expect(businessCounts()).toBe(before);
+    expect(psql(`SELECT status FROM leads WHERE id=${literal(id)}`)).toBe('assigned');
+  });
 });

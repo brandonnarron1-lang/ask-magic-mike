@@ -4,10 +4,13 @@ import { LeadContactActions } from "./LeadContactActions";
 import { LeadSectionNavigation } from "./LeadSectionNavigation";
 import { LeadContactDisclosure } from "./LeadContactDisclosure";
 import { normalizeBuyerInterest, type BuyerInterestV1 } from "../../lib/buyerInterest";
+import { ConversationRequestNotice } from "./ConversationRequestNotice";
+import type { AdminAppointmentRow } from "../../lib/adminAppointmentFollowupOps";
 
-export function LeadQuickOverview({ view, leadId, receivedAt, request, blocked, canReview, status }: {
+export function LeadQuickOverview({ view, leadId, receivedAt, request, blocked, canReview, status, conversation, observedAt }: {
   view: LeadPresentation; leadId: string; receivedAt: string | null; request: string;
   blocked: boolean; canReview: boolean; status: string;
+  conversation?: AdminAppointmentRow; observedAt?: string;
 }) {
   const identity = view.disclosure === "assigned" || view.disclosure === "supervisor" ? view.identity : undefined;
   let interest: BuyerInterestV1 | null = null;
@@ -26,11 +29,12 @@ export function LeadQuickOverview({ view, leadId, receivedAt, request, blocked, 
       <p className="text-xs text-[#b9ae9d]">Submitted interest, not the buyer’s home address. Availability and property facts are not verified.</p>
     </section> : identity?.address ? <div><p className="text-xs text-[#b9ae9d]">{view.subtype === "seller" || view.subtype === "cash_seller" ? "Seller property" : "Recorded address"}</p><p className="select-text whitespace-pre-wrap break-words text-sm [overflow-wrap:anywhere]">{identity.address}</p></div> : null}
     <dl className="grid gap-3 sm:grid-cols-2">
-      {[["Area", view.location], ["Timeframe", view.timeline], ["Source", view.source], ["Assignment", view.custodian]].map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-xs text-[#b9ae9d]">{label}</dt><dd className="mt-1 break-words text-sm">{value}</dd></div>)}
+      {[["Area", view.location], ["Timeframe", view.timeline], ["Source", view.source], ["Current owner", view.custodian]].map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-xs text-[#b9ae9d]">{label}</dt><dd className="mt-1 break-words text-sm">{value}</dd></div>)}
     </dl>
     {!view.isTest && identity?.question ? <div className="text-sm leading-6"><p className="whitespace-pre-line break-words">{identity.question.slice(0, 280)}{identity.question.length > 280 ? "…" : ""}</p>{identity.question.length > 280 ? <details className="mt-2"><summary className="cursor-pointer py-2 text-[#e2c06f]">Read full request</summary><p className="whitespace-pre-line break-words">{identity.question}</p></details> : null}</div> : null}
     <LeadContactActions key={leadId} leadId={leadId} blocked={blocked} canReview={canReview} requestLabel={request}/>
     <p className="text-xs leading-5 text-[#b9ae9d]">Received {leadReceivedLabel(receivedAt)}. {view.isTest ? "Read-only walkthrough; no contact or task changes." : "After contact, record what actually happened and set the next task."}</p>
+    {conversation ? <ConversationRequestNotice appointment={conversation} observedAt={observedAt || ""}/> : null}
     <LeadSectionNavigation leadId={leadId} isTest={view.isTest}/>
   </section></LeadContactDisclosure>;
 }

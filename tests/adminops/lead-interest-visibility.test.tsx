@@ -13,7 +13,8 @@ describe("authorized latest-inquiry property disclosure", () => {
     const html = markup(view);
     expect(html).toContain("Submitted buying interest"); expect(html).toContain(interest.properties[0].address_text); expect(html).toContain("2B");
     expect(html).toContain("reference only"); expect(html).not.toContain(`href="${interest.properties[0].listing_url}`);
-    expect(html.indexOf("Submitted buying interest")).toBeLessThan(html.indexOf("Assignment"));
+    expect(html).toContain("Current owner");
+    expect(html.indexOf("Submitted buying interest")).toBeLessThan(html.indexOf("Current owner"));
   });
   it.each(["pre_claim", "audit"] as const)("does not serialize/render interest injected into a malformed %s DTO", disclosure => {
     const view = fixture(); view.disclosure = disclosure; view.identity = { ...view.identity!, buyerInterest: { ...interest, properties: [...interest.properties] } };

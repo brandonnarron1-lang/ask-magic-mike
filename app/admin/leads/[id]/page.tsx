@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { conversationPreferenceLabel } from "../../../lib/conversationPreferences";
+import { ConversationRequestNotice } from "../../../components/admin/ConversationRequestNotice";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -285,11 +285,11 @@ function Timeline({
 
 function AppointmentCreateForm({ leadId }: { leadId: string }) {
   return (
-    <ConversionMutationForm action={createAppointmentAction} submitLabel="Create appointment record" successMessage="Appointment record saved. No calendar event or invitation created." confirmationLabel="Confirm this appointment request or agreed schedule is real. This saves an internal record only." className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+    <ConversionMutationForm action={createAppointmentAction} submitLabel="Create appointment record" successMessage="Appointment record saved. No calendar event or invitation created." confirmationLabel="Confirm this appointment request or agreed schedule is real. This saves an internal record only." className="rounded-md border border-white/10 bg-white/[0.03] p-4 [&_select]:max-w-full">
       <input type="hidden" name="lead_id" value={leadId} />
       <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
       <p className="text-sm leading-6 text-[#d9ceb8]">Requested can have no scheduled time. Scheduled requires both start and end, with a duration of at most eight hours.</p>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 [&>label]:min-w-0">
         <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
           Status
           <select name="status" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]">
@@ -341,7 +341,7 @@ function appointmentNextStatuses(status: AppointmentStatus): AppointmentStatus[]
   return transitions[status] || [];
 }
 
-function AppointmentCard({ leadId, appointment, canUpdate }: { leadId: string; appointment: AdminAppointmentRow; canUpdate: boolean }) {
+function AppointmentCard({ leadId, appointment, canUpdate, observedAt }: { leadId: string; appointment: AdminAppointmentRow; canUpdate: boolean; observedAt: string }) {
   return (
     <article className="rounded-md border border-white/10 bg-[#080808] p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -356,7 +356,7 @@ function AppointmentCard({ leadId, appointment, canUpdate }: { leadId: string; a
         </Badge>
       </div>
       {appointment.location_label ? <p className="mt-3 text-xs text-[#d9ceb8]">{appointment.location_label}</p> : null}
-      {appointment.request_preferences ? <p className="mt-3 rounded-md border border-[#cda24a33] p-3 text-sm text-[#e4dac8]">Requested preferences: {conversationPreferenceLabel(appointment.request_preferences)}. Not availability or contact permission.</p> : null}
+      <div className="mt-3"><ConversationRequestNotice appointment={appointment} observedAt={observedAt}/></div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2">
         {(canUpdate ? appointmentNextStatuses(appointment.status) : []).map((status) => (
           <ConversionMutationForm key={status} action={transitionAppointmentAction} submitLabel={`Mark ${status.replaceAll("_", " ")}`} successMessage={`Appointment marked ${status.replaceAll("_", " ")}. No calendar update or invitation sent.`} confirmationLabel={status === "completed" ? "Confirm this appointment actually took place. Task completion alone does not count." : status === "no_show" ? "Confirm the appointment time passed and the person did not attend." : status === "confirmed" ? "Confirm the person actually agreed to this appointment." : `Confirm the actual appointment change to ${status.replaceAll("_", " ")}.`} className="rounded-md border border-white/10 bg-white/[0.02] p-3">
@@ -385,13 +385,13 @@ function AppointmentCard({ leadId, appointment, canUpdate }: { leadId: string; a
   );
 }
 
-function AppointmentPanel({ leadId, appointments, canUpdate, canCreate = canUpdate }: { leadId: string; appointments: AdminAppointmentRow[]; canUpdate: boolean; canCreate?: boolean }) {
+function AppointmentPanel({ leadId, appointments, canUpdate, canCreate = canUpdate, observedAt }: { leadId: string; appointments: AdminAppointmentRow[]; canUpdate: boolean; canCreate?: boolean; observedAt: string }) {
   return (
     <Panel title="Appointment operations">
       <div className="space-y-3">
         <p className="text-sm leading-6 text-[#d9ceb8]">Internal appointment records only. No calendar availability is checked, no external calendar event is created, and no invitation is sent.</p>
         {appointments.length ? appointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} leadId={leadId} appointment={appointment} canUpdate={canUpdate} />
+          <AppointmentCard key={appointment.id} leadId={leadId} appointment={appointment} canUpdate={canUpdate} observedAt={observedAt} />
         )) : (
           <p className="text-sm text-[#8f8778]">No appointment record yet.</p>
         )}
@@ -498,14 +498,14 @@ function FollowupPanel({ leadId, tasks, canManage }: { leadId: string; tasks: Ad
 }
 
 function ManualHumanFollowthroughForm({ leadId }: { leadId: string }) {
-  const fieldClass = "mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]";
+  const fieldClass = "mt-1 w-full min-w-0 max-w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]";
   return (
     <Panel title="Log manual interaction + next task">
       <ConversionMutationForm action={recordHumanFollowthroughAction} submitLabel="Save interaction and next task" successMessage="Manual interaction and next task saved together. No message sent. A confirmed two-way conversation records first-response evidence atomically, without overwriting existing evidence." confirmationLabel="Confirm this manual interaction actually occurred and the next task reflects the agreed follow-through." newActionLabel="Log a separate interaction" className="rounded-md border border-white/10 bg-white/[0.03] p-4">
         <input type="hidden" name="lead_id" value={leadId} />
         <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
         <p className="text-sm leading-6 text-[#d9ceb8]">Operator-entered evidence, not a provider delivery receipt. The interaction and next reminder save together or neither saves. This form never calls, emails, sends a message, or books a calendar event.</p>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 [&>label]:min-w-0">
           <label className="text-sm text-[#d9ceb8]">Actual channel
             <select name="channel" required className={fieldClass}>
               <option value="phone">Phone</option><option value="email">Email</option><option value="in_person">In person</option><option value="other">Other</option>
@@ -636,8 +636,10 @@ export default async function AdminLeadDetailPage({
   const detail = await loadAdminLeadDetail(id, principal, { offset: timelineOffset, limit: 30 });
   if (detail.configured && !detail.lead && detail.error === "lead_not_found") notFound();
   const lead = detail.lead;
+  const observedAt = new Date().toISOString();
+  const conversation = detail.appointments.find(appointment => ["requested", "reschedule_requested"].includes(appointment.status));
   const canActOnCurrentLead = Boolean(lead && principal && canAccessAssignedLead(principal, lead.assigned_agent_id));
-  const contactBlocked = Boolean(lead && (lead.is_test || lead.communication_suppressed || isTerminalContactRecord(lead.status, lead.conversion_stage)));
+  const contactBlocked = Boolean(lead && (lead.is_test || lead.communication_suppressed || isTerminalContactRecord(lead.status, lead.conversion_stage, lead.closed_lost_reason)));
   // Contact holds are not a new prohibition on maintaining existing internal
   // records. Preserve canonical task/appointment transitions on closed leads.
   const canMaintainRecords = Boolean(lead && canUpdateLead && canActOnCurrentLead && !lead.is_test && !lead.communication_suppressed);
@@ -701,7 +703,7 @@ export default async function AdminLeadDetailPage({
             <section className="min-w-0 space-y-5">
               <div className="space-y-1">
               <LeadOperatorBrief detail={detail} principal={principal}/>
-              {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && canActOnCurrentLead && !isPreviewRuntime()} status={lead.status}/> : null}
+              {principal ? <LeadQuickOverview view={presentLead({ lead, principal, tier: "assigned", evidence: {appointments:detail.appointments,followupTasks:detail.followupTasks,outcomes:detail.outcomes} })} leadId={lead.id} receivedAt={lead.created_at} request={leadRequestLabel(lead.funnel_type)} blocked={contactBlocked} canReview={canUpdateLead && canActOnCurrentLead && !isPreviewRuntime()} status={lead.status} conversation={conversation} observedAt={observedAt}/> : null}
               </div>
               {repeatInquiryReviewState(lead) !== "not_required" ? <section aria-label="Repeat inquiry review" className="mt-4 rounded-xl border border-[#cda24a55] bg-[#15120d] p-4 text-sm text-[#f4ead4]">
                 <h2 className="font-semibold text-[#e2c06f]">A separate request needs review</h2>
@@ -717,7 +719,7 @@ export default async function AdminLeadDetailPage({
                 </> : <p className="mt-2">A supervisor must directly assign and review this inquiry before any response. Inherited access remains read-only.</p>}
               </section> : null}
               {dossier ? <LeadQualificationPanel dossier={dossier} simulation={simulation}/> : null}
-              <HumanReviewObjective value={detail.humanReview} now={new Date().toISOString()} held={contactBlocked}/>
+              <HumanReviewObjective value={detail.humanReview} now={observedAt} held={contactBlocked}/>
               {lead.seller_request ? <section className="mt-5 rounded-xl border border-[#cda24a55] p-4 text-sm leading-6" aria-label="Seller review context">
                 <h2 className="font-semibold text-[#e2c06f]">Requested seller review · {lead.seller_request.option}</h2>
                 <p>Client-reported relationship: {lead.seller_request.relationship}. Representation: {lead.seller_request.representation}. Occupancy: {lead.seller_request.occupancy}.</p>
@@ -789,7 +791,7 @@ export default async function AdminLeadDetailPage({
                 </p>
               </Panel>
 
-              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} canUpdate={canMaintainRecords} canCreate={canFollowThrough} /></div>
+              <div id="appointment-review"><AppointmentPanel leadId={lead.id} appointments={detail.appointments} canUpdate={canMaintainRecords} canCreate={canFollowThrough} observedAt={observedAt} /></div>
 
               <OutcomePanel
                 outcomes={detail.outcomes}

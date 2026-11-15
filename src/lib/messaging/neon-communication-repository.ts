@@ -34,7 +34,7 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
     `SELECT id, is_test, communication_suppressed, email_suppressed, sms_suppressed,
             consent_email, consent_sms, consent_call, consent_timestamp,
             consent_language_version, consent_language_text,
-            source, source_detail, page_url, assigned_agent_id, phone, email, status, conversion_stage
+            source, source_detail, page_url, assigned_agent_id, phone, email, status, conversion_stage, closed_lost_reason
        FROM public.leads
       WHERE id = $1::uuid${scoped ? " AND assigned_agent_id = $2::uuid" : ""}
       LIMIT 1`,
@@ -87,7 +87,7 @@ export async function loadLeadPermissionContext(leadId: string, principal: LeadC
   const permissions = projectManualRequestPermissions(lead, storedPermissions, consentRecords, row.consent_timestamp);
   return { ok: true as const, sql, lead, permissions, storedPermissions, contact: {
     phone: text(row.phone), email: text(row.email),
-    terminal: isTerminalContactRecord(text(row.status), text(row.conversion_stage)),
+    terminal: isTerminalContactRecord(text(row.status), text(row.conversion_stage), text(row.closed_lost_reason)),
     evidence: Object.fromEntries((["email", "phone"] as const).map(channel => [channel, consentEvidenceAvailable ? assessRequestContactEvidence(lead, consentRecords, row.consent_timestamp, channel) : { eligible: false, reason: "Retained request-consent evidence could not be read. No permission is inferred from unavailable evidence." }])),
   }, consentEvidence: { version: lead.consentVersion, text: lead.consentText, recordedAt: text(row.consent_timestamp), available: consentEvidenceAvailable } };
 }

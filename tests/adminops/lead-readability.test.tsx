@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { LeadQuickOverview } from "../../app/components/admin/LeadQuickOverview";
 import { leadCardFixture } from "../../app/lib/leadPresentationFixtures";
 import { leadPageHeading, leadRequestLabel } from "../../app/lib/leadReadability";
-import { manualContactReviewTarget, type ManualContactReview } from "../../app/lib/manualContactReview";
+import { isTerminalContactRecord, manualContactReviewTarget, type ManualContactReview } from "../../app/lib/manualContactReview";
 import { evaluateLeadCommunicationPermission, type LeadPermissionFacts, type StoredPermission } from "../../src/lib/messaging/permission-service";
 
 const view = leadCardFixture({subtype:"seller",tier:"assigned",state:"offered",score:60,isTest:true});
@@ -13,6 +13,10 @@ function snapshot(overrides: Partial<LeadPermissionFacts> = {}, state: StoredPer
   return {ok:true,lead:{isTest:Boolean(overrides.isTest),suppressed:Boolean(overrides.suppressed)},manualContact:{canReview:true,terminal:false,phone:"+1 (252) 555-0100",email:"synthetic@example.test"},reviewMatrix:(["phone","email"] as const).map(channel=>({channel,purpose:"manual_one_to_one",decision:evaluateLeadCommunicationPermission({...facts,...overrides},[{...permission,channel,state}],{channel,purpose:"manual_one_to_one",autoSendEnabled:false,humanApproved:false})}))};
 }
 describe("action-first lead detail",()=>{
+  it.each(["no_follow_up","do_not_contact"," NO_FOLLOW_UP "])("keeps %s terminal for contact even when a legacy lifecycle is open",reason=>{
+    expect(isTerminalContactRecord("new",null,reason)).toBe(true);
+    expect(isTerminalContactRecord("new",null,null)).toBe(false);
+  });
   it("uses a short human heading, never the intake text or attribution JSON",()=>{
     expect(leadPageHeading("INTERNAL QA — very long diagnostic payload",true)).toBe("Test lead");
     expect(leadPageHeading("SYNTHETIC REVIEWER")).toBe("SYNTHETIC REVIEWER");
