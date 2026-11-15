@@ -285,11 +285,11 @@ function Timeline({
 
 function AppointmentCreateForm({ leadId }: { leadId: string }) {
   return (
-    <ConversionMutationForm action={createAppointmentAction} submitLabel="Create appointment record" successMessage="Appointment record saved. No calendar event or invitation created." confirmationLabel="Confirm this appointment request or agreed schedule is real. This saves an internal record only." className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+    <ConversionMutationForm action={createAppointmentAction} submitLabel="Create appointment record" successMessage="Appointment record saved. No calendar event or invitation created." confirmationLabel="Confirm this appointment request or agreed schedule is real. This saves an internal record only." className="rounded-md border border-white/10 bg-white/[0.03] p-4 [&_select]:max-w-full">
       <input type="hidden" name="lead_id" value={leadId} />
       <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
       <p className="text-sm leading-6 text-[#d9ceb8]">Requested can have no scheduled time. Scheduled requires both start and end, with a duration of at most eight hours.</p>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 [&>label]:min-w-0">
         <label className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8f8778]">
           Status
           <select name="status" className="mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-2 py-2 text-xs text-[#f4ead4]">
@@ -498,14 +498,14 @@ function FollowupPanel({ leadId, tasks, canManage }: { leadId: string; tasks: Ad
 }
 
 function ManualHumanFollowthroughForm({ leadId }: { leadId: string }) {
-  const fieldClass = "mt-1 w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]";
+  const fieldClass = "mt-1 w-full min-w-0 max-w-full rounded-md border border-[#cda24a33] bg-[#050505] px-3 py-2 text-sm text-[#f4ead4]";
   return (
     <Panel title="Log manual interaction + next task">
       <ConversionMutationForm action={recordHumanFollowthroughAction} submitLabel="Save interaction and next task" successMessage="Manual interaction and next task saved together. No message sent. A confirmed two-way conversation records first-response evidence atomically, without overwriting existing evidence." confirmationLabel="Confirm this manual interaction actually occurred and the next task reflects the agreed follow-through." newActionLabel="Log a separate interaction" className="rounded-md border border-white/10 bg-white/[0.03] p-4">
         <input type="hidden" name="lead_id" value={leadId} />
         <input type="hidden" name="return_to" value={`/admin/leads/${leadId}`} />
         <p className="text-sm leading-6 text-[#d9ceb8]">Operator-entered evidence, not a provider delivery receipt. The interaction and next reminder save together or neither saves. This form never calls, emails, sends a message, or books a calendar event.</p>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 [&>label]:min-w-0">
           <label className="text-sm text-[#d9ceb8]">Actual channel
             <select name="channel" required className={fieldClass}>
               <option value="phone">Phone</option><option value="email">Email</option><option value="in_person">In person</option><option value="other">Other</option>

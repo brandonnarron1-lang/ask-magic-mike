@@ -80,8 +80,10 @@ test("mobile response keeps past preference, permission retry, focus and factual
       await steps.getByRole('link',{name:'Appointments',exact:true}).focus();await page.keyboard.press('Enter');
       await expect(page.locator('#appointment-review > details > summary')).toBeFocused();
       await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
-      expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
-      await page.screenshot({path:path.join(output,`mobile-response-${width}-text200.png`),fullPage:false});
+      const actualWidth=await page.evaluate(()=>document.documentElement.scrollWidth);
+      if(actualWidth>width+1)console.info('synthetic_mobile_overflow',JSON.stringify(await page.evaluate(()=>Array.from(document.querySelectorAll('main *')).filter(el=>el.getBoundingClientRect().right>document.documentElement.clientWidth+1).slice(0,12).map(el=>({tag:el.tagName,field:el.getAttribute('name'),classes:el.className,width:Math.round(el.getBoundingClientRect().width)})))));
+      try { expect(actualWidth).toBeLessThanOrEqual(width+1); }
+      finally { await page.screenshot({path:path.join(output,`mobile-response-${width}-text200.png`),fullPage:false}); }
     }
     await page.setViewportSize({width:390,height:1000});
     let first=true;
