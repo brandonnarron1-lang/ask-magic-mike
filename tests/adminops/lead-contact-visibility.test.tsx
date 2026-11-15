@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { LeadQuickOverview } from "../../app/components/admin/LeadQuickOverview";
 import { LeadContactDisclosure } from "../../app/components/admin/LeadContactDisclosure";
@@ -59,6 +59,17 @@ describe("server-authorized saved contact visibility", () => {
 });
 
 describe("fresh contact access denial (component-only synthetic fetches, not auth proof)", () => {
+  it.each([401,403,404])("canceled preparation still removes disclosed contact on a later %s",async status=>{
+    let settle!:(response:Response)=>void;
+    vi.stubGlobal("fetch",vi.fn().mockResolvedValueOnce(Response.json(permitted)).mockImplementationOnce(()=>new Promise<Response>(resolve=>{settle=resolve;})));
+    render(overview(view(),true,false));
+    const call=screen.getByRole('button',{name:'Review & call'});await waitFor(()=>expect(call).toBeEnabled());
+    fireEvent.click(call);fireEvent.click(screen.getByRole('checkbox'));fireEvent.click(screen.getByRole('button',{name:'Open dialer'}));
+    fireEvent.click(screen.getByRole('button',{name:'Cancel'}));
+    await act(async()=>settle(new Response(null,{status})));
+    await screen.findByRole('status',{name:'Lead access unavailable'});
+    expect(screen.queryByText('synthetic@example.test')).not.toBeInTheDocument();
+  });
   it("clears the whole authorized workspace, including contact details outside the overview", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(Response.json(permitted)).mockResolvedValueOnce(new Response(null, { status: 404 })));
     render(<LeadContactDisclosure leadId={id}><div>Secondary saved contact</div>{overview(view(), true, false)}</LeadContactDisclosure>);

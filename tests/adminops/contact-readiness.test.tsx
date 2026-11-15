@@ -32,6 +32,31 @@ describe('plain-language contact readiness',()=>{
   });
 });
 describe('single-screen operator controls (synthetic fetches, not real-auth proof)',()=>{
+  it('retries only the failed permission read without reloading sibling drafts or writing an evaluation',async()=>{
+    const fetch=vi.fn().mockRejectedValueOnce(Error('synthetic_read_failure')).mockResolvedValueOnce(Response.json(review));
+    vi.stubGlobal('fetch',fetch);
+    render(<><label>Unsent note<input defaultValue='SYNTHETIC UNSAVED NOTE'/></label><LeadContactActions leadId='synthetic' blocked={false} canReview/></>);
+    const retry=await screen.findByRole('button',{name:'Retry permission check'});
+    fireEvent.click(retry);
+    await waitFor(()=>expect(screen.getByRole('button',{name:'Review & email'})).toBeEnabled());
+    expect(screen.getByLabelText('Unsent note')).toHaveValue('SYNTHETIC UNSAVED NOTE');
+    expect(fetch).toHaveBeenCalledTimes(2);
+    for(const [,options] of fetch.mock.calls)expect(options).toEqual({cache:'no-store'});
+    expect(screen.queryByRole('button',{name:'Open email app'})).not.toBeInTheDocument();
+  });
+  it('returns keyboard focus on cancel and ignores a pending native-contact read after cancellation',async()=>{
+    let settle!:(r:Response)=>void;
+    vi.stubGlobal('fetch',vi.fn().mockResolvedValueOnce(Response.json(review)).mockImplementationOnce(()=>new Promise<Response>(resolve=>{settle=resolve;})));
+    render(<LeadContactActions leadId='synthetic' blocked={false} canReview/>);
+    const call=screen.getByRole('button',{name:'Review & call'});await waitFor(()=>expect(call).toBeEnabled());
+    call.focus();fireEvent.click(call);fireEvent.click(screen.getByRole('checkbox'));fireEvent.click(screen.getByRole('button',{name:'Open dialer'}));
+    fireEvent.click(screen.getByRole('button',{name:'Cancel'}));
+    expect(call).toHaveFocus();
+    await act(async()=>settle(Response.json(review)));
+    expect(screen.getByText('Contact preparation canceled. Nothing was opened or recorded.')).toBeInTheDocument();
+    expect(screen.queryByText(/Opening your dialer/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button',{name:'Open dialer'})).not.toBeInTheDocument();
+  });
   it('shows the actual reason, operator and inline evidence without another reminder',async()=>{
     vi.stubGlobal('fetch',vi.fn().mockResolvedValue(Response.json(held())));render(<LeadContactActions leadId='synthetic' blocked={false} canReview/>);
     expect(await screen.findByText('The recorded consent time is missing.')).toBeInTheDocument();
@@ -65,6 +90,17 @@ describe('single-screen operator controls (synthetic fetches, not real-auth proo
     let resolve!:(r:Response)=>void;const fetch=vi.fn().mockResolvedValueOnce(Response.json(review)).mockImplementationOnce(()=>new Promise<Response>(r=>{resolve=r;}));vi.stubGlobal('fetch',fetch);
     render(<LeadContactActions leadId='synthetic' blocked={false} canReview/>);const b=await screen.findByRole('button',{name:'Save current email evaluation to audit'});fireEvent.click(b);fireEvent.click(b);expect(fetch).toHaveBeenCalledTimes(2);
     await act(async()=>resolve(Response.json({ok:false},{status:503})));expect(await screen.findByText(/Evaluation save could not be confirmed/)).toBeInTheDocument();expect(screen.getByRole('button',{name:'Review & email'})).toBeDisabled();
+  });
+  it('refreshes permission after an UNKNOWN evaluation without replaying its POST or clearing the uncertainty',async()=>{
+    const fetch=vi.fn().mockResolvedValueOnce(Response.json(review)).mockRejectedValueOnce(Error('synthetic_unknown_save')).mockResolvedValueOnce(Response.json(review));
+    vi.stubGlobal('fetch',fetch);render(<LeadContactActions leadId='synthetic' blocked={false} canReview/>);
+    fireEvent.click(await screen.findByRole('button',{name:'Save current email evaluation to audit'}));
+    await screen.findByText(/Evaluation save could not be confirmed/);
+    fireEvent.click(screen.getByRole('button',{name:'Retry permission check'}));
+    await waitFor(()=>expect(screen.getByRole('button',{name:'Review & email'})).toBeEnabled());
+    expect(screen.getByText(/Evaluation save could not be confirmed/)).toBeInTheDocument();
+    expect(fetch.mock.calls.filter(([,init])=>init?.method==='POST')).toHaveLength(1);
+    expect(fetch.mock.calls[2][1]).toEqual({cache:'no-store'});
   });
   it('clears a pending selection when its lead scope changes',async()=>{
     vi.stubGlobal('fetch',vi.fn().mockImplementation(()=>Promise.resolve(Response.json(review))));const r=render(<LeadContactActions leadId='first' blocked={false} canReview/>);const b=screen.getByRole('button',{name:'Review & call'});await waitFor(()=>expect(b).toBeEnabled());fireEvent.click(b);

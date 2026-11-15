@@ -46,6 +46,89 @@ for(const width of [320,390,430,1440])test(`command desk real auth, keyboard and
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=document.documentElement.clientWidth+1)).toBe(true);await expect(open).toBeVisible();
   await page.screenshot({path:path.join(output,`command-desk-${width}-text200.png`),fullPage:true});expect(errors).toEqual([]);
 });
+test("mobile response keeps past preference, permission retry, focus and factual outcomes separate",async()=>{
+  const appointment=randomUUID(), page=await contexts.admin.newPage();
+  const before=(await pool.query("SELECT assigned_agent_id,(SELECT count(*)::int FROM lead_response_milestones WHERE lead_id=leads.id) responses,(SELECT count(*)::int FROM lead_notifications WHERE lead_id=leads.id) notifications FROM leads WHERE id=$1",[f.leads.agent])).rows[0];
+  expect((await pool.query("SELECT count(*)::int n FROM communication_permissions WHERE lead_id=$1 AND purpose='manual_one_to_one'",[f.leads.agent])).rows[0].n).toBe(0);
+  try {
+  await pool.query("INSERT INTO communication_permissions(lead_id,channel,purpose,state,source,evidence_at) VALUES($1,'email','manual_one_to_one','allowed','isolated_mobile_fixture',now()),($1,'phone','manual_one_to_one','allowed','isolated_mobile_fixture',now())",[f.leads.agent]);
+  await pool.query("INSERT INTO lead_appointments(id,lead_id,assigned_agent_id,status,requested_at,timezone,location_type,request_preferences,created_by) VALUES($1,$2,$3,'requested',now(),'America/New_York','phone',$4::jsonb,$5)",[appointment,f.leads.agent,f.agents.agent,JSON.stringify({version:1,channel:'phone',day:'2024-01-15',window:'afternoon',timezone:'America/New_York'}),f.ids.admin]);
+    const measurements=[];
+    for(const width of [320,390,430,1440]){
+      await page.setViewportSize({width,height:1000});const started=performance.now();
+      await page.goto(`/admin/leads/${f.leads.agent}`);
+      const overview=page.getByRole('region',{name:'Lead overview',exact:true});
+      await expect(overview.getByRole('heading',{name:'Preferred day has passed',exact:true})).toBeVisible();
+      await expect(overview).toContainText('not a missed confirmed appointment');
+      await expect(page.getByRole('region',{name:'Initial human review'})).toContainText('Review target unknown');
+      await expect(overview.getByRole('button',{name:'Review & call',exact:true})).toBeEnabled();
+      measurements.push({width,navigationToReadyMs:Math.round(performance.now()-started)});
+      const nav=page.getByRole('navigation',{name:'Command Center navigation',exact:true});
+      for(const label of ['Leads','Reports']){
+        const link=nav.getByRole('link',{name:label,exact:true});await link.focus();await expect(link).toBeFocused();
+        expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+        expect(await link.evaluate(el=>getComputedStyle(el).fontSize)).toBe('12px');
+      }
+      await page.evaluate(()=>document.fonts.ready);
+      await page.screenshot({path:path.join(output,`mobile-response-${width}.png`),fullPage:false});
+      if(width===390)await overview.screenshot({path:path.join(output,'mobile-response-overview-390.png')});
+      const steps=overview.getByRole('navigation',{name:'Lead next steps',exact:true});
+      await steps.getByRole('link',{name:'Log result / next task',exact:true}).focus();await page.keyboard.press('Enter');
+      const outcome=page.locator('#follow-up > details > summary');await expect(outcome).toBeFocused();
+      await expect(page.getByRole('combobox',{name:'Actual result',exact:true})).toBeVisible();
+      expect(await page.getByRole('combobox',{name:'Actual result',exact:true}).inputValue()).toBe('attempted');
+      await steps.getByRole('link',{name:'Appointments',exact:true}).focus();await page.keyboard.press('Enter');
+      await expect(page.locator('#appointment-review > details > summary')).toBeFocused();
+      await page.evaluate(()=>{document.documentElement.style.fontSize='200%';});
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width+1);
+      await page.screenshot({path:path.join(output,`mobile-response-${width}-text200.png`),fullPage:false});
+    }
+    await page.setViewportSize({width:390,height:1000});
+    let first=true;
+    await page.route(`**/api/admin/leads/${f.leads.agent}/communication-permissions`,route=>{
+      if(first&&route.request().method()==='GET'){first=false;return route.fulfill({status:503,contentType:'application/json',body:'{"ok":false}'});}
+      return route.continue();
+    });
+    await page.goto(`/admin/leads/${f.leads.agent}`);
+    const retry=page.getByRole('button',{name:'Retry permission check',exact:true});await expect(retry).toBeVisible();
+    const steps=page.getByRole('navigation',{name:'Lead next steps',exact:true});
+    await steps.getByRole('link',{name:'Log result / next task',exact:true}).click();
+    await page.getByLabel('Safe interaction note',{exact:true}).fill('SYNTHETIC UNSAVED NOTE — no contact occurred');
+    await retry.focus();await page.screenshot({path:path.join(output,'mobile-response-read-error-390.png'),fullPage:false});
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('button',{name:'Review & call',exact:true})).toBeEnabled();
+    await expect(page.getByLabel('Safe interaction note',{exact:true})).toHaveValue('SYNTHETIC UNSAVED NOTE — no contact occurred');
+    const call=page.getByRole('button',{name:'Review & call',exact:true});await call.click();
+    await expect(page.getByRole('button',{name:'Open dialer',exact:true})).toBeDisabled();
+    await page.getByRole('button',{name:'Cancel',exact:true}).click();await expect(call).toBeFocused();
+    await page.screenshot({path:path.join(output,'mobile-response-cancel-focus-390.png'),fullPage:false});
+    await pool.query("UPDATE communication_permissions SET state='denied' WHERE lead_id=$1 AND purpose='manual_one_to_one'",[f.leads.agent]);
+    await page.reload();
+    await expect(page.getByRole('button',{name:'Review & call',exact:true})).toBeDisabled();
+    await expect(page.getByRole('button',{name:'Review & email',exact:true})).toBeDisabled();
+    await expect(page.getByText('Contact remains restricted.',{exact:false})).toBeVisible();
+    await page.screenshot({path:path.join(output,'mobile-response-revoked-390.png'),fullPage:false});
+    await pool.query("UPDATE communication_permissions SET state='allowed' WHERE lead_id=$1 AND purpose='manual_one_to_one'",[f.leads.agent]);
+    await pool.query("UPDATE leads SET closed_lost_reason='no_follow_up' WHERE id=$1",[f.leads.agent]);
+    await page.reload();await expect(page.getByRole('region',{name:'Lead overview'})).toContainText('Contact blocked');
+    const noFollowUp=await page.request.get(`/api/admin/leads/${f.leads.agent}/communication-permissions`);
+    expect(noFollowUp.status()).toBe(200);expect((await noFollowUp.json()).manualContact.terminal).toBe(true);
+    await pool.query('UPDATE leads SET closed_lost_reason=NULL WHERE id=$1',[f.leads.agent]);
+    await pool.query("UPDATE leads SET communication_suppressed=true WHERE id=$1",[f.leads.agent]);
+    await page.reload();await expect(page.getByRole('region',{name:'Lead overview'})).toContainText('Contact blocked');
+    await expect(page.getByRole('button',{name:'Review & call',exact:true})).toHaveCount(0);
+    await page.screenshot({path:path.join(output,'mobile-response-held-390.png'),fullPage:false});
+    const after=(await pool.query("SELECT assigned_agent_id,(SELECT count(*)::int FROM lead_response_milestones WHERE lead_id=leads.id) responses,(SELECT count(*)::int FROM lead_notifications WHERE lead_id=leads.id) notifications FROM leads WHERE id=$1",[f.leads.agent])).rows[0];
+    expect(after).toEqual(before);
+    expect((await pool.query('SELECT status,starts_at,confirmed_at FROM lead_appointments WHERE id=$1',[appointment])).rows[0]).toEqual({status:'requested',starts_at:null,confirmed_at:null});
+    writeFileSync(path.join(output,'mobile-response-local-timings.json'),JSON.stringify({at:new Date().toISOString(),environment:'built local Chromium, real isolated PostgreSQL17; one navigation per width; not field INP or a Production claim',measurements},null,2),{mode:0o600});
+    await safety();
+  } finally {
+    await pool.query('DELETE FROM lead_appointments WHERE id=$1',[appointment]);
+    await pool.query("DELETE FROM communication_permissions WHERE lead_id=$1 AND purpose='manual_one_to_one'",[f.leads.agent]);
+    await pool.query('UPDATE leads SET communication_suppressed=false,closed_lost_reason=NULL WHERE id=$1',[f.leads.agent]);
+  }
+});
 test("protected deep link, advisory-only assignment and actual owner survive read",async()=>{
   const page=await contexts.admin.newPage();await page.goto(`/admin/leads/${f.leads.agent}`);
   const brief=page.getByRole("region",{name:"Operator action brief"});

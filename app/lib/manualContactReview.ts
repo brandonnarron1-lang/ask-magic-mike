@@ -9,9 +9,10 @@ export type ManualContactReview = {
   reviewMatrix?: Array<{ channel: string; purpose: string; decision: Pick<CommunicationPermissionDecision, "allowed" | "code" | "requiresHumanApproval"> & Partial<Pick<CommunicationPermissionDecision, "explanation" | "decisionSource" | "evidence" | "consentVersion" | "decidedAt">> }>;
 };
 
-export function isTerminalContactRecord(status?: string | null, stage?: string | null) {
+export function isTerminalContactRecord(status?: string | null, stage?: string | null, closedReason?: string | null) {
   const terminal = ["closed", "closed_won", "closed_lost", "lost", "disqualified", "duplicate", "converted", "dead", "spam"];
-  return terminal.includes(status || "") || terminal.includes(stage || "");
+  return terminal.includes(status || "") || terminal.includes(stage || "") ||
+    ["no_follow_up", "do_not_contact"].includes(closedReason?.trim().toLowerCase() || "");
 }
 
 /** Native dialer/composer only, after an explicit human review. Never a send,
