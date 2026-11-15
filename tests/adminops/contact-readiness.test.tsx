@@ -53,7 +53,7 @@ describe('single-screen operator controls (synthetic fetches, not real-auth proo
     fireEvent.click(screen.getByRole('button',{name:'Cancel'}));
     expect(call).toHaveFocus();
     await act(async()=>settle(Response.json(review)));
-    expect(screen.getByText('Contact preparation canceled. Nothing was opened or recorded.')).toBeInTheDocument();
+    expect(screen.getByText('Contact preparation canceled. No completed contact was recorded.')).toBeInTheDocument();
     expect(screen.queryByText(/Opening your dialer/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button',{name:'Open dialer'})).not.toBeInTheDocument();
   });

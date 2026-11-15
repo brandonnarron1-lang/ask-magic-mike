@@ -57,7 +57,7 @@ export function LeadContactActions({ leadId, blocked, canReview, requestLabel = 
   function cancelPreparation() {
     selectionEpoch.current++; nativePending.current = false;
     setSelected(null); setConfirmed(false); setBusy(false);
-    setState("Contact preparation canceled. Nothing was opened or recorded.");
+    setState("Contact preparation canceled. No completed contact was recorded.");
     if (opener.current?.isConnected && !opener.current.disabled) opener.current.focus();
     else heading.current?.focus();
   }
