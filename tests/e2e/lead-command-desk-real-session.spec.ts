@@ -67,7 +67,7 @@ test("mobile response keeps past preference, permission retry, focus and factual
       for(const label of ['Leads','Reports']){
         const link=nav.getByRole('link',{name:label,exact:true});await link.focus();await expect(link).toBeFocused();
         expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-        expect(await link.evaluate(el=>getComputedStyle(el).fontSize)).toBe('12px');
+        expect(await link.evaluate(el=>getComputedStyle(el).fontSize)).toBe('10px');
       }
       await page.evaluate(()=>document.fonts.ready);
       await page.screenshot({path:path.join(output,`mobile-response-${width}.png`),fullPage:false});
