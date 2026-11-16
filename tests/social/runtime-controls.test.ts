@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 const script="./scripts/social/run.mjs";
-function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled", scheduledTrigger=false){
+function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled", scheduledTrigger=false, onePost=false){
   // Native Node24 runner, all filesystem policy input and outbound providers
   // replaced before import. No credentials, live data, browser, or real network.
   const code=`
@@ -13,7 +13,9 @@ function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled", scheduledTri
     globalThis.Date=class extends RealDate{constructor(...a){super(...(a.length?a:[stamp]));}static now(){return +new RealDate(stamp);}};
     const outcome=${JSON.stringify(outcome)}, bytes=Buffer.from('synthetic media'),channel='synthetic-ig';
     const policy={version:'synthetic',masterPaused:false,channels:[{id:channel,platform:'instagram',accountId:'synthetic-handle',accountIdentity:'handle',ownerVerifiedAt:stamp,paused:false,automaticFormats:['image'],profileLinkVerified:true,disclosureVerified:true,capability:{status:'verified',evidence:'synthetic',observedAt:stamp,recheckAfter:'2026-11-10T00:00:00Z',destinationPaths:['/home-value']}}],brokerageAdvertisingApproval:{reference:'synthetic',scope:'owned_evergreen'},entitlement:{plan:'Free',verifiedAt:stamp,expiresAt:'2026-11-10T00:00:00Z',runtimeZeroCostVerified:true,channelLimit:3,queueLimit:10},allowedCategories:['existing_offer'],caps:{channels:3,queuePerChannel:7,providerQueueHardLimit:10,createsPerRun:1,apiCallsPerRun:50,ledgerEntries:1000}};
-    fs.readFile=async(path,...args)=>String(path)==='config/owned-social-policy.json'?JSON.stringify(policy):String(path)==='config/owned-social-content.json'?JSON.stringify({concepts:[{id:'01',offer:'seller',category:'existing_offer',format:'carousel',caption:'Our Town Properties, Inc. Request human review.',cta:'Home Value Review',title:['Synthetic'],points:['Synthetic']}],rights:'approved_owned',sourceReferences:['config/experience-contract.v1.json']}):String(path).endsWith('asset-manifest.json')?JSON.stringify({files:[1,2,3].map(n=>({name:'01-slide-'+n+'.jpg',sha256:createHash('sha256').update(bytes).digest('hex')}))}):read(path,...args);
+    const onePost=${onePost},hash=createHash('sha256').update(bytes).digest('hex');
+    if(onePost){policy.version='amm.owned-social.v1';policy.mediaEdition='owned-launch-v2';}
+    fs.readFile=async(path,...args)=>String(path)==='config/owned-social-policy.json'?JSON.stringify(policy):String(path)==='config/owned-social-content.json'?JSON.stringify({concepts:[{id:'01',offer:'seller',category:'existing_offer',format:'carousel',caption:'Our Town Properties, Inc. Request human review.',cta:'Home Value Review',title:['Synthetic'],points:['Synthetic']}],rights:'approved_owned',sourceReferences:['config/experience-contract.v1.json']}):String(path)==='config/owned-social-one-posts.json'?JSON.stringify({version:'amm.owned-social.one-posts.v1',posts:[{id:'19-occupancy-context',category:'existing_offer',text:'Our Town Properties, Inc. Synthetic request.',destination:'https://www.askmagicmike.com/home-value?utm_source=instagram&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_instagram',asset:'19-occupancy-context-feed.jpg',sha256:hash,alt:'Synthetic fixture'}]}):String(path).endsWith('asset-manifest.json')?JSON.stringify({files:[...[1,2,3].map(n=>({name:'01-slide-'+n+'.jpg',sha256:hash})),...(onePost?[{name:'19-occupancy-context-feed.jpg',sha256:hash,bytes:bytes.length,width:1080,height:1350}]:[])]}):read(path,...args);
     let ledger={revision:0,intents:[],masterPaused:false},post=null,issue=null,creates=0;
     const inventory=()=>outcome==='full'?Array.from({length:7},(_,n)=>({node:{id:'other-'+n,channelId:channel,status:'scheduled',text:'Existing',dueAt:'2026-11-0'+(n+3)+'T17:00:00Z',assets:[]}})):post?[{node:post}]:[];
     globalThis.fetch=async(url,options={})=>{
@@ -40,7 +42,7 @@ function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled", scheduledTri
       if(url.startsWith('https://www.askmagicmike.com/social/'))return new Response(bytes,{headers:{'content-length':String(bytes.length)}});
       throw Error('UNEXPECTED_OUTBOUND_FORBIDDEN');
     };
-    process.argv=['node','run','--execute'];await import('${script}');
+    process.argv=['node','run','--execute',...(onePost?['--one-post=19-occupancy-context','--at=2026-11-04T17:00:00Z']:[])];await import('${script}');
     console.log(JSON.stringify({fixtureCreates:creates,fixtureLedger:ledger,fixtureIssue:!!issue}));
   `;
   // Project ambient ProcessEnv requires Production keys. Intentionally do NOT
@@ -49,6 +51,13 @@ function run(outcome:"unknown"|"full"|"ledger_failure"|"scheduled", scheduledTri
   expect(result.stderr).toBe("");return {status:result.status,lines:result.stdout.trim().split("\n").map(s=>JSON.parse(s))};
 }
 describe("Integrated publisher runtime, mocked state/provider/alerts",()=>{
+  it.each(['scheduled','unknown'] as const)("executes one explicit feed image through the native runner with %s outcome, never a carousel or re-date",outcome=>{
+    const r=run(outcome,false,true);expect(r.status).toBe(outcome==='scheduled'?0:2);
+    expect(r.lines[1].fixtureCreates).toBe(1);
+    expect(r.lines[1].fixtureLedger.intents).toHaveLength(1);
+    expect(r.lines[1].fixtureLedger.intents[0]).toMatchObject({state:outcome,item:{id:'19-occupancy-context',dueAt:'2026-11-04T17:00:00.000Z',requiresAiDisclosure:true}});
+    expect(r.lines[1].fixtureLedger.intents[0].item.assets).toHaveLength(1);
+  });
   it("does not leave an UNKNOWN provider outcome green or without an incident",()=>{
     const r=run("unknown");expect(r.status).toBe(2);expect(r.lines[0]).toMatchObject({status:"INTERVENTION_REQUIRED",operatorSignal:{status:"CREATED"}});
     expect(r.lines[1]).toMatchObject({fixtureCreates:1,fixtureIssue:true,fixtureLedger:{intents:[{state:"unknown"}]}});

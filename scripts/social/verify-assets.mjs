@@ -28,7 +28,9 @@ for(const file of manifest.files) {
   }
 }
 const concepts=JSON.parse(await fs.readFile('config/owned-social-content.json','utf8')).concepts;
-const expectedImages=edition==='owned-launch-v2'?6+concepts.reduce((n,c)=>n+2+(c.format==='carousel'||c.format==='video'?3:0),0):37;
+const single=edition==='owned-launch-v2'?JSON.parse(await fs.readFile('config/owned-social-one-posts.json','utf8')).posts:[];
+for(const post of single)if(!manifest.files.some(f=>f.name===post.asset&&f.sha256===post.sha256&&f.width===1080&&f.height===1350))throw Error('one_post_asset_missing_or_changed');
+const expectedImages=edition==='owned-launch-v2'?6+concepts.reduce((n,c)=>n+2+(c.format==='carousel'||c.format==='video'?3:0),0)+single.length:37;
 if(images!==expectedImages||videos!==4)throw Error('expected_launch_asset_count_mismatch');
 if(edition==='owned-launch-v2')for(const c of concepts)for(const kind of ['feed','story',...(c.format==='carousel'?['slide-1','slide-2','slide-3']:['frame-1','frame-2','frame-3'])])if(!manifest.files.some(f=>f.name===`${c.id}-${kind}.jpg`))throw Error('concept_asset_missing');
 // Caller may keep a new run's diagnostics separate from dated evidence.

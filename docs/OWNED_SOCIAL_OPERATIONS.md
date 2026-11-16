@@ -295,6 +295,50 @@ does not release them. The accepted workflow continues with its existing reserve
 until the new exact-source candidate passes all required gates and has applicable
 release authority. No extra execute operation is dispatched for these drafts.
 
+### Explicit single-image preparation (not recurring reserve)
+
+`config/owned-social-one-posts.json` holds separately reviewed single Instagram
+feed images. It is not `owned-social-content.json`, and the scheduled workflow
+does not select these entries. The occupancy-context image is an append-only,
+byte-identical addition to `owned-launch-v2`; it has no Story, carousel or video
+variant. Existing media-host validation is unchanged. The proposed canonical
+image URL is not live merely because its source is committed.
+
+The existing runner accepts an explicit manual selection and a full UTC instant:
+
+```sh
+node scripts/social/run.mjs --plan --one-post=19-occupancy-context --at=APPROVED_UTC_INSTANT --summary
+```
+
+Replace the deliberately invalid placeholder only with the actual separately
+approved instant. There is no default time, next-slot search or automatic re-date.
+Planning needs no key/network and is not a reservation. An elapsed or occupied
+slot stays held. A different time needs its own disposition. `--one-post` is
+refused on the scheduled trigger and with observe/reconcile/resume/cancel modes.
+The ordinary workflow and recurring catalogue remain unchanged.
+
+Only after release, anonymous public byte/hash verification and current exact
+operation authority may the same explicit selection use `--execute`. This reuses
+the existing current policy/entitlement checks, operator-signal binding, source
+runtime gate, public-media verification, lease, durable CAS, shared mutation cap,
+duplicate/UNKNOWN holds, automatic Buffer adapter and independent exact-item
+readback. Content identity remains consumed across dates. It does not grant an
+entitlement override, new runtime binding or recurring enrollment. Require one
+image, the exact caption/time, and saved native `isAiGenerated=true`; scheduling
+is not publication or proof of the future public disclosure label.
+
+App/media release still follows `config/release-authority-policy.json`, the exact
+source hosted Release Gate, immutable Preview and proportionate read-only
+acceptance in `PRODUCTION_LAUNCH_GATE.md` / `GO_LIVE_RUNBOOK.md`, followed by normal
+protected merge, actual-merge CI and same-tree acceptance. This delta adds no SQL,
+protected request path or provider setting; it does not itself require a new
+managed database venue. Required isolated SQL/browser jobs in the existing CI
+gate remain unchanged. Any newly necessary hosted venue/access would need its
+own admission; consumed PR329 or earlier allowances cannot be borrowed. A media
+release and a customer-facing publication remain separate decisions. Preserve
+old asset URLs and reservations during rollback; app rollback does not cancel a
+remote scheduled post.
+
 ### Seven-day acquisition assessment
 
 Fixed evaluation window: `[2026-11-03T17:13:41.793Z, 2026-11-10T17:13:41.793Z)`.
