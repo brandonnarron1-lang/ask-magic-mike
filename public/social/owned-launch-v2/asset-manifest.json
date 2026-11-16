@@ -56,6 +56,10 @@
     {
       "file": "public/images/ask-magic-mike/brand-pack-v2/our-town-logo-clean.png",
       "sha256": "294e5ed44a2a4917a49083978f8493a2770369638c5c3da98634c9faa7d72c8a"
+    },
+    {
+      "file": "config/owned-social-one-posts.json",
+      "sha256": "36edeabae130d8b0ccdf808b751cfa290ee2440b3403f27e6345bc207dfbc1e5"
     }
   ],
   "files": [
@@ -748,6 +752,13 @@
       "name": "18-tax-record-context-slide-3.jpg",
       "sha256": "d8b0234252243e99487f445823d78506449dd5074b4191b47c95372584acc019",
       "bytes": 199779,
+      "width": 1080,
+      "height": 1350
+    },
+    {
+      "name": "19-occupancy-context-feed.jpg",
+      "sha256": "2edfd1952b165dd2428646ce780e77ebed7738a9ab5ba1a3d1a2bfe70b19a85e",
+      "bytes": 226756,
       "width": 1080,
       "height": 1350
     }

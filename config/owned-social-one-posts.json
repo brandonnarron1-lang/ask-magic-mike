@@ -1,0 +1,14 @@
+{
+  "version": "amm.owned-social.one-posts.v1",
+  "posts": [
+    {
+      "id": "19-occupancy-context",
+      "category": "intake_explanation",
+      "text": "A property question is easier to understand with basic occupancy context: owner-occupied, rented or vacant, if known. Share your own contact details and a brief question. Do not include tenant names, private contact information or access codes. A request does not authorize access, change a tenancy or establish a valuation. Ask Magic Mike / Our Town Properties, Inc.\n\nIllustrative brand imagery—not a listing.\n\nRequest a home value review through the website link in our profile.",
+      "destination": "https://www.askmagicmike.com/home-value?utm_source=instagram&utm_medium=organic_social&utm_campaign=amm_seller_buyer_launch_2026&utm_content=seller_instagram",
+      "asset": "19-occupancy-context-feed.jpg",
+      "sha256": "2edfd1952b165dd2428646ce780e77ebed7738a9ab5ba1a3d1a2bfe70b19a85e",
+      "alt": "Who uses the property? Start with the context. Owner-occupied, rented or vacant, if known. Keep tenant names, private contacts and access codes out. Ask Magic Mike / Our Town Properties, Inc. Brand concept imagery, not a listing."
+    }
+  ]
+}

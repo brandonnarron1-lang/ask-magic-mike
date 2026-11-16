@@ -10,6 +10,7 @@ const {observe,reconcile,plan,classify,actionableFindings,checkpointIncidents,ac
 const {BufferProvider}=await import('../../src/lib/social/buffer.ts');
 const {GitHubLedgerStore}=await import('../../src/lib/social/github-store.ts');
 const {signalOperator}=await import('../../src/lib/social/operator-signal.ts');
+const {buildOnePost,selectOnePost}=await import('../../src/lib/social/one-post.ts');
 let failureStore;
 async function report(result,incidents=[]){
   const actionable=incidents.filter(i=>!i.resolvedAt);
@@ -29,8 +30,11 @@ async function report(result,incidents=[]){
 try {
 const args=process.argv.slice(2), modes=args.filter(a=>['--observe','--reconcile','--execute','--status','--pause','--resume','--acknowledge','--cancel-queued'].includes(a));
 if(modes.length>1)throw Error('choose_one_operation');
-if(args.some(a=>!['--plan','--summary',...modes].includes(a)&&!/^--(snapshot|channel|incident)=.+/.test(a)))throw Error('unsupported_argument');
+if(args.some(a=>!['--plan','--summary',...modes].includes(a)&&!/^--(snapshot|channel|incident|one-post|at)=.+/.test(a)))throw Error('unsupported_argument');
 const mode=modes[0]||'--plan';
+const onePost=args.find(a=>a.startsWith('--one-post='))?.slice(11),at=args.find(a=>a.startsWith('--at='))?.slice(5);
+if(args.filter(a=>a.startsWith('--one-post=')).length>1||args.filter(a=>a.startsWith('--at=')).length>1)throw Error('one_post_arguments_not_unique');
+if(Boolean(onePost)!==Boolean(at)||onePost&&(!['--plan','--execute'].includes(mode)||process.env.GITHUB_EVENT_NAME==='schedule'))throw Error('one_post_explicit_manual_plan_or_execute_required');
 if(mode==='--execute'&&process.env.GITHUB_EVENT_NAME==='schedule'&&process.env.AMM_OWNED_SOCIAL_SCHEDULE_ENABLED!=='true'){
   console.log(JSON.stringify({status:'SCHEDULER_PAUSED_NO_EFFECTS'}));
   process.exit(0);
@@ -55,11 +59,17 @@ for(const c of content.concepts)for(const platform of ['facebook','instagram','t
     return {url:'https://www.askmagicmike.com/social/'+edition+'/'+name,sha256:file.sha256,type:video?'video':'image',alt:c.title.join(' ')+' '+c.points.join(' ')+' Our Town Properties, Inc.'+(edition==='owned-launch-v2'?' Illustrative brand imagery, not a listing.':'')};
   })});
 }
+if(onePost){
+  if(edition!=='owned-launch-v2')throw Error('one_post_requires_reviewed_v2_media');
+  const single=JSON.parse(await fs.readFile('config/owned-social-one-posts.json','utf8'));
+  items.splice(0,items.length,buildOnePost(single,manifest,onePost,at));
+}
+const select=(ledger,inventory)=>onePost?selectOnePost(policy,items[0],ledger,inventory,now):plan(policy,items,ledger,inventory,now);
 const snapshotArg=args.find(a=>a.startsWith('--snapshot='));
 const snapshot=snapshotArg?JSON.parse(await fs.readFile(snapshotArg.slice(11),'utf8')):null;
 const blank={revision:0,intents:[]},empty={complete:true,posts:[],disconnected:[]};
 function summary(ledger,inventory){
-  const p=plan(policy,items,ledger,inventory,now);
+  const p=select(ledger,inventory);
   return {observedAt:now.toISOString(),timezone:'America/New_York',concepts:content.concepts.length,variants:items.length,selected:p.selected.map(i=>({id:i.id,platform:i.platform,dueAt:i.dueAt})),remainingUnused:p.remainingUnused,holds:p.held.map(code=>({code,outcome:classify(code)})),queue:policy.channels.map(c=>({channelId:c.id,scheduled:inventory.posts.filter(p=>p.channelId===c.id&&['buffer','scheduled','sending'].includes(p.status)).length})),nativeFacebookCoverage:'REQUIRES_CURRENT_NATIVE_OBSERVATION',...(!args.includes('--summary')?{items:p.selected}:{})};
 }
 if(mode==='--plan')console.log(JSON.stringify({status:'PREPARED_NOT_SCHEDULED',snapshot:snapshot?'SUPPLIED_NOT_LIVE':'NO_REMOTE_COVERAGE',...summary(snapshot?.ledger||blank,snapshot?.inventory||empty)},null,2));
@@ -86,7 +96,7 @@ else{
       else{
         if(!store)throw Error('dedicated_social_state_binding_missing');
         await reconcile(store,inventory,now);
-        const old=await store.read(),p=plan(policy,items,old,inventory,now);
+        const old=await store.read(),p=select(old,inventory);
         const findings=actionableFindings(policy,p.held,old);
         const checkpoint=checkpointIncidents(old.incidents||[],findings,now);
         if(!(await store.compareAndSwap(old.revision,{...old,revision:old.revision+1,incidents:checkpoint.incidents,health:{...old.health,lastStart:now.toISOString(),lastCompleted:mode==='--reconcile'?new Date().toISOString():old.health?.lastCompleted,trigger:process.env.GITHUB_EVENT_NAME==='schedule'?'scheduled':'manual'}})))throw Error('incident_checkpoint_conflict');
